@@ -1,0 +1,318 @@
+:root {
+  /* ========================================================= */
+  /* =================== COLOR GLOBAL APP ==================== */
+  /* ========================================================= */
+  --color-primary: #4ade80;
+  --color-primary-dark: #15803d;
+  --color-primary-medium: #22c55e;
+  --color-primary-soft: rgba(74, 222, 128, 0.12);
+  --color-primary-hover: #2dd64b;
+  --color-primary-low: #86efac;
+  --color-primary-light: #dcfce7;
+  --color-primary-transparent: rgba(74, 222, 128, 0.08);
+
+  /* ========================================================= */
+  /* ======================= TIPOGRAFÍA ====================== */
+  /* ========================================================= */
+
+  /* tamaños */
+  --text-sm: 0.85rem;
+  --text-md: 1rem;
+  --text-lg: 1.35rem;
+
+  /* pesos */
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-bold: 600;
+
+  /* colores por jerarquía */
+  --text-sm-color: #6b7280;
+  --text-md-color: #1f2937;
+  --text-lg-color: #1f2937;
+
+  /* hover de texto */
+  --text-hover-dark: #1f2937;
+  --text-hover-light: #6b7280;
+
+  /* ========================================================= */
+  /* ========================= NEUTROS ======================= */
+  /* ========================================================= */
+  --color-bg-main: #f8fffe;
+  --color-bg-card: #ffffff;
+  --color-text-main: #145e0f;
+  --color-text-muted: #6b7280;
+
+  /* ========================================================= */
+  /* ========================= ESTADOS ======================= */
+  /* ========================================================= */
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+
+  /* ========================================================= */
+  /* ===================== MODULO INGRESOS =================== */
+  /* ========================================================= */
+  --ingresos-base: #22c55e;
+  --ingresos-dark: #15803d;
+  --ingresos-light: #86efac;
+  --ingresos-bg: #dcfce7;
+  --ingresos-hover: #16a34a;
+
+  /* ========================================================= */
+  /* ====================== MODULO AHORROS =================== */
+  /* ========================================================= */
+  --ahorros-base: #8b5cf6;
+  --ahorros-dark: #6d28d9;
+  --ahorros-light: #c4b5fd;
+  --ahorros-bg: #ede9fe;
+  --ahorros-hover: #7c3aed;
+
+  /* ========================================================= */
+  /* ======================= MODULO GASTOS =================== */
+  /* ========================================================= */
+  --gastos-base: #f59e0b;
+  --gastos-dark: #b45309;
+  --gastos-light: #fcd34d;
+  --gastos-bg: #fef3c7;
+  --gastos-hover: #d97706;
+
+  /* ========================================================= */
+  /* ==================== MODULO IMPREVISTOS ================= */
+  /* ========================================================= */
+  --imprevistos-base: #ef4444;
+  --imprevistos-dark: #b91c1c;
+  --imprevistos-light: #f87171;
+  --imprevistos-bg: #fee2e2;
+  --imprevistos-hover: #dc2626;
+
+  /* ========================================================= */
+  /* ======================== MODULO DEUDAS ================== */
+  /* ========================================================= */
+  --deudas-base: #3b82f6;
+  --deudas-dark: #1e40af;
+  --deudas-light: #93c5fd;
+  --deudas-bg: #eff6ff;
+  --deudas-hover: #2563eb;
+
+  /* ========================================================= */
+  /* ========== VARIABLES ADICIONALES COMPATIBILIDAD ========= */
+  /* ========================================================= */
+  
+  /* Bordes e inputs */
+  --border: rgba(74, 222, 128, 0.2);
+  --input: transparent;
+  --input-background: #f0fdf4;
+  --switch-background: #cbced4;
+  --ring: #4ade80;
+  
+  /* Bordes redondeados */
+  --radius: 0.625rem;
+  
+  /* Pesos de fuente */
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  
+  /* Colores de gráficos */
+  --chart-1: #4ade80;
+  --chart-2: #86efac;
+  --chart-3: #bbf7d0;
+  --chart-4: #dcfce7;
+  --chart-5: #f0fdf4;
+  
+  /* Sidebar */
+  --sidebar: #f8fffe;
+  --sidebar-foreground: #145e0f;
+  --sidebar-primary: #4ade80;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0fdf4;
+  --sidebar-accent-foreground: #166534;
+  --sidebar-border: rgba(74, 222, 128, 0.2);
+  --sidebar-ring: #4ade80;
+  
+  /* Tarjetas y popovers */
+  --card: #ffffff;
+  --card-foreground: #145e0f;
+  --popover: #ffffff;
+  --popover-foreground: #145e0f;
+  
+  /* Colores primarios y secundarios */
+  --primary: #4ade80;
+  --primary-foreground: #ffffff;
+  --secondary: #dcfce7;
+  --secondary-foreground: #166534;
+  --muted: #f0fdf4;
+  --muted-foreground: #6b7280;
+  --accent: #bbf7d0;
+  --accent-foreground: #166534;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  /* Fondo */
+  --background: #f8fffe;
+  --foreground: #145e0f;
+}
+* {
+    margin: 0;
+    padding: 0; /* Evita que el padding afecte el ancho total */
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px auto;
+    max-width: 1200px; 
+    padding: 0 20px;
+    color: #333;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #b5ffb5;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 28px;
+    color: #2E7D2E;
+}
+
+.btn-inicio {
+    order: 2; 
+    padding: 8px 16px;
+    border: 2px solid #5dff5d;
+    border-radius: 5px;
+    color: #2E7D2E;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-inicio:hover {
+    background-color: #5dff5d;
+    color: white;
+}
+
+
+.navbar {
+    background-color: #77ff77;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 20px 0;
+}
+
+.nav-list {
+    display: flex;
+    flex-wrap: wrap; /* Para que bajen si no caben */
+    gap: 10px;
+    list-style: none;
+    justify-content: center;
+}
+
+.nav-link {
+    background-color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+.nav-link:hover, .nav-link.active {
+    background-color: #2bc053;
+    color: white;
+}
+
+
+.modulo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding: 0 10px;
+}
+
+.acciones-ahorro {
+    display: flex;
+    gap: 10px;
+}
+
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.3s;
+}
+
+.btn-primario {
+    padding: 10px 20px;
+    background-color: white;
+    border: 2px solid #00ff00;
+    color: #15ad15;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.btn-secundario {
+    padding: 10px 20px;
+    background-color: #1beb1b;
+    border: none;
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.btn-primario:hover, .btn-secundario:hover {
+    background-color: #2bc053;
+    color: white;
+    transform: translateY(-2px); 
+}
+
+
+.resumen-container {
+    width: 100%; 
+    min-height: 150px;
+    margin: 20px 0;
+    padding: 30px;
+    background-color: #f9fff9;
+    border: 2px solid rgba(68, 244, 59, 0.3);
+    border-radius: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.total-ahorros {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.mensaje-vacio {
+    color: #888;
+    font-style: italic;
+}
+
+/* Footer */
+.footer-app {
+    text-align: center;
+    margin-top: 50px;
+    color: #aaa;
+    font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header, .modulo-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .nav-list {
+        gap: 5px;
+    }
+}

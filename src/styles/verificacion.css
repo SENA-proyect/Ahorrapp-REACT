@@ -1,0 +1,90 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 140px;
+  color: #1da209;
+  padding: 20px;
+  font-size: 30px;
+}
+
+.container {
+  width: 500px;
+  height: 300px;
+  padding: 20px;
+  margin: 20px auto;
+  background-color: #ffffff;
+  border: 1px solid black;
+}
+
+h2 {
+  font-size: 25px;
+  text-align: left;
+  padding: 5px 20px;
+  color: #1da209;
+}
+
+h3 {
+  font-size: 14px;
+  text-align: left;
+  padding: 20px 20px;
+}
+
+.codigo {
+  width: 100%;
+  border: none;
+  background: none;
+  border-bottom: solid #00000032 2px;
+  padding: 25px;
+  outline: none;
+  margin-bottom: 20px;
+}
+
+.codigo:focus {
+  border-bottom: solid #00a51c 2px;
+}
+
+.form_button {
+  display: flex;
+  justify-content: space-between;
+  color: #dffbe7;
+}
+.salir {
+  text-decoration: none;
+  display: flex;
+  padding: 10px 20px;
+  font-size: 14px;
+  outline: black solid 0.5px;
+  color: black;
+  cursor: pointer;
+}
+
+.salir:hover {
+  background-color: #f78a8a;
+  color: #000000;
+  transition: 0.3s;
+}
+
+.enviar {
+  background-color: white;
+  padding: 10px 20px;
+  outline: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.enviar:hover {
+  background-color: #acfcc1;
+  color: #000000;
+  transition: 0.3s;
+}
