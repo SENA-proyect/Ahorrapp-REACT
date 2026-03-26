@@ -1,10 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
+/* ===================== RESETEO CRÍTICO ===================== */
+/* Esto elimina los bordes negros y asegura el ancho completo */
 * {
     font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background-color: #ffffff; /* Color de fondo por defecto para evitar el negro */
 }
 
 :root {
@@ -52,6 +62,7 @@
     align-items: center;
     padding: 0 40px;
     height: 70px;
+    width: 100%; /* Asegura que el header sea ancho total */
     background: rgba(248, 255, 254, 0.85);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(74, 222, 128, 0.15);
@@ -93,9 +104,11 @@
     box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
 }
 
-/* ===================== MAIN ===================== */
+/* ===================== MAIN CONTENT ===================== */
 
 .main-content {
+    width: 100%;
+    min-height: calc(100vh - 70px);
     box-sizing: border-box;
 }
 
@@ -107,6 +120,7 @@
     padding: 80px 40px 100px;
     position: relative;
     overflow: hidden;
+    width: 100%;
 }
 
 .firstSection::before {
@@ -122,10 +136,10 @@
 }
 
 .h1-mainContent {
-    font-size: clamp(48px, 7vw, 90px);
+    font-size: clamp(40px, 7vw, 90px);
     font-weight: 800;
     letter-spacing: -2px;
-    color: transparent;
+    color: var(--color-primary-dark); /* Color de respaldo si la imagen falla */
     background-image: url('../assets/08c4711743f9b996bfae50325a4f3c14.jpg');
     background-size: cover;
     background-position: center;
@@ -133,6 +147,16 @@
     -webkit-background-clip: text;
     line-height: 1.1;
     margin-bottom: 30px;
+    /* Evita que el texto sea invisible si la imagen no carga */
+    -webkit-text-fill-color: transparent; 
+}
+
+/* Fallback para navegadores que no soportan background-clip: text */
+@supports not (background-clip: text) {
+    .h1-mainContent {
+        color: var(--color-primary-dark);
+        background-image: none;
+    }
 }
 
 .p-mainContent {
@@ -140,7 +164,7 @@
     color: var(--color-text-muted);
     text-align: center;
     line-height: 1.8;
-    max-width: 680px;
+    max-width: 100%;
     margin: 0 auto;
     font-weight: 400;
 }
@@ -150,7 +174,7 @@
 .caracteristicasPrincipales {
     background: linear-gradient(var(--color-primary-soft), var(--color-primary-light));
     padding: 80px 40px;
-    min-height: auto;
+    width: 100%;
 }
 
 .h2-caracteristicasPrincipales {
@@ -170,7 +194,7 @@
     justify-content: center;
     gap: 20px;
     flex-wrap: wrap;
-    max-width: 1100px;
+    max-width: 1200px; /* Aumentado ligeramente para mejor vista */
     margin: 0 auto;
 }
 
@@ -374,6 +398,7 @@
     opacity: 0.6;
 }
 
+
 /* ===================== RESPONSIVE ===================== */
 
 @media (max-width: 768px) {
@@ -381,24 +406,12 @@
         padding: 0 20px;
     }
 
-    .firstSection {
-        padding: 60px 20px 80px;
-    }
-
-    .boxes {
-        gap: 14px;
-    }
-
-    .boxIndex {
-        width: calc(50% - 10px);
-    }
-
     .f9 .top {
         grid-template-columns: 1fr;
         gap: 3rem;
     }
 
-    .f9 .form-grid {
-        grid-template-columns: 1fr;
+    .boxIndex {
+        width: calc(50% - 10px);
     }
 }

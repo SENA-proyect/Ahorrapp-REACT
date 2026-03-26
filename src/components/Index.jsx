@@ -1,46 +1,53 @@
-import { Link } from 'react-router-dom'
-import '../styles/index.css'
+import { Link } from 'react-router-dom';
+import '../styles/index.css';
 
 export default function Index() {
   const handleSubmit = (e) => {
-    e.preventDefault()
-    // lógica de envío de formulario
-  }
+    e.preventDefault();
+    // Aquí puedes añadir la lógica para capturar los datos del formulario
+    console.log("Formulario enviado");
+  };
 
   return (
-    <div>
+    <div className="main-content">
+      {/* HEADER / NAVEGACIÓN */}
       <header className="header">
         <div className="header-left">
           <h2>Ahorrapp</h2>
         </div>
         <div className="header-right">
-          <Link to="../components/Login.jsx">
-            <button className="btn-iniciarsesion">Iniciar sesion.</button>
+          {/* Asegúrate de que esta ruta esté definida en tu App.js */}
+          <Link to="/login">
+            <button className="btn-iniciarsesion">Iniciar sesión.</button>
           </Link>
         </div>
       </header>
 
-      <main className="main-content">
-        <div className="firstSection">
+      {/* CONTENIDO PRINCIPAL */}
+      <main>
+        {/* SECCIÓN HERO */}
+        <section className="firstSection">
           <h1 className="h1-mainContent">Controla tus Finanzas Personales.</h1>
           <p className="p-mainContent">
             Una aplicación completa para gestionar tus ingresos, gastos, ahorros, deudas,
             dependientes y más. Todo en un solo lugar, con un diseño minimalista y herramientas
             avanzadas de análisis financiero.
           </p>
-        </div>
+        </section>
 
-        <div className="caracteristicasPrincipales">
+        {/* SECCIÓN CARACTERÍSTICAS */}
+        <section className="caracteristicasPrincipales">
           <div className="h2-caracteristicasPrincipales">
-            <h2>Caracteristicas principales.</h2>
+            <h2>Características principales.</h2>
           </div>
+          
           <div className="boxes">
             <div className="boxIndex">
-              <p>Gestion de ingresos</p>
+              <p>Gestión de ingresos</p>
               <p>Registra y monitorea todos tus ingresos de manera organizada</p>
             </div>
             <div className="boxIndex">
-              <p>Gestion de gastos</p>
+              <p>Gestión de gastos</p>
               <p>Controla tus gastos y evita exceder tu presupuesto</p>
             </div>
             <div className="boxIndex">
@@ -76,33 +83,34 @@ export default function Index() {
               <p>Visualiza tus finanzas con gráficos y métricas en tiempo real</p>
             </div>
           </div>
-        </div>
+        </section>
       </main>
 
+      {/* FOOTER / CONTACTO */}
       <footer className="f9">
         <div className="top">
-
           <div className="info">
             <div className="brand">Ahorrapp<span>.</span></div>
-            <p className="tagline"></p>
+            <p className="tagline">Tu aliado financiero inteligente.</p>
           </div>
 
           <div className="form-side">
-            <h3>Contactanos Aqui!</h3>
+            <h3>Contáctanos Aquí!</h3>
             <p>Respondemos en menos de 24 horas.</p>
 
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
-                <input type="text"    name="nombre"      placeholder="Nombre"          required />
-                <input type="text"    name="empresa"     placeholder="Empresa" />
-                <input type="email"   name="email"       placeholder="Email"           required />
-                <input type="text"    name="presupuesto" placeholder="Presupuesto aprox." />
+                <input type="text"  name="nombre"      placeholder="Nombre"           required />
+                <input type="text"  name="empresa"     placeholder="Empresa" />
+                <input type="email" name="email"       placeholder="Email"            required />
+                <input type="text"  name="presupuesto" placeholder="Presupuesto aprox." />
               </div>
               <textarea
                 name="mensaje"
                 className="msg-field"
                 rows="3"
                 placeholder="¿Qué quieres construir?"
+                required
               />
               <div className="submit-row">
                 <span className="privacy">Tus datos están seguros</span>
@@ -110,13 +118,12 @@ export default function Index() {
               </div>
             </form>
           </div>
-
         </div>
 
         <div className="bottom">
-          <span>&copy; Ahorrapp</span>
+          <span>&copy; {new Date().getFullYear()} Ahorrapp</span>
         </div>
       </footer>
     </div>
-  )
+  );
 }

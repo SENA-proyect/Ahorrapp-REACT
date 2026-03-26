@@ -155,7 +155,6 @@ export default function Login() {
               ¿Olvidaste tu contraseña?
             </a>
 
-            <br />
 
             <a href="#" className="text-white">
               Crear una cuenta

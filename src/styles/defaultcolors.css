@@ -2,15 +2,14 @@
   /* ========================================================= */
   /* =================== COLOR GLOBAL APP ==================== */
   /* ========================================================= */
-  --color-primary: #4CB04C;
-  --color-primary-dark: #2E7D2E;
-  --color-primary-medium: #3DA63D;
-  --color-primary-soft: rgba(76,176,76,0.12);
-  --color-primary-hover: #43A343;
-  --color-primary-low: rgb(130, 241, 130);
-  --color-primary-light: rgb(232, 255, 232);
-  --color-primary-transparent: rgba(76,176,76,0.08);
-
+  --color-primary: #4ade80;
+  --color-primary-dark: #15803d;
+  --color-primary-medium: #22c55e;
+  --color-primary-soft: rgba(74, 222, 128, 0.12);
+  --color-primary-hover: #2dd64b;
+  --color-primary-low: #86efac;
+  --color-primary-light: #dcfce7;
+  --color-primary-transparent: rgba(74, 222, 128, 0.08);
 
   /* ========================================================= */
   /* ======================= TIPOGRAFÍA ====================== */
@@ -27,70 +26,127 @@
   --font-bold: 600;
 
   /* colores por jerarquía */
-  --text-sm-color: #9AA19A;
-  --text-md-color: #2D2D2D;
-  --text-lg-color: #1F2937;
+  --text-sm-color: #6b7280;
+  --text-md-color: #1f2937;
+  --text-lg-color: #1f2937;
 
   /* hover de texto */
-  --text-hover-dark: #1F2937;
-  --text-hover-light: #6B7280;
+  --text-hover-dark: #1f2937;
+  --text-hover-light: #6b7280;
 
   /* ========================================================= */
   /* ========================= NEUTROS ======================= */
   /* ========================================================= */
-  --color-bg-main: #FFFFFF;
-  --color-bg-card: #F4F6F4;
-  --color-text-main: #2D2D2D;
-  --color-text-muted: #9AA19A;
+  --color-bg-main: #f8fffe;
+  --color-bg-card: #ffffff;
+  --color-text-main: #145e0f;
+  --color-text-muted: #6b7280;
 
   /* ========================================================= */
   /* ========================= ESTADOS ======================= */
   /* ========================================================= */
-  --color-error: #C04141;
-  --color-warning: #D97706;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
 
   /* ========================================================= */
   /* ===================== MODULO INGRESOS =================== */
   /* ========================================================= */
-  --ingresos-base: #2FAF7F;
-  --ingresos-dark: #1F7A59;
-  --ingresos-light: #5FCFA6;
-  --ingresos-bg: #E7F7F1;
-  --ingresos-hover: #27996E;
+  --ingresos-base: #22c55e;
+  --ingresos-dark: #15803d;
+  --ingresos-light: #86efac;
+  --ingresos-bg: #dcfce7;
+  --ingresos-hover: #16a34a;
 
   /* ========================================================= */
   /* ====================== MODULO AHORROS =================== */
   /* ========================================================= */
-  --ahorros-base: #7A5AF5;
-  --ahorros-dark: #5337C9;
-  --ahorros-light: #A18BFF;
-  --ahorros-bg: #F1EDFF;
-  --ahorros-hover: #6949E6;
+  --ahorros-base: #8b5cf6;
+  --ahorros-dark: #6d28d9;
+  --ahorros-light: #c4b5fd;
+  --ahorros-bg: #ede9fe;
+  --ahorros-hover: #7c3aed;
 
   /* ========================================================= */
   /* ======================= MODULO GASTOS =================== */
   /* ========================================================= */
-  --gastos-base: #F59E0B;
-  --gastos-dark: #B96F00;
-  --gastos-light: #FBCB6A;
-  --gastos-bg: #FFF4DB;
-  --gastos-hover: #E08E00;
+  --gastos-base: #f59e0b;
+  --gastos-dark: #b45309;
+  --gastos-light: #fcd34d;
+  --gastos-bg: #fef3c7;
+  --gastos-hover: #d97706;
 
   /* ========================================================= */
   /* ==================== MODULO IMPREVISTOS ================= */
   /* ========================================================= */
-  --imprevistos-base: #E5484D;
-  --imprevistos-dark: #A72B2F;
-  --imprevistos-light: #F07A7E;
-  --imprevistos-bg: #FDEBEC;
-  --imprevistos-hover: #D63B40;
+  --imprevistos-base: #ef4444;
+  --imprevistos-dark: #b91c1c;
+  --imprevistos-light: #f87171;
+  --imprevistos-bg: #fee2e2;
+  --imprevistos-hover: #dc2626;
 
   /* ========================================================= */
   /* ======================== MODULO DEUDAS ================== */
   /* ========================================================= */
-  --deudas-base: #3B82F6;
-  --deudas-dark: #1D4ED8;
-  --deudas-light: #7FB0FF;
-  --deudas-bg: #EAF2FF;
-  --deudas-hover: #256EEA;
+  --deudas-base: #3b82f6;
+  --deudas-dark: #1e40af;
+  --deudas-light: #93c5fd;
+  --deudas-bg: #eff6ff;
+  --deudas-hover: #2563eb;
+
+  /* ========================================================= */
+  /* ========== VARIABLES ADICIONALES COMPATIBILIDAD ========= */
+  /* ========================================================= */
+  
+  /* Bordes e inputs */
+  --border: rgba(74, 222, 128, 0.2);
+  --input: transparent;
+  --input-background: #f0fdf4;
+  --switch-background: #cbced4;
+  --ring: #4ade80;
+  
+  /* Bordes redondeados */
+  --radius: 0.625rem;
+  
+  /* Pesos de fuente */
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  
+  /* Colores de gráficos */
+  --chart-1: #4ade80;
+  --chart-2: #86efac;
+  --chart-3: #bbf7d0;
+  --chart-4: #dcfce7;
+  --chart-5: #f0fdf4;
+  
+  /* Sidebar */
+  --sidebar: #f8fffe;
+  --sidebar-foreground: #145e0f;
+  --sidebar-primary: #4ade80;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0fdf4;
+  --sidebar-accent-foreground: #166534;
+  --sidebar-border: rgba(74, 222, 128, 0.2);
+  --sidebar-ring: #4ade80;
+  
+  /* Tarjetas y popovers */
+  --card: #ffffff;
+  --card-foreground: #145e0f;
+  --popover: #ffffff;
+  --popover-foreground: #145e0f;
+  
+  /* Colores primarios y secundarios */
+  --primary: #4ade80;
+  --primary-foreground: #ffffff;
+  --secondary: #dcfce7;
+  --secondary-foreground: #166534;
+  --muted: #f0fdf4;
+  --muted-foreground: #6b7280;
+  --accent: #bbf7d0;
+  --accent-foreground: #166534;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  /* Fondo */
+  --background: #f8fffe;
+  --foreground: #145e0f;
 }
