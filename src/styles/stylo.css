@@ -96,28 +96,28 @@
   /* ========================================================= */
   /* ========== VARIABLES ADICIONALES COMPATIBILIDAD ========= */
   /* ========================================================= */
-  
+
   /* Bordes e inputs */
   --border: rgba(74, 222, 128, 0.2);
   --input: transparent;
   --input-background: #f0fdf4;
   --switch-background: #cbced4;
   --ring: #4ade80;
-  
+
   /* Bordes redondeados */
   --radius: 0.625rem;
-  
+
   /* Pesos de fuente */
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  
+
   /* Colores de gráficos */
   --chart-1: #4ade80;
   --chart-2: #86efac;
   --chart-3: #bbf7d0;
   --chart-4: #dcfce7;
   --chart-5: #f0fdf4;
-  
+
   /* Sidebar */
   --sidebar: #f8fffe;
   --sidebar-foreground: #145e0f;
@@ -127,13 +127,13 @@
   --sidebar-accent-foreground: #166534;
   --sidebar-border: rgba(74, 222, 128, 0.2);
   --sidebar-ring: #4ade80;
-  
+
   /* Tarjetas y popovers */
   --card: #ffffff;
   --card-foreground: #145e0f;
   --popover: #ffffff;
   --popover-foreground: #145e0f;
-  
+
   /* Colores primarios y secundarios */
   --primary: #4ade80;
   --primary-foreground: #ffffff;
@@ -145,108 +145,133 @@
   --accent-foreground: #166534;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  
+
   /* Fondo */
   --background: #f8fffe;
   --foreground: #145e0f;
 }
 
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-body{
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(100deg, var(--color-primary-light), var(--color-primary-dark));
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(100deg, var(--color-primary-light), var(--color-primary-dark));
 }
 
-p{
-    padding: 20px;
-    text-align: center;
+p {
+  padding: 20px;
+  text-align: center;
 }
 
-.h4Text{
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 25px;
-    color: var(--color-text-main);
+.h4Text {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--color-primary-low);
 }
+
 .form-register {
-    width: 900px;
-    padding: 40px;
-    border-radius: 8px;
-    background: var(--color-bg-transparent);
-    box-shadow: 0 0 10px rgb(0, 0, 0);
+  background-color: var(--color-primary-transparent);
+  padding: 48px 40px;
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 1px var(--color-primary-soft),
+    0 0 60px var(--color-primary-soft),
+    0 8px 48px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  max-width: 450px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.form-register h4{
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 25px;
+.form-register h4 {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--color-primary-low);
 }
 
-.controls{
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 18px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    background: #ffffff;
-    color: white;
-    font-size: 15px;
-    transition: 0.3s;
+.controls {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8f5e9;
+  font-size: 15px;
+  transition: 0.3s;
 }
 
-.controls:focus{
-    border: 1px solid #1fc527;
-    box-shadow: 0 0 8px #1fc51f;
+.controls::placeholder {
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.form-register p{
-    text-align: center;
-    font-size: 14px;
-    margin-bottom: 15px;
+.controls:focus {
+  border: 1px solid var(--color-primary);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
 }
 
-.form-register a{
-    color: #040035;
-    text-decoration: none;
-    font-weight: bold;
+.form-register p {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 15px;
 }
 
-.form-register a:hover{
-    text-decoration: underline;
+.form-register a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: bold;
 }
 
-.bottom{
-    width: 100%;
-    padding: 15px;
-    border: none;
-    margin: 10px;
-    border-radius: 8px;
-    background: var(--color-bg-main);
-    border: 1px solid;
-    border-color: var(--color-primary-light);
-    color: rgb(0, 0, 0);
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
+.form-register a:hover {
+  text-decoration: underline;
 }
-.terminosCondiciones{
-    font-size: 14px;
-    color: var(--color-text-main);
-    text-align: center;
+
+.bottom {
+  width: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  background: var(--color-primary-medium);
+  border: 1px solid var(--color-primary);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
 }
-.bottom:hover{
-    background: #adadad;
-    transform: scale(1.03);
+
+.bottom:hover {
+  background: var(--color-primary-dark);
+  transform: scale(1.03);
+}
+
+.terminosCondiciones {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+.containerTerminos {
+    display: flex;
+    justify-content: space-between;
 }
 /* ================INICIO CSS CHECKBOX===================== */
 .container {

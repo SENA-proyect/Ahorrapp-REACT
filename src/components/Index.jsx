@@ -1,7 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/index.css';
 
+
+
 export default function Index() {
+
+  const navigate = useNavigate()
   const handleSubmit = (e) => {
     e.preventDefault();
     // Aquí puedes añadir la lógica para capturar los datos del formulario
@@ -18,7 +22,7 @@ export default function Index() {
         <div className="header-right">
           {/* Asegúrate de que esta ruta esté definida en tu App.js */}
           <Link to="/login">
-            <button className="btn-iniciarsesion">Iniciar sesión.</button>
+            <button className="btn-iniciarsesion" onClick={() => navigate('/Login')}>Iniciar sesión.</button>
           </Link>
         </div>
       </header>

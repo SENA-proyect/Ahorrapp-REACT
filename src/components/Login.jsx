@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import '../styles/login.css';
 
 const VERTEX_SHADER_SOURCE = `
@@ -69,6 +70,7 @@ function createProgram(gl, vertexShader, fragmentShader) {
 }
 
 export default function Login() {
+  const navigate = useNavigate() // ✅ bien escrito
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
 
@@ -155,10 +157,9 @@ export default function Login() {
               ¿Olvidaste tu contraseña?
             </a>
 
-
-            <a href="#" className="text-white">
+            <Link to="/Registrar" className="text-white">
               Crear una cuenta
-            </a>
+            </Link>
           </div>
         </form>
       </div>
