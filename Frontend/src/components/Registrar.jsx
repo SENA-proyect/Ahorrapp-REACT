@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import '../styles/stylo.css'
+import { useRef, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { registerUser } from '../api';
+import '../styles/stylo.css';
 
 const VERTEX_SHADER_SOURCE = `
   attribute vec4 a_position;
@@ -70,8 +71,11 @@ function createProgram(gl, vertexShader, fragmentShader) {
 }
 
 export default function Registro() {
+  const navigate = useNavigate();
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -124,17 +128,39 @@ export default function Registro() {
     };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // lógica de registro
+    setError(null);
+
+    const { nombres, apellido, correo, contraseña } = e.target.elements;
+
+    if (!nombres.value || !correo.value || !contraseña.value) {
+      setError("Por favor completa todos los campos obligatorios");
+      return;
+    }
+
+    setCargando(true);
+
+    const respuesta = await registerUser({
+      nombre: nombres.value,
+      apellido: apellido.value,
+      correo: correo.value,
+      contraseña: contraseña.value,
+    });
+
+    setCargando(false);
+
+    if (respuesta.ok) {
+      navigate("/login");
+    } else {
+      setError(respuesta.mensaje);
+    }
   };
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-      {/* Fondo WebGL */}
       <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
 
-      {/* Formulario encima del fondo */}
       <div>
         <form className="form-register" onSubmit={handleSubmit}>
           <h4 className="h4Text">Formulario Registro!</h4>
@@ -143,22 +169,32 @@ export default function Registro() {
           <input className="controls" type="text" name="apellido" placeholder="Ingrese su apellido" />
           <input className="controls" type="email" name="correo" placeholder="Ingrese su correo" />
           <input className="controls" type="password" name="contraseña" placeholder="Ingrese su contraseña" />
+
           <div className="containerTerminos">
-          <p className="terminosCondiciones">
-            Estoy de acuerdo con <a href="#">Términos y condiciones</a>
-          </p> <label className="container">
-            <input type="checkbox" />
-            <svg viewBox="10 -80 10 64" height="1em" width="1em">
-              <path
-                d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-                pathLength="575.0541381835938"
-                className="path"
-              />
-            </svg>
-          </label>
+            <p className="terminosCondiciones">
+              Estoy de acuerdo con <a href="#">Términos y condiciones</a>
+            </p>
+            <label className="container">
+              <input type="checkbox" />
+              <svg viewBox="10 -80 10 64" height="1em" width="1em">
+                <path
+                  d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                  pathLength="575.0541381835938"
+                  className="path"
+                />
+              </svg>
+            </label>
           </div>
 
-          <button className="bottom" type="submit">Registrar</button>
+          {error && (
+            <p style={{ color: "#ff6b6b", fontSize: "14px", textAlign: "center" }}>
+              {error}
+            </p>
+          )}
+
+          <button className="bottom" type="submit" disabled={cargando}>
+            {cargando ? "Registrando..." : "Registrar"}
+          </button>
 
           <p><Link to="/login">¿Ya tengo cuenta?</Link></p>
         </form>

@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../api";
 import '../styles/login.css';
 
 const VERTEX_SHADER_SOURCE = `
@@ -70,9 +71,11 @@ function createProgram(gl, vertexShader, fragmentShader) {
 }
 
 export default function Login() {
-  const navigate = useNavigate() // ✅ bien escrito
+  const navigate = useNavigate();
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -125,9 +128,34 @@ export default function Login() {
     };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // lógica de login
+    setError(null);
+
+    const { email, password } = e.target.elements;
+
+    if (!email.value || !password.value) {
+      setError("Por favor completa todos los campos");
+      return;
+    }
+
+    setCargando(true);
+
+    const respuesta = await loginUser({
+      correo: email.value,
+      contraseña: password.value,
+    });
+
+    setCargando(false);
+
+    if (respuesta.ok) {
+      // Guardamos el token y los datos del usuario en localStorage
+      localStorage.setItem("token", respuesta.token);
+      localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
+      navigate("/dashboard");
+    } else {
+      setError(respuesta.mensaje);
+    }
   };
 
   return (
@@ -149,8 +177,19 @@ export default function Login() {
               <input type="password" id="password" placeholder="Contraseña" />
             </div>
 
-            <button type="submit" className="boton" style={{ borderRadius: "25px" }}>
-              Entrar
+            {error && (
+              <p style={{ color: "#ff6b6b", fontSize: "14px", textAlign: "center" }}>
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="boton"
+              style={{ borderRadius: "25px" }}
+              disabled={cargando}
+            >
+              {cargando ? "Iniciando sesión..." : "Entrar"}
             </button>
 
             <a href="#" className="text-white">
