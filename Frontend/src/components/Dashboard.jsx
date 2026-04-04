@@ -27,6 +27,7 @@ export default function Dashboard() {
         <Link to="/gastos"><button className="nav-item">Gastos</button></Link>
         <Link to="/ahorros"><button className="nav-item">Ahorros</button></Link>
         <Link to="/imprevistos"><button className="nav-item">Imprevistos</button></Link>
+        {/* <link to="/ModuloImprevistos"><button className="nav-item">Modulo Imprevistos</button></link> */}
         <Link to="/deudas"><button className="nav-item">Deudas</button></Link>
         <Link to="/dependientes"><button className="nav-item">Dependientes</button></Link>
         <Link to="/categorias"><button className="nav-item">Categorias</button></Link>

@@ -1,0 +1,6 @@
+1- solucionar errores de visibilidad general, ocurren errores con los estilos.
+suceden en casi todas las vistas, se probo modificando el "index.css" para evitar que
+el codigo se sobrepusiera a los estilos generales de las respectivas vistas
+pero funciono parcialmente.
+
+Sugerencia, revisar los css de cada vista
