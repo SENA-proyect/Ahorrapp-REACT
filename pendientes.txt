@@ -4,3 +4,14 @@ el codigo se sobrepusiera a los estilos generales de las respectivas vistas
 pero funciono parcialmente.
 
 Sugerencia, revisar los css de cada vista
+
+2- Crear vistas CRUD para los siguientes escensarios:
+· Dependientes
+· Gastos
+· Ingresos
+· Imprevistos
+· Deudas
+· Ahorros
+
+3- Crear formularios para:
+· Registrar MOVIMIENTOS, siguiendo la logica del schema.sql 
