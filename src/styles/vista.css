@@ -163,17 +163,6 @@ body{
     
 }
 
-
-.main-content {
-    position: absolute;
-    top: 30%;
-    left: 35%;
-    box-sizing: border-box;
-}
-
-
-
-
 h1{
     color: var(--color-primary);
     text-align: center;   

@@ -70,7 +70,7 @@ function createProgram(gl, vertexShader, fragmentShader) {
 }
 
 export default function Login() {
-  const navigate = useNavigate() // ✅ bien escrito
+  const navigate = useNavigate();
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
 
@@ -136,31 +136,27 @@ export default function Login() {
 
       <div className="login-container">
         <form onSubmit={handleSubmit} className="form-container">
-          <div className="box">
-            <h1 className="text-center mb-4" style={{ color: "white" }}>
-              Iniciar Sesión
-            </h1>
+          <h1>Iniciar Sesión</h1>
 
-            <div className="form-group">
-              <input type="text" id="email" placeholder="Correo Electrónico" />
-            </div>
-
-            <div className="form-group">
-              <input type="password" id="password" placeholder="Contraseña" />
-            </div>
-
-            <button type="submit" className="boton" style={{ borderRadius: "25px" }}>
-              Entrar
-            </button>
-
-            <a href="#" className="text-white">
-              ¿Olvidaste tu contraseña?
-            </a>
-
-            <Link to="/Registrar" className="text-white">
-              Crear una cuenta
-            </Link>
+          <div className="form-group">
+            <input type="text" id="email" placeholder="Correo Electrónico" />
           </div>
+
+          <div className="form-group">
+            <input type="password" id="password" placeholder="Contraseña" />
+          </div>
+
+          <button type="submit" className="boton">
+            Entrar
+          </button>
+
+          <a href="#" className="text-white">
+            ¿Olvidaste tu contraseña?
+          </a>
+
+          <Link to="/Registrar" className="text-white">
+            Crear una cuenta
+          </Link>
         </form>
       </div>
     </>

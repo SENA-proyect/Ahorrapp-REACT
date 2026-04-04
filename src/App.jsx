@@ -30,7 +30,7 @@ function App() {
 
     <BrowserRouter>
      <Routes>
-      <Route path="/Index" element={<Index />} />
+      <Route path="/" element={<Index />} />
       <Route path="/Registrar" element={<Registrar />} />
       <Route path="/Login" element={<Login />} />
       <Route path="/Dashboard" element={<Dashboard />} />

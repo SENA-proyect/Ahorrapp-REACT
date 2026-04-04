@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import '../styles/olvidar_contrasena.css'
+import '../styles/olvidar_contraseña.css'
 
 export default function OlvidarContrasena() {
   return (

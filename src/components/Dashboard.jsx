@@ -8,7 +8,7 @@ export default function Dashboard() {
 
       {/* HEADER */}
       <header className="header">
-        <Link to="/">
+        <Link to="/Index">
           <button className="buttonHeader">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 10">
               <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
@@ -19,21 +19,35 @@ export default function Dashboard() {
         <h1>Ahorrapp</h1>
         <button className="buttonCerrarSesion">Cerrar Sesion</button>
       </header>
-
-      {/* NAVBAR */}
       <nav className="navbar">
-        <Link to="/dashboard"><button className="nav-item">Dashboard</button></Link>
-        <Link to="/ingresos"><button className="nav-item">Ingresos</button></Link>
-        <Link to="/gastos"><button className="nav-item">Gastos</button></Link>
-        <Link to="/ahorros"><button className="nav-item">Ahorros</button></Link>
-        <Link to="/imprevistos"><button className="nav-item">Imprevistos</button></Link>
-        <Link to="/deudas"><button className="nav-item">Deudas</button></Link>
-        <Link to="/dependientes"><button className="nav-item">Dependientes</button></Link>
-        <Link to="/categorias"><button className="nav-item">Categorias</button></Link>
+        <Link to="/Dashboard">
+        <button className="nav-item" onClick={() => navigate('/Dashboard')}>Dashboard</button>
+        </Link>
+        <Link to="/ModulosIngresos">
+        <button className="nav-item" onClick={() => navigate('/ModulosIngresos')}>Ingresos</button>
+        </Link>
+        <Link to="/ModulosGastos">
+        <button className="nav-item" onClick={() => navigate('/ModulosGastos')}>Gastos</button>
+        </Link>
+        <Link to="/ModuloAhorros">
+        <button className="nav-item" onClick={() => navigate('/ModuloAhorros')}>Ahorros</button>
+        </Link>
+        <Link to="/ModuloImprevistos">
+        <button className="nav-item" onClick={() => navigate('/ModuloImprevistos')}>Imprevistos</button>
+        </Link>
+        <Link to="/ModuloDeudas">
+        <button className="nav-item" onClick={() => navigate('/ModuloDeudas')}>Deudas</button>
+        </Link>
+        <Link to="/ModulosDependientes">
+        <button className="nav-item" onClick={() => navigate('/ModulosDependientes')}>Dependientes</button>
+        </Link>
+        <Link to="/ModulosCategorias">
+        <button className="nav-item" onClick={() => navigate('/ModulosCategorias')}>Categorias</button>
+        </Link>
       </nav>
 
       {/* MAIN */}
-      <main className="main-content">
+      <main className="dashboard-main-content">
 
         <div className="dashboard-header">
           <div className="header-left">
@@ -46,8 +60,8 @@ export default function Dashboard() {
             <p className="pHeaderLeft">Analisis completo con insights automaticos</p>
           </div>
           <div className="header-right">
-            <Link to="/ayuda">
-              <button className="btn-outline">Ayuda</button>
+            <Link to="/VentanaModalDashboard">
+              <button className="btn-outline" onClick={() => navigate ('/VentanaModalDashboard')}>Ayuda</button>
             </Link>
             <button className="btn-solid">Exportar Reporte</button>
           </div>
