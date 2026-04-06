@@ -21,7 +21,7 @@ export default function Index() {
         </div>
         <div className="header-right">
           {/* Asegúrate de que esta ruta esté definida en tu App.js */}
-          <Link to="/login">
+          <Link to="/Login">
             <button className="btn-iniciarsesion" onClick={() => navigate('/Login')}>Iniciar sesión.</button>
           </Link>
         </div>
