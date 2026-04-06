@@ -3,7 +3,7 @@ import '../styles/generalModulos.css'
 
 export default function ModuloIngresos() {
   return (
-    <div className="modulo-wrapper">
+    <div className="box-content">
 
       <header className="header">
         <Link to="/">
