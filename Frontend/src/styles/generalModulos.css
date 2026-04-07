@@ -172,11 +172,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
+  padding: 5px 20px;
   margin: 0 auto 20px;
   width: 100%;
   background-color: var(--color-bg-main);
   border-bottom: 2px solid var(--color-primary-low);
+}
+.box-content {
+  box-sizing: border-box;
+  padding: 10px 100px;
 }
 
 .header h1 {

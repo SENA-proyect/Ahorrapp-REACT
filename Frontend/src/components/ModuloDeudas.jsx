@@ -4,6 +4,7 @@ import '../styles/generalModulos.css'
 const Deudas = () => {
   return (
     <>
+    <div className="box-content">
       <header className="header">
         <Link to="/">
           <button className="buttonHeader">
@@ -70,6 +71,7 @@ const Deudas = () => {
       <footer className="footer-app">
         <p>&copy; 2024 Mi Aplicación de Finanzas</p>
       </footer>
+      </div>
     </>
   );
 };
