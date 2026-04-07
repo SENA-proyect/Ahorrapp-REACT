@@ -129,6 +129,7 @@ export default function Login() {
     };
   }, []);
 
+  // Conexion con el backend, verificacion de email y password
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -153,7 +154,7 @@ export default function Login() {
       // Guardamos el token y los datos del usuario en localStorage
       localStorage.setItem("token", respuesta.token);
       localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
-      navigate("/dashboard");
+      navigate("/Dashboard");
     } else {
       setError(respuesta.mensaje);
     }

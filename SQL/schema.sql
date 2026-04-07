@@ -35,6 +35,10 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     Fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario'
 ) ENGINE=InnoDB;
 
+-- 22222222222222222222222222
+    
+-- 22222222222222222222222222
+
 -- NOTA: Validar formato de Email desde el backend.
 --   CHECK (Email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')
 

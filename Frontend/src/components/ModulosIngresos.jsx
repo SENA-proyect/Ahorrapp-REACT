@@ -35,7 +35,7 @@ export default function ModuloIngresos() {
             <li><Link to="/ModulosCategorias" className="nav-link">Categorias</Link></li>
           </ul>
         </nav>
-
+{/* PARTE DEL CRUD */}
         <section className="modulo-ahorros">
           <header className="modulo-header">
             <h3>Módulo de ingresos</h3>
