@@ -180,9 +180,9 @@ export default function Login() {
               Entrar
             </button>
 
-          <a href="#" className="text-white">
+          <Link to="/Registrar" className="text-white">
             ¿Olvidaste tu contraseña?
-          </a>
+          </Link>
 
           <Link to="/Registrar" className="text-white">
             Crear una cuenta
