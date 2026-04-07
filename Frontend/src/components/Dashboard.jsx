@@ -22,14 +22,14 @@ export default function Dashboard() {
 
       {/* NAVBAR */}
       <nav className="navbar">
-        <Link to="/dashboard"><button className="nav-item">Dashboard</button></Link>
-        <Link to="/ingresos"><button className="nav-item">Ingresos</button></Link>
-        <Link to="/gastos"><button className="nav-item">Gastos</button></Link>
-        <Link to="/ahorros"><button className="nav-item">Ahorros</button></Link>
-        <Link to="/imprevistos"><button className="nav-item">Imprevistos</button></Link>
-        <Link to="/deudas"><button className="nav-item">Deudas</button></Link>
-        <Link to="/dependientes"><button className="nav-item">Dependientes</button></Link>
-        <Link to="/categorias"><button className="nav-item">Categorias</button></Link>
+        <Link to="/Dashboard"><button className="nav-item">Dashboard</button></Link>
+        <Link to="/ModulosIngresos"><button className="nav-item">Ingresos</button></Link>
+        <Link to="/ModulosGastos"><button className="nav-item">Gastos</button></Link>
+        <Link to="/ModuloAhorros"><button className="nav-item">Ahorros</button></Link>
+        <Link to="/ModuloImprevistos"><button className="nav-item">Imprevistos</button></Link>
+        <Link to="/ModuloDeudas"><button className="nav-item">Deudas</button></Link>
+        <Link to="/ModulosDependientes"><button className="nav-item">Dependientes</button></Link>
+        <Link to="/ModulosCategorias"><button className="nav-item">Categorias</button></Link>
       </nav>
 
       {/* MAIN */}

@@ -21,6 +21,7 @@ const Ahorros = () => {
         </Link>
 
         <h1>Ahorrapp</h1>
+         {/* PENDIENTE: Definir funcion de logout */}
         <button className="buttonCerrarSesion">Cerrar Sesión</button>
       </header>
 
@@ -42,6 +43,8 @@ const Ahorros = () => {
             <li><Link to="/ModulosCategorias" className="nav-link">Categorías</Link></li>
           </ul>
         </nav>
+
+        {/* PARTE DEL CRUD */}
 
         <section className="modulo-ahorros">
           <header className="modulo-header">

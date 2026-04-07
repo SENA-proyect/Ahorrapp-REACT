@@ -42,7 +42,7 @@ const Imprevistos = () => {
             <li><Link to="/modulosCategorias" className="nav-link">Categorías</Link></li>
           </ul>
         </nav>
-
+{/* PARTE DEL CRUD */}
         <section className="modulo-ahorros">
           <header className="modulo-header">
             <h3>Fondo de Imprevistos</h3>
