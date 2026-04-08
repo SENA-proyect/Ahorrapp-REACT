@@ -5,6 +5,7 @@ import FormAhorro from './FormAhorro'
 import FormGasto from './FormGasto'
 import FormDeuda from './FormDeuda'
 import FormImprevisto from './FormImprevisto'
+import '../../styles/movimientos.css'
 
 const OPCIONES = {
   Entrada: ['Ingreso', 'Ahorro'],
@@ -33,21 +34,18 @@ export default function FormMovimiento() {
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.titulo}>Nuevo movimiento</h2>
+    <div className="movimientos-page">
+      <div className="movimientos-card">
+        <h2 className="movimientos-titulo">Nuevo movimiento</h2>
 
         {/* PASO 1 — Tipo de flujo */}
-        <div style={styles.grupo}>
-          <p style={styles.label}>¿Qué tipo de movimiento es?</p>
-          <div style={styles.opciones}>
+        <div className="mov-grupo">
+          <p className="mov-label">¿Qué tipo de movimiento es?</p>
+          <div className="mov-opciones">
             {['Entrada', 'Salida'].map(tipo => (
               <button
                 key={tipo}
-                style={{
-                  ...styles.opcionBtn,
-                  ...(tipoFlujo === tipo ? styles.opcionActiva : {})
-                }}
+                className={`mov-opcion-btn${tipoFlujo === tipo ? ' activo' : ''}`}
                 onClick={() => handleTipoFlujo(tipo)}
               >
                 {tipo === 'Entrada' ? '↑ Entrada' : '↓ Salida'}
@@ -58,16 +56,13 @@ export default function FormMovimiento() {
 
         {/* PASO 2 — Subtipo según flujo */}
         {tipoFlujo && (
-          <div style={styles.grupo}>
-            <p style={styles.label}>¿Qué quieres registrar?</p>
-            <div style={styles.opciones}>
+          <div className="mov-grupo">
+            <p className="mov-label">¿Qué quieres registrar?</p>
+            <div className="mov-opciones">
               {OPCIONES[tipoFlujo].map(sub => (
                 <button
                   key={sub}
-                  style={{
-                    ...styles.opcionBtn,
-                    ...(subtipoModulo === sub ? styles.opcionActiva : {})
-                  }}
+                  className={`mov-opcion-btn${subtipoModulo === sub ? ' activo' : ''}`}
                   onClick={() => setSubtipoModulo(sub)}
                 >
                   {sub}
@@ -79,85 +74,15 @@ export default function FormMovimiento() {
 
         {/* PASO 3 — Formulario del módulo seleccionado */}
         {subtipoModulo && (
-          <div style={styles.formDetalle}>
+          <div className="mov-form-detalle">
             {renderFormDetalle()}
           </div>
         )}
 
-        <button style={styles.btnCancelar} onClick={() => navigate(-1)}>
+        <button className="form-btn-cancelar" onClick={() => navigate(-1)}>
           Cancelar
         </button>
       </div>
     </div>
   )
-}
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    background: 'var(--bg-primary)',
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    padding: '40px 16px',
-  },
-  card: {
-    background: 'var(--bg-secondary)',
-    borderRadius: '14px',
-    border: '1px solid var(--border-color)',
-    padding: '36px',
-    width: '100%',
-    maxWidth: '520px',
-  },
-  titulo: {
-    fontSize: 'var(--text-lg)',
-    fontWeight: 'var(--font-bold)',
-    color: 'var(--text-lg-color)',
-    marginBottom: '28px',
-  },
-  grupo: {
-    marginBottom: '24px',
-  },
-  label: {
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-medium)',
-    color: 'var(--text-secondary)',
-    marginBottom: '10px',
-  },
-  opciones: {
-    display: 'flex',
-    gap: '10px',
-    flexWrap: 'wrap',
-  },
-  opcionBtn: {
-    padding: '10px 20px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
-    background: 'var(--bg-primary)',
-    color: 'var(--text-primary)',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-medium)',
-    cursor: 'pointer',
-  },
-  opcionActiva: {
-    background: 'var(--color-primary-soft)',
-    border: '1px solid var(--color-primary)',
-    color: 'var(--color-primary-dark)',
-  },
-  formDetalle: {
-    marginTop: '8px',
-    paddingTop: '24px',
-    borderTop: '1px solid var(--border-color)',
-  },
-  btnCancelar: {
-    marginTop: '24px',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
-    background: 'transparent',
-    color: 'var(--text-secondary)',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-medium)',
-    cursor: 'pointer',
-  },
 }

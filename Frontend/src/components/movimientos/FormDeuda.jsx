@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
+import '../../styles/movimientos.css'
 
 export default function FormDeuda({ tipoFlujo, subtipo }) {
   const navigate = useNavigate()
@@ -9,13 +10,13 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
   const [error,      setError]      = useState(null)
 
   const [form, setForm] = useState({
-    monto:         '',
-    fuente:        '',
-    descripcion:   '',
-    cuotas_total:  '',
-    fecha_inicio:  '',
-    fecha_fin:     '',
-    id_categoria:  '',
+    monto:        '',
+    fuente:       '',
+    descripcion:  '',
+    cuotas_total: '',
+    fecha_inicio: '',
+    fecha_fin:    '',
+    id_categoria: '',
   })
 
   useEffect(() => {
@@ -93,13 +94,12 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 style={styles.subtitulo}>Datos de la deuda</h3>
+      <h3 className="form-subtitulo deudas">Datos de la deuda</h3>
 
-      {/* Monto */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Monto *</label>
+      <div className="form-grupo">
+        <label className="form-label">Monto *</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="number"
           name="monto"
           placeholder="0.00"
@@ -110,11 +110,10 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Fuente */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Fuente *</label>
+      <div className="form-grupo">
+        <label className="form-label">Fuente *</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="text"
           name="fuente"
           placeholder="Ej: Banco, Tarjeta de crédito..."
@@ -123,11 +122,10 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Categoría */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Categoría</label>
+      <div className="form-grupo">
+        <label className="form-label">Categoría</label>
         <select
-          style={styles.input}
+          className="form-select"
           name="id_categoria"
           value={form.id_categoria}
           onChange={handleChange}
@@ -139,11 +137,10 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         </select>
       </div>
 
-      {/* Cuotas */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Número de cuotas</label>
+      <div className="form-grupo">
+        <label className="form-label">Número de cuotas</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="number"
           name="cuotas_total"
           placeholder="Dejar vacío si es pago único"
@@ -154,11 +151,10 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Fecha inicio */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Fecha de inicio</label>
+      <div className="form-grupo">
+        <label className="form-label">Fecha de inicio</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="date"
           name="fecha_inicio"
           value={form.fecha_inicio}
@@ -166,11 +162,10 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Fecha fin */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Fecha de fin</label>
+      <div className="form-grupo">
+        <label className="form-label">Fecha de fin</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="date"
           name="fecha_fin"
           value={form.fecha_fin}
@@ -178,11 +173,10 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Descripción */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Descripción</label>
+      <div className="form-grupo">
+        <label className="form-label">Descripción</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="text"
           name="descripcion"
           placeholder="Descripción opcional"
@@ -191,61 +185,15 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
 
       <button
         type="submit"
-        style={styles.btnSubmit}
+        className="form-btn-submit deudas"
         disabled={cargando}
       >
         {cargando ? 'Guardando...' : 'Registrar deuda'}
       </button>
     </form>
   )
-}
-
-const styles = {
-  subtitulo: {
-    fontSize: '1rem',
-    fontWeight: 'var(--font-bold)',
-    color: 'var(--deudas-dark)',
-    marginBottom: '20px',
-  },
-  grupo: {
-    marginBottom: '16px',
-  },
-  label: {
-    display: 'block',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-medium)',
-    color: 'var(--text-secondary)',
-    marginBottom: '6px',
-  },
-  input: {
-    width: '100%',
-    padding: '10px 12px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
-    background: 'var(--input-background)',
-    fontSize: 'var(--text-sm)',
-    color: 'var(--text-primary)',
-    outline: 'none',
-    boxSizing: 'border-box',
-  },
-  error: {
-    color: 'var(--destructive)',
-    fontSize: 'var(--text-sm)',
-    marginBottom: '12px',
-  },
-  btnSubmit: {
-    width: '100%',
-    padding: '12px',
-    borderRadius: '8px',
-    border: 'none',
-    background: 'var(--deudas-base)',
-    color: '#fff',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-bold)',
-    cursor: 'pointer',
-  },
 }
