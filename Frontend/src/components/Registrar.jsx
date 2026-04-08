@@ -82,7 +82,7 @@ export default function Registro() {
     nombre: "",
     apellido: "",
     correo: "",
-    contrasena: ""
+    contraseña: ""
   });
 
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function Registro() {
   setError(null);
   setCargando(true);
 
-  if (!form.nombre || !form.apellido || !form.correo || !form.contrasena) {
+  if (!form.nombre || !form.apellido || !form.correo || !form.contraseña) {
     setError("Todos los campos son obligatorios");
     setCargando(false);
     return; // Salimos si falta algún campo
@@ -190,7 +190,7 @@ export default function Registro() {
           <input value={form.nombre} onChange={handleChange} className="controls" type="text" name="nombre" placeholder="Ingrese su nombre" />
           <input value={form.apellido} onChange={handleChange} className="controls" type="text" name="apellido" placeholder="Ingrese su apellido" />
           <input value={form.correo} onChange={handleChange} className="controls" type="email" name="correo" placeholder="Ingrese su correo" />
-          <input value={form.contrasena} onChange={handleChange} className="controls" type="password" name="contrasena" placeholder="Ingrese su contraseña" />
+          <input value={form.contraseña} onChange={handleChange} className="controls" type="password" name="contraseña" placeholder="Ingrese su contraseña" />
 
        <div className="containerTerminos">
           <input type="checkbox" id="terminos" className="checkbox-terminos" />
