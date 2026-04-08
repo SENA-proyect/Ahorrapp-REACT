@@ -20,7 +20,7 @@ import PanelUsuarios from './components/PanelUsuarios.jsx'
 import VerificacionCorreo from './components/VerificacionCorreo.jsx'
 import VistaEmail from './components/VistaEmail.jsx'
 import VMIDependientes from './components/VM_I-Dependientes.jsx'
-import
+import FormMovimiento from './components/movimientos/FormMovimientos.jsx'
 
 
 

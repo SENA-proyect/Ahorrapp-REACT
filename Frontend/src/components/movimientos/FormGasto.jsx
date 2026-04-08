@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
+import '../../styles/movimientos.css'
 
 export default function FormGasto({ tipoFlujo, subtipo }) {
   const navigate = useNavigate()
@@ -83,13 +84,12 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 style={styles.subtitulo}>Datos del gasto</h3>
+      <h3 className="form-subtitulo gastos">Datos del gasto</h3>
 
-      {/* Monto */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Monto *</label>
+      <div className="form-grupo">
+        <label className="form-label">Monto *</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="number"
           name="monto"
           placeholder="0.00"
@@ -100,11 +100,10 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Categoría */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Categoría</label>
+      <div className="form-grupo">
+        <label className="form-label">Categoría</label>
         <select
-          style={styles.input}
+          className="form-select"
           name="id_categoria"
           value={form.id_categoria}
           onChange={handleChange}
@@ -116,11 +115,10 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
         </select>
       </div>
 
-      {/* Dependiente */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Dependiente</label>
+      <div className="form-grupo">
+        <label className="form-label">Dependiente</label>
         <select
-          style={styles.input}
+          className="form-select"
           name="id_dependiente"
           value={form.id_dependiente}
           onChange={handleChange}
@@ -132,11 +130,10 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
         </select>
       </div>
 
-      {/* Descripción */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Descripción</label>
+      <div className="form-grupo">
+        <label className="form-label">Descripción</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="text"
           name="descripcion"
           placeholder="Descripción opcional"
@@ -145,11 +142,10 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Fecha */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Fecha</label>
+      <div className="form-grupo">
+        <label className="form-label">Fecha</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="date"
           name="fecha_registro"
           value={form.fecha_registro}
@@ -157,61 +153,15 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
 
       <button
         type="submit"
-        style={styles.btnSubmit}
+        className="form-btn-submit gastos"
         disabled={cargando}
       >
         {cargando ? 'Guardando...' : 'Registrar gasto'}
       </button>
     </form>
   )
-}
-
-const styles = {
-  subtitulo: {
-    fontSize: '1rem',
-    fontWeight: 'var(--font-bold)',
-    color: 'var(--gastos-dark)',
-    marginBottom: '20px',
-  },
-  grupo: {
-    marginBottom: '16px',
-  },
-  label: {
-    display: 'block',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-medium)',
-    color: 'var(--text-secondary)',
-    marginBottom: '6px',
-  },
-  input: {
-    width: '100%',
-    padding: '10px 12px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
-    background: 'var(--input-background)',
-    fontSize: 'var(--text-sm)',
-    color: 'var(--text-primary)',
-    outline: 'none',
-    boxSizing: 'border-box',
-  },
-  error: {
-    color: 'var(--destructive)',
-    fontSize: 'var(--text-sm)',
-    marginBottom: '12px',
-  },
-  btnSubmit: {
-    width: '100%',
-    padding: '12px',
-    borderRadius: '8px',
-    border: 'none',
-    background: 'var(--gastos-base)',
-    color: '#fff',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-bold)',
-    cursor: 'pointer',
-  },
 }

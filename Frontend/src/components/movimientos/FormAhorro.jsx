@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
+import '../../styles/movimientos.css'
 
 export default function FormAhorro({ tipoFlujo, subtipo }) {
   const navigate = useNavigate()
@@ -81,13 +82,12 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 style={styles.subtitulo}>Datos del ahorro</h3>
+      <h3 className="form-subtitulo ahorros">Datos del ahorro</h3>
 
-      {/* Monto */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Monto *</label>
+      <div className="form-grupo">
+        <label className="form-label">Monto *</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="number"
           name="monto"
           placeholder="0.00"
@@ -98,11 +98,10 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Meta */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Meta u objetivo</label>
+      <div className="form-grupo">
+        <label className="form-label">Meta u objetivo</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="text"
           name="meta"
           placeholder="Ej: Vacaciones, Fondo de emergencia..."
@@ -111,11 +110,10 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Categoría */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Categoría</label>
+      <div className="form-grupo">
+        <label className="form-label">Categoría</label>
         <select
-          style={styles.input}
+          className="form-select"
           name="id_categoria"
           value={form.id_categoria}
           onChange={handleChange}
@@ -127,11 +125,10 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
         </select>
       </div>
 
-      {/* Descripción */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Descripción</label>
+      <div className="form-grupo">
+        <label className="form-label">Descripción</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="text"
           name="descripcion"
           placeholder="Descripción opcional"
@@ -140,11 +137,10 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Fecha registro */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Fecha de registro</label>
+      <div className="form-grupo">
+        <label className="form-label">Fecha de registro</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="date"
           name="fecha_registro"
           value={form.fecha_registro}
@@ -152,11 +148,10 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {/* Fecha meta */}
-      <div style={styles.grupo}>
-        <label style={styles.label}>Fecha meta</label>
+      <div className="form-grupo">
+        <label className="form-label">Fecha meta</label>
         <input
-          style={styles.input}
+          className="form-input"
           type="date"
           name="fecha_meta"
           value={form.fecha_meta}
@@ -164,61 +159,15 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
         />
       </div>
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
 
       <button
         type="submit"
-        style={styles.btnSubmit}
+        className="form-btn-submit ahorros"
         disabled={cargando}
       >
         {cargando ? 'Guardando...' : 'Registrar ahorro'}
       </button>
     </form>
   )
-}
-
-const styles = {
-  subtitulo: {
-    fontSize: '1rem',
-    fontWeight: 'var(--font-bold)',
-    color: 'var(--ahorros-dark)',
-    marginBottom: '20px',
-  },
-  grupo: {
-    marginBottom: '16px',
-  },
-  label: {
-    display: 'block',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-medium)',
-    color: 'var(--text-secondary)',
-    marginBottom: '6px',
-  },
-  input: {
-    width: '100%',
-    padding: '10px 12px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
-    background: 'var(--input-background)',
-    fontSize: 'var(--text-sm)',
-    color: 'var(--text-primary)',
-    outline: 'none',
-    boxSizing: 'border-box',
-  },
-  error: {
-    color: 'var(--destructive)',
-    fontSize: 'var(--text-sm)',
-    marginBottom: '12px',
-  },
-  btnSubmit: {
-    width: '100%',
-    padding: '12px',
-    borderRadius: '8px',
-    border: 'none',
-    background: 'var(--ahorros-base)',
-    color: '#fff',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 'var(--font-bold)',
-    cursor: 'pointer',
-  },
 }
