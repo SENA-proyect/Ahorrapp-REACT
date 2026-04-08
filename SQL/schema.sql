@@ -446,6 +446,19 @@ CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_historial) REFERENCES HISTORIAL(ID_historial) ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB;
+
+--categorias
+CREATE TABLE categorias (
+  id          INT PRIMARY KEY AUTO_INCREMENT,
+  nombre      VARCHAR(100) NOT NULL,
+  descripcion VARCHAR(255),
+  activa      BOOLEAN DEFAULT true,
+  sistema     BOOLEAN DEFAULT false,
+  id_usuario  INT,  -- NULL si es del sistema
+  FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+)
+
+
  
 -- NOTA: ID_historial ahora es opcional (NULL) para permitir notificaciones del sistema o de bienvenida que no están asociadas a ninguna acción del usuario.
 -- NOTA: Se agregó el tipo 'alerta_presupuesto' para notificaciones disparadas por PRESUPUESTOS.
