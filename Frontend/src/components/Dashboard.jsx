@@ -30,6 +30,7 @@ export default function Dashboard() {
         <Link to="/ModuloDeudas"><button className="nav-item">Deudas</button></Link>
         <Link to="/ModulosDependientes"><button className="nav-item">Dependientes</button></Link>
         <Link to="/ModulosCategorias"><button className="nav-item">Categorias</button></Link>
+        <Link to="/movimientos/nuevo"><button className="nav-item">Nuevo movimiento</button></Link>
       </nav>
 
       {/* MAIN */}
