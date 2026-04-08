@@ -114,13 +114,6 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* ✅ wrapper que ocupa toda la pantalla */
-.registro-wrapper {
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
 
 /* ✅ canvas fijo detrás de todo */
 .registro-canvas {

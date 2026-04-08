@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { getCategorias, crearCategoria, editarCategoria, deshabilitarCategoria, habilitarCategoria } from '../api'
 import '../styles/generalModulos.css'
 
 // ─── Categorías predeterminadas del sistema ───────────────────────────────────
@@ -12,7 +13,7 @@ const CATEGORIAS_DEFAULT = [
   { id: 6, nombre: 'Servicios',      descripcion: 'Agua, luz, internet y gas',          activa: true, sistema: true },
 ]
 
-const API_URL = 'http://localhost:3000/api'
+// const API_URL = 'http://localhost:3000/api'
 
 export default function ModuloCategorias() {
   const [categorias, setCategorias]     = useState(CATEGORIAS_DEFAULT)
@@ -24,51 +25,53 @@ export default function ModuloCategorias() {
   const [formNombre, setFormNombre]       = useState('')
   const [formDescripcion, setFormDescripcion] = useState('')
 
+
   // ── Cargar categorías del backend al montar ──────────────────────────────
+
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    fetch(`${API_URL}/categorias`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data && Array.isArray(data)) {
-          // Combinar: predeterminadas del sistema + las del usuario
-          const ids = new Set(data.map(c => c.id))
-          const defaults = CATEGORIAS_DEFAULT.filter(c => !ids.has(c.id))
-          setCategorias([...defaults, ...data])
-        }
-      })
-      .catch(() => {}) // Si el backend no responde usa las predeterminadas
+  getCategorias().then(data => {
+    if (Array.isArray(data)) {
+      const ids = new Set(data.map(c => c.id))
+      const defaults = CATEGORIAS_DEFAULT.filter(c => !ids.has(c.id))
+      setCategorias([...defaults, ...data])
+    }
+  }).catch(() => {})
   }, [])
+}
 
   // ── Agregar categoría ────────────────────────────────────────────────────
+  
   const handleAgregar = async () => {
-    if (!formNombre.trim()) return alert('El nombre es obligatorio')
-    const nueva = {
-      id: Date.now(),
-      nombre: formNombre.trim(),
-      descripcion: formDescripcion.trim(),
-      activa: true,
-      sistema: false,
-    }
-    try {
-      const token = localStorage.getItem('token')
-      const res = await fetch(`${API_URL}/categorias`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ nombre: nueva.nombre, descripcion: nueva.descripcion }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        nueva.id = data.id ?? nueva.id
-      }
-    } catch (_) {}
-    setCategorias(prev => [...prev, nueva])
-    setFormNombre('')
-    setFormDescripcion('')
-    setModalAgregar(false)
+  if (!formNombre.trim()) return alert('El nombre es obligatorio')
+
+  const respuesta = await crearCategoria({
+    nombre: formNombre.trim(),
+    descripcion: formDescripcion.trim(),
+  })
+  
+  
+const handleAgregar = async () => {
+  if (!formNombre.trim()) return alert('El nombre es obligatorio')
+
+  const respuesta = await crearCategoria({
+    nombre: formNombre.trim(),
+    descripcion: formDescripcion.trim(),
+  })
+
+  const nueva = {
+    id: respuesta.id ?? Date.now(),
+    nombre: formNombre.trim(),
+    descripcion: formDescripcion.trim(),
+    activa: true,
+    sistema: false,
   }
+
+  setCategorias(prev => [...prev, nueva])
+  setFormNombre('')
+  setFormDescripcion('')
+  setModalAgregar(false)
+}
+
 
   // ── Abrir modal editar ───────────────────────────────────────────────────
   const abrirEditar = (cat) => {
@@ -77,46 +80,35 @@ export default function ModuloCategorias() {
   }
 
   // ── Guardar edición ──────────────────────────────────────────────────────
-  const handleGuardarEdicion = async () => {
-    if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
-    try {
-      const token = localStorage.getItem('token')
-      await fetch(`${API_URL}/categorias/${categoriaEdit.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ nombre: categoriaEdit.nombre, descripcion: categoriaEdit.descripcion }),
-      })
-    } catch (_) {}
-    setCategorias(prev =>
-      prev.map(c => c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c)
-    )
-    setModalEditar(false)
-  }
+const handleGuardarEdicion = async () => {
+  if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
+
+  await editarCategoria(categoriaEdit.id, {
+    nombre: categoriaEdit.nombre,
+    descripcion: categoriaEdit.descripcion,
+  })
+
+  setCategorias(prev =>
+    prev.map(c => c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c)
+  )
+  setModalEditar(false)
+}
 
   // ── Deshabilitar categoría (no eliminar) ─────────────────────────────────
-  const handleDeshabilitar = async (id) => {
-    if (!window.confirm('¿Seguro que deseas deshabilitar esta categoría?')) return
-    try {
-      const token = localStorage.getItem('token')
-      await fetch(`${API_URL}/categorias/${id}/deshabilitar`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-    } catch (_) {}
-    setCategorias(prev =>
-      prev.map(c => c.id === id ? { ...c, activa: false } : c)
-    )
-  }
+const handleDeshabilitar = async (id) => {
+  if (!window.confirm('¿Seguro que deseas deshabilitar esta categoría?')) return
+
+  await deshabilitarCategoria(id)
+
+  setCategorias(prev =>
+    prev.map(c => c.id === id ? { ...c, activa: false } : c)
+  )
+}
 
   // ── Habilitar de nuevo ───────────────────────────────────────────────────
   const handleHabilitar = async (id) => {
-    try {
-      const token = localStorage.getItem('token')
-      await fetch(`${API_URL}/categorias/${id}/habilitar`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-    } catch (_) {}
+    await habilitarCategoria(id)
+
     setCategorias(prev =>
       prev.map(c => c.id === id ? { ...c, activa: true } : c)
     )

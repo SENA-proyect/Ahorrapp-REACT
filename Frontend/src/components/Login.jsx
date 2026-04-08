@@ -130,35 +130,40 @@ export default function Login() {
   }, []);
 
   // Conexion con el backend, verificacion de email y password
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
+// Actualmente no tiene try/catch, si la red falla rompe silenciosamente
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(null);
+  setCargando(true);
 
-    const { email, password } = e.target.elements;
+  const { email, password } = e.target.elements;
 
-    if (!email.value || !password.value) {
-      setError("Por favor completa todos los campos");
-      return;
-    }
+  if (!email.value || !password.value) {
+    setError("Por favor completa todos los campos");
+    setCargando(false);
+    return;
+  }
 
-    setCargando(true);
-
+  try {                                          // ← agregar try/catch
     const respuesta = await loginUser({
       correo: email.value,
       contraseña: password.value,
     });
 
-    setCargando(false);
-
     if (respuesta.ok) {
-      // Guardamos el token y los datos del usuario en localStorage
       localStorage.setItem("token", respuesta.token);
       localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
       navigate("/Dashboard");
     } else {
       setError(respuesta.mensaje);
     }
-  };
+  } catch {
+    setError("Error de conexión. Intenta de nuevo.");
+  } finally {
+    setCargando(false);
+  }
+};
+
 
   return (
     <>
@@ -169,11 +174,11 @@ export default function Login() {
           <h1>Iniciar Sesión</h1>
 
           <div className="form-group">
-            <input type="text" id="email" placeholder="Correo Electrónico" />
+            <input type="text" id="email" name="email" placeholder="Correo Electrónico" />
           </div>
 
           <div className="form-group">
-            <input type="password" id="password" placeholder="Contraseña" />
+            <input type="password" id="password" name="password" placeholder="Contraseña" />
           </div>
 
             <button type="submit" className="boton" style={{ borderRadius: "25px" }}>

@@ -1,7 +1,75 @@
 import { Link } from "react-router-dom"
+import { useState } from "react"
 import '../styles/generalModulos.css'
+import '../styles/VentanaModal.css'
+import '../styles/dependientes.css'
 
 const Dependientes = () => {
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [dependientes, setDependientes] = useState([])
+  const [editandoId, setEditandoId] = useState(null)
+  const [formDatos, setFormDatos] = useState({
+    Nombre: '',
+    Relacion: '',
+    Ocupacion: '',
+    Fecha_nacimiento: '',
+    Peso_economico: ''
+  })
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormDatos(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    
+    if (editandoId) {
+      // Actualizar dependiente existente
+      setDependientes(dependientes.map(dep => 
+        dep.id === editandoId ? { ...formDatos, id: editandoId } : dep
+      ))
+      setEditandoId(null)
+    } else {
+      // Agregar nuevo dependiente
+      setDependientes([...dependientes, { ...formDatos, id: Date.now() }])
+    }
+    
+    setMostrarModal(false)
+    setFormDatos({
+      Nombre: '',
+      Relacion: '',
+      Ocupacion: '',
+      Fecha_nacimiento: '',
+      Peso_economico: ''
+    })
+  }
+
+  const handleEditar = (dependiente) => {
+    setFormDatos(dependiente)
+    setEditandoId(dependiente.id)
+    setMostrarModal(true)
+  }
+
+  const handleEliminar = (id) => {
+    setDependientes(dependientes.filter(dep => dep.id !== id))
+  }
+
+  const abrirModal = () => {
+    setFormDatos({
+      Nombre: '',
+      Relacion: '',
+      Ocupacion: '',
+      Fecha_nacimiento: '',
+      Peso_economico: ''
+    })
+    setEditandoId(null)
+    setMostrarModal(true)
+  }
+
   return (
     <>
     <div className="box-content">
@@ -48,7 +116,11 @@ const Dependientes = () => {
           <header className="modulo-header">
             <h3>Módulo de dependientes</h3>
             <div className="acciones-ahorro">
-              <button type="button" className="btn-secundario">
+              <button 
+                type="button"
+                className="btn-secundario"
+                onClick={abrirModal}
+              >
                 Agregar dependiente
               </button>
             </div>
@@ -56,13 +128,43 @@ const Dependientes = () => {
 
           <div className="resumen-container">
             <p className="total-ahorros">
-              Total dependientes: <strong>0</strong>
+              Total dependientes: <strong>{dependientes.length}</strong>
             </p>
 
             <div className="tabla-ingresos" style={{ marginTop: "20px" }}>
-              <p className="mensaje-vacio">
-                No hay dependientes registrados. Agrega tu primer dependiente para comenzar.
-              </p>
+              {dependientes.length === 0 ? (
+                <p className="mensaje-vacio">
+                  No hay dependientes registrados. Agrega tu primer dependiente para comenzar.
+                </p>
+              ) : (
+                <div className="dependientes-lista">
+                  {dependientes.map(dependiente => (
+                    <div key={dependiente.id} className="dependiente-card">
+                      <div className="dependiente-info">
+                        <p><strong>Nombre:</strong> {dependiente.Nombre}</p>
+                        <p><strong>Relación:</strong> {dependiente.Relacion}</p>
+                        <p><strong>Ocupación:</strong> {dependiente.Ocupacion || 'N/A'}</p>
+                        <p><strong>Fecha Nac.:</strong> {dependiente.Fecha_nacimiento}</p>
+                        <p><strong>Peso Económico:</strong> {dependiente.Peso_economico || 'N/A'}%</p>
+                      </div>
+                      <div className="dependiente-acciones">
+                        <button 
+                          className="btn-editar"
+                          onClick={() => handleEditar(dependiente)}
+                        >
+                          Editar
+                        </button>
+                        <button 
+                          className="btn-eliminar"
+                          onClick={() => handleEliminar(dependiente.id)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -71,6 +173,95 @@ const Dependientes = () => {
       <footer className="footer-app">
         <p>&copy; 2024 Mi Aplicación de Finanzas</p>
       </footer>
+
+      {mostrarModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2 className="h2Modal">{editandoId ? 'Editar Dependiente' : 'Agregar Dependiente'}</h2>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="Nombre">Nombre</label>
+                <input
+                  type="text"
+                  id="Nombre"
+                  name="Nombre"
+                  value={formDatos.Nombre}
+                  onChange={handleChange}
+                  required
+                  placeholder="Nombre del dependiente"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="Relacion">Relación</label>
+                <select
+                  id="Relacion"
+                  name="Relacion"
+                  value={formDatos.Relacion}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Selecciona una relación</option>
+                  <option value="Hijo">Hijo</option>
+                  <option value="Hija">Hija</option>
+                  <option value="Hermano">Hermano</option>
+                  <option value="Hermana">Hermana</option>
+                  <option value="Padre">Padre</option>
+                  <option value="Madre">Madre</option>
+                  <option value="Abuelo">Abuelo</option>
+                  <option value="Abuela">Abuela</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="Ocupacion">Ocupación</label>
+                <input
+                  type="text"
+                  id="Ocupacion"
+                  name="Ocupacion"
+                  value={formDatos.Ocupacion}
+                  onChange={handleChange}
+                  placeholder="Ocupación del dependiente"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="Fecha_nacimiento">Fecha de Nacimiento</label>
+                <input
+                  type="date"
+                  id="Fecha_nacimiento"
+                  name="Fecha_nacimiento"
+                  value={formDatos.Fecha_nacimiento}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="Peso_economico">Peso Económico</label>
+                <input
+                  type="number"
+                  id="Peso_economico"
+                  name="Peso_economico"
+                  value={formDatos.Peso_economico}
+                  onChange={handleChange}
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  placeholder="Peso económico del dependiente"
+                />
+              </div>
+
+              <div className="form-buttons">
+                <button type="submit" className="btn-modal btn-guardar">Guardar</button>
+                <button type="button" className="btn-modal btn-cancelar" onClick={() => setMostrarModal(false)}>Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       </div>
     </>
   );
