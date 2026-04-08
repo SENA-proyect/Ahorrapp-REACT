@@ -1,7 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../api';
+
 import '../styles/stylo.css'
+import { pool } from '../../../Backend/src/db/connection';
 
 const VERTEX_SHADER_SOURCE = `
   attribute vec4 a_position;
@@ -79,10 +81,10 @@ export default function Registro() {
 
 
   const [form, setForm] = useState ({
-    nombre: "",
-    apellido: "",
-    correo: "",
-    contrasena: ""
+    Nombre: "",
+    Apellido: "",
+    Email: "",
+    Password_hash: ""
   });
 
   useEffect(() => {
@@ -148,7 +150,7 @@ export default function Registro() {
   setError(null);
   setCargando(true);
 
-  if (!form.nombre || !form.apellido || !form.correo || !form.contrasena) {
+  if (!form.Nombre || !form.Apellido || !form.Email || !form.Password_hash) {
     setError("Todos los campos son obligatorios");
     setCargando(false);
     return; // Salimos si falta algún campo
@@ -173,10 +175,27 @@ export default function Registro() {
       setError(respuesta.mensaje); // Mostrar error devuelto por backend
     }
   } catch (err) {
+  console.error(err);
+  
     setError("Error en el registro. Intenta de nuevo.");
     setCargando(false);
   }
 };
+
+const getUsuarios = async (req, res) => {
+  try {
+    const [rows] = await pool.query ('SELECT * FROM usuarios');
+    return res.status(200).json ({
+      ok: true,
+      usuarios: rows
+    });
+   } catch (error) {
+      return res.status(500).json ({
+        ok: false,
+        mensaje: "No fue posible establecer conexion con la base de datos."
+      })
+    }
+  };S
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
@@ -187,10 +206,10 @@ export default function Registro() {
         <form className="form-register" onSubmit={handleSubmit}>
           <h4 className="h4Text">Formulario Registro!</h4>
 
-          <input value={form.nombre} onChange={handleChange} className="controls" type="text" name="nombre" placeholder="Ingrese su nombre" />
-          <input value={form.apellido} onChange={handleChange} className="controls" type="text" name="apellido" placeholder="Ingrese su apellido" />
-          <input value={form.correo} onChange={handleChange} className="controls" type="email" name="correo" placeholder="Ingrese su correo" />
-          <input value={form.contrasena} onChange={handleChange} className="controls" type="password" name="contrasena" placeholder="Ingrese su contraseña" />
+          <input value={form.Nombre} onChange={handleChange} className="controls" type="text" name="Nombre" placeholder="Ingrese su nombre" />
+          <input value={form.Apellido} onChange={handleChange} className="controls" type="text" name="Apellido" placeholder="Ingrese su apellido" />
+          <input value={form.Email} onChange={handleChange} className="controls" type="email" name="Email" placeholder="Ingrese su correo" />
+          <input value={form.Password_hash} onChange={handleChange} className="controls" type="password" name="Password_hash" placeholder="Ingrese su contraseña" />
 
        <div className="containerTerminos">
           <input type="checkbox" id="terminos" className="checkbox-terminos" />

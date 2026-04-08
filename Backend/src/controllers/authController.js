@@ -4,13 +4,13 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const register = async (req, res) => {
-  const { nombre, apellido, correo, contraseña } = req.body;
+  const { Nombre, Apellido, Email, Password_hash } = req.body;
 
   try {
     // Verificar si el correo ya existe
     const [existingUser] = await pool.query(
       "SELECT ID_usuario FROM USUARIOS WHERE Email = ?",
-      [correo]
+      [Email]
     );
 
     if (existingUser.length > 0) {
@@ -22,12 +22,12 @@ const register = async (req, res) => {
 
     // Hashear la contraseña
     const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(contraseña, saltRounds);
+    const passwordHash = await bcrypt.hash(Password_hash, saltRounds);
 
     // Insertar el nuevo usuario
     const [result] = await pool.query(
       "INSERT INTO USUARIOS (Nombre, Apellido, Email, Password_hash) VALUES (?, ?, ?, ?)",
-      [nombre, apellido, correo, passwordHash]
+      [Nombre, Apellido, Email, passwordHash]
     );
 
     return res.status(201).json({
@@ -46,13 +46,13 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { correo, contraseña } = req.body;
+  const { Email, Password_hash } = req.body;
 
   try {
     // Buscar el usuario por correo
     const [rows] = await pool.query(
       "SELECT * FROM USUARIOS WHERE Email = ? AND Activo = TRUE",
-      [correo]
+      [Email]
     );
 
     if (rows.length === 0) {
@@ -65,7 +65,7 @@ const login = async (req, res) => {
     const usuario = rows[0];
 
     // Verificar la contraseña
-    const passwordValida = await bcrypt.compare(contraseña, usuario.Password_hash);
+    const passwordValida = await bcrypt.compare(Password_hash, usuario.Password_hash);
 
     if (!passwordValida) {
       return res.status(401).json({
@@ -107,6 +107,8 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const getUsuarios = async (req, res)
 
-// NOTA: login busca el usuario por correo verificando que esté activo, compara la contraseña contra el hash, y si todo está bien genera un JWT con el ID, nombre y rol del usuario adentro.
+module.exports = { register, login, getUsuarios };
+
+// NOTA: login busca el usuario por correo verificando que esté activo, compara la contraseña contra el hash, y si todo está bien genera un JWT con el ID, nombre y rol del usuario adentro. 
