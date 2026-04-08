@@ -60,6 +60,9 @@ CREATE TABLE IF NOT EXISTS CATEGORIAS (
 -- NOTA: Validar formato HEX del Color desde el backend.
 --       CHECK (Color REGEXP '^#[0-9A-Fa-f]{6}$')
  
+ -- ALTER TABLE CATEGORIAS
+    -- ADD COLUMN Descripcion VARCHAR(255) DEFAULT NULL AFTER Nombre,
+    -- ADD COLUMN Activo BOOLEAN NOT NULL DEFAULT TRUE AFTER ES_global;
 
  -- ========================================================================
 --     TABLA: dependientes
