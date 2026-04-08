@@ -19,7 +19,7 @@ import PanelMovimientos from './components/PanelMovimientos.jsx'
 import PanelUsuarios from './components/PanelUsuarios.jsx'
 import VerificacionCorreo from './components/VerificacionCorreo.jsx'
 import VistaEmail from './components/VistaEmail.jsx'
-
+import VMIDependientes from './components/VM_I-Dependientes.jsx'
 
 
 function App() {
@@ -46,6 +46,7 @@ function App() {
       <Route path="/PanelUsuarios" element={<PanelUsuarios />} />
       <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
       <Route path="/VistaEmail" element={<VistaEmail />} />
+      <Route path='/VM_I-Dependientes' element={<VMIDependientes />} />
 
      </Routes>
     </BrowserRouter>
