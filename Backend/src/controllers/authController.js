@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const register = async (req, res) => {
-  const { nombre, apellido, correo, contraseña } = req.body;
+  const { nombre, apellido, correo, password } = req.body;
 
   try {
     // Verificar si el correo ya existe
@@ -22,7 +22,7 @@ const register = async (req, res) => {
 
     // Hashear la contraseña
     const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(contraseña, saltRounds);
+    const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // Insertar el nuevo usuario
     const [result] = await pool.query(
@@ -46,7 +46,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { correo, contraseña } = req.body;
+  const { correo, password } = req.body;
 
   try {
     // Buscar el usuario por correo
@@ -65,7 +65,7 @@ const login = async (req, res) => {
     const usuario = rows[0];
 
     // Verificar la contraseña
-    const passwordValida = await bcrypt.compare(contraseña, usuario.Password_hash);
+    const passwordValida = await bcrypt.compare(password, usuario.Password_hash);
 
     if (!passwordValida) {
       return res.status(401).json({

@@ -169,11 +169,11 @@ export default function Login() {
           <h1>Iniciar Sesión</h1>
 
           <div className="form-group">
-            <input type="text" id="email" placeholder="Correo Electrónico" />
+            <input type="text" id="email" name="email" placeholder="Correo Electrónico" />
           </div>
 
           <div className="form-group">
-            <input type="password" id="password" placeholder="Contraseña" />
+            <input type="password" id="password" name="password" placeholder="Contraseña" />
           </div>
 
             <button type="submit" className="boton" style={{ borderRadius: "25px" }}>
