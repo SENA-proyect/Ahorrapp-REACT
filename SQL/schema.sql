@@ -35,6 +35,10 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     Fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario'
 ) ENGINE=InnoDB;
 
+-- 22222222222222222222222222
+    
+-- 22222222222222222222222222
+
 -- NOTA: Validar formato de Email desde el backend.
 --   CHECK (Email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')
 
@@ -56,6 +60,9 @@ CREATE TABLE IF NOT EXISTS CATEGORIAS (
 -- NOTA: Validar formato HEX del Color desde el backend.
 --       CHECK (Color REGEXP '^#[0-9A-Fa-f]{6}$')
  
+ -- ALTER TABLE CATEGORIAS
+    -- ADD COLUMN Descripcion VARCHAR(255) DEFAULT NULL AFTER Nombre,
+    -- ADD COLUMN Activo BOOLEAN NOT NULL DEFAULT TRUE AFTER ES_global;
 
  -- ========================================================================
 --     TABLA: dependientes

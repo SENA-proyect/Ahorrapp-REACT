@@ -1,9 +1,8 @@
-// src/components/VentanaModal.jsx
-import { useNavigate } from 'react-router-dom'
-import '../styles/VentanaModal.css'
+import { useNavigate } from 'react-router-dom';
+import '../styles/VentanaModal.css';;
+import { useState } from 'react';
 
 export default function VentanaModal() {
-  const navigate = useNavigate()
 
   return (
     <div>
@@ -28,7 +27,7 @@ export default function VentanaModal() {
             </ul>
             <br />
 
-            <button className="btn-modal" onClick={() => navigate(-1)}>OK</button>
+            <button className="btn-modal" onClick={() => navigate(-1)} id='closeModal'>OK</button>
 
           </div>
         </div>
