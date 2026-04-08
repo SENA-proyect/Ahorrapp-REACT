@@ -6,7 +6,7 @@ const getDependientes = async (req, res) => {
 
   try {
     const [results] = await pool.query(
-      'SELECT * FROM dependientes WHERE ID_usuario = ?',
+      'SELECT ID_dependientes AS id, Nombre AS nombre, Relacion AS relacion FROM DEPENDIENTES WHERE ID_usuario = ?',
       [ID_usuario]
     );
     res.json(results);
