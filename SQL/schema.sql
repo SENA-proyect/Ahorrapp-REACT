@@ -454,7 +454,7 @@ CREATE TABLE categorias (
   descripcion VARCHAR(255),
   activa      BOOLEAN DEFAULT true,
   sistema     BOOLEAN DEFAULT false,
-  id_usuario  INT,  -- NULL si es del sistema
+  id_usuario  INT, NULL
   FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
 )
 
