@@ -1,3 +1,4 @@
+========= 1 DE ABRIL =========
 1- solucionar errores de visibilidad general, ocurren errores con los estilos.
 suceden en casi todas las vistas, se probo modificando el "index.css" para evitar que
 el codigo se sobrepusiera a los estilos generales de las respectivas vistas
@@ -5,7 +6,7 @@ pero funciono parcialmente.
 
 Sugerencia, revisar los css de cada vista
 
-2- Crear vistas CRUD para los siguientes escensarios:
+2- Crear vistas CRUD para los siguientes escenarios:
 · Dependientes
 · Gastos
 · Ingresos
@@ -15,3 +16,51 @@ Sugerencia, revisar los css de cada vista
 
 3- Crear formularios para:
 · Registrar MOVIMIENTOS, siguiendo la logica del schema.sql 
+
+========= 7 DE ABRIL =========
+
+Borrar vistas que no se estan usando (ejemplo)
+arreglar estilos
+
+1- CRUD (En todos los "Modulos" y "Paneles")
+C- Solo creado para "Login" y "Registrar"
+R- listo
+U- TODO PENDIENTE
+D- TODO PENDIENTE
+
+2- ARREGLOS
+DASHBOARD
+Enlaces de redirigimiento
+TERMINAR la logica en la vista, 
+
+INDEX
+conectar el footer, que se envien los resultados directamente al corrreo
+en SECCION CARACTERISTICAS, organizar los enlaces para que ridirigan a las vistas indicadas
+
+LOGIN
+Seguridad y verificacion de los caracteres permitidos en el email
+
+REGISTRAR 
+Ver que funcion cumple esta linea "import { registerUser } from '../api';"
+Seguridad y validacion de los datos faltantes
+
+3- Cosas necesarias
+
+Definir las funciones necesarias en el modulo de deudas, si tiene o no deudas registradas, usar la logica para filtrar y que diga los detalles de la respectiva deuda
+
+Crear una nueva carpeta (subjects) para poner demas vistas que se manejaran en una vista general de "panel de administrador", manejar logica de filtrado para mostrar solo las vistas solicitadas
+4- FALTANTES
+BACKEND:en todas las vistas menos login y registrar
+TOKENS:logica de tokens en olvidar contraseña, vista email y verificacion correo
+
+
+5- PANELES
+Tener la lista generales por medio de cardas con informacion en la cual se pueda editar y eliminar (desactivar) una funcion/caracteristica
+
+
+6- VENTANAS MODALES
+Definir la informacion y en que vistas que utilizaran
+
+7- ESTUDIAR
+Que es una api y como funciona
+Que "scripts" son necesarios para que se suban los datos a MySQL y conecte con el Backend 

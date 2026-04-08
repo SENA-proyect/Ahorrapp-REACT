@@ -1,8 +1,8 @@
 * {
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
@@ -103,28 +103,28 @@
   /* ========================================================= */
   /* ========== VARIABLES ADICIONALES COMPATIBILIDAD ========= */
   /* ========================================================= */
-  
+
   /* Bordes e inputs */
   --border: rgba(74, 222, 128, 0.2);
   --input: transparent;
   --input-background: #f0fdf4;
   --switch-background: #cbced4;
   --ring: #4ade80;
-  
+
   /* Bordes redondeados */
   --radius: 0.625rem;
-  
+
   /* Pesos de fuente */
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  
+
   /* Colores de gráficos */
   --chart-1: #4ade80;
   --chart-2: #86efac;
   --chart-3: #bbf7d0;
   --chart-4: #dcfce7;
   --chart-5: #f0fdf4;
-  
+
   /* Sidebar */
   --sidebar: #f8fffe;
   --sidebar-foreground: #145e0f;
@@ -134,13 +134,13 @@
   --sidebar-accent-foreground: #166534;
   --sidebar-border: rgba(74, 222, 128, 0.2);
   --sidebar-ring: #4ade80;
-  
+
   /* Tarjetas y popovers */
   --card: #ffffff;
   --card-foreground: #145e0f;
   --popover: #ffffff;
   --popover-foreground: #145e0f;
-  
+
   /* Colores primarios y secundarios */
   --primary: #4ade80;
   --primary-foreground: #ffffff;
@@ -152,46 +152,72 @@
   --accent-foreground: #166534;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  
+
   /* Fondo */
   --background: #f8fffe;
   --foreground: #145e0f;
 }
 
-
 /* Fondo que cubre toda la pantalla */
 .modal-overlay {
-  position: fixed;              /* Se queda fijo en la pantalla */
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;                 /* Todo el ancho */
-  height: 100vh;                /* Todo el alto */
+  width: 100vw;
+  height: 100vh;
 
-  background-color: rgba(0, 0, 0, 0.5);
-  /* ↑ negro con transparencia */
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.15
+  ); /* Más transparente para ver el contenido atrás */
+  backdrop-filter: blur(2px); /* Blur más suave */
 
   display: flex;
-  justify-content: center;      /* Centrar horizontal */
-  align-items: center;          /* Centrar vertical */
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
 }
 
 /* Caja del modal */
 .modal {
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.95);
   /* ↑ blanco con transparencia */
 
   padding: 40px;
   border-radius: 12px;
   width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
 
-  color: #67a367;                  /* Texto normal */
+  color: #67a367; /* Texto normal */
+}
+
+.modal h2 {
+  text-align: center;
+}
+
+.modal p {
+  margin: 10px 0;
+}
+
+.modal ul {
+  text-align: left;
+  display: inline-block;
+  margin: 15px 0;
+}
+
+.modal ul li {
+  margin: 8px 0;
 }
 .btn-modal {
-    width: 30%;
-    padding: 5px;
-    border-radius: 5px;
-    position: relative;
-    left: 70%;
+  width: 30%;
+  padding: 5px;
+  border-radius: 5px;
+  position: relative;
+  left: 70%;
 }
 
 .h2Modal {
@@ -202,5 +228,89 @@
   background-color: rgb(161, 226, 161);
   transition: all 500ms cubic-bezier(0.77, 0, 0.175, 1);
   transform: translateY(-3px);
-  background:linear-gradient(rgba(87, 196, 87, 0.692), rgba(207, 207, 207, 0.411))
+  background: linear-gradient(
+    rgba(87, 196, 87, 0.692),
+    rgba(207, 207, 207, 0.411)
+  );
+}
+
+/* Estilos para el formulario en el modal */
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #145e0f;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px;
+  border: 2px solid rgba(74, 222, 128, 0.3);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background-color: #f0fdf4;
+  color: #1f2937;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #4ade80;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.btn-guardar,
+.btn-cancelar {
+  padding: 10px 20px !important;
+  width: auto !important;
+  position: static !important;
+  left: auto !important;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-guardar {
+  background-color: #4ade80;
+  color: white;
+}
+
+.btn-guardar:hover {
+  background-color: #22c55e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(74, 222, 128, 0.3);
+}
+
+.btn-cancelar {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.btn-cancelar:hover {
+  background-color: #d1d5db;
+  transform: translateY(-2px);
 }

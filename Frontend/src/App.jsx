@@ -7,7 +7,7 @@ import Dashboard from './components/Dashboard.jsx'
 import ModuloAhorros from './components/ModuloAhorros.jsx'
 import ModuloDeudas from './components/ModuloDeudas.jsx'
 import ModuloImprevistos from './components/ModuloImprevistos.jsx'
-import ModuloCategorias from './components/ModulosCategorias.jsx'
+import ModulosCategorias from './components/ModulosCategorias.jsx'
 import ModulosDependientes from './components/ModulosDependientes.jsx'
 import ModulosGastos from './components/ModulosGastos.jsx'
 import ModulosIngresos from './components/ModulosIngresos.jsx'
@@ -17,12 +17,9 @@ import PanelDependientes from './components/PanelDependientes.jsx'
 import PanelHistorial from './components/PanelHistorial.jsx'
 import PanelMovimientos from './components/PanelMovimientos.jsx'
 import PanelUsuarios from './components/PanelUsuarios.jsx'
-import VentanaModalActividad from './components/VentanaModalActividad.jsx'
-import VentanaModalDashboard from './components/VentanaModalDashboard.jsx'
-import VentanaModalDependientes from './components/VentanaModalDependientes.jsx'
 import VerificacionCorreo from './components/VerificacionCorreo.jsx'
 import VistaEmail from './components/VistaEmail.jsx'
-
+import VMIDependientes from './components/VM_I-Dependientes.jsx'
 
 
 function App() {
@@ -37,7 +34,7 @@ function App() {
       <Route path="/ModuloAhorros" element={<ModuloAhorros />} />
       <Route path="/ModuloDeudas" element={<ModuloDeudas />} />
       <Route path="/ModuloImprevistos" element={<ModuloImprevistos />} />
-      <Route path="/ModuloCategorias" element={<ModuloCategorias />} />
+      <Route path="/ModulosCategorias" element={<ModulosCategorias />} />
       <Route path="/ModulosDependientes" element={<ModulosDependientes />} />
       <Route path="/ModulosGastos" element={<ModulosGastos />} />
       <Route path="/ModulosIngresos" element={<ModulosIngresos />} />
@@ -47,11 +44,9 @@ function App() {
       <Route path="/PanelHistorial" element={<PanelHistorial />} />
       <Route path="/PanelMovimientos" element={<PanelMovimientos />} />
       <Route path="/PanelUsuarios" element={<PanelUsuarios />} />
-      <Route path="/VentanaModalActividad" element={<VentanaModalActividad />} />
-      <Route path="/VentanaModalDashboard" element={<VentanaModalDashboard/>} />
-      <Route path="/VentanaModalDependientes" element={<VentanaModalDependientes />} />
       <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
       <Route path="/VistaEmail" element={<VistaEmail />} />
+      <Route path='/VM_I-Dependientes' element={<VMIDependientes />} />
 
      </Routes>
     </BrowserRouter>
