@@ -329,8 +329,8 @@ export default function ModuloCategorias() {
 // ─── Estilos inline reutilizables ─────────────────────────────────────────────
 const thStyle = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
 const tdStyle = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
-const badgeSistema = { background: '#e8f5e9', color: '#2e7d32', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
-const badgeUsuario = { background: '#e3f2fd', color: '#1565c0', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
+const badgeSistema = { background: 'var(--color-primary-soft)', color: 'var(--color-primary-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
+const badgeUsuario = { background: 'var(--ingresos-bg)', color: 'var(--ingresos-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
 const btnDeshabilitar = { background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
 const modalStyle = { background: '#fff', borderRadius: '12px', padding: '32px', width: '100%', maxWidth: '420px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }
