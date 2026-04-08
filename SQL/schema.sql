@@ -58,6 +58,14 @@ CREATE TABLE IF NOT EXISTS CATEGORIAS (
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB;
 
+-- CATEOGIRAS PREDETERMINADAS POR EL SISTEMA
+INSERT INTO CATEGORIAS (ID_usuario, Nombre, Descripcion, Color, Activa, Sistema, ES_global) VALUES
+(NULL, 'Alimentación',    'Gastos en comida y bebida',          '#FF6B6B', TRUE, TRUE, TRUE),
+(NULL, 'Transporte',      'Movilidad y combustible',            '#4ECDC4', TRUE, TRUE, TRUE),
+(NULL, 'Salud',           'Médicos, medicamentos y bienestar',  '#45B7D1', TRUE, TRUE, TRUE),
+(NULL, 'Educación',       'Colegiaturas, libros y cursos',      '#96CEB4', TRUE, TRUE, TRUE),
+(NULL, 'Entretenimiento', 'Ocio, streaming y salidas',          '#FFEAA7', TRUE, TRUE, TRUE),
+(NULL, 'Servicios',       'Agua, luz, internet y gas',          '#DDA0DD', TRUE, TRUE, TRUE);
 
 
 -- NOTA: Si ID_usuario es NULL y Es_global = TRUE, la categoría pertenece al sistema (visible para todos).
