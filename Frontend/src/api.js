@@ -1,12 +1,19 @@
 const API_URL = "http://localhost:3000/api";
 
+
 export const registerUser = async (datos) => {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(datos),
   });
-  return response.json();
+
+  const data = await response.json();
+
+  return {
+    ok: response.ok,
+    ...data
+    };
 };
 
 export const loginUser = async (datos) => {
@@ -15,5 +22,11 @@ export const loginUser = async (datos) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(datos),
   });
-  return response.json();
+
+  const data = await response.json();
+
+  return {
+    ok: response.ok,
+    ...data
+  };
 };

@@ -3,7 +3,7 @@ import '../styles/panel.css'
 
 export default function PanelAdmin() {
   return (
-    <div>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }}>
 
       {/* TABLAS GENERALES */}
       <div className="inf-container">
@@ -12,25 +12,25 @@ export default function PanelAdmin() {
         <div className="inf-listas">
 
           <div className="general-card">
-            <Link to="/panel/dependientes">
+            <Link to="/PanelDependientes">
               <button>Panel de Dependientes</button>
             </Link>
           </div>
 
           <div className="general-card">
-            <Link to="/panel/historial">
+            <Link to="/PanelHistorial">
               <button>Panel de Historial</button>
             </Link>
           </div>
 
           <div className="general-card">
-            <Link to="/panel/movimientos">
+            <Link to="/PanelMovimientos">
               <button>Panel de Movimientos</button>
             </Link>
           </div>
 
           <div className="general-card">
-            <Link to="/panel/usuario">
+            <Link to="/PanelUsuarios">
               <button>Panel de Usuario</button>
             </Link>
           </div>
