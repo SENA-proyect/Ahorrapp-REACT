@@ -45,15 +45,26 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
 -- ========================================================================
 --     TABLA: categorias
 -- =========================================================================
-CREATE TABLE IF NOT EXISTS CATEGORIAS (
-    ID_categoria INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la categoría',
-    ID_usuario INT DEFAULT NULL COMMENT 'Usuario al que pertenece la categoría (NULL si es global)',
-    Nombre VARCHAR(50) NOT NULL COMMENT 'Nombre de la categoría financiera',
-    Color VARCHAR(7) DEFAULT '#000000' COMMENT 'Color representativo de la categoría (formato HEX)',
-    Icono VARCHAR(255) COMMENT 'Ruta o URL del icono de la categoría',
-    ES_global BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si la categoría es global (visible para todos los usuarios) o personalizada (visible solo para el usuario propietario)',
-    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
-)ENGINE=InnoDB;
+-- CREATE TABLE IF NOT EXISTS CATEGORIAS (
+--     ID_categoria INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la categoría',
+--     ID_usuario INT DEFAULT NULL COMMENT 'Usuario al que pertenece la categoría (NULL si es global)',
+--     Nombre VARCHAR(50) NOT NULL COMMENT 'Nombre de la categoría financiera',
+--     Color VARCHAR(7) DEFAULT '#000000' COMMENT 'Color representativo de la categoría (formato HEX)',
+--     Icono VARCHAR(255) COMMENT 'Ruta o URL del icono de la categoría',
+--     ES_global BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si la categoría es global (visible para todos los usuarios) o personalizada (visible solo para el usuario propietario)',
+--     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+-- )ENGINE=InnoDB;
+
+--categorias
+CREATE TABLE categorias (
+  id          INT PRIMARY KEY AUTO_INCREMENT,
+  nombre      VARCHAR(100) NOT NULL,
+  descripcion VARCHAR(255),
+  activa      BOOLEAN DEFAULT true,
+  sistema     BOOLEAN DEFAULT false,
+  id_usuario  INT NULL,
+  FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
 
 -- NOTA: Si ID_usuario es NULL y Es_global = TRUE, la categoría pertenece al sistema (visible para todos).
 --       Si ID_usuario tiene valor, es una categoría personalizada del usuario.

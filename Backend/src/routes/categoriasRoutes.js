@@ -4,15 +4,15 @@ const { verifyToken } = require("../middlewares/authMiddleware");
 const {
   getCategorias,
   crearCategoria,
-  editarCategoria,
+  actualizarCategoria,
   deshabilitarCategoria,
   habilitarCategoria,
 } = require("../controllers/categoriasController");
 
-router.get("/", verifyToken, getCategorias);
-router.post("/", verifyToken, crearCategoria);
-router.put("/:id", verifyToken, editarCategoria);
+router.get("/",              verifyToken, getCategorias);
+router.post("/",             verifyToken, crearCategoria);
+router.put("/:id",           verifyToken, actualizarCategoria);
 router.patch("/:id/deshabilitar", verifyToken, deshabilitarCategoria);
-router.patch("/:id/habilitar", verifyToken, habilitarCategoria);
+router.patch("/:id/habilitar",    verifyToken, habilitarCategoria);
 
 module.exports = router;
