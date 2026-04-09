@@ -64,3 +64,7 @@ Definir la informacion y en que vistas que utilizaran
 7- ESTUDIAR
 Que es una api y como funciona
 Que "scripts" son necesarios para que se suban los datos a MySQL y conecte con el Backend 
+
+
+URGENTE !!!
+CORREGIR LA DB DE CATEGORIAS

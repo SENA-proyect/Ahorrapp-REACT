@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const authRoutes = require("./src/routes/authRoutes");
+const categoriasRoutes = require("./src/routes/categoriasRoutes");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Rutas
 app.use("/api/auth", authRoutes);
+app.use("/api/categorias", categoriasRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

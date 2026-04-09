@@ -258,7 +258,20 @@ body:has(.login-container) {
 }
 
 .boton:active {
+<<<<<<< HEAD
+<<<<<<< HEAD:Frontend/src/styles/login.css
+    transform: translateY(0);
+    background-color: var(--ingresos-dark);
+}
+
+=======
+  transform: translateY(0);
+  background-color: var(--ingresos-dark);
+}
+>>>>>>> main:src/styles/login.css
+=======
   transform: translateY(0);
   background-color: var(--ingresos-dark);
 }
 
+>>>>>>> main
