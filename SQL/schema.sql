@@ -49,17 +49,33 @@ CREATE TABLE IF NOT EXISTS CATEGORIAS (
     ID_categoria INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la categoría',
     ID_usuario INT DEFAULT NULL COMMENT 'Usuario al que pertenece la categoría (NULL si es global)',
     Nombre VARCHAR(50) NOT NULL COMMENT 'Nombre de la categoría financiera',
+    Descripcion VARCHAR(255),
     Color VARCHAR(7) DEFAULT '#000000' COMMENT 'Color representativo de la categoría (formato HEX)',
     Icono VARCHAR(255) COMMENT 'Ruta o URL del icono de la categoría',
+    Activa BOOLEAN DEFAULT true,
+    Sistema BOOLEAN DEFAULT false,
     ES_global BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si la categoría es global (visible para todos los usuarios) o personalizada (visible solo para el usuario propietario)',
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB;
+
+-- CATEOGIRAS PREDETERMINADAS POR EL SISTEMA
+INSERT INTO CATEGORIAS (ID_usuario, Nombre, Descripcion, Color, Activa, Sistema, ES_global) VALUES
+(NULL, 'Alimentación',    'Gastos en comida y bebida',          '#FF6B6B', TRUE, TRUE, TRUE),
+(NULL, 'Transporte',      'Movilidad y combustible',            '#4ECDC4', TRUE, TRUE, TRUE),
+(NULL, 'Salud',           'Médicos, medicamentos y bienestar',  '#45B7D1', TRUE, TRUE, TRUE),
+(NULL, 'Educación',       'Colegiaturas, libros y cursos',      '#96CEB4', TRUE, TRUE, TRUE),
+(NULL, 'Entretenimiento', 'Ocio, streaming y salidas',          '#FFEAA7', TRUE, TRUE, TRUE),
+(NULL, 'Servicios',       'Agua, luz, internet y gas',          '#DDA0DD', TRUE, TRUE, TRUE);
+
 
 -- NOTA: Si ID_usuario es NULL y Es_global = TRUE, la categoría pertenece al sistema (visible para todos).
 --       Si ID_usuario tiene valor, es una categoría personalizada del usuario.
 -- NOTA: Validar formato HEX del Color desde el backend.
 --       CHECK (Color REGEXP '^#[0-9A-Fa-f]{6}$')
  
+ -- ALTER TABLE CATEGORIAS
+    -- ADD COLUMN Descripcion VARCHAR(255) DEFAULT NULL AFTER Nombre,
+    -- ADD COLUMN Activo BOOLEAN NOT NULL DEFAULT TRUE AFTER ES_global;
 
  -- ========================================================================
 --     TABLA: dependientes
