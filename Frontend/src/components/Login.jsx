@@ -128,28 +128,19 @@ export default function Login() {
     };
   }, []);
 
-<<<<<<< HEAD
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-=======
-  // Conexion con el backend, verificacion de email y password
-// Actualmente no tiene try/catch, si la red falla rompe silenciosamente
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(null);
-  setCargando(true);
->>>>>>> main
 
-  const { email, password } = e.target.elements;
+    const { email, password } = e.target.elements;
 
-  if (!email.value || !password.value) {
-    setError("Por favor completa todos los campos");
-    setCargando(false);
-    return;
-  }
+    if (!email.value || !password.value) {
+      setError("Por favor completa todos los campos");
+      return;
+    }
 
-<<<<<<< HEAD
+    setCargando(true);
+
     try {
       const respuesta = await loginUser({
         Email: email.value,
@@ -168,28 +159,8 @@ const handleSubmit = async (e) => {
       setError("Error de conexión con el servidor");
     } finally {
       setCargando(false);
-=======
-  try {                                          // ← agregar try/catch
-    const respuesta = await loginUser({
-      correo: email.value,
-      contraseña: password.value,
-    });
-
-    if (respuesta.ok) {
-      localStorage.setItem("token", respuesta.token);
-      localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
-      navigate("/Dashboard");
-    } else {
-      setError(respuesta.mensaje);
->>>>>>> main
     }
-  } catch {
-    setError("Error de conexión. Intenta de nuevo.");
-  } finally {
-    setCargando(false);
-  }
-};
-
+  };
 
   return (
     <>
@@ -202,19 +173,11 @@ const handleSubmit = async (e) => {
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-<<<<<<< HEAD
             <input type="email" id="email" placeholder="Correo Electrónico" required />
           </div>
 
           <div className="form-group">
             <input type="password" id="password" placeholder="Contraseña" required />
-=======
-            <input type="text" id="email" name="email" placeholder="Correo Electrónico" />
-          </div>
-
-          <div className="form-group">
-            <input type="password" id="password" name="password" placeholder="Contraseña" />
->>>>>>> main
           </div>
 
           <button type="submit" className="boton" style={{ borderRadius: "25px" }} disabled={cargando}>
