@@ -80,17 +80,10 @@ export default function Registro() {
 
 
   const [form, setForm] = useState ({
-<<<<<<< HEAD
     Nombre: "",
     Apellido: "",
     Email: "",
     Password_hash: ""
-=======
-    nombre: "",
-    apellido: "",
-    correo: "",
-    contraseña: ""
->>>>>>> main
   });
 
   useEffect(() => {
@@ -156,11 +149,8 @@ export default function Registro() {
   setError(null);
   setCargando(true);
 
-<<<<<<< HEAD
   if (!form.Nombre || !form.Apellido || !form.Email || !form.Password_hash) {
-=======
-  if (!form.nombre || !form.apellido || !form.correo || !form.contraseña) {
->>>>>>> main
+
     setError("Todos los campos son obligatorios");
     setCargando(false);
     return; // Salimos si falta algún campo
@@ -202,17 +192,11 @@ export default function Registro() {
         <form className="form-register" onSubmit={handleSubmit}>
           <h4 className="h4Text">Formulario Registro!</h4>
 
-<<<<<<< HEAD
           <input value={form.Nombre} onChange={handleChange} className="controls" type="text" name="Nombre" placeholder="Ingrese su nombre" />
           <input value={form.Apellido} onChange={handleChange} className="controls" type="text" name="Apellido" placeholder="Ingrese su apellido" />
           <input value={form.Email} onChange={handleChange} className="controls" type="email" name="Email" placeholder="Ingrese su correo" />
           <input value={form.Password_hash} onChange={handleChange} className="controls" type="password" name="Password_hash" placeholder="Ingrese su contraseña" />
-=======
-          <input value={form.nombre} onChange={handleChange} className="controls" type="text" name="nombre" placeholder="Ingrese su nombre" />
-          <input value={form.apellido} onChange={handleChange} className="controls" type="text" name="apellido" placeholder="Ingrese su apellido" />
-          <input value={form.correo} onChange={handleChange} className="controls" type="email" name="correo" placeholder="Ingrese su correo" />
-          <input value={form.contraseña} onChange={handleChange} className="controls" type="password" name="contraseña" placeholder="Ingrese su contraseña" />
->>>>>>> main
+
 
        <div className="containerTerminos">
           <input type="checkbox" id="terminos" className="checkbox-terminos" />

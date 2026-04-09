@@ -4,10 +4,10 @@ const API_URL = "/api"; // ← antes: "http://localhost:3000/api"
 export const registerUser = async (datos) => {
   // Normalizamos el campo contraseña → password antes de enviarlo
   const payload = {
-    nombre: datos.nombre,
-    apellido: datos.apellido,
-    correo: datos.correo,
-    password: datos.contraseña,  // ← aquí está el fix
+    Nombre: datos.Nombre,
+    Apellido: datos.Apellido,
+    Email: datos.Email,
+    Password_hash: datos.Password_hash,  // ← aquí está el fix
   };
 
   const response = await fetch("/api/auth/register", {
@@ -57,16 +57,7 @@ export const crearCategoria = async (datos) => {
     },
     body: JSON.stringify(datos),
   });
-<<<<<<< HEAD
 
-  const data = await response.json();
-
-  return {
-    ok: response.ok,
-    ...data
-  };
-};
-=======
   return response.json();
 };
 
@@ -100,4 +91,4 @@ export const habilitarCategoria = async (id) => {
   });
   return response.json();
 };
->>>>>>> main
+
