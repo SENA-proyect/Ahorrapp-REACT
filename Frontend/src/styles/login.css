@@ -205,7 +205,7 @@ body:has(.login-container) {
   opacity: 0.7;
 }
 
-.form-container input[type="text"]:focus,
+.form-container input[type="email"]:focus,
 .form-container input[type="password"]:focus {
   border-color: var(--color-primary);
   background-color: rgba(255, 255, 255, 0.12);
