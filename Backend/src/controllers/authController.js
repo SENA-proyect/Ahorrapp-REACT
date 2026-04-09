@@ -128,7 +128,91 @@ const getUsuarios = async (req, res) => {
     });
   }
 };
+const updateUsuario = async (req, res) => {
+  const { id } = req.params;
+  const { Nombre, Apellido, Email, Rol } = req.body;
 
-module.exports = { register, login, getUsuarios };
+  try {
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: "ID inválido"
+      });
+    }
+
+    const [existe] = await pool.query(
+      "SELECT ID_usuario FROM usuarios WHERE ID_usuario = ?",
+      [id]
+    );
+
+    if (existe.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: "Usuario no encontrado"
+      });
+    }
+
+    await pool.query(
+      "UPDATE usuarios SET Nombre = ?, Apellido = ?, Email = ?, Rol = ? WHERE ID_usuario = ?",
+      [Nombre, Apellido, Email, Rol, id]
+    );
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Usuario actualizado exitosamente"
+    });
+
+  } catch (error) {
+    console.error("Error en updateUsuario:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: "Error al actualizar usuario"
+    });
+  }
+};
+
+const deleteUsuario = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: "ID inválido"
+      });
+    }
+
+    const [existe] = await pool.query(
+      "SELECT ID_usuario FROM usuarios WHERE ID_usuario = ?",
+      [id]
+    );
+
+    if (existe.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: "Usuario no encontrado"
+      });
+    }
+
+    await pool.query(
+      "UPDATE usuarios SET Activo = FALSE WHERE ID_usuario = ?",
+      [id]
+    );
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Usuario eliminado exitosamente"
+    });
+
+  } catch (error) {
+    console.error("Error en deleteUsuario:", error.message);
+    return res.status(500).json({
+      ok: false,
+      mensaje: "Error al eliminar usuario"
+    });
+  }
+};
+
+module.exports = { register, login, getUsuarios, updateUsuario, deleteUsuario };
 
 // NOTA: login busca el usuario por correo verificando que esté activo, compara la contraseña contra el hash, y si todo está bien genera un JWT con el ID, nombre y rol del usuario adentro. 
