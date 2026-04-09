@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
-import"../styles/login.css";
-
+import "../styles/login.css";
 
 const VERTEX_SHADER_SOURCE = `
   attribute vec4 a_position;
@@ -129,7 +128,6 @@ export default function Login() {
     };
   }, []);
 
-  // Conexion con el backend, verificacion de email y password
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -143,20 +141,24 @@ export default function Login() {
 
     setCargando(true);
 
-    const respuesta = await loginUser({
-      correo: email.value,
-      contraseña: password.value,
-    });
+    try {
+      const respuesta = await loginUser({
+        Email: email.value,
+        Password_hash: password.value,
+      });
 
-    setCargando(false);
-
-    if (respuesta.ok) {
-      // Guardamos el token y los datos del usuario en localStorage
-      localStorage.setItem("token", respuesta.token);
-      localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
-      navigate("/Dashboard");
-    } else {
-      setError(respuesta.mensaje);
+      if (respuesta.ok) {
+        localStorage.setItem("token", respuesta.token);
+        localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
+        navigate("/Dashboard");
+      } else {
+        setError(respuesta.mensaje || "Error al iniciar sesión");
+      }
+    } catch (err) {
+      console.error("Error en login:", err);
+      setError("Error de conexión con el servidor");
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -168,17 +170,19 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="form-container">
           <h1>Iniciar Sesión</h1>
 
+          {error && <div className="error-message">{error}</div>}
+
           <div className="form-group">
-            <input type="text" id="email" placeholder="Correo Electrónico" />
+            <input type="email" id="email" placeholder="Correo Electrónico" required />
           </div>
 
           <div className="form-group">
-            <input type="password" id="password" placeholder="Contraseña" />
+            <input type="password" id="password" placeholder="Contraseña" required />
           </div>
 
-            <button type="submit" className="boton" style={{ borderRadius: "25px" }}>
-              Entrar
-            </button>
+          <button type="submit" className="boton" style={{ borderRadius: "25px" }} disabled={cargando}>
+            {cargando ? "Cargando..." : "Entrar"}
+          </button>
 
           <Link to="/Registrar" className="text-white">
             ¿Olvidaste tu contraseña?

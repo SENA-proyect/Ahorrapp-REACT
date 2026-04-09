@@ -1,9 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../api';
-
 import '../styles/stylo.css'
-import { pool } from '../../../Backend/src/db/connection';
+
 
 const VERTEX_SHADER_SOURCE = `
   attribute vec4 a_position;
@@ -182,20 +181,6 @@ export default function Registro() {
   }
 };
 
-const getUsuarios = async (req, res) => {
-  try {
-    const [rows] = await pool.query ('SELECT * FROM usuarios');
-    return res.status(200).json ({
-      ok: true,
-      usuarios: rows
-    });
-   } catch (error) {
-      return res.status(500).json ({
-        ok: false,
-        mensaje: "No fue posible establecer conexion con la base de datos."
-      })
-    }
-  };S
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
@@ -234,3 +219,4 @@ const getUsuarios = async (req, res) => {
     </div>
   );
 }
+

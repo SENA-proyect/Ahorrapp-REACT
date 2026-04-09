@@ -7,7 +7,7 @@ const register = async (req, res) => {
   const { Nombre, Apellido, Email, Password_hash } = req.body;
 
   try {
-    // Verificar si el correo ya existe
+
     const [existingUser] = await pool.query(
       "SELECT ID_usuario FROM USUARIOS WHERE Email = ?",
       [Email]
@@ -49,7 +49,6 @@ const login = async (req, res) => {
   const { Email, Password_hash } = req.body;
 
   try {
-    // Buscar el usuario por correo
     const [rows] = await pool.query(
       "SELECT * FROM USUARIOS WHERE Email = ? AND Activo = TRUE",
       [Email]
@@ -64,7 +63,7 @@ const login = async (req, res) => {
 
     const usuario = rows[0];
 
-    // Verificar la contraseña
+
     const passwordValida = await bcrypt.compare(Password_hash, usuario.Password_hash);
 
     if (!passwordValida) {
@@ -107,7 +106,28 @@ const login = async (req, res) => {
   }
 };
 
-const getUsuarios = async (req, res)
+const getUsuarios = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT ID_usuario, Nombre, Apellido, Email, Rol, Activo 
+       FROM usuarios 
+       WHERE Activo = TRUE`
+    );
+    return res.status(200).json({
+      ok: true,
+      cantidad: rows.length,
+      usuarios: rows
+    });
+  } catch (error) {
+    console.error("Error en los datos a encontrar.", error.message);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: "No fue posible obtener los usuarios",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
+  }
+};
 
 module.exports = { register, login, getUsuarios };
 
