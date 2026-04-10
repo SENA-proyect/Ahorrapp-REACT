@@ -107,6 +107,25 @@ const login = async (req, res) => {
   }
 };
 
+const getUsuarios = async (req, res) => {
+  try {
+    if (req.usuario.rol !== 'Administrador') {
+      return res.status(403).json({ ok: false, mensaje: "Acceso denegado" });
+    }
+
+    const [rows] = await pool.query(
+      `SELECT ID_usuario, Nombre, Apellido, Email, Rol, Activo, Fecha_registro
+       FROM USUARIOS
+       ORDER BY Fecha_registro DESC`
+    );
+
+    return res.status(200).json({ ok: true, usuarios: rows });
+  } catch (error) {
+    console.error("Error en getUsuarios:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
 module.exports = { register, login };
 
 // NOTA: login busca el usuario por correo verificando que esté activo, compara la contraseña contra el hash, y si todo está bien genera un JWT con el ID, nombre y rol del usuario adentro.
