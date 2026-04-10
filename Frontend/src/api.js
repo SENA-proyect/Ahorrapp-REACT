@@ -1,36 +1,28 @@
-const API_URL = "/api"; // ← antes: "http://localhost:3000/api"
+const API_URL = "/api";
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
 
 export const registerUser = async (datos) => {
-  // Normalizamos el campo contraseña → password antes de enviarlo
-  const payload = {
-    nombre: datos.nombre,
-    apellido: datos.apellido,
-    correo: datos.correo,
-    password: datos.contraseña,  // ← aquí está el fix
-  };
-
-  const response = await fetch("/api/auth/register", {
+  // datos viene con { nombre, apellido, correo, password }
+  const response = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(datos),
   });
   return response.json();
 };
 
 export const loginUser = async (datos) => {
-  const payload = {
-    correo: datos.correo,
-    password: datos.contraseña,  // ← aquí está el fix
-  };
-
-  const response = await fetch("/api/auth/login", {
+  // datos viene con { correo, password }
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(datos),
   });
   return response.json();
 };
 
+// ── Categorías ────────────────────────────────────────────────────────────────
 
 export const getCategorias = async () => {
   const token = localStorage.getItem("token");
@@ -40,7 +32,6 @@ export const getCategorias = async () => {
   const data = await response.json();
   return data.categorias ?? [];
 };
-
 
 export const crearCategoria = async (datos) => {
   const token = localStorage.getItem("token");

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
-import"../styles/login.css";
-
+import "../styles/login.css";
 
 const VERTEX_SHADER_SOURCE = `
   attribute vec4 a_position;
@@ -129,41 +128,40 @@ export default function Login() {
     };
   }, []);
 
-  // Conexion con el backend, verificacion de email y password
-// Actualmente no tiene try/catch, si la red falla rompe silenciosamente
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(null);
-  setCargando(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
 
-  const { email, password } = e.target.elements;
+    const { email, password } = e.target.elements;
 
-  if (!email.value || !password.value) {
-    setError("Por favor completa todos los campos");
-    setCargando(false);
-    return;
-  }
-
-  try {                                          // ← agregar try/catch
-    const respuesta = await loginUser({
-      correo: email.value,
-      contraseña: password.value,
-    });
-
-    if (respuesta.ok) {
-      localStorage.setItem("token", respuesta.token);
-      localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
-      navigate("/Dashboard");
-    } else {
-      setError(respuesta.mensaje);
+    if (!email.value || !password.value) {
+      setError("Por favor completa todos los campos");
+      return;
     }
-  } catch {
-    setError("Error de conexión. Intenta de nuevo.");
-  } finally {
-    setCargando(false);
-  }
-};
 
+    setCargando(true);
+
+    try {
+      // api.js espera { correo, password } y los envía al backend
+      const respuesta = await loginUser({
+        correo: email.value,
+        password: password.value,
+      });
+
+      if (respuesta.ok) {
+        localStorage.setItem("token", respuesta.token);
+        localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
+        navigate("/Dashboard");
+      } else {
+        setError(respuesta.mensaje || "Error al iniciar sesión");
+      }
+    } catch (err) {
+      console.error("Error en login:", err);
+      setError("Error de conexión con el servidor");
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <>
@@ -173,17 +171,19 @@ const handleSubmit = async (e) => {
         <form onSubmit={handleSubmit} className="form-container">
           <h1>Iniciar Sesión</h1>
 
+          {error && <div className="error-message">{error}</div>}
+
           <div className="form-group">
-            <input type="text" id="email" name="email" placeholder="Correo Electrónico" />
+            <input type="email" id="email" placeholder="Correo Electrónico" required />
           </div>
 
           <div className="form-group">
-            <input type="password" id="password" name="password" placeholder="Contraseña" />
+            <input type="password" id="password" placeholder="Contraseña" required />
           </div>
 
-            <button type="submit" className="boton" style={{ borderRadius: "25px" }}>
-              Entrar
-            </button>
+          <button type="submit" className="boton" style={{ borderRadius: "25px" }} disabled={cargando}>
+            {cargando ? "Cargando..." : "Entrar"}
+          </button>
 
           <Link to="/Registrar" className="text-white">
             ¿Olvidaste tu contraseña?

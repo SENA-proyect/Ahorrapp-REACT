@@ -4,7 +4,7 @@ import '../styles/panel.css'
 
 export default function PanelDependientes({ dependientes = [] }) {
   return (
-    <div>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }} >
 
       <div className="inf-container">
         <h2>Dependientes</h2>

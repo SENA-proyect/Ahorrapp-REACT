@@ -233,11 +233,9 @@ h2 {
     z-index: -1;
 }
 button {
-    box-sizing: border-box;
-    padding: 25px;
-    border-radius: 10px 20px 10px;
     background-color: transparent;
-    color: var(--color-primary);
-    width: 100%;
-    font-weight: bold;  
+    border-radius: 10px;
+    border: solid 1px green;
+    padding: 10px;
+    color: white;
 }

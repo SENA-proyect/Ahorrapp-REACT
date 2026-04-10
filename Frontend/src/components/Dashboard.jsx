@@ -17,6 +17,8 @@ export default function Dashboard() {
         </Link>
 
         <h1>Ahorrapp</h1>
+        
+
         <button className="buttonCerrarSesion">Cerrar Sesion</button>
       </header>
 
