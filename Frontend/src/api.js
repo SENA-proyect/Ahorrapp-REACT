@@ -37,8 +37,10 @@ export const getCategorias = async () => {
   const response = await fetch(`${API_URL}/categorias`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.json();
+  const data = await response.json();
+  return data.categorias ?? [];
 };
+
 
 export const crearCategoria = async (datos) => {
   const token = localStorage.getItem("token");
