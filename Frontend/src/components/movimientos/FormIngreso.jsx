@@ -112,7 +112,7 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
           onChange={handleChange}
         >
           <option value="">Sin categoría</option>
-          {categorias.filter(c => c.activa).map(cat => (
+          {categorias.filter(c => c.activa == 1).map(cat => (
             <option key={cat.id} value={cat.id}>{cat.nombre}</option>
           ))}
         </select>

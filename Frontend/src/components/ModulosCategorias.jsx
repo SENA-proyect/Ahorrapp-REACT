@@ -15,13 +15,10 @@ export default function ModuloCategorias() {
   useEffect(() => {
     getCategorias()
       .then(data => {
-        if (data.ok && Array.isArray(data.categorias)) {
-          setCategorias(data.categorias)
-        }
+        if (Array.isArray(data)) setCategorias(data)
       })
       .catch(() => {})
   }, [])
-
   // ── Agregar categoría ──────────────────────────────────────────────────
   const handleAgregar = async () => {
     if (!formNombre.trim()) return alert('El nombre es obligatorio')
