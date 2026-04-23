@@ -5,6 +5,13 @@ import '../styles/generalModulos.css'
 export default function ModuloIngresos() {
   const [ingresos, setIngresos] = useState([])
   const [cargando, setCargando] = useState(true)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 600)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -72,7 +79,36 @@ export default function ModuloIngresos() {
                 <p className="mensaje-vacio">Cargando...</p>
               ) : ingresos.length === 0 ? (
                 <p className="mensaje-vacio">No hay ingresos registrados. Agrega tu primer ingreso para comenzar.</p>
+              ) : isMobile ? (
+                /* ── Vista móvil: cards ── */
+                <div className="cards-mobile">
+                  {ingresos.map(i => (
+                    <div key={i.id} className="card-ingreso">
+                      <div className="card-row">
+                        <span className="card-label">Fecha</span>
+                        <span className="card-value">{i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}</span>
+                      </div>
+                      <div className="card-row">
+                        <span className="card-label">Fuente</span>
+                        <span className="card-value">{i.fuente || '—'}</span>
+                      </div>
+                      <div className="card-row">
+                        <span className="card-label">Categoría</span>
+                        <span className="card-value">{i.categoria || '—'}</span>
+                      </div>
+                      <div className="card-row">
+                        <span className="card-label">Descripción</span>
+                        <span className="card-value">{i.descripcion || '—'}</span>
+                      </div>
+                      <div className="card-row card-monto">
+                        <span className="card-label">Monto</span>
+                        <span className="card-value monto">${Number(i.monto).toLocaleString('es-CO')}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
+                /* ── Vista escritorio: tabla normal ── */
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
@@ -110,5 +146,15 @@ export default function ModuloIngresos() {
   )
 }
 
-const thStyle = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
-const tdStyle = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
+const thStyle = {
+  padding: '10px 12px',
+  textAlign: 'left',
+  color: 'var(--text-secondary)',
+  fontWeight: 600,
+  fontSize: '0.85rem'
+}
+const tdStyle = {
+  padding: '10px 12px',
+  fontSize: '0.9rem',
+  verticalAlign: 'middle'
+}
