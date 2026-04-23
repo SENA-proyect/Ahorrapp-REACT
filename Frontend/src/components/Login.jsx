@@ -142,9 +142,10 @@ export default function Login() {
     setCargando(true);
 
     try {
+      // api.js espera { correo, password } y los envía al backend
       const respuesta = await loginUser({
-        Email: email.value,
-        Password_hash: password.value,
+        correo: email.value,
+        password: password.value,
       });
 
       if (respuesta.ok) {
