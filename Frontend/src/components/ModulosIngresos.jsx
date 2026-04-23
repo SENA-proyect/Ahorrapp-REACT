@@ -1,10 +1,26 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/generalModulos.css'
 
 export default function ModuloIngresos() {
+  const [ingresos, setIngresos] = useState([])
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    fetch('http://localhost:3000/api/movimientos/ingresos', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setIngresos(data) })
+      .catch(() => {})
+      .finally(() => setCargando(false))
+  }, [])
+
+  const total = ingresos.reduce((acc, i) => acc + Number(i.monto), 0)
+
   return (
     <div className="box-content">
-
       <header className="header">
         <Link to="/">
           <button className="buttonHeader">
@@ -25,31 +41,63 @@ export default function ModuloIngresos() {
 
         <nav className="navbar" aria-label="Menú de secciones">
           <ul className="nav-list">
-            <li><Link to="/Dashboard" className="nav-link">Dashboard</Link></li>
-            <li><Link to="/ModulosIngresos" className="nav-link active">Ingresos</Link></li>
-            <li><Link to="/ModulosGastos" className="nav-link">Gastos</Link></li>
-            <li><Link to="/ModuloAhorros" className="nav-link">Ahorros</Link></li>
-            <li><Link to="/ModuloImprevistos" className="nav-link">Imprevistos</Link></li>
-            <li><Link to="/ModuloDeudas" className="nav-link">Deudas</Link></li>
-            <li><Link to="/ModulosDependientes" className="nav-link">Dependientes</Link></li>
-            <li><Link to="/ModulosCategorias" className="nav-link">Categorias</Link></li>
+            <li><Link to="/Dashboard"           className="nav-link">Dashboard</Link></li>
+            <li><Link to="/ModulosIngresos"      className="nav-link active">Ingresos</Link></li>
+            <li><Link to="/ModulosGastos"        className="nav-link">Gastos</Link></li>
+            <li><Link to="/ModuloAhorros"        className="nav-link">Ahorros</Link></li>
+            <li><Link to="/ModuloImprevistos"    className="nav-link">Imprevistos</Link></li>
+            <li><Link to="/ModuloDeudas"         className="nav-link">Deudas</Link></li>
+            <li><Link to="/ModulosDependientes"  className="nav-link">Dependientes</Link></li>
+            <li><Link to="/ModulosCategorias"    className="nav-link">Categorias</Link></li>
           </ul>
         </nav>
-{/* PARTE DEL CRUD */}
+
         <section className="modulo-ahorros">
           <header className="modulo-header">
             <h3>Módulo de ingresos</h3>
             <div className="acciones-ahorro">
-              <button type="button" className="btn-secundario">Agregar ingreso</button>
+              <Link to="/movimientos/nuevo">
+                <button type="button" className="btn-secundario">Agregar ingreso</button>
+              </Link>
             </div>
           </header>
 
           <div className="resumen-container">
-            <p className="total-ahorros">Total Ingresos: <strong>$0</strong></p>
+            <p className="total-ahorros">
+              Total Ingresos: <strong>${total.toLocaleString('es-CO')}</strong>
+            </p>
+
             <div className="tabla-ingresos" style={{ marginTop: '20px' }}>
-              <p className="mensaje-vacio">
-                No hay ingresos registrados. Agrega tu primer ingreso para comenzar.
-              </p>
+              {cargando ? (
+                <p className="mensaje-vacio">Cargando...</p>
+              ) : ingresos.length === 0 ? (
+                <p className="mensaje-vacio">No hay ingresos registrados. Agrega tu primer ingreso para comenzar.</p>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                      <th style={thStyle}>Fecha</th>
+                      <th style={thStyle}>Fuente</th>
+                      <th style={thStyle}>Categoría</th>
+                      <th style={thStyle}>Descripción</th>
+                      <th style={thStyle}>Monto</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ingresos.map(i => (
+                      <tr key={i.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={tdStyle}>{i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}</td>
+                        <td style={tdStyle}>{i.fuente || '—'}</td>
+                        <td style={tdStyle}>{i.categoria || '—'}</td>
+                        <td style={tdStyle}>{i.descripcion || '—'}</td>
+                        <td style={{ ...tdStyle, color: 'var(--ingresos-dark)', fontWeight: 600 }}>
+                          ${Number(i.monto).toLocaleString('es-CO')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </section>
@@ -58,7 +106,9 @@ export default function ModuloIngresos() {
       <footer className="footer-app">
         <p>&copy; 2024 Mi Aplicación de Finanzas</p>
       </footer>
-
     </div>
   )
 }
+
+const thStyle = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
+const tdStyle = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
