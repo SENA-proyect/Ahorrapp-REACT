@@ -105,7 +105,7 @@ const Gastos = () => {
         </main>
 
         <footer className="footer-app">
-          <p>&copy; 2024 Mi Aplicación de Finanzas</p>
+          <p>&copy; 2026 Mi Aplicación de Finanzas</p>
         </footer>
       </div>
     </>

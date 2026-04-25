@@ -119,7 +119,7 @@ export default function Dashboard() {
       </main>
 
       <footer className="footer-app">
-        <p>© 2024 Mi Aplicación de Finanzas</p>
+        <p>© 2026 Mi Aplicación de Finanzas</p>
       </footer>
     </div>
   );
