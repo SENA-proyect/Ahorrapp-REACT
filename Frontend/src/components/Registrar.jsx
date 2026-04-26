@@ -80,10 +80,10 @@ export default function Registro() {
 
 
   const [form, setForm] = useState ({
-    Nombre: "",
-    Apellido: "",
-    Email: "",
-    Password_hash: ""
+    nombre: "",
+    apellido: "",
+    correo: "",
+    password: ""
   });
 
   useEffect(() => {
@@ -149,7 +149,7 @@ export default function Registro() {
   setError(null);
   setCargando(true);
 
-  if (!form.Nombre || !form.Apellido || !form.Email || !form.Password_hash) {
+  if (!form.nombre || !form.apellido || !form.correo || !form.password) {
 
     setError("Todos los campos son obligatorios");
     setCargando(false);
@@ -192,10 +192,10 @@ export default function Registro() {
         <form className="form-register" onSubmit={handleSubmit}>
           <h4 className="h4Text">Formulario Registro!</h4>
 
-          <input value={form.Nombre} onChange={handleChange} className="controls" type="text" name="Nombre" placeholder="Ingrese su nombre" />
-          <input value={form.Apellido} onChange={handleChange} className="controls" type="text" name="Apellido" placeholder="Ingrese su apellido" />
-          <input value={form.Email} onChange={handleChange} className="controls" type="email" name="Email" placeholder="Ingrese su correo" />
-          <input value={form.Password_hash} onChange={handleChange} className="controls" type="password" name="Password_hash" placeholder="Ingrese su contraseña" />
+          <input value={form.nombre}   onChange={handleChange} className="controls" name="nombre"   type="text"     placeholder="Ingrese su nombre" />
+          <input value={form.apellido} onChange={handleChange} className="controls" name="apellido" type="text"     placeholder="Ingrese su apellido" />
+          <input value={form.correo}   onChange={handleChange} className="controls" name="correo"   type="email"    placeholder="Ingrese su correo" />
+          <input value={form.password} onChange={handleChange} className="controls" name="password" type="password" placeholder="Ingrese su contraseña" />
 
 
        <div className="containerTerminos">
