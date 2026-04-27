@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/generalModulos.css'
 
@@ -49,8 +50,17 @@ export default function ModuloIngresos() {
             <li><Link to="/ModuloDeudas"         className="nav-link">Deudas</Link></li>
             <li><Link to="/ModulosDependientes"  className="nav-link">Dependientes</Link></li>
             <li><Link to="/ModulosCategorias"    className="nav-link">Categorias</Link></li>
+            <li><Link to="/Dashboard"           className="nav-link">Dashboard</Link></li>
+            <li><Link to="/ModulosIngresos"      className="nav-link active">Ingresos</Link></li>
+            <li><Link to="/ModulosGastos"        className="nav-link">Gastos</Link></li>
+            <li><Link to="/ModuloAhorros"        className="nav-link">Ahorros</Link></li>
+            <li><Link to="/ModuloImprevistos"    className="nav-link">Imprevistos</Link></li>
+            <li><Link to="/ModuloDeudas"         className="nav-link">Deudas</Link></li>
+            <li><Link to="/ModulosDependientes"  className="nav-link">Dependientes</Link></li>
+            <li><Link to="/ModulosCategorias"    className="nav-link">Categorias</Link></li>
           </ul>
         </nav>
+
 
         <section className="modulo-ahorros">
           <header className="modulo-header">
@@ -59,10 +69,17 @@ export default function ModuloIngresos() {
               <Link to="/movimientos/nuevo">
                 <button type="button" className="btn-secundario">Agregar ingreso</button>
               </Link>
+              <Link to="/movimientos/nuevo">
+                <button type="button" className="btn-secundario">Agregar ingreso</button>
+              </Link>
             </div>
           </header>
 
           <div className="resumen-container">
+            <p className="total-ahorros">
+              Total Ingresos: <strong>${total.toLocaleString('es-CO')}</strong>
+            </p>
+
             <p className="total-ahorros">
               Total Ingresos: <strong>${total.toLocaleString('es-CO')}</strong>
             </p>
@@ -104,7 +121,7 @@ export default function ModuloIngresos() {
       </main>
 
       <footer className="footer-app">
-        <p>&copy; 2024 Mi Aplicación de Finanzas</p>
+        <p>&copy; 2026 Mi Aplicación de Finanzas</p>
       </footer>
     </div>
   )

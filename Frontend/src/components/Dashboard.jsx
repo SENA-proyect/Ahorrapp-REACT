@@ -17,7 +17,6 @@ export default function Dashboard() {
         </Link>
 
         <h1>Ahorrapp</h1>
-        
 
         <button className="buttonCerrarSesion">Cerrar Sesion</button>
       </header>
@@ -39,7 +38,6 @@ export default function Dashboard() {
       <main className="main-content">
         <div className="dashboard-header">
           <div className="header-left">
-
             <section className="sectionHeader">
               <svg xmlns="http://www.w3.org/2000/svg" style={{ padding: "5px" }} width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="green" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 18V5"/>
@@ -47,7 +45,6 @@ export default function Dashboard() {
               </svg>
               <h2>Dashboard Financiero Inteligente</h2>
             </section>
-
             <p className="pHeaderLeft">Analisis completo con insights automaticos</p>
           </div>
 
@@ -93,32 +90,37 @@ export default function Dashboard() {
         <br />
 
         {/* CARDS */}
-         <div className="boxes">
-            <section className="box-section1"><p>Ingresos Totales</p>
-                <p><strong>$0</strong></p>
-                <p>Base de tus finanzas</p>
-            </section>
-            <section className="box-section2"><p>Gastos Totales</p>
-                <p><strong>$0</strong></p>
-                <p>0% de Ingresos</p>
-            </section>
-            <section className="box-section3"><p>Ahorros Totales</p>
-                <p><strong>$0</strong></p>
-                <p>0% de Ingresos</p>
-            </section>
-            <section className="box-section4"><p>Patrimonio Neto</p>
-                <p><strong>$0</strong></p>
-                <p>Negativo</p>
-            </section>
-            <section className="box-section5"><p>Dinero Disponible</p>
-                <p><strong>$0</strong></p>
-                <p>Para gastos adicionales</p>
-            </section>
+        <div className="boxes">
+          <section className="box-section1">
+            <p>Ingresos Totales</p>
+            <p><strong>$0</strong></p>
+            <p>Base de tus finanzas</p>
+          </section>
+          <section className="box-section2">
+            <p>Gastos Totales</p>
+            <p><strong>$0</strong></p>
+            <p>0% de Ingresos</p>
+          </section>
+          <section className="box-section3">
+            <p>Ahorros Totales</p>
+            <p><strong>$0</strong></p>
+            <p>0% de Ingresos</p>
+          </section>
+          <section className="box-section4">
+            <p>Patrimonio Neto</p>
+            <p><strong>$0</strong></p>
+            <p>Negativo</p>
+          </section>
+          <section className="box-section5">
+            <p>Dinero Disponible</p>
+            <p><strong>$0</strong></p>
+            <p>Para gastos adicionales</p>
+          </section>
         </div>
       </main>
 
       <footer className="footer-app">
-        <p>© 2024 Mi Aplicación de Finanzas</p>
+        <p>© 2026 Mi Aplicación de Finanzas</p>
       </footer>
     </div>
   );

@@ -1,12 +1,22 @@
 const pool = require('../db/connection');
 
+
 // ── GET: Obtener dependientes del usuario autenticado ──────
 const getDependientes = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
   try {
     const [results] = await pool.query(
-      'SELECT ID_dependientes AS id, Nombre AS nombre, Relacion AS relacion FROM DEPENDIENTES WHERE ID_usuario = ?',
+      // Ahora traemos TODOS los campos que el frontend necesita mostrar
+      `SELECT 
+        ID_dependientes,
+        Nombre,
+        Relacion,
+        Ocupacion,
+        Fecha_nacimiento,
+        Peso_economico
+      FROM DEPENDIENTES
+      WHERE ID_usuario = ?`,
       [ID_usuario]
     );
     res.json(results);
@@ -16,10 +26,15 @@ const getDependientes = async (req, res) => {
   }
 };
 
+
 // ── POST: Agregar un dependiente ───────────────────────────
 const addDependiente = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { Nombre, Relacion, Ocupacion, Fecha_nacimiento, Peso_economico } = req.body;
+
+  // Imprimimos todo lo que llega para verificar
+  console.log("Body recibido:", req.body);
+  console.log("ID_usuario del token:", ID_usuario);
 
   if (!Nombre || !Relacion) {
     return res.status(400).json({ error: 'Nombre y Relación son requeridos' });
@@ -33,16 +48,23 @@ const addDependiente = async (req, res) => {
     );
     res.status(201).json({ message: 'Dependiente agregado', id: result.insertId });
   } catch (err) {
-    console.error('Error al agregar dependiente:', err);
+    // Imprimimos el error COMPLETO, no solo el mensaje
+    console.error('Error al agregar dependiente COMPLETO:', err);
     res.status(500).json({ error: 'Error al agregar dependiente' });
   }
 };
+
 
 // ── PUT: Editar un dependiente ─────────────────────────────
 const updateDependiente = async (req, res) => {
   const { id } = req.params;
   const ID_usuario = req.usuario.id;
   const { Nombre, Relacion, Ocupacion, Fecha_nacimiento, Peso_economico } = req.body;
+
+  // Imprimimos todo lo que llega
+  console.log("ID del dependiente a editar:", id);
+  console.log("ID_usuario del token:", ID_usuario);
+  console.log("Body recibido:", req.body);
 
   if (!Nombre || !Relacion) {
     return res.status(400).json({ error: 'Nombre y Relación son requeridos' });
@@ -61,30 +83,33 @@ const updateDependiente = async (req, res) => {
     }
     res.json({ message: 'Dependiente actualizado' });
   } catch (err) {
-    console.error('Error al actualizar dependiente:', err);
+    console.error('Error al actualizar dependiente COMPLETO:', err);
     res.status(500).json({ error: 'Error al actualizar dependiente' });
   }
 };
 
 // ── DELETE: Eliminar un dependiente ───────────────────────
 const deleteDependiente = async (req, res) => {
-  const { id } = req.params;
-  const ID_usuario = req.usuario.id;
+  const { id } = req.params;
+  const ID_usuario = req.usuario.id;
 
-  try {
-    const [result] = await pool.query(
-      'DELETE FROM dependientes WHERE ID_dependientes = ? AND ID_usuario = ?',
-      [id, ID_usuario]
-    );
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Dependiente no encontrado' });
-    }
-    res.json({ message: 'Dependiente eliminado' });
-  } catch (err) {
-    console.error('Error al eliminar dependiente:', err);
-    res.status(500).json({ error: 'Error al eliminar dependiente' });
-  }
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM dependientes WHERE ID_dependientes = ? AND ID_usuario = ?',
+      [id, ID_usuario]
+    );
+
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Dependiente no encontrado' });
+    }
+    res.json({ message: 'Dependiente eliminado' });
+  } catch (err) {
+    console.error('Error al eliminar dependiente:', err);
+    res.status(500).json({ error: 'Error al eliminar dependiente' });
+  }
 };
+
 
 module.exports = { getDependientes, addDependiente, updateDependiente, deleteDependiente };

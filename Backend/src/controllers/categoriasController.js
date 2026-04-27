@@ -1,24 +1,12 @@
 const pool = require("../db/connection");
 
-// ── GET todas las categorías (sistema + las del usuario) ────────────────────
+// ── GET todas las categorias (sistema + las del usuario) ────────────────────
 const getCategorias = async (req, res) => {
   const id_usuario = req.usuario.id;
 
   try {
     const [rows] = await pool.query(
-      `SELECT 
-        ID_categoria  AS id,
-        ID_usuario    AS id_usuario,
-        Nombre        AS nombre,
-        Descripcion   AS descripcion,
-        Color         AS color,
-        Icono         AS icono,
-        Activa        AS activa,
-        Sistema       AS sistema,
-        ES_global     AS es_global
-       FROM CATEGORIAS
-       WHERE ES_global = TRUE OR ID_usuario = ?
-       ORDER BY ES_global DESC, Nombre ASC`,
+      "SELECT ID_categoria AS id, ID_usuario AS id_usuario, Nombre AS nombre, Descripcion AS descripcion, Color AS color, Icono AS icono, Activa AS activa, Sistema AS sistema, ES_global AS es_global FROM CATEGORIAS WHERE ES_global = TRUE OR ID_usuario = ? ORDER BY ES_global DESC, Nombre ASC",
       [id_usuario]
     );
 
@@ -30,16 +18,18 @@ const getCategorias = async (req, res) => {
   }
 };
 
-// ── POST crear categoría nueva ───────────────────────────────────────────────
+// ── POST crear categoria nueva ───────────────────────────────────────────────
 const crearCategoria = async (req, res) => {
-  const id_usuario = req.usuario.id;
-  const { nombre, descripcion } = req.body;
 
+  const id_usuario = req.usuario.id;
+
+  const { nombre, descripcion } = req.body;
   if (!nombre?.trim()) {
     return res.status(400).json({ ok: false, mensaje: "El nombre es obligatorio" });
   }
 
   try {
+
     const [result] = await pool.query(
       `INSERT INTO CATEGORIAS (ID_usuario, Nombre, Descripcion, Activa, Sistema, ES_global)
        VALUES (?, ?, ?, TRUE, FALSE, FALSE)`,
@@ -48,7 +38,7 @@ const crearCategoria = async (req, res) => {
 
     return res.status(201).json({
       ok: true,
-      mensaje: "Categoría creada exitosamente",
+      mensaje: "Categoria creada exitosamente",
       id: result.insertId,
     });
 
@@ -58,7 +48,7 @@ const crearCategoria = async (req, res) => {
   }
 };
 
-// ── PUT actualizar nombre y descripción ─────────────────────────────────────
+// ── PUT actualizar nombre y descripcion ─────────────────────────────────────
 const actualizarCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
   const { id } = req.params;
@@ -69,7 +59,7 @@ const actualizarCategoria = async (req, res) => {
   }
 
   try {
-    // Solo puede editar sus propias categorías, no las del sistema
+
     const [rows] = await pool.query(
       `SELECT ID_categoria FROM CATEGORIAS
        WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
@@ -77,7 +67,7 @@ const actualizarCategoria = async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(403).json({ ok: false, mensaje: "No tienes permiso para editar esta categoría" });
+      return res.status(403).json({ ok: false, mensaje: "No tienes permiso para editar esta categoria" });
     }
 
     await pool.query(
@@ -85,7 +75,7 @@ const actualizarCategoria = async (req, res) => {
       [nombre.trim(), descripcion?.trim() || null, id]
     );
 
-    return res.status(200).json({ ok: true, mensaje: "Categoría actualizada exitosamente" });
+    return res.status(200).json({ ok: true, mensaje: "Categoria actualizada exitosamente" });
 
   } catch (error) {
     console.error("Error en actualizarCategoria:", error.message);
@@ -93,12 +83,13 @@ const actualizarCategoria = async (req, res) => {
   }
 };
 
-// ── PATCH deshabilitar categoría ────────────────────────────────────────────
+// ── PATCH deshabilitar categoria ────────────────────────────────────────────
 const deshabilitarCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
   const { id } = req.params;
 
   try {
+
     const [rows] = await pool.query(
       `SELECT ID_categoria FROM CATEGORIAS
        WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
@@ -106,7 +97,7 @@ const deshabilitarCategoria = async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(403).json({ ok: false, mensaje: "No tienes permiso para deshabilitar esta categoría" });
+      return res.status(403).json({ ok: false, mensaje: "No tienes permiso para deshabilitar esta categoria" });
     }
 
     await pool.query(
@@ -114,7 +105,7 @@ const deshabilitarCategoria = async (req, res) => {
       [id]
     );
 
-    return res.status(200).json({ ok: true, mensaje: "Categoría deshabilitada" });
+    return res.status(200).json({ ok: true, mensaje: "Categoria deshabilitada" });
 
   } catch (error) {
     console.error("Error en deshabilitarCategoria:", error.message);
@@ -122,12 +113,13 @@ const deshabilitarCategoria = async (req, res) => {
   }
 };
 
-// ── PATCH habilitar categoría ───────────────────────────────────────────────
+// ── PATCH habilitar categoria ───────────────────────────────────────────────
 const habilitarCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
   const { id } = req.params;
 
   try {
+
     const [rows] = await pool.query(
       `SELECT ID_categoria FROM CATEGORIAS
        WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
@@ -135,21 +127,23 @@ const habilitarCategoria = async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(403).json({ ok: false, mensaje: "No tienes permiso para habilitar esta categoría" });
+      return res.status(403).json({ ok: false, mensaje: "No tienes permiso para habilitar esta categoria" });
     }
+
 
     await pool.query(
       `UPDATE CATEGORIAS SET Activa = TRUE WHERE ID_categoria = ?`,
       [id]
     );
 
-    return res.status(200).json({ ok: true, mensaje: "Categoría habilitada" });
+    return res.status(200).json({ ok: true, mensaje: "Categoria habilitada" });
 
   } catch (error) {
     console.error("Error en habilitarCategoria:", error.message);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
+
 
 module.exports = {
   getCategorias,
