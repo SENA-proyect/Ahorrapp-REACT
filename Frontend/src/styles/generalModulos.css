@@ -476,6 +476,109 @@ button:hover {
   z-index: 100;
 }
 
+.card-ahorro {
+  background-color: var(--ahorros-bg);       /* fondo morado claro */
+  border: 1px solid var(--ahorros-light);    /* borde morado suave */
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-imprevisto {
+  background-color: var(--imprevistos-bg);    /* fondo rojo claro */
+  border: 1px solid var(--imprevistos-light); /* borde rojo suave */
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-ingresos {
+  background-color: var(--ingresos-bg);    /* fondo rojo claro */
+  border: 1px solid var(--ingresos-light); /* borde rojo suave */
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.card-gastos {
+  background-color: var(--gastos-bg);    /* fondo rojo claro */
+  border: 1px solid var(--gastos-light); /* borde rojo suave */
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-deuda {
+  background-color: var(--deudas-bg);    /* fondo azul claro */
+  border: 1px solid var(--deudas-light); /* borde azul suave */
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.card-categoria {
+  background-color: var(--color-primary-soft);
+  border: 1px solid var(--color-primary-low);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Lista de dependientes ──────────────────────────────────────────── */
+
+/* Móvil: columna simple */
+.dependientes-lista-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Escritorio: grilla de 2 o 3 columnas */
+.dependientes-lista-desktop {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* Card compartida para ambos modos */
+.dependiente-card {
+  background-color: var(--color-primary-soft);
+  border: 1px solid var(--color-primary-low);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Nombre destacado en la card */
+.dependiente-nombre {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  border-bottom: 1px solid var(--color-primary-low);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+/* Botones al fondo */
+.dependiente-acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }

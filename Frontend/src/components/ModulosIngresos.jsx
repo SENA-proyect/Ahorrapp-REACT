@@ -5,10 +5,10 @@ import '../styles/generalModulos.css'
 export default function ModuloIngresos() {
   const [ingresos, setIngresos] = useState([])
   const [cargando, setCargando] = useState(true)
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 600)
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -81,9 +81,9 @@ export default function ModuloIngresos() {
                 <p className="mensaje-vacio">No hay ingresos registrados. Agrega tu primer ingreso para comenzar.</p>
               ) : isMobile ? (
                 /* ── Vista móvil: cards ── */
-                <div className="cards-mobile">
+                <div className="card-ingresos">
                   {ingresos.map(i => (
-                    <div key={i.id} className="card-ingreso">
+                    <div key={i.id} className="card-ingresos">
                       <div className="card-row">
                         <span className="card-label">Fecha</span>
                         <span className="card-value">{i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}</span>

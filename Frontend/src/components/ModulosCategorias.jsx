@@ -4,30 +4,35 @@ import { getCategorias, crearCategoria, editarCategoria, deshabilitarCategoria, 
 import '../styles/generalModulos.css'
 
 export default function ModuloCategorias() {
-  const [categorias, setCategorias]         = useState([])
-  const [modalAgregar, setModalAgregar]     = useState(false)
-  const [modalEditar, setModalEditar]       = useState(false)
-  const [categoriaEdit, setCategoriaEdit]   = useState(null)
-  const [formNombre, setFormNombre]         = useState('')
+  const [categorias, setCategorias]           = useState([])
+  const [modalAgregar, setModalAgregar]       = useState(false)
+  const [modalEditar, setModalEditar]         = useState(false)
+  const [categoriaEdit, setCategoriaEdit]     = useState(null)
+  const [formNombre, setFormNombre]           = useState('')
   const [formDescripcion, setFormDescripcion] = useState('')
+  const [isMobile, setIsMobile]               = useState(window.innerWidth <= 768)  // 👈 NUEVO
+
+  // ── Escuchar cambios de tamaño de pantalla ─────────────────────────── // 👈 NUEVO
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // ── Cargar categorías del backend al montar ────────────────────────────
   useEffect(() => {
     getCategorias()
-      .then(data => {
-        if (Array.isArray(data)) setCategorias(data)
-      })
+      .then(data => { if (Array.isArray(data)) setCategorias(data) })
       .catch(() => {})
   }, [])
+
   // ── Agregar categoría ──────────────────────────────────────────────────
   const handleAgregar = async () => {
     if (!formNombre.trim()) return alert('El nombre es obligatorio')
-
     const respuesta = await crearCategoria({
       nombre: formNombre.trim(),
       descripcion: formDescripcion.trim(),
     })
-
     if (respuesta.ok) {
       const nueva = {
         id: respuesta.id,
@@ -55,12 +60,10 @@ export default function ModuloCategorias() {
   // ── Guardar edición ────────────────────────────────────────────────────
   const handleGuardarEdicion = async () => {
     if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
-
     const respuesta = await editarCategoria(categoriaEdit.id, {
       nombre: categoriaEdit.nombre,
       descripcion: categoriaEdit.descripcion,
     })
-
     if (respuesta.ok) {
       setCategorias(prev =>
         prev.map(c => c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c)
@@ -74,13 +77,9 @@ export default function ModuloCategorias() {
   // ── Deshabilitar categoría ─────────────────────────────────────────────
   const handleDeshabilitar = async (id) => {
     if (!window.confirm('¿Seguro que deseas deshabilitar esta categoría?')) return
-
     const respuesta = await deshabilitarCategoria(id)
-
     if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => c.id === id ? { ...c, activa: false } : c)
-      )
+      setCategorias(prev => prev.map(c => c.id === id ? { ...c, activa: false } : c))
     } else {
       alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
     }
@@ -89,17 +88,14 @@ export default function ModuloCategorias() {
   // ── Habilitar categoría ────────────────────────────────────────────────
   const handleHabilitar = async (id) => {
     const respuesta = await habilitarCategoria(id)
-
     if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => c.id === id ? { ...c, activa: true } : c)
-      )
+      setCategorias(prev => prev.map(c => c.id === id ? { ...c, activa: true } : c))
     } else {
       alert(respuesta.mensaje || 'Error al habilitar la categoría')
     }
   }
 
-  const activas   = categorias.filter(c => c.activa)
+  const activas   = categorias.filter(c =>  c.activa)
   const inactivas = categorias.filter(c => !c.activa)
 
   return (
@@ -116,7 +112,7 @@ export default function ModuloCategorias() {
           </button>
         </Link>
         <h1>Ahorrapp</h1>
-        <button className="buttonCerrarSesion">Cerrar Sesion</button>
+        <button className="buttonCerrarSesion">Cerrar Sesión</button>
       </header>
 
       <main>
@@ -154,11 +150,61 @@ export default function ModuloCategorias() {
               Total categorías activas: <strong>{activas.length}</strong>
             </p>
 
-            {/* TABLA DE CATEGORÍAS ACTIVAS */}
-            <div className="tabla-ingresos" style={{ marginTop: '20px' }}>
+            {/* ── TABLA / CARDS DE CATEGORÍAS ACTIVAS ── */}
+            <div style={{ marginTop: '20px' }}>
               {activas.length === 0 ? (
                 <p className="mensaje-vacio">No hay categorías activas.</p>
+
+              ) : isMobile ? (
+                // ── VISTA MÓVIL: cards ──────────────────────────────── // 👈 NUEVO
+                <div className="cards-mobile">
+                  {activas.map(cat => (
+                    <div key={cat.id} className="card-categoria">
+
+                      <div className="card-row">
+                        <span className="card-label">Nombre</span>
+                        <span className="card-value"><strong>{cat.nombre}</strong></span>
+                      </div>
+
+                      <div className="card-row">
+                        <span className="card-label">Descripción</span>
+                        <span className="card-value">{cat.descripcion || '—'}</span>
+                      </div>
+
+                      <div className="card-row">
+                        <span className="card-label">Tipo</span>
+                        <span className="card-value">
+                          <span style={cat.es_global ? badgeSistema : badgeUsuario}>
+                            {cat.es_global ? 'Sistema' : 'Personalizada'}
+                          </span>
+                        </span>
+                      </div>
+
+                      {/* Acciones solo para categorías del usuario */}
+                      {!cat.es_global && (
+                        <div className="card-row" style={{ marginTop: '4px', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button
+                            className="btn-secundario"
+                            style={{ fontSize: '0.8rem', padding: '4px 10px' }}
+                            onClick={() => abrirEditar(cat)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            style={{ ...btnDeshabilitar, fontSize: '0.8rem', padding: '4px 10px' }}
+                            onClick={() => handleDeshabilitar(cat.id)}
+                          >
+                            Deshabilitar
+                          </button>
+                        </div>
+                      )}
+
+                    </div>
+                  ))}
+                </div>
+
               ) : (
+                // ── VISTA ESCRITORIO: tabla ──────────────────────────────
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
@@ -179,7 +225,6 @@ export default function ModuloCategorias() {
                           </span>
                         </td>
                         <td style={tdStyle}>
-                          {/* Solo se pueden editar/deshabilitar las categorías del usuario */}
                           {!cat.es_global && (
                             <>
                               <button
@@ -205,19 +250,30 @@ export default function ModuloCategorias() {
               )}
             </div>
 
-            {/* CATEGORÍAS DESHABILITADAS */}
+            {/* ── CATEGORÍAS DESHABILITADAS ── */}
             {inactivas.length > 0 && (
               <div style={{ marginTop: '32px' }}>
                 <p style={{ color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '10px' }}>
                   Categorías deshabilitadas ({inactivas.length})
                 </p>
-                <table style={{ width: '100%', borderCollapse: 'collapse', opacity: 0.6 }}>
-                  <tbody>
+
+                {isMobile ? (
+                  // ── VISTA MÓVIL: cards inactivas ─────────────────────── // 👈 NUEVO
+                  <div className="cards-mobile" style={{ opacity: 0.6 }}>
                     {inactivas.map(cat => (
-                      <tr key={cat.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={tdStyle}><s>{cat.nombre}</s></td>
-                        <td style={tdStyle}>{cat.descripcion || '—'}</td>
-                        <td style={tdStyle}>
+                      <div key={cat.id} className="card-categoria">
+
+                        <div className="card-row">
+                          <span className="card-label">Nombre</span>
+                          <span className="card-value"><s>{cat.nombre}</s></span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Descripción</span>
+                          <span className="card-value">{cat.descripcion || '—'}</span>
+                        </div>
+
+                        <div className="card-row" style={{ justifyContent: 'flex-end' }}>
                           <button
                             className="btn-secundario"
                             style={{ fontSize: '0.8rem', padding: '4px 10px' }}
@@ -225,11 +281,34 @@ export default function ModuloCategorias() {
                           >
                             Habilitar
                           </button>
-                        </td>
-                      </tr>
+                        </div>
+
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+
+                ) : (
+                  // ── VISTA ESCRITORIO: tabla inactivas ────────────────────
+                  <table style={{ width: '100%', borderCollapse: 'collapse', opacity: 0.6 }}>
+                    <tbody>
+                      {inactivas.map(cat => (
+                        <tr key={cat.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={tdStyle}><s>{cat.nombre}</s></td>
+                          <td style={tdStyle}>{cat.descripcion || '—'}</td>
+                          <td style={tdStyle}>
+                            <button
+                              className="btn-secundario"
+                              style={{ fontSize: '0.8rem', padding: '4px 10px' }}
+                              onClick={() => handleHabilitar(cat.id)}
+                            >
+                              Habilitar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             )}
           </div>
@@ -240,30 +319,17 @@ export default function ModuloCategorias() {
         <p>&copy; 2026 Mi Aplicación de Finanzas</p>
       </footer>
 
-      {/* ── MODAL AGREGAR ──────────────────────────────────────────────────── */}
+      {/* ── MODAL AGREGAR ── */}
       {modalAgregar && (
         <div style={overlayStyle}>
           <div style={modalStyle}>
             <h3 style={{ marginBottom: '16px' }}>Nueva categoría</h3>
-
             <label style={labelStyle}>Nombre *</label>
-            <input
-              style={inputStyle}
-              type="text"
-              placeholder="Ej: Ropa, Mascotas..."
-              value={formNombre}
-              onChange={e => setFormNombre(e.target.value)}
-            />
-
+            <input style={inputStyle} type="text" placeholder="Ej: Ropa, Mascotas..."
+              value={formNombre} onChange={e => setFormNombre(e.target.value)} />
             <label style={labelStyle}>Descripción</label>
-            <input
-              style={inputStyle}
-              type="text"
-              placeholder="Descripción opcional"
-              value={formDescripcion}
-              onChange={e => setFormDescripcion(e.target.value)}
-            />
-
+            <input style={inputStyle} type="text" placeholder="Descripción opcional"
+              value={formDescripcion} onChange={e => setFormDescripcion(e.target.value)} />
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button className="btn-secundario" onClick={handleAgregar}>Guardar</button>
               <button style={btnCancelar} onClick={() => { setModalAgregar(false); setFormNombre(''); setFormDescripcion('') }}>
@@ -274,28 +340,17 @@ export default function ModuloCategorias() {
         </div>
       )}
 
-      {/* ── MODAL EDITAR ───────────────────────────────────────────────────── */}
+      {/* ── MODAL EDITAR ── */}
       {modalEditar && categoriaEdit && (
         <div style={overlayStyle}>
           <div style={modalStyle}>
             <h3 style={{ marginBottom: '16px' }}>Editar categoría</h3>
-
             <label style={labelStyle}>Nombre *</label>
-            <input
-              style={inputStyle}
-              type="text"
-              value={categoriaEdit.nombre}
-              onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))}
-            />
-
+            <input style={inputStyle} type="text" value={categoriaEdit.nombre}
+              onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))} />
             <label style={labelStyle}>Descripción</label>
-            <input
-              style={inputStyle}
-              type="text"
-              value={categoriaEdit.descripcion || ''}
-              onChange={e => setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))}
-            />
-
+            <input style={inputStyle} type="text" value={categoriaEdit.descripcion || ''}
+              onChange={e => setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))} />
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button className="btn-secundario" onClick={handleGuardarEdicion}>Guardar cambios</button>
               <button style={btnCancelar} onClick={() => setModalEditar(false)}>Cancelar</button>
@@ -309,13 +364,13 @@ export default function ModuloCategorias() {
 }
 
 // ─── Estilos inline reutilizables ─────────────────────────────────────────────
-const thStyle       = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
-const tdStyle       = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
-const badgeSistema  = { background: 'var(--color-primary-soft)', color: 'var(--color-primary-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
-const badgeUsuario  = { background: 'var(--ingresos-bg)', color: 'var(--ingresos-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
+const thStyle         = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
+const tdStyle         = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
+const badgeSistema    = { background: 'var(--color-primary-soft)', color: 'var(--color-primary-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
+const badgeUsuario    = { background: 'var(--ingresos-bg)', color: 'var(--ingresos-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
 const btnDeshabilitar = { background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
-const overlayStyle  = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
-const modalStyle    = { background: '#fff', borderRadius: '12px', padding: '32px', width: '100%', maxWidth: '420px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }
-const labelStyle    = { display: 'block', marginBottom: '6px', marginTop: '14px', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }
-const inputStyle    = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none' }
-const btnCancelar   = { padding: '8px 18px', borderRadius: '8px', border: '1px solid var(--border-color)', background: '#fff', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }
+const overlayStyle    = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
+const modalStyle      = { background: '#fff', borderRadius: '12px', padding: '32px', width: '100%', maxWidth: '420px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }
+const labelStyle      = { display: 'block', marginBottom: '6px', marginTop: '14px', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }
+const inputStyle      = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none' }
+const btnCancelar     = { padding: '8px 18px', borderRadius: '8px', border: '1px solid var(--border-color)', background: '#fff', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }

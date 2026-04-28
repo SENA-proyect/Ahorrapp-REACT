@@ -6,6 +6,17 @@ const Deudas = () => {
   const [deudas,   setDeudas]   = useState([])
   const [cargando, setCargando] = useState(true)
 
+  // ── Detecta si la ventana es menor o igual a 768px ──
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+  // ── Escucha cuando el usuario redimensiona la ventana ──
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    // Limpia el listener cuando el componente se desmonta
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   useEffect(() => {
     const token = localStorage.getItem('token')
     fetch('http://localhost:3000/api/movimientos/deudas', {
@@ -77,9 +88,78 @@ const Deudas = () => {
               <div style={{ marginTop: '20px' }}>
                 {cargando ? (
                   <p className="mensaje-vacio">Cargando...</p>
+
                 ) : deudas.length === 0 ? (
                   <p className="mensaje-vacio">¡Felicidades! No tienes deudas pendientes registradas.</p>
+
+                ) : isMobile ? (
+                  // ── VISTA MÓVIL: cards ──
+                  <div className="cards-mobile">
+                    {deudas.map(d => (
+                      // Cada deuda se renderiza como una tarjeta
+                      <div key={d.id} className="card-deuda">
+
+                        <div className="card-row">
+                          <span className="card-label">Fuente</span>
+                          <span className="card-value">{d.fuente || '—'}</span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Categoría</span>
+                          <span className="card-value">{d.categoria || '—'}</span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Descripción</span>
+                          <span className="card-value">{d.descripcion || '—'}</span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Cuotas</span>
+                          {/* Si tiene cuotas_total mostramos pagadas/total,
+                              si no, mostramos "Pago único" */}
+                          <span className="card-value">
+                            {d.cuotas_total ? `${d.cuotas_pagadas}/${d.cuotas_total}` : 'Pago único'}
+                          </span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Fecha fin</span>
+                          <span className="card-value">
+                            {d.fecha_fin ? new Date(d.fecha_fin).toLocaleDateString('es-CO') : '—'}
+                          </span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Estado</span>
+                          {/* Badge de estado igual que en la tabla:
+                              verde si pagada, azul si pendiente */}
+                          <span style={{
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            background: d.estado === 'pagada' ? 'var(--ingresos-bg)' : 'var(--deudas-bg)',
+                            color: d.estado === 'pagada' ? 'var(--ingresos-dark)' : 'var(--deudas-dark)',
+                          }}>
+                            {d.estado === 'pagada' ? 'Pagada' : 'Pendiente'}
+                          </span>
+                        </div>
+
+                        {/* Separador visual antes del monto */}
+                        <div className="card-row card-monto">
+                          <span className="card-label">Monto</span>
+                          <span className="card-value" style={{ color: 'var(--deudas-dark)', fontWeight: 700 }}>
+                            ${Number(d.monto).toLocaleString('es-CO')}
+                          </span>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+
                 ) : (
+                  // ── VISTA ESCRITORIO: tabla normal ──
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
@@ -99,9 +179,7 @@ const Deudas = () => {
                           <td style={tdStyle}>{d.categoria || '—'}</td>
                           <td style={tdStyle}>{d.descripcion || '—'}</td>
                           <td style={tdStyle}>
-                            {d.cuotas_total
-                              ? `${d.cuotas_pagadas}/${d.cuotas_total}`
-                              : 'Pago único'}
+                            {d.cuotas_total ? `${d.cuotas_pagadas}/${d.cuotas_total}` : 'Pago único'}
                           </td>
                           <td style={tdStyle}>{d.fecha_fin ? new Date(d.fecha_fin).toLocaleDateString('es-CO') : '—'}</td>
                           <td style={tdStyle}>

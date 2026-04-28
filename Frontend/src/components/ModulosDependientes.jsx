@@ -15,8 +15,9 @@ const PESO_LABELS = {
 const Dependientes = () => {
   const [mostrarModal, setMostrarModal] = useState(false)
   const [dependientes, setDependientes] = useState([])
-  const [editandoId, setEditandoId] = useState(null)
-  const [formDatos, setFormDatos] = useState({
+  const [editandoId, setEditandoId]     = useState(null)
+  const [isMobile, setIsMobile]         = useState(window.innerWidth <= 768)  // 👈 NUEVO
+  const [formDatos, setFormDatos]       = useState({
     Nombre: '',
     Relacion: '',
     Ocupacion: '',
@@ -25,6 +26,13 @@ const Dependientes = () => {
   })
 
   const token = localStorage.getItem('token')
+
+  // ── Escuchar cambios de pantalla ───────────────────────────────────── // 👈 NUEVO
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // ── Cargar dependientes al entrar ──────────────────────────
   useEffect(() => {
@@ -44,7 +52,6 @@ const Dependientes = () => {
   // ── Agregar o Editar ───────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     const payload = {
       ...formDatos,
       Peso_economico: parseInt(formDatos.Peso_economico),
@@ -55,10 +62,7 @@ const Dependientes = () => {
       try {
         const res = await fetch(`/api/dependientes/${editandoId}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload)
         })
         if (res.ok) {
@@ -79,10 +83,7 @@ const Dependientes = () => {
       try {
         const res = await fetch('/api/dependientes', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload)
         })
         const data = await res.json()
@@ -96,7 +97,6 @@ const Dependientes = () => {
         alert('Error de conexión')
       }
     }
-
     cerrarModal()
   }
 
@@ -107,7 +107,7 @@ const Dependientes = () => {
       Relacion: dependiente.Relacion,
       Ocupacion: dependiente.Ocupacion || '',
       Fecha_nacimiento: dependiente.Fecha_nacimiento
-        ? dependiente.Fecha_nacimiento.split('T')[0]  // quita la parte de tiempo si viene como ISO
+        ? dependiente.Fecha_nacimiento.split('T')[0]
         : '',
       Peso_economico: String(dependiente.Peso_economico ?? '3')
     })
@@ -118,7 +118,6 @@ const Dependientes = () => {
   // ── Eliminar ───────────────────────────────────────────────
   const handleEliminar = async (id) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
-
     try {
       const res = await fetch(`/api/dependientes/${id}`, {
         method: 'DELETE',
@@ -196,25 +195,50 @@ const Dependientes = () => {
                 Total dependientes: <strong>{dependientes.length}</strong>
               </p>
 
-              <div className="tabla-ingresos" style={{ marginTop: "20px" }}>
+              <div style={{ marginTop: '20px' }}>
                 {dependientes.length === 0 ? (
                   <p className="mensaje-vacio">
                     No hay dependientes registrados. Agrega tu primer dependiente para comenzar.
                   </p>
                 ) : (
-                  <div className="dependientes-lista">
+                  // 👇 La clase cambia según el tamaño de pantalla
+                  <div className={isMobile ? 'dependientes-lista-mobile' : 'dependientes-lista-desktop'}>
                     {dependientes.map(dependiente => (
                       <div key={dependiente.ID_dependientes} className="dependiente-card">
-                        <div className="dependiente-info">
-                          <p><strong>Nombre:</strong> {dependiente.Nombre}</p>
-                          <p><strong>Relación:</strong> {dependiente.Relacion}</p>
-                          <p><strong>Ocupación:</strong> {dependiente.Ocupacion || 'N/A'}</p>
-                          <p><strong>Fecha Nac.:</strong> {dependiente.Fecha_nacimiento
-                            ? dependiente.Fecha_nacimiento.split('T')[0]
-                            : 'N/A'}
-                          </p>
-                          <p><strong>Peso Económico:</strong> {PESO_LABELS[dependiente.Peso_economico] ?? 'N/A'}</p>
+
+                        {/* Nombre destacado arriba */}
+                        <p className="dependiente-nombre">{dependiente.Nombre}</p>
+
+                        <div className="card-row">
+                          <span className="card-label">Relación</span>
+                          <span className="card-value">{dependiente.Relacion}</span>
                         </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Ocupación</span>
+                          <span className="card-value">{dependiente.Ocupacion || 'N/A'}</span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Fecha Nac.</span>
+                          <span className="card-value">
+                            {dependiente.Fecha_nacimiento
+                              ? dependiente.Fecha_nacimiento.split('T')[0]
+                              : 'N/A'}
+                          </span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Peso Econ.</span>
+                          <span className="card-value">
+                            {/* Badge de color según el peso */}
+                            <span style={badgePeso(dependiente.Peso_economico)}>
+                              {PESO_LABELS[dependiente.Peso_economico] ?? 'N/A'}
+                            </span>
+                          </span>
+                        </div>
+
+                        {/* Acciones al fondo de la card */}
                         <div className="dependiente-acciones">
                           <button className="btn-editar" onClick={() => handleEditar(dependiente)}>
                             Editar
@@ -223,6 +247,7 @@ const Dependientes = () => {
                             Eliminar
                           </button>
                         </div>
+
                       </div>
                     ))}
                   </div>
@@ -241,30 +266,18 @@ const Dependientes = () => {
           <div className="modal-overlay">
             <div className="modal">
               <h2 className="h2Modal">{editandoId ? 'Editar Dependiente' : 'Agregar Dependiente'}</h2>
-
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="Nombre">Nombre</label>
-                  <input
-                    type="text"
-                    id="Nombre"
-                    name="Nombre"
-                    value={formDatos.Nombre}
-                    onChange={handleChange}
-                    required
-                    placeholder="Nombre del dependiente"
-                  />
+                  <input type="text" id="Nombre" name="Nombre"
+                    value={formDatos.Nombre} onChange={handleChange}
+                    required placeholder="Nombre del dependiente" />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="Relacion">Relación</label>
-                  <select
-                    id="Relacion"
-                    name="Relacion"
-                    value={formDatos.Relacion}
-                    onChange={handleChange}
-                    required
-                  >
+                  <select id="Relacion" name="Relacion"
+                    value={formDatos.Relacion} onChange={handleChange} required>
                     <option value="">Selecciona una relación</option>
                     <option value="Hijo">Hijo</option>
                     <option value="Hija">Hija</option>
@@ -280,36 +293,21 @@ const Dependientes = () => {
 
                 <div className="form-group">
                   <label htmlFor="Ocupacion">Ocupación</label>
-                  <input
-                    type="text"
-                    id="Ocupacion"
-                    name="Ocupacion"
-                    value={formDatos.Ocupacion}
-                    onChange={handleChange}
-                    placeholder="Ocupación del dependiente"
-                  />
+                  <input type="text" id="Ocupacion" name="Ocupacion"
+                    value={formDatos.Ocupacion} onChange={handleChange}
+                    placeholder="Ocupación del dependiente" />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="Fecha_nacimiento">Fecha de Nacimiento</label>
-                  <input
-                    type="date"
-                    id="Fecha_nacimiento"
-                    name="Fecha_nacimiento"
-                    value={formDatos.Fecha_nacimiento}
-                    onChange={handleChange}
-                    required
-                  />
+                  <input type="date" id="Fecha_nacimiento" name="Fecha_nacimiento"
+                    value={formDatos.Fecha_nacimiento} onChange={handleChange} required />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="Peso_economico">Peso Económico</label>
-                  <select
-                    id="Peso_economico"
-                    name="Peso_economico"
-                    value={formDatos.Peso_economico}
-                    onChange={handleChange}
-                  >
+                  <select id="Peso_economico" name="Peso_economico"
+                    value={formDatos.Peso_economico} onChange={handleChange}>
                     <option value="1">1 — Muy bajo</option>
                     <option value="2">2 — Bajo</option>
                     <option value="3">3 — Medio</option>
@@ -332,3 +330,21 @@ const Dependientes = () => {
 }
 
 export default Dependientes
+
+// ── Badge de color según peso económico ───────────────────────────────────────
+const badgePeso = (peso) => {
+  const colores = {
+    1: { background: '#e8f5e9', color: '#2e7d32' },   // verde — muy bajo
+    2: { background: '#f1f8e9', color: '#558b2f' },   // verde claro — bajo
+    3: { background: '#fff8e1', color: '#f57f17' },   // amarillo — medio
+    4: { background: '#fff3e0', color: '#e65100' },   // naranja — alto
+    5: { background: '#fce4ec', color: '#c62828' },   // rojo — muy alto
+  }
+  return {
+    ...(colores[peso] || {}),
+    padding: '2px 8px',
+    borderRadius: '12px',
+    fontSize: '0.75rem',
+    fontWeight: 600,
+  }
+}

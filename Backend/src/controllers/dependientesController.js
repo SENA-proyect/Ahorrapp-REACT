@@ -90,25 +90,25 @@ const updateDependiente = async (req, res) => {
 
 // ── DELETE: Eliminar un dependiente ───────────────────────
 const deleteDependiente = async (req, res) => {
-  const { id } = req.params;
-  const ID_usuario = req.usuario.id;
+  const { id } = req.params;
+  const ID_usuario = req.usuario.id;
 
 
-  try {
-    const [result] = await pool.query(
-      'DELETE FROM dependientes WHERE ID_dependientes = ? AND ID_usuario = ?',
-      [id, ID_usuario]
-    );
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM dependientes WHERE ID_dependientes = ? AND ID_usuario = ?',
+      [id, ID_usuario]
+    );
 
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Dependiente no encontrado' });
-    }
-    res.json({ message: 'Dependiente eliminado' });
-  } catch (err) {
-    console.error('Error al eliminar dependiente:', err);
-    res.status(500).json({ error: 'Error al eliminar dependiente' });
-  }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Dependiente no encontrado' });
+    }
+    res.json({ message: 'Dependiente eliminado' });
+  } catch (err) {
+    console.error('Error al eliminar dependiente:', err);
+    res.status(500).json({ error: 'Error al eliminar dependiente' });
+  }
 };
 
 

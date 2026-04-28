@@ -5,6 +5,13 @@ import '../styles/generalModulos.css'
 const Imprevistos = () => {
   const [imprevistos, setImprevistos] = useState([])
   const [cargando,    setCargando]    = useState(true)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -71,9 +78,53 @@ const Imprevistos = () => {
               <div style={{ marginTop: '20px' }}>
                 {cargando ? (
                   <p className="mensaje-vacio">Cargando...</p>
+
                 ) : imprevistos.length === 0 ? (
                   <p className="mensaje-vacio">Tu fondo de imprevistos está vacío. Es recomendable ahorrar al menos 3 meses de gastos.</p>
+
+                ) : isMobile ? (
+                  // ── VISTA MÓVIL: cards ──
+                  <div className="cards-mobile">
+                    {imprevistos.map(i => (
+                      // Cada imprevisto se renderiza como una tarjeta
+                      <div key={i.id} className="card-imprevisto">
+
+                        <div className="card-row">
+                          <span className="card-label">Fecha</span>
+                          <span className="card-value">
+                            {i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}
+                          </span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Causa</span>
+                          <span className="card-value">{i.causa || '—'}</span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Categoría</span>
+                          <span className="card-value">{i.categoria || '—'}</span>
+                        </div>
+
+                        <div className="card-row">
+                          <span className="card-label">Dependiente</span>
+                          <span className="card-value">{i.dependiente || '—'}</span>
+                        </div>
+
+                        {/* Separador visual antes del monto */}
+                        <div className="card-row card-monto">
+                          <span className="card-label">Monto</span>
+                          <span className="card-value" style={{ color: 'var(--imprevistos-dark)', fontWeight: 700 }}>
+                            ${Number(i.monto).toLocaleString('es-CO')}
+                          </span>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+
                 ) : (
+                  // ── VISTA ESCRITORIO: tabla normal ──
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
