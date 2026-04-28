@@ -72,6 +72,9 @@ const Deudas = () => {
                 <Link to="/movimientos/nuevo">
                   <button type="button" className="btn-secundario">Nueva Deuda</button>
                 </Link>
+                <Link to="/">
+                  <button type="button" className="btn-secundario">Pagar deuda.</button>
+                </Link>
               </div>
             </header>
 

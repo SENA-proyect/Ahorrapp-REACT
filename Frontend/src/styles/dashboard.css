@@ -232,6 +232,7 @@ button:hover {
   width: 140px;
   border: 1px solid var(--color-primary-low);
   text-align: center;
+  color: var(--text-lg-color);
 }
 
 .buttonCerrarSesion {
@@ -239,17 +240,21 @@ button:hover {
   width: 150px;
   border: 1px solid var(--color-primary-low);
   text-align: center;
+  color: var(--text-lg-color);
+  
 }
 
 .btn-outline {
   padding: 8px 14px;
   border: 1px solid var(--color-primary-low);
+  color: var(--text-lg-color);
 }
 
 .btn-solid {
   padding: 8px 14px;
   border: 0.5px solid var(--color-primary-low);
   background-color: var(--color-primary-light);
+  color: var(--text-lg-color);
 }
 
 /* ========================================================= */

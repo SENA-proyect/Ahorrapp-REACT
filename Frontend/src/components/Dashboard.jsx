@@ -4,8 +4,9 @@ import '../styles/dashboard.css';
 
 export default function Dashboard() {
 
-  // useState guarda el total de ingresos, empieza en 0
   const [ingresos, setIngresos] = useState(0);
+  const [gastos, setGastos] = useState(0);
+  const [ahorros, setAhorros] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -16,17 +17,11 @@ export default function Dashboard() {
       }
     })
       .then((res) => res.json())
-      // data es el array [] que retorna tu backend directamente
       .then((data) => {
-        // Verificamos que data sea un array antes de usar .reduce()
         if (Array.isArray(data)) {
-          // reduce() suma todos los montos del array
-          // acumulado empieza en 0 y va sumando cada ingreso.monto
-          // Number() convierte el monto a número por si viene como string
           const total = data.reduce((acumulado, ingreso) => {
             return acumulado + Number(ingreso.monto);
           }, 0);
-          // Guardamos el total calculado en el estado
           setIngresos(total);
         }
       })
@@ -34,14 +29,58 @@ export default function Dashboard() {
         console.error("Error al obtener ingresos:", error);
       });
   }, []);
-  // El [] significa que el fetch solo se ejecuta una vez al montar el componente
 
-  // ── Aquí el return va directo, sin llaves {} envolviéndolo ──
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:3000/api/movimientos/gastos", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const total = data.reduce((acumulado, gasto) => {
+            return acumulado + Number(gasto.monto);
+          }, 0);
+          setGastos(total);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener gastos:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:3000/api/movimientos/ahorros", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAhorros(data);  // ← guarda el array, no el total
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener ahorros:", error);
+      });
+  }, []);
+
+  const totalAcumulado = ahorros.reduce((acc, a) => {
+    return acc + Number(a.monto_acumulado)
+  }, 0)
+
   return (
     <div className="page-wrapper">
 
       {/* HEADER */}
       <header className="header">
+        <section className="sectionHeader">
         <Link to="/">
           <button className="buttonHeader">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 10">
@@ -50,9 +89,9 @@ export default function Dashboard() {
             Inicio
           </button>
         </Link>
+        </section>
 
         <h1>Ahorrapp</h1>
-
         <button className="buttonCerrarSesion">Cerrar Sesion</button>
       </header>
 
@@ -73,10 +112,6 @@ export default function Dashboard() {
         <div className="dashboard-header">
           <div className="header-left">
             <section className="sectionHeader">
-              <svg xmlns="http://www.w3.org/2000/svg" style={{ padding: "5px" }} width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="green" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 18V5"/>
-                <path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/>
-              </svg>
               <h2>Dashboard Financiero Inteligente</h2>
             </section>
             <p className="pHeaderLeft">Analisis completo con insights automaticos</p>
@@ -93,11 +128,6 @@ export default function Dashboard() {
         {/* BOX PRINCIPAL */}
         <section className="box1">
           <section className="iconAndText">
-            <article className="iconBox">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-                <path d="M22 12h-2.48" />
-              </svg>
-            </article>
             <p className="text-box">Puntuacion de Salud Financiera</p>
           </section>
 
@@ -134,12 +164,12 @@ export default function Dashboard() {
           </section>
           <section className="box-section2">
             <p>Gastos Totales</p>
-            <p><strong>$0</strong></p>
+            <p><strong>${gastos.toLocaleString('es-CO')}</strong></p>
             <p>0% de Ingresos</p>
           </section>
           <section className="box-section3">
             <p>Ahorros Totales</p>
-            <p><strong>$0</strong></p>
+            <p><strong>${totalAcumulado.toLocaleString('es-CO')}</strong></p>
             <p>0% de Ingresos</p>
           </section>
           <section className="box-section4">

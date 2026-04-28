@@ -184,6 +184,18 @@ body:has(.login-container) {
   position: relative;
 }
 
+#email {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8f5e9;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
 .form-container input[type="text"],
 .form-container input[type="password"] {
   width: 100%;
@@ -257,21 +269,3 @@ body:has(.login-container) {
   transform: translateY(-2px);
 }
 
-.boton:active {
-<<<<<<< HEAD
-<<<<<<< HEAD:Frontend/src/styles/login.css
-    transform: translateY(0);
-    background-color: var(--ingresos-dark);
-}
-
-=======
-  transform: translateY(0);
-  background-color: var(--ingresos-dark);
-}
->>>>>>> main:src/styles/login.css
-=======
-  transform: translateY(0);
-  background-color: var(--ingresos-dark);
-}
-
->>>>>>> main

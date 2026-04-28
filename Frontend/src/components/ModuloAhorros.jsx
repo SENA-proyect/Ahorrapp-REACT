@@ -24,7 +24,9 @@ const Ahorros = () => {
       .finally(() => setCargando(false))
   }, [])
 
-  const total = ahorros.reduce((acc, a) => acc + Number(a.monto), 0)
+  const totalAcumulado = ahorros.reduce((acc, a) => {
+    return acc + Number(a.monto_acumulado)
+  }, 0)
 
   return (
     <>
@@ -67,12 +69,15 @@ const Ahorros = () => {
                 <Link to="/movimientos/nuevo">
                   <button type="button" className="btn-secundario">Nueva Meta</button>
                 </Link>
+                <Link to="/movimientos/nuevo">
+                  <button type="button" className="btn-secundario">Agregar dinero a la meta!</button>
+                </Link>
               </div>
             </header>
 
             <div className="resumen-container">
               <p className="total-ahorros">
-                Total Ahorros: <strong>${total.toLocaleString('es-CO')}</strong>
+                Total Ahorros: <strong>${totalAcumulado.toLocaleString('es-CO')}</strong>
               </p>
 
               <div style={{ marginTop: '20px' }}>
