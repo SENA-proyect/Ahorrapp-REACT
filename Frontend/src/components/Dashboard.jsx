@@ -1,7 +1,42 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import '../styles/dashboard.css';
 
 export default function Dashboard() {
+
+  // useState guarda el total de ingresos, empieza en 0
+  const [ingresos, setIngresos] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:3000/api/movimientos/ingresos", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+      .then((res) => res.json())
+      // data es el array [] que retorna tu backend directamente
+      .then((data) => {
+        // Verificamos que data sea un array antes de usar .reduce()
+        if (Array.isArray(data)) {
+          // reduce() suma todos los montos del array
+          // acumulado empieza en 0 y va sumando cada ingreso.monto
+          // Number() convierte el monto a número por si viene como string
+          const total = data.reduce((acumulado, ingreso) => {
+            return acumulado + Number(ingreso.monto);
+          }, 0);
+          // Guardamos el total calculado en el estado
+          setIngresos(total);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener ingresos:", error);
+      });
+  }, []);
+  // El [] significa que el fetch solo se ejecuta una vez al montar el componente
+
+  // ── Aquí el return va directo, sin llaves {} envolviéndolo ──
   return (
     <div className="page-wrapper">
 
@@ -92,7 +127,9 @@ export default function Dashboard() {
         <div className="boxes">
           <section className="box-section1">
             <p>Ingresos Totales</p>
-            <p><strong>$0</strong></p>
+            {/* toLocaleString('es-CO') formatea el número con puntos
+                separadores de miles en formato colombiano: 1.000.000 */}
+            <p><strong>${ingresos.toLocaleString('es-CO')}</strong></p>
             <p>Base de tus finanzas</p>
           </section>
           <section className="box-section2">
