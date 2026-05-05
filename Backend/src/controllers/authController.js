@@ -24,11 +24,11 @@ const register = async (req, res) => {
       [nombre, apellido, correo, passwordHash]
     );
 
-    return res.status(201).json({
-      ok: true,
-      mensaje: "Usuario registrado exitosamente",
-      id: result.insertId,
-    });
+    return res.status(201).json({
+      ok: true,
+      mensaje: "Usuario registrado exitosamente",
+      id: result.insertId,
+    });
 
   } catch (error) {
     console.error("Error en register:", error.message);
@@ -63,18 +63,18 @@ const login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    return res.status(200).json({
-      ok: true,
-      mensaje: "Inicio de sesión exitoso",
-      token,
-      usuario: {
-        id: usuario.ID_usuario,
-        nombre: usuario.Nombre,
-        apellido: usuario.Apellido,
-        email: usuario.Email,
-        rol: usuario.Rol,
-      },
-    });
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Inicio de sesión exitoso",
+      token,
+      usuario: {
+        id: usuario.ID_usuario,
+        nombre: usuario.Nombre,
+        apellido: usuario.Apellido,
+        email: usuario.Email,
+        rol: usuario.Rol,
+      },
+    });
 
   } catch (error) {
     console.error("Error en login:", error.message);
@@ -99,8 +99,9 @@ const getUsuarios = async (req, res) => {
 
 // ── PUT /PanelUsuarios/:id ───────────────────────────────────────────────────
 const updateUsuario = async (req, res) => {
-  const { id } = req.params;
-  const { Nombre, Apellido, Email, Rol } = req.body;
+  const { id } = req.params;
+  const { Nombre, Apellido, Email, Rol } = req.body;
+
 
   try {
     if (!id || isNaN(id)) {
@@ -131,7 +132,8 @@ const updateUsuario = async (req, res) => {
 
 // ── DELETE /PanelUsuarios/:id ────────────────────────────────────────────────
 const deleteUsuario = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params;
+
 
   try {
     if (!id || isNaN(id)) {
@@ -159,5 +161,6 @@ const deleteUsuario = async (req, res) => {
     return res.status(500).json({ ok: false, mensaje: "Error al eliminar usuario" });
   }
 };
+
 
 module.exports = { register, login, getUsuarios, updateUsuario, deleteUsuario };
