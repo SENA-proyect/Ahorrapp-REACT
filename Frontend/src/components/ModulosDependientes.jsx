@@ -4,6 +4,14 @@ import '../styles/generalModulos.css'
 import '../styles/VentanaModal.css'
 import '../styles/dependientes.css'
 
+const PESO_LABELS = {
+  1: 'Muy bajo',
+  2: 'Bajo',
+  3: 'Medio',
+  4: 'Alto',
+  5: 'Muy alto',
+}
+
 const Dependientes = () => {
   const [mostrarModal, setMostrarModal] = useState(false)
   const [dependientes, setDependientes] = useState([])
@@ -13,14 +21,14 @@ const Dependientes = () => {
     Relacion: '',
     Ocupacion: '',
     Fecha_nacimiento: '',
-    Peso_economico: ''
+    Peso_economico: '3'
   })
 
   const token = localStorage.getItem('token')
 
   // ── Cargar dependientes al entrar ──────────────────────────
   useEffect(() => {
-    fetch('http://localhost:3000/api/dependientes', {
+    fetch('/api/dependientes', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -37,44 +45,49 @@ const Dependientes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    const payload = {
+      ...formDatos,
+      Peso_economico: parseInt(formDatos.Peso_economico),
+      Fecha_nacimiento: formDatos.Fecha_nacimiento || null,
+    }
+
     if (editandoId) {
-      // EDITAR
       try {
-        const res = await fetch(`http://localhost:3000/api/dependientes/${editandoId}`, {
+        const res = await fetch(`/api/dependientes/${editandoId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify(formDatos)
+          body: JSON.stringify(payload)
         })
         if (res.ok) {
           setDependientes(dependientes.map(dep =>
             dep.ID_dependientes === editandoId
-              ? { ...formDatos, ID_dependientes: editandoId }
+              ? { ...payload, ID_dependientes: editandoId }
               : dep
           ))
         } else {
-          alert('Error al actualizar el dependiente')
+          const data = await res.json()
+          alert(data.error || 'Error al actualizar el dependiente')
         }
       } catch (err) {
         console.error(err)
         alert('Error de conexión')
       }
     } else {
-      // AGREGAR
       try {
-        const res = await fetch('http://localhost:3000/api/dependientes', {
+        const res = await fetch('/api/dependientes', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify(formDatos)
+          body: JSON.stringify(payload)
         })
         const data = await res.json()
         if (res.ok) {
-          setDependientes([...dependientes, { ...formDatos, ID_dependientes: data.id }])
+          setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
         } else {
           alert(data.error || 'Error al guardar el dependiente')
         }
@@ -84,9 +97,7 @@ const Dependientes = () => {
       }
     }
 
-    setEditandoId(null)
-    setMostrarModal(false)
-    setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '' })
+    cerrarModal()
   }
 
   // ── Editar ─────────────────────────────────────────────────
@@ -95,8 +106,10 @@ const Dependientes = () => {
       Nombre: dependiente.Nombre,
       Relacion: dependiente.Relacion,
       Ocupacion: dependiente.Ocupacion || '',
-      Fecha_nacimiento: dependiente.Fecha_nacimiento || '',
-      Peso_economico: dependiente.Peso_economico || ''
+      Fecha_nacimiento: dependiente.Fecha_nacimiento
+        ? dependiente.Fecha_nacimiento.split('T')[0]  // quita la parte de tiempo si viene como ISO
+        : '',
+      Peso_economico: String(dependiente.Peso_economico ?? '3')
     })
     setEditandoId(dependiente.ID_dependientes)
     setMostrarModal(true)
@@ -107,7 +120,7 @@ const Dependientes = () => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
 
     try {
-      const res = await fetch(`http://localhost:3000/api/dependientes/${id}`, {
+      const res = await fetch(`/api/dependientes/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -123,9 +136,15 @@ const Dependientes = () => {
   }
 
   const abrirModal = () => {
-    setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '' })
+    setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' })
     setEditandoId(null)
     setMostrarModal(true)
+  }
+
+  const cerrarModal = () => {
+    setMostrarModal(false)
+    setEditandoId(null)
+    setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' })
   }
 
   return (
@@ -151,18 +170,17 @@ const Dependientes = () => {
 
           <nav className="navbar" aria-label="Menú de secciones">
             <ul className="nav-list">
-              <li><Link to="/Dashboard" className="nav-link">Dashboard</Link></li>
-              <li><Link to="/ModulosIngresos" className="nav-link">Ingresos</Link></li>
-              <li><Link to="/ModulosGastos" className="nav-link">Gastos</Link></li>
-              <li><Link to="/ModuloAhorros" className="nav-link">Ahorros</Link></li>
-              <li><Link to="/ModuloImprevistos" className="nav-link">Imprevistos</Link></li>
-              <li><Link to="/ModuloDeudas" className="nav-link">Deudas</Link></li>
+              <li><Link to="/Dashboard"           className="nav-link">Dashboard</Link></li>
+              <li><Link to="/ModulosIngresos"     className="nav-link">Ingresos</Link></li>
+              <li><Link to="/ModulosGastos"       className="nav-link">Gastos</Link></li>
+              <li><Link to="/ModuloAhorros"       className="nav-link">Ahorros</Link></li>
+              <li><Link to="/ModuloImprevistos"   className="nav-link">Imprevistos</Link></li>
+              <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
               <li><Link to="/ModulosDependientes" className="nav-link active">Dependientes</Link></li>
-              <li><Link to="/ModulosCategorias" className="nav-link">Categorías</Link></li>
+              <li><Link to="/ModulosCategorias"   className="nav-link">Categorías</Link></li>
             </ul>
           </nav>
 
-          {/* PARTE DEL CRUD */}
           <section className="modulo-ahorros">
             <header className="modulo-header">
               <h3>Módulo de dependientes</h3>
@@ -191,8 +209,11 @@ const Dependientes = () => {
                           <p><strong>Nombre:</strong> {dependiente.Nombre}</p>
                           <p><strong>Relación:</strong> {dependiente.Relacion}</p>
                           <p><strong>Ocupación:</strong> {dependiente.Ocupacion || 'N/A'}</p>
-                          <p><strong>Fecha Nac.:</strong> {dependiente.Fecha_nacimiento}</p>
-                          <p><strong>Peso Económico:</strong> {dependiente.Peso_economico || 'N/A'}%</p>
+                          <p><strong>Fecha Nac.:</strong> {dependiente.Fecha_nacimiento
+                            ? dependiente.Fecha_nacimiento.split('T')[0]
+                            : 'N/A'}
+                          </p>
+                          <p><strong>Peso Económico:</strong> {PESO_LABELS[dependiente.Peso_economico] ?? 'N/A'}</p>
                         </div>
                         <div className="dependiente-acciones">
                           <button className="btn-editar" onClick={() => handleEditar(dependiente)}>
@@ -283,22 +304,23 @@ const Dependientes = () => {
 
                 <div className="form-group">
                   <label htmlFor="Peso_economico">Peso Económico</label>
-                  <input
-                    type="number"
+                  <select
                     id="Peso_economico"
                     name="Peso_economico"
                     value={formDatos.Peso_economico}
                     onChange={handleChange}
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    placeholder="Peso económico del dependiente"
-                  />
+                  >
+                    <option value="1">1 — Muy bajo</option>
+                    <option value="2">2 — Bajo</option>
+                    <option value="3">3 — Medio</option>
+                    <option value="4">4 — Alto</option>
+                    <option value="5">5 — Muy alto</option>
+                  </select>
                 </div>
 
                 <div className="form-buttons">
                   <button type="submit" className="btn-modal btn-guardar">Guardar</button>
-                  <button type="button" className="btn-modal btn-cancelar" onClick={() => setMostrarModal(false)}>Cancelar</button>
+                  <button type="button" className="btn-modal btn-cancelar" onClick={cerrarModal}>Cancelar</button>
                 </div>
               </form>
             </div>

@@ -2,9 +2,10 @@
 import { Link } from 'react-router-dom'
 import '../styles/panel.css'
 
-export default function PanelDependientes({ dependientes = [], onEliminar }) {
+export default function PanelDependientes({ dependientes = [] }) {
   return (
-    <div>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }} >
+
       <div className="inf-container">
         <h2>Dependientes</h2>
 
@@ -20,21 +21,12 @@ export default function PanelDependientes({ dependientes = [], onEliminar }) {
                 <p><strong>Relación:</strong> {dependiente.Relacion}</p>
                 <p><strong>Ocupación:</strong> {dependiente.Ocupacion || 'N/A'}</p>
                 <p><strong>Fecha Nac.:</strong> {dependiente.Fecha_nacimiento}</p>
-                <p><strong>Peso Económico:</strong> {dependiente.Peso_economico || 'N/A'}%</p>
-
-                {onEliminar && (
-                  <button
-                    className="btn-eliminar"
-                    onClick={() => onEliminar(dependiente.ID_dependientes)}
-                  >
-                    Eliminar
-                  </button>
-                )}
               </div>
             ))
           )}
         </div>
       </div>
+
     </div>
   )
 }

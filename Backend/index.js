@@ -5,6 +5,7 @@ require("dotenv").config();
 const authRoutes = require("./src/routes/authRoutes");
 const categoriasRoutes = require("./src/routes/categoriasRoutes");
 const dependientesRoutes = require("./src/routes/dependientesRoutes");
+const movimientosRoutes = require("./src/routes/movimientosRoutes");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/dependientes", dependientesRoutes);
+app.use("/api/movimientos", movimientosRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {
