@@ -7,7 +7,6 @@ const getDependientes = async (req, res) => {
 
   try {
     const [results] = await pool.query(
-      // Ahora traemos TODOS los campos que el frontend necesita mostrar
       `SELECT 
         ID_dependientes,
         Nombre,
