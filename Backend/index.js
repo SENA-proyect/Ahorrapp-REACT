@@ -6,6 +6,9 @@ const authRoutes = require("./src/routes/authRoutes");
 const categoriasRoutes = require("./src/routes/categoriasRoutes");
 const dependientesRoutes = require("./src/routes/dependientesRoutes");
 const movimientosRoutes = require("./src/routes/movimientosRoutes");
+const aiRoutes = require("./src/routes/aiRoutes");
+const noticiasRoutes = require("./src/routes/noticiasRoutes");
+
 
 const app = express();
 
@@ -22,6 +25,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/dependientes", dependientesRoutes);
 app.use("/api/movimientos", movimientosRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/noticias", noticiasRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

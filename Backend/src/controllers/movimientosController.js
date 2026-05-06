@@ -234,4 +234,49 @@ const getDeudas = async (req, res) => {
   }
 };
 
-module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas };
+// ── GET todos los movimientos (para el asistente IA) ──────
+const getMovimientos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  try {
+    const [ingresos] = await pool.query(
+      `SELECT i.Monto AS monto, i.Descripcion AS descripcion,
+              i.Fuente AS fuente, 'ingreso' AS tipo
+       FROM INGRESOS i
+       JOIN ENTRADA e     ON i.ID_entrada    = e.ID_entrada
+       JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?`, [ID_usuario]
+    );
+    const [gastos] = await pool.query(
+      `SELECT g.Monto AS monto, g.Descripcion AS descripcion,
+              'gasto' AS tipo
+       FROM GASTOS g
+       JOIN SALIDA s      ON g.ID_salida     = s.ID_salida
+       JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?`, [ID_usuario]
+    );
+    const [deudas] = await pool.query(
+      `SELECT d.Monto AS monto, d.Descripcion AS descripcion,
+              d.Fuente AS fuente, d.Estado AS estado, 'deuda' AS tipo
+       FROM DEUDAS d
+       JOIN SALIDA s      ON d.ID_salida     = s.ID_salida
+       JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?`, [ID_usuario]
+    );
+    const [ahorros] = await pool.query(
+      `SELECT a.Monto AS monto, a.Descripcion AS descripcion,
+              a.Meta AS meta, 'ahorro' AS tipo
+       FROM AHORROS a
+       JOIN ENTRADA e     ON a.ID_entrada    = e.ID_entrada
+       JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?`, [ID_usuario]
+    );
+
+    res.json({ movimientos: [...ingresos, ...gastos, ...deudas, ...ahorros] });
+  } catch (error) {
+    console.error("Error en getMovimientos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, getMovimientos };
+

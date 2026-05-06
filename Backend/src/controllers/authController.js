@@ -5,6 +5,7 @@ require("dotenv").config();
 
 // ── POST /register ───────────────────────────────────────────────────────────
 const register = async (req, res) => {
+  console.log('Datos recibidos en /register:', req.body);
   const { nombre, apellido, correo, password } = req.body;
 
   try {
@@ -12,17 +13,24 @@ const register = async (req, res) => {
       "SELECT ID_usuario FROM USUARIOS WHERE Email = ?",
       [correo]
     );
+    console.log('Resultado existingUser:', existingUser);
 
     if (existingUser.length > 0) {
       return res.status(400).json({ ok: false, mensaje: "El correo ya está registrado" });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-
-    const [result] = await pool.query(
-      "INSERT INTO USUARIOS (Nombre, Apellido, Email, Password_hash) VALUES (?, ?, ?, ?)",
-      [nombre, apellido, correo, passwordHash]
-    );
+    let result;
+    try {
+      [result] = await pool.query(
+        "INSERT INTO USUARIOS (Nombre, Apellido, Email, Password_hash) VALUES (?, ?, ?, ?)",
+        [nombre, apellido, correo, passwordHash]
+      );
+      console.log('Resultado INSERT:', result);
+    } catch (insertErr) {
+      console.error('Error en INSERT:', insertErr);
+      return res.status(500).json({ ok: false, mensaje: 'Error al insertar usuario', error: insertErr.message });
+    }
 
     return res.status(201).json({
       ok: true,

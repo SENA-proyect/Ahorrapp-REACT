@@ -49,6 +49,7 @@ export default function ModuloIngresos() {
             <li><Link to="/ModuloDeudas"         className="nav-link">Deudas</Link></li>
             <li><Link to="/ModulosDependientes"  className="nav-link">Dependientes</Link></li>
             <li><Link to="/ModulosCategorias"    className="nav-link">Categorias</Link></li>
+            <li><Link to="/noticias" className="nav-link">📰 Noticias</Link></li>
           </ul>
         </nav>
 

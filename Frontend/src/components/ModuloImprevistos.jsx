@@ -50,6 +50,7 @@ const Imprevistos = () => {
               <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
               <li><Link to="/ModulosDependientes" className="nav-link">Dependientes</Link></li>
               <li><Link to="/modulosCategorias"   className="nav-link">Categorías</Link></li>
+              <li><Link to="/noticias" className="nav-link">📰 Noticias</Link></li>
             </ul>
           </nav>
 

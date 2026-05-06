@@ -75,7 +75,8 @@ export default function FormImprevisto({ tipoFlujo, subtipo }) {
       } else {
         setError(data.mensaje)
       }
-    } catch (_) {
+    } catch (e) {
+      void e
       setError('Error al conectar con el servidor')
     } finally {
       setCargando(false)

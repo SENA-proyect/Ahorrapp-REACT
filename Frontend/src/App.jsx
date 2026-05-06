@@ -21,39 +21,45 @@ import VerificacionCorreo from './components/VerificacionCorreo.jsx'
 import VistaEmail from './components/VistaEmail.jsx'
 import VMIDependientes from './components/VM_I-Dependientes.jsx'
 import FormMovimiento from './components/movimientos/FormMovimientos.jsx'
+import Asistente from './components/Asistente/Asistente';
+import Noticias from "./components/Noticias";
 
 
 
 function App() {
-  return (
-
+return (
     <BrowserRouter>
-     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/Registrar" element={<Registrar />} />
-      <Route path="/Login" element={<Login />} />
-      <Route path="/Dashboard" element={<Dashboard />} />
-      <Route path="/ModuloAhorros" element={<ModuloAhorros />} />
-      <Route path="/ModuloDeudas" element={<ModuloDeudas />} />
-      <Route path="/ModuloImprevistos" element={<ModuloImprevistos />} />
-      <Route path="/ModulosCategorias" element={<ModulosCategorias />} />
-      <Route path="/ModulosDependientes" element={<ModulosDependientes />} />
-      <Route path="/ModulosGastos" element={<ModulosGastos />} />
-      <Route path="/ModulosIngresos" element={<ModulosIngresos />} />
-      <Route path="/OlvidarContrasena" element={<OlvidarContrasena />} />
-      <Route path="/PanelAdmin" element={<PanelAdmin />} />
-      <Route path="/PanelDependientes" element={<PanelDependientes />} />
-      <Route path="/PanelHistorial" element={<PanelHistorial />} />
-      <Route path="/PanelMovimientos" element={<PanelMovimientos />} />
-      <Route path="/PanelUsuarios" element={<PanelUsuarios />} />
-      <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
-      <Route path="/VistaEmail" element={<VistaEmail />} />
-      <Route path='/VM_I-Dependientes' element={<VMIDependientes />} />
-      <Route path="/movimientos/nuevo" element={<FormMovimiento />} /> 
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/Registrar" element={<Registrar />} />
+          <Route path="/Login" element={<Login />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/ModuloAhorros" element={<ModuloAhorros />} />
+          <Route path="/ModuloDeudas" element={<ModuloDeudas />} />
+          <Route path="/ModuloImprevistos" element={<ModuloImprevistos />} />
+          <Route path="/ModulosCategorias" element={<ModulosCategorias />} />
+          <Route path="/ModulosDependientes" element={<ModulosDependientes />} />
+          <Route path="/ModulosGastos" element={<ModulosGastos />} />
+          <Route path="/ModulosIngresos" element={<ModulosIngresos />} />
+          <Route path="/OlvidarContrasena" element={<OlvidarContrasena />} />
+          <Route path="/PanelAdmin" element={<PanelAdmin />} />
+          <Route path="/PanelDependientes" element={<PanelDependientes />} />
+          <Route path="/PanelHistorial" element={<PanelHistorial />} />
+          <Route path="/PanelMovimientos" element={<PanelMovimientos />} />
+          <Route path="/PanelUsuarios" element={<PanelUsuarios />} />
+          <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
+          <Route path="/VistaEmail" element={<VistaEmail />} />
+          <Route path="/VM_I-Dependientes" element={<VMIDependientes />} />
+          <Route path="/movimientos/nuevo" element={<FormMovimiento />} />
+          <Route path="/noticias" element={<Noticias />} />
+        </Routes>
 
-     </Routes>
+        {/* El Asistente va aquí, fuera de Routes para que sea global */}
+        <Asistente />
+      </div>
     </BrowserRouter>
-  )
+  );
 }
 
 export default App
