@@ -1,5 +1,5 @@
 // src/components/PanelMovimientos.jsx
-import '../styles/panel.css'
+
 
 export default function PanelMovimientos({ movimientos = [] }) {
   return (

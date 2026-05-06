@@ -1,148 +1,141 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import '../styles/generalModulos.css'
 
 const Imprevistos = () => {
   const [imprevistos, setImprevistos] = useState([])
-  const [cargando,    setCargando]    = useState(true)
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
-  
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
+
     fetch('http://localhost:3000/api/movimientos/imprevistos', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setImprevistos(data) })
+      .then(data => {
+        if (Array.isArray(data)) setImprevistos(data)
+      })
       .catch(() => {})
       .finally(() => setCargando(false))
   }, [])
 
   const total = imprevistos.reduce((acc, i) => acc + Number(i.monto), 0)
 
+  const navLinks = [
+    { to: '/Dashboard', label: 'Dashboard' },
+    { to: '/ModulosIngresos', label: 'Ingresos' },
+    { to: '/ModulosGastos', label: 'Gastos' },
+    { to: '/ModuloAhorros', label: 'Ahorros' },
+    { to: '/ModuloImprevistos', label: 'Imprevistos', active: true },
+    { to: '/ModuloDeudas', label: 'Deudas' },
+    { to: '/ModulosDependientes', label: 'Dependientes' },
+    { to: '/modulosCategorias', label: 'Categorías' },
+  ]
+
   return (
-    <>
-      <div className="box-content">
-        <header className="header">
+    <div className="mx-auto min-h-screen max-w-[1400px] bg-white px-5 py-5 pb-20 font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] text-[#2D2D2D]">
+      <div className="box-border px-4 py-2 lg:px-[100px]">
+        <header className="mx-auto mb-5 flex w-full flex-col items-start justify-between gap-3 border-b-2 border-[#82F182] bg-white px-5 py-[5px] text-center md:flex-row md:items-center">
           <Link to="/">
-            <button className="buttonHeader">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 10">
+            <button className="flex w-[140px] cursor-pointer items-center gap-2 rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                viewBox="0 0 20 10"
+              >
                 <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
               </svg>
               Inicio
             </button>
           </Link>
-          <h1>Ahorrapp</h1>
-          <button className="buttonCerrarSesion">Cerrar Sesión</button>
+
+          <h1 className="text-[28px] font-bold text-[#2E7D2E]">Ahorrapp</h1>
+
+          <button className="w-[150px] cursor-pointer rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
+            Cerrar Sesión
+          </button>
         </header>
 
-        <main>
-          <p className="parrafo1">
+        <main className="animate-[fadeUp_0.6s_ease]">
+          <p className="mb-4 text-[#2D2D2D]">
             Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos
           </p>
 
-          <nav className="navbar" aria-label="Menú de secciones">
-            <ul className="nav-list">
-              <li><Link to="/Dashboard"          className="nav-link">Dashboard</Link></li>
-              <li><Link to="/ModulosIngresos"     className="nav-link">Ingresos</Link></li>
-              <li><Link to="/ModulosGastos"       className="nav-link">Gastos</Link></li>
-              <li><Link to="/ModuloAhorros"       className="nav-link">Ahorros</Link></li>
-              <li><Link to="/ModuloImprevistos"   className="nav-link active">Imprevistos</Link></li>
-              <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
-              <li><Link to="/ModulosDependientes" className="nav-link">Dependientes</Link></li>
-              <li><Link to="/modulosCategorias"   className="nav-link">Categorías</Link></li>
+          <nav
+            className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+            aria-label="Menú de secciones"
+          >
+            <ul className="flex list-none flex-wrap justify-center gap-2.5 p-0">
+              {navLinks.map(link => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className={`inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-[0.85rem] font-semibold no-underline shadow-[0_2px_6px_rgba(0,0,0,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#2E7D2E] hover:bg-[#E8FFE8] hover:text-[#2E7D2E] hover:shadow-[0_4px_10px_rgba(0,0,0,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2E7D2E] ${
+                      link.active
+                        ? 'border-transparent bg-[#E8FFE8] text-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
+                        : 'border border-transparent bg-[#F4F6F4] text-[#2D2D2D]'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 
-          <section className="modulo-ahorros">
-            <header className="modulo-header">
-              <h3>Fondo de Imprevistos</h3>
-              <div className="acciones-ahorro">
+          <section>
+            <header className="mt-[30px] flex flex-col items-start justify-between gap-3 px-2.5 md:flex-row md:items-center">
+              <h3 className="text-xl font-semibold text-[#2D2D2D]">Fondo de Imprevistos</h3>
+
+              <div className="flex gap-2.5">
                 <Link to="/movimientos/nuevo">
-                  <button type="button" className="btn-secundario">Registrar Imprevisto</button>
+                  <button
+                    type="button"
+                    className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
+                  >
+                    Registrar Imprevisto
+                  </button>
                 </Link>
               </div>
             </header>
 
-            <div className="resumen-container">
-              <p className="total-ahorros">
-                Total Imprevistos: <strong>${total.toLocaleString('es-CO')}</strong>
+            <div className="my-5 flex min-h-[150px] w-full flex-col justify-center rounded-[15px] border-2 border-[#4CB04C]/20 bg-white p-[30px] text-center">
+              <p className="mb-2.5 text-2xl text-[#2D2D2D]">
+                Total Imprevistos:{' '}
+                <strong>${total.toLocaleString('es-CO')}</strong>
               </p>
 
-              <div style={{ marginTop: '20px' }}>
+              <div className="mt-5 overflow-x-auto">
                 {cargando ? (
-                  <p className="mensaje-vacio">Cargando...</p>
-
+                  <p className="italic text-[#9AA19A]">Cargando...</p>
                 ) : imprevistos.length === 0 ? (
-                  <p className="mensaje-vacio">Tu fondo de imprevistos está vacío. Es recomendable ahorrar al menos 3 meses de gastos.</p>
-
-                ) : isMobile ? (
-                  // ── VISTA MÓVIL: cards ──
-                  <div className="cards-mobile">
-                    {imprevistos.map(i => (
-                      // Cada imprevisto se renderiza como una tarjeta
-                      <div key={i.id} className="card-imprevisto">
-
-                        <div className="card-row">
-                          <span className="card-label">Fecha</span>
-                          <span className="card-value">
-                            {i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}
-                          </span>
-                        </div>
-
-                        <div className="card-row">
-                          <span className="card-label">Causa</span>
-                          <span className="card-value">{i.causa || '—'}</span>
-                        </div>
-
-                        <div className="card-row">
-                          <span className="card-label">Categoría</span>
-                          <span className="card-value">{i.categoria || '—'}</span>
-                        </div>
-
-                        <div className="card-row">
-                          <span className="card-label">Dependiente</span>
-                          <span className="card-value">{i.dependiente || '—'}</span>
-                        </div>
-
-                        {/* Separador visual antes del monto */}
-                        <div className="card-row card-monto">
-                          <span className="card-label">Monto</span>
-                          <span className="card-value" style={{ color: 'var(--imprevistos-dark)', fontWeight: 700 }}>
-                            ${Number(i.monto).toLocaleString('es-CO')}
-                          </span>
-                        </div>
-
-                      </div>
-                    ))}
-                  </div>
-
+                  <p className="italic text-[#9AA19A]">
+                    Tu fondo de imprevistos está vacío. Es recomendable ahorrar al menos 3 meses de gastos.
+                  </p>
                 ) : (
-                  // ── VISTA ESCRITORIO: tabla normal ──
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <table className="w-full border-collapse text-left">
                     <thead>
-                      <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-                        <th style={thStyle}>Fecha</th>
-                        <th style={thStyle}>Causa</th>
-                        <th style={thStyle}>Categoría</th>
-                        <th style={thStyle}>Dependiente</th>
-                        <th style={thStyle}>Monto</th>
+                      <tr className="border-b-2 border-[#D4DCE9]">
+                        <th className={thClass}>Fecha</th>
+                        <th className={thClass}>Causa</th>
+                        <th className={thClass}>Categoría</th>
+                        <th className={thClass}>Dependiente</th>
+                        <th className={thClass}>Monto</th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {imprevistos.map(i => (
-                        <tr key={i.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={tdStyle}>{i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}</td>
-                          <td style={tdStyle}>{i.causa || '—'}</td>
-                          <td style={tdStyle}>{i.categoria || '—'}</td>
-                          <td style={tdStyle}>{i.dependiente || '—'}</td>
-                          <td style={{ ...tdStyle, color: 'var(--imprevistos-dark)', fontWeight: 600 }}>
+                        <tr key={i.id} className="border-b border-[#D4DCE9]">
+                          <td className={tdClass}>
+                            {i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}
+                          </td>
+                          <td className={tdClass}>{i.causa || '—'}</td>
+                          <td className={tdClass}>{i.categoria || '—'}</td>
+                          <td className={tdClass}>{i.dependiente || '—'}</td>
+                          <td className={`${tdClass} font-semibold text-[#A72B2F]`}>
                             ${Number(i.monto).toLocaleString('es-CO')}
                           </td>
                         </tr>
@@ -155,15 +148,15 @@ const Imprevistos = () => {
           </section>
         </main>
 
-        <footer className="footer-app">
+        <footer className="fixed bottom-0 left-0 z-[100] w-full border-t border-[#82F182] bg-white p-3 text-center text-xs text-[#9AA19A]">
           <p>&copy; 2026 Mi Aplicación de Finanzas</p>
         </footer>
       </div>
-    </>
+    </div>
   )
 }
 
 export default Imprevistos
 
-const thStyle = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
-const tdStyle = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
+const thClass = 'px-3 py-2.5 text-left text-[0.85rem] font-semibold text-[#4A5568]'
+const tdClass = 'px-3 py-2.5 align-middle text-sm'

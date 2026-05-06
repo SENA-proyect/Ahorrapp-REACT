@@ -1,48 +1,49 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getCategorias, crearCategoria, editarCategoria, deshabilitarCategoria, habilitarCategoria } from '../api'
-import '../styles/generalModulos.css'
+import {
+  getCategorias,
+  crearCategoria,
+  editarCategoria,
+  deshabilitarCategoria,
+  habilitarCategoria,
+} from '../api'
 
 export default function ModuloCategorias() {
-  const [categorias, setCategorias]           = useState([])
-  const [modalAgregar, setModalAgregar]       = useState(false)
-  const [modalEditar, setModalEditar]         = useState(false)
-  const [categoriaEdit, setCategoriaEdit]     = useState(null)
-  const [formNombre, setFormNombre]           = useState('')
+  const [categorias, setCategorias] = useState([])
+  const [modalAgregar, setModalAgregar] = useState(false)
+  const [modalEditar, setModalEditar] = useState(false)
+  const [categoriaEdit, setCategoriaEdit] = useState(null)
+  const [formNombre, setFormNombre] = useState('')
   const [formDescripcion, setFormDescripcion] = useState('')
-  const [isMobile, setIsMobile]               = useState(window.innerWidth <= 768)  // 👈 NUEVO
 
-  // ── Escuchar cambios de tamaño de pantalla ─────────────────────────── // 👈 NUEVO
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  // ── Cargar categorías del backend al montar ────────────────────────────
   useEffect(() => {
     getCategorias()
-      .then(data => { if (Array.isArray(data)) setCategorias(data) })
+      .then(data => {
+        if (Array.isArray(data)) setCategorias(data)
+      })
       .catch(() => {})
   }, [])
 
-  // ── Agregar categoría ──────────────────────────────────────────────────
   const handleAgregar = async () => {
     if (!formNombre.trim()) return alert('El nombre es obligatorio')
+
     const respuesta = await crearCategoria({
       nombre: formNombre.trim(),
       descripcion: formDescripcion.trim(),
     })
+
     if (respuesta.ok) {
-      const nueva = {
-        id: respuesta.id,
-        nombre: formNombre.trim(),
-        descripcion: formDescripcion.trim(),
-        activa: true,
-        sistema: false,
-        es_global: false,
-      }
-      setCategorias(prev => [...prev, nueva])
+      setCategorias(prev => [
+        ...prev,
+        {
+          id: respuesta.id,
+          nombre: formNombre.trim(),
+          descripcion: formDescripcion.trim(),
+          activa: true,
+          sistema: false,
+          es_global: false,
+        },
+      ])
       setFormNombre('')
       setFormDescripcion('')
       setModalAgregar(false)
@@ -51,22 +52,22 @@ export default function ModuloCategorias() {
     }
   }
 
-  // ── Abrir modal editar ─────────────────────────────────────────────────
-  const abrirEditar = (cat) => {
+  const abrirEditar = cat => {
     setCategoriaEdit({ ...cat })
     setModalEditar(true)
   }
 
-  // ── Guardar edición ────────────────────────────────────────────────────
   const handleGuardarEdicion = async () => {
     if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
+
     const respuesta = await editarCategoria(categoriaEdit.id, {
       nombre: categoriaEdit.nombre,
       descripcion: categoriaEdit.descripcion,
     })
+
     if (respuesta.ok) {
       setCategorias(prev =>
-        prev.map(c => c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c)
+        prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
       )
       setModalEditar(false)
     } else {
@@ -74,231 +75,192 @@ export default function ModuloCategorias() {
     }
   }
 
-  // ── Deshabilitar categoría ─────────────────────────────────────────────
-  const handleDeshabilitar = async (id) => {
+  const handleDeshabilitar = async id => {
     if (!window.confirm('¿Seguro que deseas deshabilitar esta categoría?')) return
+
     const respuesta = await deshabilitarCategoria(id)
+
     if (respuesta.ok) {
-      setCategorias(prev => prev.map(c => c.id === id ? { ...c, activa: false } : c))
+      setCategorias(prev => prev.map(c => (c.id === id ? { ...c, activa: false } : c)))
     } else {
       alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
     }
   }
 
-  // ── Habilitar categoría ────────────────────────────────────────────────
-  const handleHabilitar = async (id) => {
+  const handleHabilitar = async id => {
     const respuesta = await habilitarCategoria(id)
+
     if (respuesta.ok) {
-      setCategorias(prev => prev.map(c => c.id === id ? { ...c, activa: true } : c))
+      setCategorias(prev => prev.map(c => (c.id === id ? { ...c, activa: true } : c)))
     } else {
       alert(respuesta.mensaje || 'Error al habilitar la categoría')
     }
   }
 
-  const activas   = categorias.filter(c =>  c.activa)
+  const activas = categorias.filter(c => c.activa)
   const inactivas = categorias.filter(c => !c.activa)
 
+  const navLinks = [
+    { to: '/Dashboard', label: 'Dashboard' },
+    { to: '/ModulosIngresos', label: 'Ingresos' },
+    { to: '/ModulosGastos', label: 'Gastos' },
+    { to: '/ModuloAhorros', label: 'Ahorros' },
+    { to: '/ModuloImprevistos', label: 'Imprevistos' },
+    { to: '/ModuloDeudas', label: 'Deudas' },
+    { to: '/ModulosDependientes', label: 'Dependientes' },
+    { to: '/ModulosCategorias', label: 'Categorias', active: true },
+  ]
+
   return (
-    <div className="box-content">
+    <div className="mx-auto min-h-screen max-w-[1400px] bg-white px-5 py-5 pb-20 font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] text-[#2D2D2D]">
+      <div className="box-border px-4 py-2 lg:px-[100px]">
+        <header className="mx-auto mb-5 flex w-full flex-col items-start justify-between gap-3 border-b-2 border-[#82F182] bg-white px-5 py-[5px] text-center md:flex-row md:items-center">
+          <Link to="/">
+            <button className="flex w-[140px] cursor-pointer items-center gap-2 rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                viewBox="0 0 20 10"
+              >
+                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+              </svg>
+              Inicio
+            </button>
+          </Link>
 
-      {/* HEADER */}
-      <header className="header">
-        <Link to="/">
-          <button className="buttonHeader">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 10">
-              <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
-            </svg>
-            Inicio
+          <h1 className="text-[28px] font-bold text-[#2E7D2E]">Ahorrapp</h1>
+
+          <button className="w-[150px] cursor-pointer rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
+            Cerrar Sesion
           </button>
-        </Link>
-        <h1>Ahorrapp</h1>
-        <button className="buttonCerrarSesion">Cerrar Sesión</button>
-      </header>
+        </header>
 
-      <main>
-        <p className="parrafo1">
-          Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos
-        </p>
+        <main className="animate-[fadeUp_0.6s_ease]">
+          <p className="mb-4 text-[#2D2D2D]">
+            Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos
+          </p>
 
-        {/* NAVBAR */}
-        <nav className="navbar" aria-label="Menú de secciones">
-          <ul className="nav-list">
-            <li><Link to="/Dashboard"           className="nav-link">Dashboard</Link></li>
-            <li><Link to="/ModulosIngresos"     className="nav-link">Ingresos</Link></li>
-            <li><Link to="/ModulosGastos"       className="nav-link">Gastos</Link></li>
-            <li><Link to="/ModuloAhorros"       className="nav-link">Ahorros</Link></li>
-            <li><Link to="/ModuloImprevistos"   className="nav-link">Imprevistos</Link></li>
-            <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
-            <li><Link to="/ModulosDependientes" className="nav-link">Dependientes</Link></li>
-            <li><Link to="/ModulosCategorias"   className="nav-link active">Categorias</Link></li>
-          </ul>
-        </nav>
+          <nav
+            className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+            aria-label="Menú de secciones"
+          >
+            <ul className="flex list-none flex-wrap justify-center gap-2.5 p-0">
+              {navLinks.map(link => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className={`inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-[0.85rem] font-semibold no-underline shadow-[0_2px_6px_rgba(0,0,0,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#2E7D2E] hover:bg-[#E8FFE8] hover:text-[#2E7D2E] hover:shadow-[0_4px_10px_rgba(0,0,0,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2E7D2E] ${
+                      link.active
+                        ? 'border-transparent bg-[#E8FFE8] text-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
+                        : 'border border-transparent bg-[#F4F6F4] text-[#2D2D2D]'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        {/* CRUD */}
-        <section className="modulo-ahorros">
-          <header className="modulo-header">
-            <h3>Módulo de categorías</h3>
-            <div className="acciones-ahorro">
-              <button type="button" className="btn-secundario" onClick={() => setModalAgregar(true)}>
-                + Agregar categoría
-              </button>
-            </div>
-          </header>
+          <section>
+            <header className="mt-[30px] flex flex-col items-start justify-between gap-3 px-2.5 md:flex-row md:items-center">
+              <h3 className="text-xl font-semibold text-[#2D2D2D]">
+                Módulo de categorías
+              </h3>
 
-          <div className="resumen-container">
-            <p className="total-ahorros">
-              Total categorías activas: <strong>{activas.length}</strong>
-            </p>
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
+                  onClick={() => setModalAgregar(true)}
+                >
+                  + Agregar categoría
+                </button>
+              </div>
+            </header>
 
-            {/* ── TABLA / CARDS DE CATEGORÍAS ACTIVAS ── */}
-            <div style={{ marginTop: '20px' }}>
-              {activas.length === 0 ? (
-                <p className="mensaje-vacio">No hay categorías activas.</p>
+            <div className="my-5 flex min-h-[150px] w-full flex-col justify-center rounded-[15px] border-2 border-[#4CB04C]/20 bg-white p-[30px] text-center">
+              <p className="mb-2.5 text-2xl text-[#2D2D2D]">
+                Total categorías activas: <strong>{activas.length}</strong>
+              </p>
 
-              ) : isMobile ? (
-                // ── VISTA MÓVIL: cards ──────────────────────────────── // 👈 NUEVO
-                <div className="cards-mobile">
-                  {activas.map(cat => (
-                    <div key={cat.id} className="card-categoria">
-
-                      <div className="card-row">
-                        <span className="card-label">Nombre</span>
-                        <span className="card-value"><strong>{cat.nombre}</strong></span>
-                      </div>
-
-                      <div className="card-row">
-                        <span className="card-label">Descripción</span>
-                        <span className="card-value">{cat.descripcion || '—'}</span>
-                      </div>
-
-                      <div className="card-row">
-                        <span className="card-label">Tipo</span>
-                        <span className="card-value">
-                          <span style={cat.es_global ? badgeSistema : badgeUsuario}>
-                            {cat.es_global ? 'Sistema' : 'Personalizada'}
-                          </span>
-                        </span>
-                      </div>
-
-                      {/* Acciones solo para categorías del usuario */}
-                      {!cat.es_global && (
-                        <div className="card-row" style={{ marginTop: '4px', gap: '8px', justifyContent: 'flex-end' }}>
-                          <button
-                            className="btn-secundario"
-                            style={{ fontSize: '0.8rem', padding: '4px 10px' }}
-                            onClick={() => abrirEditar(cat)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            style={{ ...btnDeshabilitar, fontSize: '0.8rem', padding: '4px 10px' }}
-                            onClick={() => handleDeshabilitar(cat.id)}
-                          >
-                            Deshabilitar
-                          </button>
-                        </div>
-                      )}
-
-                    </div>
-                  ))}
-                </div>
-
-              ) : (
-                // ── VISTA ESCRITORIO: tabla ──────────────────────────────
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-                      <th style={thStyle}>Nombre</th>
-                      <th style={thStyle}>Descripción</th>
-                      <th style={thStyle}>Tipo</th>
-                      <th style={thStyle}>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activas.map(cat => (
-                      <tr key={cat.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={tdStyle}><strong>{cat.nombre}</strong></td>
-                        <td style={tdStyle}>{cat.descripcion || '—'}</td>
-                        <td style={tdStyle}>
-                          <span style={cat.es_global ? badgeSistema : badgeUsuario}>
-                            {cat.es_global ? 'Sistema' : 'Personalizada'}
-                          </span>
-                        </td>
-                        <td style={tdStyle}>
-                          {!cat.es_global && (
-                            <>
-                              <button
-                                className="btn-secundario"
-                                style={{ marginRight: '8px', fontSize: '0.8rem', padding: '4px 10px' }}
-                                onClick={() => abrirEditar(cat)}
-                              >
-                                Editar
-                              </button>
-                              <button
-                                style={{ ...btnDeshabilitar, fontSize: '0.8rem', padding: '4px 10px' }}
-                                onClick={() => handleDeshabilitar(cat.id)}
-                              >
-                                Deshabilitar
-                              </button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-
-            {/* ── CATEGORÍAS DESHABILITADAS ── */}
-            {inactivas.length > 0 && (
-              <div style={{ marginTop: '32px' }}>
-                <p style={{ color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '10px' }}>
-                  Categorías deshabilitadas ({inactivas.length})
-                </p>
-
-                {isMobile ? (
-                  // ── VISTA MÓVIL: cards inactivas ─────────────────────── // 👈 NUEVO
-                  <div className="cards-mobile" style={{ opacity: 0.6 }}>
-                    {inactivas.map(cat => (
-                      <div key={cat.id} className="card-categoria">
-
-                        <div className="card-row">
-                          <span className="card-label">Nombre</span>
-                          <span className="card-value"><s>{cat.nombre}</s></span>
-                        </div>
-
-                        <div className="card-row">
-                          <span className="card-label">Descripción</span>
-                          <span className="card-value">{cat.descripcion || '—'}</span>
-                        </div>
-
-                        <div className="card-row" style={{ justifyContent: 'flex-end' }}>
-                          <button
-                            className="btn-secundario"
-                            style={{ fontSize: '0.8rem', padding: '4px 10px' }}
-                            onClick={() => handleHabilitar(cat.id)}
-                          >
-                            Habilitar
-                          </button>
-                        </div>
-
-                      </div>
-                    ))}
-                  </div>
-
+              <div className="mt-5 overflow-x-auto">
+                {activas.length === 0 ? (
+                  <p className="italic text-[#9AA19A]">No hay categorías activas.</p>
                 ) : (
-                  // ── VISTA ESCRITORIO: tabla inactivas ────────────────────
-                  <table style={{ width: '100%', borderCollapse: 'collapse', opacity: 0.6 }}>
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b-2 border-[#D4DCE9]">
+                        <th className={thClass}>Nombre</th>
+                        <th className={thClass}>Descripción</th>
+                        <th className={thClass}>Tipo</th>
+                        <th className={thClass}>Acciones</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {activas.map(cat => (
+                        <tr key={cat.id} className="border-b border-[#D4DCE9]">
+                          <td className={tdClass}>
+                            <strong>{cat.nombre}</strong>
+                          </td>
+                          <td className={tdClass}>{cat.descripcion || '—'}</td>
+                          <td className={tdClass}>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                                cat.es_global
+                                  ? 'bg-[#4CB04C]/10 text-[#2E7D2E]'
+                                  : 'bg-[#E7F7F1] text-[#1F7A59]'
+                              }`}
+                            >
+                              {cat.es_global ? 'Sistema' : 'Personalizada'}
+                            </span>
+                          </td>
+                          <td className={tdClass}>
+                            {!cat.es_global && (
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  className="cursor-pointer rounded-md bg-[#3DA63D] px-2.5 py-1 text-[0.8rem] font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
+                                  onClick={() => abrirEditar(cat)}
+                                >
+                                  Editar
+                                </button>
+
+                                <button
+                                  className="cursor-pointer rounded-md border border-[#FFCC80] bg-[#FFF3E0] px-2.5 py-1 text-[0.8rem] font-semibold text-[#E65100] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FFE0B2]"
+                                  onClick={() => handleDeshabilitar(cat.id)}
+                                >
+                                  Deshabilitar
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              {inactivas.length > 0 && (
+                <div className="mt-8 overflow-x-auto">
+                  <p className="mb-2.5 text-left font-semibold text-[#4A5568]">
+                    Categorías deshabilitadas ({inactivas.length})
+                  </p>
+
+                  <table className="w-full border-collapse text-left opacity-60">
                     <tbody>
                       {inactivas.map(cat => (
-                        <tr key={cat.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={tdStyle}><s>{cat.nombre}</s></td>
-                          <td style={tdStyle}>{cat.descripcion || '—'}</td>
-                          <td style={tdStyle}>
+                        <tr key={cat.id} className="border-b border-[#D4DCE9]">
+                          <td className={tdClass}>
+                            <s>{cat.nombre}</s>
+                          </td>
+                          <td className={tdClass}>{cat.descripcion || '—'}</td>
+                          <td className={tdClass}>
                             <button
-                              className="btn-secundario"
-                              style={{ fontSize: '0.8rem', padding: '4px 10px' }}
+                              className="cursor-pointer rounded-md bg-[#3DA63D] px-2.5 py-1 text-[0.8rem] font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
                               onClick={() => handleHabilitar(cat.id)}
                             >
                               Habilitar
@@ -308,31 +270,56 @@ export default function ModuloCategorias() {
                       ))}
                     </tbody>
                   </table>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
+                </div>
+              )}
+            </div>
+          </section>
+        </main>
 
-      <footer className="footer-app">
-        <p>&copy; 2026 Mi Aplicación de Finanzas</p>
-      </footer>
+        <footer className="fixed bottom-0 left-0 z-[100] w-full border-t border-[#82F182] bg-white p-3 text-center text-xs text-[#9AA19A]">
+          <p>&copy; 2026 Mi Aplicación de Finanzas</p>
+        </footer>
+      </div>
 
-      {/* ── MODAL AGREGAR ── */}
       {modalAgregar && (
-        <div style={overlayStyle}>
-          <div style={modalStyle}>
-            <h3 style={{ marginBottom: '16px' }}>Nueva categoría</h3>
-            <label style={labelStyle}>Nombre *</label>
-            <input style={inputStyle} type="text" placeholder="Ej: Ropa, Mascotas..."
-              value={formNombre} onChange={e => setFormNombre(e.target.value)} />
-            <label style={labelStyle}>Descripción</label>
-            <input style={inputStyle} type="text" placeholder="Descripción opcional"
-              value={formDescripcion} onChange={e => setFormDescripcion(e.target.value)} />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button className="btn-secundario" onClick={handleAgregar}>Guardar</button>
-              <button style={btnCancelar} onClick={() => { setModalAgregar(false); setFormNombre(''); setFormDescripcion('') }}>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
+            <h3 className="mb-4 text-xl font-semibold text-[#2D2D2D]">Nueva categoría</h3>
+
+            <label className={labelClass}>Nombre *</label>
+            <input
+              className={inputClass}
+              type="text"
+              placeholder="Ej: Ropa, Mascotas..."
+              value={formNombre}
+              onChange={e => setFormNombre(e.target.value)}
+            />
+
+            <label className={labelClass}>Descripción</label>
+            <input
+              className={inputClass}
+              type="text"
+              placeholder="Descripción opcional"
+              value={formDescripcion}
+              onChange={e => setFormDescripcion(e.target.value)}
+            />
+
+            <div className="mt-5 flex gap-2.5">
+              <button
+                className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
+                onClick={handleAgregar}
+              >
+                Guardar
+              </button>
+
+              <button
+                className="cursor-pointer rounded-lg border border-[#D4DCE9] bg-white px-[18px] py-2 font-semibold text-[#4A5568] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E8FFE8]"
+                onClick={() => {
+                  setModalAgregar(false)
+                  setFormNombre('')
+                  setFormDescripcion('')
+                }}
+              >
                 Cancelar
               </button>
             </div>
@@ -340,37 +327,57 @@ export default function ModuloCategorias() {
         </div>
       )}
 
-      {/* ── MODAL EDITAR ── */}
       {modalEditar && categoriaEdit && (
-        <div style={overlayStyle}>
-          <div style={modalStyle}>
-            <h3 style={{ marginBottom: '16px' }}>Editar categoría</h3>
-            <label style={labelStyle}>Nombre *</label>
-            <input style={inputStyle} type="text" value={categoriaEdit.nombre}
-              onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))} />
-            <label style={labelStyle}>Descripción</label>
-            <input style={inputStyle} type="text" value={categoriaEdit.descripcion || ''}
-              onChange={e => setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))} />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button className="btn-secundario" onClick={handleGuardarEdicion}>Guardar cambios</button>
-              <button style={btnCancelar} onClick={() => setModalEditar(false)}>Cancelar</button>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
+            <h3 className="mb-4 text-xl font-semibold text-[#2D2D2D]">
+              Editar categoría
+            </h3>
+
+            <label className={labelClass}>Nombre *</label>
+            <input
+              className={inputClass}
+              type="text"
+              value={categoriaEdit.nombre}
+              onChange={e =>
+                setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))
+              }
+            />
+
+            <label className={labelClass}>Descripción</label>
+            <input
+              className={inputClass}
+              type="text"
+              value={categoriaEdit.descripcion || ''}
+              onChange={e =>
+                setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))
+              }
+            />
+
+            <div className="mt-5 flex gap-2.5">
+              <button
+                className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
+                onClick={handleGuardarEdicion}
+              >
+                Guardar cambios
+              </button>
+
+              <button
+                className="cursor-pointer rounded-lg border border-[#D4DCE9] bg-white px-[18px] py-2 font-semibold text-[#4A5568] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E8FFE8]"
+                onClick={() => setModalEditar(false)}
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   )
 }
 
-// ─── Estilos inline reutilizables ─────────────────────────────────────────────
-const thStyle         = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
-const tdStyle         = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
-const badgeSistema    = { background: 'var(--color-primary-soft)', color: 'var(--color-primary-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
-const badgeUsuario    = { background: 'var(--ingresos-bg)', color: 'var(--ingresos-dark)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }
-const btnDeshabilitar = { background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
-const overlayStyle    = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
-const modalStyle      = { background: '#fff', borderRadius: '12px', padding: '32px', width: '100%', maxWidth: '420px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }
-const labelStyle      = { display: 'block', marginBottom: '6px', marginTop: '14px', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }
-const inputStyle      = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none' }
-const btnCancelar     = { padding: '8px 18px', borderRadius: '8px', border: '1px solid var(--border-color)', background: '#fff', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }
+const thClass = 'px-3 py-2.5 text-left text-[0.85rem] font-semibold text-[#4A5568]'
+const tdClass = 'px-3 py-2.5 align-middle text-sm'
+const labelClass = 'mb-1.5 mt-3.5 block text-sm font-semibold text-[#1A1A1A]'
+const inputClass =
+  'w-full rounded-lg border border-[#D4DCE9] px-3 py-2.5 text-sm outline-none transition focus:border-[#4CB04C] focus:ring-2 focus:ring-[#4CB04C]/20'
