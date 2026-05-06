@@ -150,8 +150,8 @@ const getIngresos = async (req, res) => {
 // ── UPDATE Ingresos ───────────────────────────────────────────
 const updateIngresos = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  
-  const { id, monto, descripcion, fuente, fecha_registro, id_categoria } = req.body;
+  const { id } = req.params;
+  const { monto, descripcion, fuente, fecha_registro, id_categoria } = req.body;
     try {
     const [rows] = await pool.query(
         `UPDATE INGRESOS    
@@ -173,18 +173,38 @@ const updateIngresos = async (req, res) => {
 const deleteIngresos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-    try {    const [rows] = await pool.query(
-        `DELETE FROM INGRESOS    
-            WHERE ID_ingresos = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [id, ID_usuario]
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
+    const [[ingreso]] = await connection.query(
+      `SELECT e.ID_entrada, e.ID_movimiento
+       FROM INGRESOS i
+       INNER JOIN ENTRADA e     ON i.ID_entrada    = e.ID_entrada
+       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
+       WHERE i.ID_ingresos = ? AND m.ID_usuario = ?`,
+      [id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
+
+    if (!ingreso) {
+      await connection.rollback();
+      return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
     }
+
+    // 2. Borrar en cascada
+    await connection.query(`DELETE FROM INGRESOS    WHERE ID_ingresos = ?`,       [id]);
+    await connection.query(`DELETE FROM ENTRADA     WHERE ID_entrada = ?`,         [ingreso.ID_entrada]);
+    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`,      [ingreso.ID_movimiento]);
+
+    await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Ingreso eliminado exitosamente" });
-    } catch (error) {
+  } catch (error) {
+    await connection.rollback();
     console.error("Error en deleteIngresos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  } finally {
+    connection.release();
   }
 };
 
@@ -217,7 +237,8 @@ const getAhorros = async (req, res) => {
 // ── UPDATE Ahorros ────────────────────────────────────────────
 const updateAhorros = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  const { id, monto, monto_acumulado, descripcion, meta, fecha_meta } = req.body;
+  const { id } = req.params;
+  const { monto, monto_acumulado, descripcion, meta, fecha_meta } = req.body;
 
   try {
     const [rows] = await pool.query(
@@ -242,20 +263,42 @@ const updateAhorros = async (req, res) => {
 const deleteAhorros = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-    try {    const [rows] = await pool.query(
-        `DELETE FROM AHORROS    
-            WHERE ID_ahorros = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [id, ID_usuario]
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
+    const [[ahorro]] = await connection.query(
+      `SELECT e.ID_entrada, e.ID_movimiento
+       FROM AHORROS a
+       INNER JOIN ENTRADA e     ON a.ID_entrada    = e.ID_entrada
+       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
+       WHERE a.ID_ahorros = ? AND m.ID_usuario = ?`,
+      [id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
+
+    if (!ahorro) {
+      await connection.rollback();
+      return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
     }
+
+    // 2. Borrar en cascada
+    await connection.query(`DELETE FROM AHORROS    
+        WHERE ID_ahorros = ?`, [id]);
+    await connection.query(`DELETE FROM ENTRADA     WHERE ID_entrada = ?`, [ahorro.ID_entrada]);
+    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [ahorro.ID_movimiento]);
+
+    await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Ahorro eliminado exitosamente" });
-    } catch (error) {
+  } catch (error) {
+    await connection.rollback();
     console.error("Error en deleteAhorros:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  } finally {
+    connection.release();
   }
 };
+
 
 // <==&&==·········· GASTOS ··········==&&==>
 
@@ -287,7 +330,8 @@ const getGastos = async (req, res) => {
 // ── UPDATE Gastos ─────────────────────────────────────────────
 const updateGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  const { id, monto, descripcion, fecha_registro, id_categoria, id_dependiente } = req.body;
+  const { id } = req.params;
+  const { monto, descripcion, fecha_registro, id_categoria, id_dependiente } = req.body;
     try {
     const [rows] = await pool.query(
         `UPDATE GASTOS    
@@ -309,19 +353,33 @@ const updateGastos = async (req, res) => {
 const deleteGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  try {
-    const [rows] = await pool.query(
-      `DELETE FROM GASTOS
-       WHERE ID_gastos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+  const connection = await pool.getConnection();
+    try {    await connection.beginTransaction();
+    // 1. Buscar el ID_salida y ID_movimiento antes de borrar
+    const [[gasto]] = await connection.query(
+      `SELECT s.ID_salida, s.ID_movimiento
+         FROM GASTOS g
+            INNER JOIN SALIDA s       ON g.ID_salida      = s.ID_salida
+            INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
+         WHERE g.ID_gastos = ? AND m.ID_usuario = ?`,
       [id, ID_usuario]
-    );
-    if (rows.affectedRows === 0) {
+    );  
+    if (!gasto) {
+      await connection.rollback();
       return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
     }
+    // 2. Borrar en cascada
+    await connection.query(`DELETE FROM GASTOS    
+        WHERE ID_gastos = ?`, [id]);
+    await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [gasto.ID_salida]);
+    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [gasto.ID_movimiento]);
+    await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Gasto eliminado exitosamente" });
-  } catch (error) {
+    } catch (error) {
+    await connection.rollback();
     console.error("Error en deleteGastos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  } finally {    connection.release();
   }
 };
 
@@ -355,7 +413,8 @@ const getImprevistos = async (req, res) => {
 // ── UPDATE Imprevistos ────────────────────────────────────────
 const updateImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
-    const { id, monto, causa, fecha_registro, id_categoria, id_dependiente } = req.body;
+    const { id } = req.params;
+    const { monto, causa, fecha_registro, id_categoria, id_dependiente } = req.body;
     try {    const [rows] = await pool.query(
         `UPDATE IMPREVISTOS    
             SET Monto = ?, Causa = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependiente = ?
@@ -375,19 +434,34 @@ const updateImprevistos = async (req, res) => {
 // ── DELETE Imprevistos ────────────────────────────────────────
 const deleteImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
-    const { id } = req.params;
-    try {    const [rows] = await pool.query(
-        `DELETE FROM IMPREVISTOS    
-            WHERE ID_imprevistos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+  const { id } = req.params;
+  const connection = await pool.getConnection();
+    try {    await connection.beginTransaction();
+    // 1. Buscar el ID_salida y ID_movimiento antes de borrar
+    const [[imprevisto]] = await connection.query(
+        `SELECT s.ID_salida, s.ID_movimiento
+            FROM IMPREVISTOS i
+            INNER JOIN SALIDA s       ON i.ID_salida      = s.ID_salida
+            INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
+            WHERE i.ID_imprevistos = ? AND m.ID_usuario = ?`,
         [id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado" });
+    if (!imprevisto) {
+      await connection.rollback();
+      return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado" });
     }
+    // 2. Borrar en cascada
+    await connection.query(`DELETE FROM IMPREVISTOS    
+        WHERE ID_imprevistos = ?`, [id]);
+    await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [imprevisto.ID_salida]);
+    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [imprevisto.ID_movimiento]);
+    await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Imprevisto eliminado exitosamente" });
     } catch (error) {
+    await connection.rollback();
     console.error("Error en deleteImprevistos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  } finally {    connection.release();
   }
 };
 
@@ -421,7 +495,8 @@ const getDeudas = async (req, res) => {
 // ── UPDATE Deudas ─────────────────────────────────────────────
 const updateDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
-    const { id, monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria } = req.body;
+    const { id } = req.params;
+    const { monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria } = req.body;
     try {    const [rows] = await pool.query(
         `UPDATE DEUDAS    
             SET Monto = ?, Fuente = ?, Descripcion = ?, Cuotas_total = ?, Cuotas_pagadas = ?, Fecha_inicio = ?, Fecha_fin = ?, Estado = ?, ID_categoria = ?
@@ -442,19 +517,34 @@ const updateDeudas = async (req, res) => {
 const deleteDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-    try {    const [rows] = await pool.query(
-        `DELETE FROM DEUDAS    
-            WHERE ID_deudas = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+  const connection = await pool.getConnection();
+    try {    await connection.beginTransaction();
+    // 1. Buscar el ID_salida y ID_movimiento antes de borrar
+    const [[deuda]] = await connection.query(
+        `SELECT s.ID_salida, s.ID_movimiento
+            FROM DEUDAS d
+            INNER JOIN SALIDA s      ON d.ID_salida     = s.ID_salida
+            INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
+            WHERE d.ID_deudas = ? AND m.ID_usuario = ?`,
         [id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
+    if (!deuda) {
+      await connection.rollback();
+      return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
     }
+    // 2. Borrar en cascada
+    await connection.query(`DELETE FROM DEUDAS    
+        WHERE ID_deudas = ?`, [id]);
+    await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [deuda.ID_salida]);
+    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [deuda.ID_movimiento]);
+    await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Deuda eliminada exitosamente" });
     } catch (error) {
+    await connection.rollback();
     console.error("Error en deleteDeudas:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-    }
+  } finally {    connection.release();
+  }
 };
 
 
