@@ -5,15 +5,25 @@ const crearMovimiento = async (req, res) => {
 
   try {
     const ID_usuario = req.usuario.id;
+
     const { tipo_flujo, subtipo_modulo, datos } = req.body;
 
+    if (!datos?.monto) {
+    return res.status(400).json({ ok: false, mensaje: "El campo monto es requerido" });
+    }
+
     // Validar coherencia entre tipo_flujo y subtipo_modulo
+    if (!["Entrada", "Salida"].includes(tipo_flujo)) {
+    return res.status(400).json({ ok: false, mensaje: "tipo_flujo inválido" });
+    }
+
     const entradas = ["Ahorro", "Ingreso"];
     const salidas  = ["Gasto", "Deuda", "Imprevisto"];
 
     if (tipo_flujo === "Entrada" && !entradas.includes(subtipo_modulo)) {
       return res.status(400).json({ ok: false, mensaje: "Subtipo inválido para Entrada" });
     }
+
     if (tipo_flujo === "Salida" && !salidas.includes(subtipo_modulo)) {
       return res.status(400).json({ ok: false, mensaje: "Subtipo inválido para Salida" });
     }
@@ -112,6 +122,8 @@ const crearMovimiento = async (req, res) => {
   }
 };
 
+// <==&&==·········· INGRESOS ··········==&&==>
+
 // ── GET Ingresos ───────────────────────────────────────────
 const getIngresos = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -134,6 +146,49 @@ const getIngresos = async (req, res) => {
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
+
+// ── UPDATE Ingresos ───────────────────────────────────────────
+const updateIngresos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  
+  const { id, monto, descripcion, fuente, fecha_registro, id_categoria } = req.body;
+    try {
+    const [rows] = await pool.query(
+        `UPDATE INGRESOS    
+            SET Monto = ?, Descripcion = ?, Fuente = ?, Fecha_registro = ?, ID_categoria = ?
+            WHERE ID_ingresos = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [monto, descripcion, fuente, fecha_registro, id_categoria, id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Ingreso actualizado exitosamente" });
+    } catch (error) {
+    console.error("Error en updateIngresos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// ── DELETE Ingresos ────────────────────────────────────────────
+const deleteIngresos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id } = req.params;
+    try {    const [rows] = await pool.query(
+        `DELETE FROM INGRESOS    
+            WHERE ID_ingresos = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Ingreso eliminado exitosamente" });
+    } catch (error) {
+    console.error("Error en deleteIngresos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// <==&&==·········· AHORROS ··········==&&==>
 
 // ── GET Ahorros ────────────────────────────────────────────
 const getAhorros = async (req, res) => {
@@ -158,6 +213,51 @@ const getAhorros = async (req, res) => {
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
+
+// ── UPDATE Ahorros ────────────────────────────────────────────
+const updateAhorros = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id, monto, monto_acumulado, descripcion, meta, fecha_meta } = req.body;
+
+  try {
+    const [rows] = await pool.query(
+      `UPDATE AHORROS
+       SET Monto = ?, Monto_acumulado = ?, Descripcion = ?, Meta = ?, Fecha_meta = ?
+       WHERE ID_ahorros = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+      [monto, monto_acumulado, descripcion, meta, fecha_meta, id, ID_usuario]
+    );
+
+    if (rows.affectedRows === 0) {
+      return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
+    }
+
+    res.status(200).json({ ok: true, mensaje: "Ahorro actualizado exitosamente" });
+  } catch (error) {
+    console.error("Error en updateAhorros:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// ── DELETE Ahorros ─────────────────────────────────────────────
+const deleteAhorros = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id } = req.params;
+    try {    const [rows] = await pool.query(
+        `DELETE FROM AHORROS    
+            WHERE ID_ahorros = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Ahorro eliminado exitosamente" });
+    } catch (error) {
+    console.error("Error en deleteAhorros:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// <==&&==·········· GASTOS ··········==&&==>
 
 // ── GET Gastos ─────────────────────────────────────────────
 const getGastos = async (req, res) => {
@@ -184,6 +284,49 @@ const getGastos = async (req, res) => {
   }
 };
 
+// ── UPDATE Gastos ─────────────────────────────────────────────
+const updateGastos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id, monto, descripcion, fecha_registro, id_categoria, id_dependiente } = req.body;
+    try {
+    const [rows] = await pool.query(
+        `UPDATE GASTOS    
+            SET Monto = ?, Descripcion = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependiente = ?
+            WHERE ID_gastos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [monto, descripcion, fecha_registro, id_categoria, id_dependiente, id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Gasto actualizado exitosamente" });
+    } catch (error) {
+    console.error("Error en updateGastos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// ── DELETE Gastos ────────────────────────────────────────
+const deleteGastos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query(
+      `DELETE FROM GASTOS
+       WHERE ID_gastos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+      [id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+      return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Gasto eliminado exitosamente" });
+  } catch (error) {
+    console.error("Error en deleteGastos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// <==&&==·········· IMPREVISTOS ··········==&&==>
+
 // ── GET Imprevistos ────────────────────────────────────────
 const getImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -209,6 +352,47 @@ const getImprevistos = async (req, res) => {
   }
 };
 
+// ── UPDATE Imprevistos ────────────────────────────────────────
+const updateImprevistos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+    const { id, monto, causa, fecha_registro, id_categoria, id_dependiente } = req.body;
+    try {    const [rows] = await pool.query(
+        `UPDATE IMPREVISTOS    
+            SET Monto = ?, Causa = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependiente = ?
+            WHERE ID_imprevistos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [monto, causa, fecha_registro, id_categoria, id_dependiente, id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Imprevisto actualizado exitosamente" });
+    } catch (error) {
+    console.error("Error en updateImprevistos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// ── DELETE Imprevistos ────────────────────────────────────────
+const deleteImprevistos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+    const { id } = req.params;
+    try {    const [rows] = await pool.query(
+        `DELETE FROM IMPREVISTOS    
+            WHERE ID_imprevistos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Imprevisto eliminado exitosamente" });
+    } catch (error) {
+    console.error("Error en deleteImprevistos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+
+// <==&&==·········· DEUDAS ··········==&&==>
 // ── GET Deudas ─────────────────────────────────────────────
 const getDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -234,4 +418,44 @@ const getDeudas = async (req, res) => {
   }
 };
 
-module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas };
+// ── UPDATE Deudas ─────────────────────────────────────────────
+const updateDeudas = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+    const { id, monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria } = req.body;
+    try {    const [rows] = await pool.query(
+        `UPDATE DEUDAS    
+            SET Monto = ?, Fuente = ?, Descripcion = ?, Cuotas_total = ?, Cuotas_pagadas = ?, Fecha_inicio = ?, Fecha_fin = ?, Estado = ?, ID_categoria = ?
+            WHERE ID_deudas = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria, id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Deuda actualizada exitosamente" });
+    } catch (error) {
+    console.error("Error en updateDeudas:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// ── DELETE Deudas ─────────────────────────────────────────────
+const deleteDeudas = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id } = req.params;
+    try {    const [rows] = await pool.query(
+        `DELETE FROM DEUDAS    
+            WHERE ID_deudas = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+        [id, ID_usuario]
+    );
+    if (rows.affectedRows === 0) {
+        return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
+    }
+    res.status(200).json({ ok: true, mensaje: "Deuda eliminada exitosamente" });
+    } catch (error) {
+    console.error("Error en deleteDeudas:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+    }
+};
+
+
+module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas };
