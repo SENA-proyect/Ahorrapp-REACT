@@ -2,7 +2,7 @@ import '../styles/vista.css'
 
 export default function PanelHistorial({ historial = [] }) {
   return (
-    <div>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }} >
 
       <div className="inf-container">
         <h2>Historial de Acciones</h2>

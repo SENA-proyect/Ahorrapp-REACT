@@ -77,12 +77,11 @@ export default function Registro() {
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
 
-
-  const [form, setForm] = useState ({
+  const [form, setForm] = useState({
     nombre: "",
     apellido: "",
     correo: "",
-    contraseña: ""
+    password: "",
   });
 
   useEffect(() => {
@@ -137,73 +136,68 @@ export default function Registro() {
   }, []);
 
   const handleChange = (e) => {
-    setForm ({
-      ...form,
-      [e.target.name]: e.target.value
-    })
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(null);
-  setCargando(true);
+    e.preventDefault();
+    setError(null);
+    setCargando(true);
 
-  if (!form.nombre || !form.apellido || !form.correo || !form.contraseña) {
-    setError("Todos los campos son obligatorios");
-    setCargando(false);
-    return; // Salimos si falta algún campo
-  }
-
-  // Validación del checkbox
-  const checkbox = document.getElementById("terminos");
-  if (!checkbox.checked) {
-    setError("Debes aceptar los términos y condiciones.");
-    setCargando(false);
-    return; // Salimos si no está marcado
-  }
-
-  try {
-    // Intentamos registrar al usuario
-    const respuesta = await registerUser(form);
-    setCargando(false);
-
-    if (respuesta.ok) {
-      navigate("/Login"); // Redirige al login si todo bien
-    } else {
-      setError(respuesta.mensaje); // Mostrar error devuelto por backend
+    if (!form.nombre || !form.apellido || !form.correo || !form.password) {
+      setError("Todos los campos son obligatorios");
+      setCargando(false);
+      return;
     }
-  } catch (err) {
-    setError("Error en el registro. Intenta de nuevo.");
-    setCargando(false);
-  }
-};
+
+    const checkbox = document.getElementById("terminos");
+    if (!checkbox.checked) {
+      setError("Debes aceptar los términos y condiciones.");
+      setCargando(false);
+      return;
+    }
+
+    try {
+      const respuesta = await registerUser(form);
+
+      if (respuesta.ok) {
+        navigate("/Login");
+      } else {
+        setError(respuesta.mensaje);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error en el registro. Intenta de nuevo.");
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-
       <canvas ref={canvasRef} className="registro-canvas" />
 
       <div className="registro-container">
         <form className="form-register" onSubmit={handleSubmit}>
           <h4 className="h4Text">Formulario Registro!</h4>
 
-          <input value={form.nombre} onChange={handleChange} className="controls" type="text" name="nombre" placeholder="Ingrese su nombre" />
-          <input value={form.apellido} onChange={handleChange} className="controls" type="text" name="apellido" placeholder="Ingrese su apellido" />
-          <input value={form.correo} onChange={handleChange} className="controls" type="email" name="correo" placeholder="Ingrese su correo" />
-          <input value={form.contraseña} onChange={handleChange} className="controls" type="password" name="contraseña" placeholder="Ingrese su contraseña" />
+          <input value={form.nombre}   onChange={handleChange} className="controls" type="text"     name="nombre"   placeholder="Ingrese su nombre" />
+          <input value={form.apellido} onChange={handleChange} className="controls" type="text"     name="apellido" placeholder="Ingrese su apellido" />
+          <input value={form.correo}   onChange={handleChange} className="controls" type="email"    name="correo"   placeholder="Ingrese su correo" />
+          <input value={form.password} onChange={handleChange} className="controls" type="password" name="password" placeholder="Ingrese su contraseña" />
 
-       <div className="containerTerminos">
-          <input type="checkbox" id="terminos" className="checkbox-terminos" />
-          <label htmlFor="terminos" className="terminosCondiciones">
-            Estoy de acuerdo con <a href="#">Términos y condiciones</a>
-          </label>
-        </div>
-          
-         {error && (
-          <p style={{ color: "#ff6b6b", fontSize: "14px", textAlign: "center"}}>
-            {error}
-          </p>
-         )}
+          <div className="containerTerminos">
+            <input type="checkbox" id="terminos" className="checkbox-terminos" />
+            <label htmlFor="terminos" className="terminosCondiciones">
+              Estoy de acuerdo con <a href="#">Términos y condiciones</a>
+            </label>
+          </div>
+
+          {error && (
+            <p style={{ color: "#ff6b6b", fontSize: "14px", textAlign: "center" }}>
+              {error}
+            </p>
+          )}
 
           <button className="bottom" type="submit" disabled={cargando}>
             {cargando ? "Registrando..." : "Registrar"}
