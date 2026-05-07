@@ -10,4 +10,33 @@ backend:
 npm install nodemon express cors axios bcrypt jsonwebtoken node-fetch
 
 frontend:
-npm install axios
+npm install -D tailwindcss postcss autoprefixer axios
+
+npx tailwindcss init -p
+
+por si ahi errores con tailwind:
+npm install --force tailwindcss postcss autoprefixer
+
+crear carpetas
+1- tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+2- postcss.config.js
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+npm install -D postcss autoprefixer

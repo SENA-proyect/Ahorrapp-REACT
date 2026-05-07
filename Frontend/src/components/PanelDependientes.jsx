@@ -1,6 +1,6 @@
 // src/components/PanelDependientes.jsx
 import { Link } from 'react-router-dom'
-import '../styles/panel.css'
+
 
 export default function PanelDependientes({ dependientes = [] }) {
   return (

@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom"
 import { useState, useEffect } from "react"
 import '../styles/generalModulos.css'
-import '../styles/VentanaModal.css'
-import '../styles/dependientes.css'
+// import '../styles/VentanaModal.css'
+// import '../styles/dependientes.css'
 
 const PESO_LABELS = {
   1: 'Muy bajo',

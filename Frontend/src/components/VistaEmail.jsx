@@ -1,4 +1,4 @@
-import '../styles/vista.css'
+// import '../styles/vista.css'
 
 export default function EmailConfirmacion() {
   return (
