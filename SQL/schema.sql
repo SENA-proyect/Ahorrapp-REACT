@@ -469,7 +469,7 @@ CREATE TABLE categorias (
   activa      BOOLEAN DEFAULT true,
   sistema     BOOLEAN DEFAULT false,
   id_usuario  INT, NULL
-  FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+  FOREIGN KEY (id_usuario) REFERENCES USUARIOS (id)
 )
 
 
