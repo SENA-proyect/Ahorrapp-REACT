@@ -88,6 +88,7 @@ const Ahorros = () => {
               <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
               <li><Link to="/ModulosDependientes" className="nav-link">Dependientes</Link></li>
               <li><Link to="/ModulosCategorias"   className="nav-link">Categorías</Link></li>
+              <li><Link to="/noticias" className="nav-link">📰 Noticias</Link></li>
             </ul>
           </nav>
 
@@ -120,7 +121,6 @@ const Ahorros = () => {
                         <th style={thStyle}>Meta fecha</th>
                         <th style={thStyle}>Monto</th>
                         <th style={thStyle}>Acumulado</th>
-                        <th style={thStyle}>Acciones</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -1,6 +1,0 @@
-IMPREVISTO
-error al momento de actualizar, no se conservan los valores anteriormente registrados
-GASTO
-Mismo error que con imprevistos
-DEUDAS
-error con el update en categorias, de resto todo bien

@@ -86,3 +86,51 @@ export const habilitarCategoria = async (id) => {
   });
   return response.json();
 };
+
+// ── Movimientos y Finanzas (Para el Asistente) ────────────────────────────────
+
+export const getMovimientos = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/movimientos`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json();
+  return data.movimientos ?? data ?? [];
+};
+
+export const getResumenFinancieroBreve = async () => {
+  try {
+    const movimientos = await getMovimientos();
+    
+    const deudas = movimientos.filter(m => m.tipo === 'deuda' || m.tipo_movimiento === 'deuda');
+    const ahorros = movimientos.filter(m => m.tipo === 'ahorro' || m.tipo_movimiento === 'ahorro');
+    const ingresosTotales = movimientos
+      .filter(m => m.tipo === 'ingreso')
+      .reduce((acc, curr) => acc + Number(curr.monto || 0), 0);
+    const gastosTotales = movimientos
+      .filter(m => m.tipo === 'gasto')
+      .reduce((acc, curr) => acc + Number(curr.monto || 0), 0);
+
+    let contextoTextual = `CONTEXTO FINANCIERO REAL DEL USUARIO:\n`;
+    contextoTextual += `- Ingresos totales de este mes: $${ingresosTotales}\n`;
+    contextoTextual += `- Gastos totales de este mes: $${gastosTotales}\n`;
+    contextoTextual += `- Balance actual: $${ingresosTotales - gastosTotales}\n`;
+    
+    contextoTextual += `\nDEUDAS ACTIVAS:\n`;
+    if (deudas.length === 0) contextoTextual += "  Sin deudas registradas.\n";
+    deudas.forEach(d => {
+      contextoTextual += `  * ${d.descripcion || 'Deuda'}: $${d.monto} (Estado: ${d.estado || 'Pendiente'})\n`;
+    });
+
+    contextoTextual += `\nPLANES DE AHORRO:\n`;
+    if (ahorros.length === 0) contextoTextual += "  Sin ahorros registrados.\n";
+    ahorros.forEach(a => {
+      contextoTextual += `  * ${a.descripcion || 'Ahorro'}: $${a.monto}\n`;
+    });
+
+    return contextoTextual;
+  } catch (error) {
+    console.error("Error al recopilar el contexto financiero:", error);
+    return "No se pudo cargar la información financiera actual del usuario.";
+  }
+};
