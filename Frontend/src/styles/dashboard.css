@@ -8,21 +8,21 @@
   /* ========================================================= */
   /* =================== COLOR GLOBAL APP ==================== */
   /* ========================================================= */
-  --color-primary:             #4CB04C;
-  --color-primary-dark:        #2E7D2E;
-  --color-primary-medium:      #3DA63D;
-  --color-primary-soft:        rgba(76, 176, 76, 0.12);
-  --color-primary-hover:       #43A343;
-  --color-primary-low:         rgb(130, 241, 130);
-  --color-primary-light:       rgb(232, 255, 232);
+  --color-primary: #4cb04c;
+  --color-primary-dark: #2e7d2e;
+  --color-primary-medium: #3da63d;
+  --color-primary-soft: rgba(76, 176, 76, 0.12);
+  --color-primary-hover: #43a343;
+  --color-primary-low: rgb(130, 241, 130);
+  --color-primary-light: rgb(232, 255, 232);
   --color-primary-transparent: rgba(76, 176, 76, 0.08);
 
-  --bg-primary:    #f0f4fb;
-  --bg-secondary:  #ffffff;
+  --bg-primary: #f0f4fb;
+  --bg-secondary: #ffffff;
 
-  --border-color:  #d4dce9;
+  --border-color: #d4dce9;
 
-  --text-primary:   #1a1a1a;
+  --text-primary: #1a1a1a;
   --text-secondary: #4a5568;
 
   /* ========================================================= */
@@ -33,122 +33,122 @@
   --text-lg: 1.35rem;
 
   --font-regular: 400;
-  --font-medium:  500;
-  --font-bold:    600;
+  --font-medium: 500;
+  --font-bold: 600;
 
-  --text-sm-color: #9AA19A;
-  --text-md-color: #2D2D2D;
-  --text-lg-color: #1F2937;
+  --text-sm-color: #9aa19a;
+  --text-md-color: #2d2d2d;
+  --text-lg-color: #1f2937;
 
-  --text-hover-dark:  #1F2937;
-  --text-hover-light: #6B7280;
+  --text-hover-dark: #1f2937;
+  --text-hover-light: #6b7280;
 
   /* ========================================================= */
   /* ========================= NEUTROS ======================= */
   /* ========================================================= */
-  --color-bg-main:    #FFFFFF;
-  --color-bg-card:    #F4F6F4;
-  --color-text-main:  #2D2D2D;
-  --color-text-muted: #9AA19A;
+  --color-bg-main: #ffffff;
+  --color-bg-card: #f4f6f4;
+  --color-text-main: #2d2d2d;
+  --color-text-muted: #9aa19a;
 
   /* ========================================================= */
   /* ========================= ESTADOS ======================= */
   /* ========================================================= */
-  --color-error:   #C04141;
-  --color-warning: #D97706;
+  --color-error: #c04141;
+  --color-warning: #d97706;
 
   /* ========================================================= */
   /* ===================== MODULO INGRESOS =================== */
   /* ========================================================= */
-  --ingresos-base:  #2FAF7F;
-  --ingresos-dark:  #1F7A59;
-  --ingresos-light: #5FCFA6;
-  --ingresos-bg:    #E7F7F1;
-  --ingresos-hover: #27996E;
+  --ingresos-base: #2faf7f;
+  --ingresos-dark: #1f7a59;
+  --ingresos-light: #5fcfa6;
+  --ingresos-bg: #e7f7f1;
+  --ingresos-hover: #27996e;
 
   /* ========================================================= */
   /* ====================== MODULO AHORROS =================== */
   /* ========================================================= */
-  --ahorros-base:  #7A5AF5;
-  --ahorros-dark:  #5337C9;
-  --ahorros-light: #A18BFF;
-  --ahorros-bg:    #F1EDFF;
-  --ahorros-hover: #6949E6;
+  --ahorros-base: #7a5af5;
+  --ahorros-dark: #5337c9;
+  --ahorros-light: #a18bff;
+  --ahorros-bg: #f1edff;
+  --ahorros-hover: #6949e6;
 
   /* ========================================================= */
   /* ======================= MODULO GASTOS =================== */
   /* ========================================================= */
-  --gastos-base:  #ffc054;
-  --gastos-dark:  #B96F00;
-  --gastos-light: #FBCB6A;
-  --gastos-bg:    #FFF4DB;
-  --gastos-hover: #E08E00;
+  --gastos-base: #ffc054;
+  --gastos-dark: #b96f00;
+  --gastos-light: #fbcb6a;
+  --gastos-bg: #fff4db;
+  --gastos-hover: #e08e00;
 
   /* ========================================================= */
   /* ==================== MODULO IMPREVISTOS ================= */
   /* ========================================================= */
-  --imprevistos-base:  #ff5359;
-  --imprevistos-dark:  #A72B2F;
-  --imprevistos-light: #F07A7E;
-  --imprevistos-bg:    #FDEBEC;
-  --imprevistos-hover: #D63B40;
+  --imprevistos-base: #ff5359;
+  --imprevistos-dark: #a72b2f;
+  --imprevistos-light: #f07a7e;
+  --imprevistos-bg: #fdebec;
+  --imprevistos-hover: #d63b40;
 
   /* ========================================================= */
   /* ======================== MODULO DEUDAS ================== */
   /* ========================================================= */
-  --deudas-base:  #4d91ff;
-  --deudas-dark:  #1D4ED8;
-  --deudas-light: #7FB0FF;
-  --deudas-bg:    #EAF2FF;
-  --deudas-hover: #256EEA;
+  --deudas-base: #4d91ff;
+  --deudas-dark: #1d4ed8;
+  --deudas-light: #7fb0ff;
+  --deudas-bg: #eaf2ff;
+  --deudas-hover: #256eea;
 
   /* ========================================================= */
   /* ========== VARIABLES ADICIONALES COMPATIBILIDAD ========= */
   /* ========================================================= */
-  --border:            rgba(76, 176, 76, 0.2);
-  --input:             transparent;
-  --input-background:  #f0fdf4;
+  --border: rgba(76, 176, 76, 0.2);
+  --input: transparent;
+  --input-background: #f0fdf4;
   --switch-background: #cbced4;
-  --ring:              #4CB04C;
+  --ring: #4cb04c;
 
   --radius: 0.625rem;
 
   --font-weight-medium: 500;
   --font-weight-normal: 400;
 
-  --chart-1: #4CB04C;
+  --chart-1: #4cb04c;
   --chart-2: rgb(130, 241, 130);
   --chart-3: rgb(200, 255, 200);
   --chart-4: rgb(232, 255, 232);
   --chart-5: #f0fdf4;
 
-  --sidebar:                    #FFFFFF;
-  --sidebar-foreground:         #2D2D2D;
-  --sidebar-primary:            #4CB04C;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2d2d2d;
+  --sidebar-primary: #4cb04c;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent:             rgb(232, 255, 232);
-  --sidebar-accent-foreground:  #2E7D2E;
-  --sidebar-border:             rgba(76, 176, 76, 0.2);
-  --sidebar-ring:               #4CB04C;
+  --sidebar-accent: rgb(232, 255, 232);
+  --sidebar-accent-foreground: #2e7d2e;
+  --sidebar-border: rgba(76, 176, 76, 0.2);
+  --sidebar-ring: #4cb04c;
 
-  --card:               #F4F6F4;
-  --card-foreground:    #2D2D2D;
-  --popover:            #ffffff;
-  --popover-foreground: #2D2D2D;
+  --card: #f4f6f4;
+  --card-foreground: #2d2d2d;
+  --popover: #ffffff;
+  --popover-foreground: #2d2d2d;
 
-  --primary:              #4CB04C;
-  --primary-foreground:   #ffffff;
-  --secondary:            rgb(232, 255, 232);
-  --secondary-foreground: #2E7D2E;
-  --muted:                #F4F6F4;
-  --muted-foreground:     #9AA19A;
-  --accent:               rgb(200, 255, 200);
-  --accent-foreground:    #2E7D2E;
-  --destructive:          #C04141;
+  --primary: #4cb04c;
+  --primary-foreground: #ffffff;
+  --secondary: rgb(232, 255, 232);
+  --secondary-foreground: #2e7d2e;
+  --muted: #f4f6f4;
+  --muted-foreground: #9aa19a;
+  --accent: rgb(200, 255, 200);
+  --accent-foreground: #2e7d2e;
+  --destructive: #c04141;
   --destructive-foreground: #ffffff;
 
-  --background: #FFFFFF;
-  --foreground:  #2D2D2D;
+  --background: #ffffff;
+  --foreground: #2d2d2d;
 }
 
 /* ========================================================= */
@@ -156,7 +156,7 @@
 /* ========================================================= */
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--color-bg-main);
   color: var(--color-text-main);
   margin: 20px auto;
@@ -215,7 +215,7 @@ button {
   background-color: var(--color-bg-main);
   border: none;
   cursor: pointer;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   transition: all 300ms cubic-bezier(0.785, 0.135, 0.15, 0.86);
 }
 
@@ -225,31 +225,80 @@ button:hover {
 }
 
 .buttonHeader {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 10px 16px;
-  width: 140px;
   border: 1px solid var(--color-primary-low);
   text-align: center;
+  white-space: nowrap;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  border-radius: 10px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.buttonHeader:hover {
+  background-color: var(--color-primary-hover);
+  color: #ffffff;
+  border-color: var(--color-primary-hover);
 }
 
 .buttonCerrarSesion {
   padding: 10px 16px;
-  width: 150px;
   border: 1px solid var(--color-primary-low);
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.buttonCerrarSesion:hover {
+  background-color: var(--color-primary-hover);
+  color: #ffffff;
+  border-color: var(--color-primary-hover);
 }
 
 .btn-outline {
   padding: 8px 14px;
   border: 1px solid var(--color-primary-low);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary-hover);
+  color: #ffffff;
+  border-color: var(--color-primary-hover);
 }
 
 .btn-solid {
   padding: 8px 14px;
   border: 0.5px solid var(--color-primary-low);
   background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-solid:hover {
+  background-color: var(--color-primary-hover);
+  color: #ffffff;
+  border-color: var(--color-primary-hover);
 }
 
 /* ========================================================= */
@@ -285,11 +334,12 @@ button:hover {
   border-radius: 8px;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background-color 0.25s ease,
-              color 0.25s ease,
-              transform 0.25s ease,
-              border-color 0.25s ease,
-              box-shadow 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .nav-item:hover,
@@ -322,8 +372,6 @@ button:hover {
   box-sizing: border-box;
   padding: 10px 100px;
 }
-
-
 
 .main-content {
   padding: 24px 20px;
@@ -438,33 +486,52 @@ button:hover {
   border-radius: 10px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
-
 }
 
 /* ─── Colores individuales ────────────────────────────── */
 .box-section1 {
   border: 1px solid var(--color-primary-low);
-  background: radial-gradient(circle at top left, var(--color-bg-main), var(--color-primary-light));
+  background: radial-gradient(
+    circle at top left,
+    var(--color-bg-main),
+    var(--color-primary-light)
+  );
 }
 
 .box-section2 {
   border: 1px solid var(--imprevistos-hover);
-  background: radial-gradient(circle at top left, var(--imprevistos-bg), var(--imprevistos-light));
+  background: radial-gradient(
+    circle at top left,
+    var(--imprevistos-bg),
+    var(--imprevistos-light)
+  );
 }
 
 .box-section3 {
   border: 1px solid var(--color-primary-medium);
-  background: radial-gradient(circle at top left, var(--bg-primary), var(--color-primary-low));
+  background: radial-gradient(
+    circle at top left,
+    var(--bg-primary),
+    var(--color-primary-low)
+  );
 }
 
 .box-section4 {
   border: 1px solid var(--deudas-dark);
-  background: radial-gradient(circle at top left, var(--deudas-bg), var(--deudas-light));
+  background: radial-gradient(
+    circle at top left,
+    var(--deudas-bg),
+    var(--deudas-light)
+  );
 }
 
 .box-section5 {
   border: 1px solid var(--gastos-hover);
-  background: radial-gradient(circle at top left, var(--gastos-bg), var(--gastos-light));
+  background: radial-gradient(
+    circle at top left,
+    var(--gastos-bg),
+    var(--gastos-light)
+  );
 }
 
 .iconBox {

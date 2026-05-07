@@ -1,8 +1,8 @@
+import '../styles/VentanaModal.css';
 import { useNavigate } from 'react-router-dom';
-import '../styles/VentanaModal.css';;
-import { useState } from 'react';
 
 export default function VentanaModal() {
+  const navigate = useNavigate();
 
   return (
     <div>

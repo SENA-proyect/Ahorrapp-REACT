@@ -1,0 +1,234 @@
+/* ========================================================= */
+/* ==================== MOVIMIENTOS PAGE ================== */
+/* ========================================================= */
+
+.movimientos-page {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px 80px;
+  animation: fadeUp 0.6s ease;
+}
+
+.movimientos-card {
+  background-color: var(--color-bg-main);
+  border-radius: 15px;
+  border: 2px solid var(--border);
+  padding: 36px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.movimientos-titulo {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-lg-color);
+  margin-bottom: 28px;
+}
+
+/* ========================================================= */
+/* =================== SELECTOR DE TIPO =================== */
+/* ========================================================= */
+
+.mov-grupo {
+  margin-bottom: 24px;
+}
+
+.mov-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.mov-opciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mov-opcion-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all 250ms cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.mov-opcion-btn:hover {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+.mov-opcion-btn.activo {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  font-weight: var(--font-bold);
+}
+
+/* ========================================================= */
+/* =================== DIVISOR FORMULARIO ================= */
+/* ========================================================= */
+
+.mov-form-detalle {
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 2px solid var(--border);
+}
+
+/* ========================================================= */
+/* ===================== FORMULARIOS ====================== */
+/* ========================================================= */
+
+.form-subtitulo {
+  font-size: var(--text-md);
+  font-weight: var(--font-bold);
+  margin-bottom: 20px;
+}
+
+/* Colores por módulo */
+.form-subtitulo.ingresos    { color: var(--ingresos-dark); }
+.form-subtitulo.ahorros     { color: var(--ahorros-dark); }
+.form-subtitulo.gastos      { color: var(--gastos-dark); }
+.form-subtitulo.imprevistos { color: var(--imprevistos-dark); }
+.form-subtitulo.deudas      { color: var(--deudas-dark); }
+
+.form-grupo {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-background);
+  font-size: var(--text-sm);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-primary);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-transparent);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ========================================================= */
+/* ======================= ERRORES ======================== */
+/* ========================================================= */
+
+.form-error {
+  color: var(--destructive);
+  font-size: var(--text-sm);
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background-color: rgba(192, 65, 65, 0.08);
+  border-radius: 6px;
+  border-left: 3px solid var(--destructive);
+}
+
+/* ========================================================= */
+/* ======================= BOTONES ======================== */
+/* ========================================================= */
+
+.form-btn-submit {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  transition: all 250ms cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  margin-top: 4px;
+}
+
+.form-btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.form-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Colores por módulo */
+.form-btn-submit.ingresos    { background-color: var(--ingresos-base); }
+.form-btn-submit.ahorros     { background-color: var(--ahorros-base); }
+.form-btn-submit.gastos      { background-color: var(--gastos-base); }
+.form-btn-submit.imprevistos { background-color: var(--imprevistos-dark); }
+.form-btn-submit.deudas      { background-color: var(--deudas-base); }
+
+.form-btn-cancelar {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  transition: all 250ms ease;
+}
+
+.form-btn-cancelar:hover {
+  background-color: var(--color-bg-card);
+  transform: translateY(-1px);
+}
+
+/* ========================================================= */
+/* ======================= RESPONSIVE ===================== */
+/* ========================================================= */
+
+@media (max-width: 768px) {
+  .movimientos-page {
+    padding: 20px 12px 80px;
+  }
+
+  .movimientos-card {
+    padding: 24px 16px;
+  }
+
+  .mov-opciones {
+    flex-direction: column;
+  }
+
+  .mov-opcion-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
