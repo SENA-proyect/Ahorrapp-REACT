@@ -5,7 +5,7 @@ import { getResumenFinancieroBreve } from '../../api';
 const Asistente = () => {
   const [visible, setVisible] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'bot', content: '¡Hola! Soy el asistente de AhorraPP. ¿En qué puedo ayudarte con tus finanzas hoy?' }
+    { role: 'bot', content: '¡Hola! Soy el asistente de AhorrApp. ¿En qué puedo ayudarte con tus finanzas hoy?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
