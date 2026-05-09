@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, use } from 'react'
+import { data, Link } from 'react-router-dom'
+import { getCategorias } from '../api';
 
 const API = 'http://localhost:3000/api/movimientos'
 
@@ -25,6 +26,7 @@ const Deudas = () => {
   const [guardando,   setGuardando]   = useState(false)
   const [eliminando,  setEliminando]  = useState(false)
   const [errorModal,  setErrorModal]  = useState(null)
+  const [categorias,    setCategorias]   = useState([])
 
   const cargarDeudas = () => {
     setCargando(true)
@@ -35,6 +37,14 @@ const Deudas = () => {
       .catch(() => {})
       .finally(() => setCargando(false))
   }
+
+  useEffect(() => {
+    getCategorias()
+      .then(data => {
+        if (Array.isArray(data)) setCategorias(data);
+      })
+      .catch(err => console.error("Error cargando categorías:", err));
+  }, []);
 
   useEffect(() => { cargarDeudas() }, [])
 
@@ -47,6 +57,7 @@ const Deudas = () => {
       id:             d.id,
       monto:          String(d.monto),
       fuente:         d.fuente          || '',
+      id_categoria:      d.ID_categoria       || '',
       descripcion:    d.descripcion     || '',
       estado:         d.estado          || 'pendiente',
       cuotas_pagadas: String(d.cuotas_pagadas ?? 0),
@@ -92,6 +103,7 @@ const Deudas = () => {
         body: JSON.stringify({
           monto:          Number(modalEditar.monto),
           fuente:         modalEditar.fuente.trim(),
+          id_categoria:      modalEditar.id_categoria || null,
           descripcion:    modalEditar.descripcion  || null,
           estado:         modalEditar.estado,
           cuotas_pagadas: cuotasPagadas,
@@ -231,6 +243,21 @@ const Deudas = () => {
             <label className={labelCls}>Fuente *</label>
             <input className={inputCls} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta de crédito..."
               value={modalEditar.fuente} onChange={handleEditarChange} />
+
+            <label className={labelCls}>Categoría</label>
+            <select 
+              className={inputCls} 
+              name="id_categoria" 
+              value={modalEditar.id_categoria || ""} 
+              onChange={handleEditarChange}
+            >
+              <option value="">Sin categoría</option>
+              {categorias.filter(c => c.activa == 1).map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nombre}
+              </option>
+              ))}
+            </select>
 
             <label className={labelCls}>Monto *</label>
             <input className={inputCls} type="number" name="monto" min="0" step="0.01"

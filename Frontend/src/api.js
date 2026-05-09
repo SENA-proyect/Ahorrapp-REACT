@@ -26,6 +26,33 @@ export const loginUser = async (datos) => {
   return response.json();
 };
 
+// ── Dependientes ────────────────────────────────────────────────────────────────
+// frontend/api.js
+
+export const getDependientes = async () => {
+  const token = localStorage.getItem('token');
+  
+  try {
+    const res = await fetch('http://localhost:3000/api/dependientes', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Error al obtener dependientes');
+    }
+
+    return await res.json(); // Esto devuelve el array de dependientes
+  } catch (error) {
+    console.error("Error en API getDependientes:", error);
+    throw error;
+  }
+};
+
 
 // ── Categorías ────────────────────────────────────────────────────────────────
 

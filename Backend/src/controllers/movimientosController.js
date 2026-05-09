@@ -76,20 +76,20 @@ const crearMovimiento = async (req, res) => {
       const ID_salida = salida.insertId;
 
       if (subtipo_modulo === "Gasto") {
-        const { monto, descripcion, fecha_registro, id_categoria, id_dependiente } = datos;
+        const { monto, descripcion, fecha_registro, id_categoria, id_dependientes } = datos;
         const [result] = await connection.query(
-          `INSERT INTO GASTOS (ID_salida, ID_categoria, Monto, Descripcion, Fecha_registro, ID_dependiente)
+          `INSERT INTO GASTOS (ID_salida, ID_categoria, Monto, Descripcion, Fecha_registro, ID_dependientes)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [ID_salida, id_categoria || null, monto, descripcion || null, fecha_registro || null, id_dependiente || null]
+          [ID_salida, id_categoria || null, monto, descripcion || null, fecha_registro || null, id_dependientes || null]
         );
         ID_detalle = result.insertId;
 
       } else if (subtipo_modulo === "Imprevisto") {
-        const { monto, causa, fecha_registro, id_categoria, id_dependiente } = datos;
+        const { monto, causa, fecha_registro, id_categoria, id_dependientes } = datos;
         const [result] = await connection.query(
-          `INSERT INTO IMPREVISTOS (ID_salida, ID_categoria, Monto, Causa, Fecha_registro, ID_dependiente)
+          `INSERT INTO IMPREVISTOS (ID_salida, ID_categoria, Monto, Causa, Fecha_registro, ID_dependientes)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [ID_salida, id_categoria || null, monto, causa || null, fecha_registro || null, id_dependiente || null]
+          [ID_salida, id_categoria || null, monto, causa || null, fecha_registro || null, id_dependientes || null]
         );
         ID_detalle = result.insertId;
 
@@ -307,15 +307,20 @@ const getGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   try {
     const [rows] = await pool.query(
-      `SELECT g.ID_gastos AS id, g.Monto AS monto, g.Descripcion AS descripcion,
-              g.Fecha_registro AS fecha,
-              c.Nombre AS categoria,
-              d.Nombre AS dependiente
+      `SELECT g.ID_gastos AS id, 
+        g.Monto AS monto, 
+        g.Descripcion AS descripcion,
+        g.Fecha_registro AS fecha,
+        g.ID_categoria,    
+        g.ID_dependientes,  
+        c.Nombre AS categoria,
+        d.Nombre AS dependiente
+
        FROM GASTOS g
        INNER JOIN SALIDA s       ON g.ID_salida      = s.ID_salida
        INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
        LEFT  JOIN CATEGORIAS c   ON g.ID_categoria   = c.ID_categoria
-       LEFT  JOIN DEPENDIENTES d ON g.ID_dependiente = d.ID_dependientes
+       LEFT  JOIN DEPENDIENTES d ON g.ID_dependientes = d.ID_dependientes
        WHERE m.ID_usuario = ?
        ORDER BY g.Fecha_registro DESC`,
       [ID_usuario]
@@ -331,13 +336,13 @@ const getGastos = async (req, res) => {
 const updateGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const { monto, descripcion, fecha_registro, id_categoria, id_dependiente } = req.body;
+  const { monto, descripcion, fecha_registro, id_categoria, id_dependientes } = req.body;
     try {
     const [rows] = await pool.query(
         `UPDATE GASTOS    
-            SET Monto = ?, Descripcion = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependiente = ?
+            SET Monto = ?, Descripcion = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependientes = ?
             WHERE ID_gastos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [monto, descripcion, fecha_registro, id_categoria, id_dependiente, id, ID_usuario]
+        [monto, descripcion, fecha_registro, id_categoria, id_dependientes, id, ID_usuario]
     );
     if (rows.affectedRows === 0) {
         return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
@@ -414,12 +419,12 @@ const getImprevistos = async (req, res) => {
 const updateImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
     const { id } = req.params;
-    const { monto, causa, fecha_registro, id_categoria, id_dependiente } = req.body;
+    const { monto, causa, fecha_registro, id_categoria, id_dependientes } = req.body;
     try {    const [rows] = await pool.query(
         `UPDATE IMPREVISTOS    
-            SET Monto = ?, Causa = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependiente = ?
+            SET Monto = ?, Causa = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependientes = ?
             WHERE ID_imprevistos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [monto, causa, fecha_registro, id_categoria, id_dependiente, id, ID_usuario]
+        [monto, causa, fecha_registro, id_categoria, id_dependientes, id, ID_usuario]
     );
     if (rows.affectedRows === 0) {
         return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado" });
@@ -472,10 +477,17 @@ const getDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
   try {
     const [rows] = await pool.query(
-      `SELECT d.ID_deudas AS id, d.Monto AS monto, d.Fuente AS fuente,
-              d.Descripcion AS descripcion, d.Cuotas_total AS cuotas_total,
-              d.Cuotas_pagadas AS cuotas_pagadas, d.Fecha_inicio AS fecha_inicio,
-              d.Fecha_fin AS fecha_fin, d.Estado AS estado,
+      `SELECT 
+              d.ID_deudas AS id, 
+              d.Monto AS monto, 
+              d.Fuente AS fuente,
+              d.Descripcion AS descripcion, 
+              d.Cuotas_total AS cuotas_total,
+              d.Cuotas_pagadas AS cuotas_pagadas, 
+              d.Fecha_inicio AS fecha_inicio,
+              d.Fecha_fin AS fecha_fin, 
+              d.Estado AS estado,
+              d.ID_categoria,
               c.Nombre AS categoria
        FROM DEUDAS d
        INNER JOIN SALIDA s      ON d.ID_salida     = s.ID_salida

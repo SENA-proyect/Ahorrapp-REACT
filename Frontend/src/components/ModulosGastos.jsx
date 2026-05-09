@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { getCategorias } from '../api';
+import { getDependientes } from '../api';
 
 const API = 'http://localhost:3000/api/movimientos'
 
@@ -25,6 +27,8 @@ const Gastos = () => {
   const [guardando,   setGuardando]   = useState(false)
   const [eliminando,  setEliminando]  = useState(false)
   const [errorModal,  setErrorModal]  = useState(null)
+  const [categorias, setCategorias] = useState([]);
+  const [dependientes, setDependientes] = useState([]);
 
   const cargarGastos = () => {
     setCargando(true)
@@ -36,19 +40,37 @@ const Gastos = () => {
       .finally(() => setCargando(false))
   }
 
+  useEffect(() => {
+    getCategorias()
+      .then(data => {
+        if (Array.isArray(data)) setCategorias(data);
+      })
+      .catch(err => console.error("Error cargando categorías:", err));
+  }, []);
+
+  useEffect(() => {
+    getDependientes()
+      .then(data => {
+        if (Array.isArray(data)) setDependientes(data);
+      })
+      .catch(err => console.error("Error cargando dependientes:", err));
+  }, []);
+
   useEffect(() => { cargarGastos() }, [])
 
   const total = gastos.reduce((acc, g) => acc + Number(g.monto), 0)
 
   const abrirEditar = (g) => {
-    setErrorModal(null)
-    setModalEditar({
-      id:          g.id,
-      monto:       String(g.monto),
-      descripcion: g.descripcion || '',
-      fecha:       g.fecha ? g.fecha.slice(0, 10) : '',
-    })
-  }
+  setModalEditar({
+    id: g.id,
+    monto: String(g.monto),
+    id_categoria: g.ID_categoria || '',   
+    id_dependientes: g.ID_dependientes || '', 
+    descripcion: g.descripcion || '',
+    fecha: g.fecha ? g.fecha.slice(0, 10) : '',
+  });
+};
+
 
   const handleEditarChange = (e) => {
     setModalEditar(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -70,6 +92,8 @@ const Gastos = () => {
           monto:          Number(modalEditar.monto),
           descripcion:    modalEditar.descripcion    || null,
           fecha_registro: modalEditar.fecha          || null,
+          id_categoria:      modalEditar.id_categoria      || null,
+          id_dependientes:    modalEditar.id_dependientes   || null,
         }),
       })
       const data = await res.json()
@@ -182,7 +206,7 @@ const Gastos = () => {
         </footer>
       </div>
 
-      {/* ── Modal Editar ── */}
+       {/* ── Modal Editar ──  */}
       {modalEditar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
@@ -200,6 +224,37 @@ const Gastos = () => {
             <label className={labelCls}>Fecha</label>
             <input className={inputCls} type="date" name="fecha"
               value={modalEditar.fecha} onChange={handleEditarChange} />
+
+            <label className={labelCls}>Categoría</label>
+            <select 
+              className={inputCls} 
+              name="id_categoria" 
+              value={modalEditar.id_categoria || ""} 
+              onChange={handleEditarChange}
+            >
+              <option value="">Sin categoría</option>
+              {categorias.filter(c => c.activa == 1).map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nombre}
+              </option>
+              ))}
+            </select>
+
+            <label className={labelCls}>Dependientes</label>
+            <select
+              className={inputCls}
+              name="id_dependientes" // 
+              value={modalEditar.id_dependientes || ""}
+              onChange={handleEditarChange}
+            >
+              <option value="">Sin dependiente</option>
+              {dependientes.map(d => (
+                <option key={d.ID_dependientes} value={d.ID_dependientes}>
+                  {d.Nombre}
+                </option>
+              ))}
+            </select>
+
 
             {errorModal && (
               <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{errorModal}</p>
