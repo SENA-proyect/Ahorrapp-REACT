@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 const navItems = [
   { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos'     },
   { href: '/ModulosGastos',       emoji: '💸', label: 'Gastos'       },
-  { href: '/ModulosAhorros',      emoji: '🎯', label: 'Ahorrar'      },
-  { href: '/ModulosImprevistos',  emoji: '🛡️', label: 'Imprevistos'  },
-  { href: '/ModulosDeudas',       emoji: '💳', label: 'Deudas'       },
+  { href: '/ModuloAhorros',      emoji: '🎯', label: 'Ahorrar'      },
+  { href: '/ModuloImprevistos',  emoji: '🛡️', label: 'Imprevistos'  },
+  { href: '/ModuloDeudas',       emoji: '💳', label: 'Deudas'       },
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias'   },
 ]

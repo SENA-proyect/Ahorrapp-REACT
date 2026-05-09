@@ -123,7 +123,10 @@ export default function FormImprevisto({ tipoFlujo, subtipo }) {
         >
           <option value="">Sin categoría</option>
           {categorias.filter(c => c.activa == 1).map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+            // Asegúrate si es .id o .ID_categoria según tu DB
+            <option key={cat.id || cat.ID_categoria} value={cat.id || cat.ID_categoria}>
+              {cat.nombre || cat.Nombre}
+            </option>
           ))}
         </select>
       </div>
@@ -133,12 +136,17 @@ export default function FormImprevisto({ tipoFlujo, subtipo }) {
         <select
           className={inputCls}
           name="id_dependiente"
-          value={form.id_dependiente}
+          value={form.id_dependientes}
           onChange={handleChange}
         >
           <option value="">Ninguno (imprevisto propio)</option>
-          {dependientes.map(dep => (
-            <option key={dep.id} value={dep.id}>{dep.nombre}</option>
+          {dependientes.map((dep, index) => (
+            <option 
+              key={dep.ID_dependientes || `dep-${index}`} 
+              value={dep.ID_dependientes}
+            >
+              {dep.Nombre}
+            </option>
           ))}
         </select>
       </div>

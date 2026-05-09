@@ -20,11 +20,10 @@ const {
   deleteDeudas
 } = require("../controllers/movimientosController");
 
-
-router.post("/",          verifyToken, crearMovimiento);
-router.get("/ingresos",   verifyToken, getIngresos);
-router.get("/ahorros",    verifyToken, getAhorros);
-router.get("/gastos",     verifyToken, getGastos);
+router.post("/",          verifyToken, crearMovimiento);
+router.get("/ingresos",   verifyToken, getIngresos);
+router.get("/ahorros",    verifyToken, getAhorros);
+router.get("/gastos",     verifyToken, getGastos);
 router.get("/imprevistos",verifyToken, getImprevistos);
 router.get("/deudas",     verifyToken, getDeudas);
 router.put("/ingresos/:id", verifyToken, updateIngresos);
