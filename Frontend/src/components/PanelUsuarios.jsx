@@ -1,4 +1,4 @@
-import '../styles/panel.css'
+
 import { useState, useEffect } from 'react';
 
 export default function PanelUsuarios() {

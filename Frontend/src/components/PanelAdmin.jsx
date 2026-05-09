@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import '../styles/panel.css'
 
 export default function PanelAdmin() {
   return (

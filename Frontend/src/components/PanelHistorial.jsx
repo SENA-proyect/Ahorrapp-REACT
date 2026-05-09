@@ -1,4 +1,4 @@
-import '../styles/vista.css'
+
 
 export default function PanelHistorial({ historial = [] }) {
   return (

@@ -1,6 +1,5 @@
 // src/components/VentanaModalDependientes.jsx
 import { useNavigate } from 'react-router-dom'
-import '../styles/VentanaModal.css'
 
 export default function VentanaModalDependientes() {
   const navigate = useNavigate()
