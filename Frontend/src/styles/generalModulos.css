@@ -5,9 +5,6 @@
 }
 
 :root {
-  /* ========================================================= */
-  /* =================== COLOR GLOBAL APP ==================== */
-  /* ========================================================= */
   --color-primary:             #4CB04C;
   --color-primary-dark:        #2E7D2E;
   --color-primary-medium:      #3DA63D;
@@ -25,9 +22,6 @@
   --text-primary:   #1a1a1a;
   --text-secondary: #4a5568;
 
-  /* ========================================================= */
-  /* ======================= TIPOGRAFÍA ====================== */
-  /* ========================================================= */
   --text-sm: 0.85rem;
   --text-md: 1rem;
   --text-lg: 1.35rem;
@@ -43,74 +37,49 @@
   --text-hover-dark:  #1F2937;
   --text-hover-light: #6B7280;
 
-  /* ========================================================= */
-  /* ========================= NEUTROS ======================= */
-  /* ========================================================= */
   --color-bg-main:    #FFFFFF;
   --color-bg-card:    #F4F6F4;
   --color-text-main:  #2D2D2D;
   --color-text-muted: #9AA19A;
 
-  /* ========================================================= */
-  /* ========================= ESTADOS ======================= */
-  /* ========================================================= */
   --color-error:   #C04141;
   --color-warning: #D97706;
 
-  /* ========================================================= */
-  /* ===================== MODULO INGRESOS =================== */
-  /* ========================================================= */
   --ingresos-base:  #2FAF7F;
   --ingresos-dark:  #1F7A59;
   --ingresos-light: #5FCFA6;
   --ingresos-bg:    #E7F7F1;
   --ingresos-hover: #27996E;
 
-  /* ========================================================= */
-  /* ====================== MODULO AHORROS =================== */
-  /* ========================================================= */
   --ahorros-base:  #7A5AF5;
   --ahorros-dark:  #5337C9;
   --ahorros-light: #A18BFF;
   --ahorros-bg:    #F1EDFF;
   --ahorros-hover: #6949E6;
 
-  /* ========================================================= */
-  /* ======================= MODULO GASTOS =================== */
-  /* ========================================================= */
   --gastos-base:  #ffc054;
   --gastos-dark:  #B96F00;
   --gastos-light: #FBCB6A;
   --gastos-bg:    #FFF4DB;
   --gastos-hover: #E08E00;
 
-  /* ========================================================= */
-  /* ==================== MODULO IMPREVISTOS ================= */
-  /* ========================================================= */
   --imprevistos-base:  #ff717665;
   --imprevistos-dark:  #A72B2F;
   --imprevistos-light: #F07A7E;
   --imprevistos-bg:    #FDEBEC;
   --imprevistos-hover: #D63B40;
 
-  /* ========================================================= */
-  /* ======================== MODULO DEUDAS ================== */
-  /* ========================================================= */
   --deudas-base:  #4d91ff;
   --deudas-dark:  #1D4ED8;
   --deudas-light: #7FB0FF;
   --deudas-bg:    #EAF2FF;
   --deudas-hover: #256EEA;
 
-  /* ========================================================= */
-  /* ========== VARIABLES ADICIONALES COMPATIBILIDAD ========= */
-  /* ========================================================= */
   --border:            rgba(76, 176, 76, 0.2);
   --input:             transparent;
   --input-background:  #f0fdf4;
   --switch-background: #cbced4;
   --ring:              #4CB04C;
-
   --radius: 0.625rem;
 
   --font-weight-medium: 500;
@@ -151,10 +120,6 @@
   --foreground:  #2D2D2D;
 }
 
-/* ========================================================= */
-/* ========================= BODY ========================== */
-/* ========================================================= */
-
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--color-bg-main);
@@ -163,10 +128,6 @@ body {
   max-width: 1400px;
   padding: 0 20px;
 }
-
-/* ========================================================= */
-/* ======================== HEADER ========================= */
-/* ========================================================= */
 
 .header {
   display: flex;
@@ -178,6 +139,7 @@ body {
   background-color: var(--color-bg-main);
   border-bottom: 2px solid var(--color-primary-low);
 }
+
 .box-content {
   box-sizing: border-box;
   padding: 10px 100px;
@@ -213,10 +175,6 @@ h1 {
   font-size: 22px;
   color: var(--color-primary-dark);
 }
-
-/* ========================================================= */
-/* ======================== BOTONES ======================== */
-/* ========================================================= */
 
 button {
   padding: 10px;
@@ -305,11 +263,6 @@ button:hover {
   transform: translateY(-2px);
 }
 
-/* ========================================================= */
-/* ========================= NAVBAR ======================== */
-/* ========================================================= */
-
-/* ─── Navbar ─────────────────────────────────────────── */
 .navbar {
   display: flex;
   justify-content: center;
@@ -325,7 +278,6 @@ button:hover {
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* ─── Nav List ────────────────────────────────────────── */
 .nav-list {
   display: flex;
   flex-wrap: wrap;
@@ -336,7 +288,6 @@ button:hover {
   padding: 0;
 }
 
-/* ─── Nav Item / Nav Link ─────────────────────────────── */
 .nav-item,
 .nav-link {
   display: inline-flex;
@@ -360,7 +311,6 @@ button:hover {
               box-shadow 0.25s ease;
 }
 
-/* ─── Hover ───────────────────────────────────────────── */
 .nav-item:hover,
 .nav-link:hover {
   background-color: var(--color-primary-light);
@@ -371,7 +321,6 @@ button:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* ─── Activo ──────────────────────────────────────────── */
 .nav-link.active {
   background-color: var(--color-primary-light);
   border: none;
@@ -379,16 +328,11 @@ button:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* ─── Foco accesible ──────────────────────────────────── */
 .nav-item:focus-visible,
 .nav-link:focus-visible {
   outline: 2px solid var(--color-primary-dark);
   outline-offset: 2px;
 }
-
-/* ========================================================= */
-/* ====================== MAIN CONTENT ===================== */
-/* ========================================================= */
 
 .main-content {
   padding: 24px 0;
@@ -431,10 +375,6 @@ button:hover {
   color: var(--color-text-muted);
   margin-top: 4px;
 }
-
-/* ========================================================= */
-/* ========================= BOXES ========================= */
-/* ========================================================= */
 
 .box {
   display: flex;
@@ -497,10 +437,6 @@ button:hover {
   align-items: center;
 }
 
-/* ========================================================= */
-/* ======================= RESUMEN ========================= */
-/* ========================================================= */
-
 .resumen-container {
   width: 100%;
   min-height: 150px;
@@ -526,10 +462,6 @@ button:hover {
   font-style: italic;
 }
 
-/* ========================================================= */
-/* ========================= FOOTER ======================== */
-/* ========================================================= */
-
 .footer-app {
   position: fixed;
   bottom: 0;
@@ -544,23 +476,73 @@ button:hover {
   z-index: 100;
 }
 
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+main {
+  animation: fadeUp 0.6s ease;
+}
+
 /* ========================================================= */
 /* ======================= RESPONSIVE ====================== */
 /* ========================================================= */
 
+@media (max-width: 1024px) {
+  .box-content {
+    padding: 10px 40px;
+  }
+}
+
 @media (max-width: 768px) {
-  .header,
+  .box-content {
+    padding: 10px 16px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 16px;
+    justify-content: center;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+
+  .buttonHeader,
+  .buttonCerrarSesion {
+    width: auto;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
   .modulo-header,
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-    flex-wrap: wrap;
-    text-align: center;
   }
 
   .nav-list {
-    gap: 5px;
+    gap: 6px;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .resumen-container {
+    padding: 16px;
+  }
+
+  .total-ahorros {
+    font-size: 18px;
   }
 
   .boxes {
@@ -572,17 +554,66 @@ button:hover {
     width: 100%;
   }
 }
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+
+@media (max-width: 600px) {
+  .box-content {
+    padding: 8px 10px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .nav-link {
+    padding: 5px 10px;
+    font-size: 0.75rem;
   }
 }
 
-main {
-  animation: fadeUp 0.6s ease;
+/* ========================================================= */
+/* =================== CARDS MÓVIL (TABLA) ================= */
+/* ========================================================= */
+
+.cards-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-ingreso {
+  background-color: var(--ingresos-bg);
+  border: 1px solid var(--ingresos-light);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.card-label {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  min-width: 90px;
+}
+
+.card-value {
+  color: var(--color-text-main);
+  text-align: right;
+  flex: 1;
+}
+
+.card-monto {
+  border-top: 1px solid var(--ingresos-light);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.card-value.monto {
+  color: var(--ingresos-dark);
+  font-weight: 700;
+  font-size: 1rem;
 }

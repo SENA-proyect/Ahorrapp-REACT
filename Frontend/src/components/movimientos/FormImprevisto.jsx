@@ -137,7 +137,9 @@ export default function FormImprevisto({ tipoFlujo, subtipo }) {
         >
           <option value="">Ninguno (imprevisto propio)</option>
           {dependientes.map(dep => (
-            <option key={dep.id} value={dep.id}>{dep.nombre}</option>
+            <option key={dep.ID_dependientes} value={dep.ID_dependientes}>
+              {dep.Nombre}
+            </option>
           ))}
         </select>
       </div>

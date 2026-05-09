@@ -8,21 +8,21 @@
   /* ========================================================= */
   /* =================== COLOR GLOBAL APP ==================== */
   /* ========================================================= */
-  --color-primary:             #4CB04C;
-  --color-primary-dark:        #2E7D2E;
-  --color-primary-medium:      #3DA63D;
-  --color-primary-soft:        rgba(76, 176, 76, 0.12);
-  --color-primary-hover:       #43A343;
-  --color-primary-low:         rgb(130, 241, 130);
-  --color-primary-light:       rgb(232, 255, 232);
+  --color-primary: #4cb04c;
+  --color-primary-dark: #2e7d2e;
+  --color-primary-medium: #3da63d;
+  --color-primary-soft: rgba(76, 176, 76, 0.12);
+  --color-primary-hover: #43a343;
+  --color-primary-low: rgb(130, 241, 130);
+  --color-primary-light: rgb(232, 255, 232);
   --color-primary-transparent: rgba(76, 176, 76, 0.08);
 
-  --bg-primary:    #f0f4fb;
-  --bg-secondary:  #ffffff;
+  --bg-primary: #f0f4fb;
+  --bg-secondary: #ffffff;
 
-  --border-color:  #d4dce9;
+  --border-color: #d4dce9;
 
-  --text-primary:   #1a1a1a;
+  --text-primary: #1a1a1a;
   --text-secondary: #4a5568;
 
   /* ========================================================= */

@@ -34,7 +34,7 @@ const Dependientes = () => {
       .then(res => res.json())
       .then(data => setDependientes(Array.isArray(data) ? data : []))
       .catch(err => console.error('Error cargando dependientes:', err))
-  }, [])
+  }, [token])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -178,6 +178,7 @@ const Dependientes = () => {
               <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
               <li><Link to="/ModulosDependientes" className="nav-link active">Dependientes</Link></li>
               <li><Link to="/ModulosCategorias"   className="nav-link">Categorías</Link></li>
+              <li><Link to="/noticias" className="nav-link">📰 Noticias</Link></li>
             </ul>
           </nav>
 
