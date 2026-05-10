@@ -10,6 +10,8 @@ const navItems = [
   { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias'   },
 ]
 
+const usuario = JSON.parse(localStorage.getItem('usuario'))
+
 const statCards = [
   {
     id:        'ingresos',
@@ -121,7 +123,9 @@ export default function Dashboard() {
         {/* Bienvenida */}
         <div className="flex flex-col w-full items-start">
           <p className="text-zinc-400 text-sm">Bienvenido de vuelta</p>
-          <h2 className="text-2xl font-bold text-white">Santiago <span>👋.</span></h2>
+          <h2 className="text-2xl font-bold text-white">
+            {usuario?.nombre || 'Usuario'} <span>👋.</span>
+          </h2>
         </div>
 
         {/* Stat Cards */}

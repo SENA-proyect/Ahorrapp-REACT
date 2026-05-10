@@ -1,43 +1,22 @@
-IMPREVISTO
-error al momento de actualizar, no se conservan los valores anteriormente registrados
-GASTO
-Mismo error que con imprevistos
-DEUDAS
-error con el update en categorias, de resto todo bien
+TAILWIND
+por si falla:
+npm uninstall tailwindcss postcss autoprefixer
+Remove-Item -Recurse -Force node_modules, package-lock.json
 
-INSTALACION 
-backend:
-npm install express cors axios bcrypt jsonwebtoken nodemon
+Instalacion:
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p <= si falla usar este comando: node .\node_modules\tailwindcss\lib\cli.js init -p
+en caso de que no funcione, toca hacerlo manualmente
 
+crear archivo:
 
-frontend:
-npm install -D tailwindcss postcss autoprefixer axios
-
-npx tailwindcss init -p
-
-por si ahi errores con tailwind:
-npm install --force tailwindcss postcss autoprefixer
-
-crear carpetas
-1- tailwind.config.js
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-
-2- postcss.config.js
+postcss.config.js:
 export default {
   plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
+    '@tailwindcss/postcss': {},
+    'autoprefixer': {},
   },
 }
 
-npm install -D postcss autoprefixer
+instalar tambien esto: npm install @tailwindcss/postcss

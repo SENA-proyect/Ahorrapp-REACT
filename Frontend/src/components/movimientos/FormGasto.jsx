@@ -124,9 +124,16 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
           value={form.id_dependiente}
           onChange={handleChange}
         >
-          <option value="">Ninguno (gasto propio)</option>
-          {dependientes.map(dep => (
-            <option key={dep.id} value={dep.id}>{dep.nombre}</option>
+          <option value="">Ninguno (Gasto propio)</option>
+            {dependientes.map((dep, index) => (
+              <option 
+                key={dep.ID_dependientes || `dep-${index}`} 
+                value={dep.ID_dependientes}
+              >
+                {dep.Nombre}
+              </option>
+
+            
           ))}
         </select>
       </div>
