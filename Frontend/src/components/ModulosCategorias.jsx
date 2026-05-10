@@ -142,22 +142,6 @@ export default function ModuloCategorias() {
             Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos
           </p>
 
-<<<<<<< HEAD
-        {/* NAVBAR */}
-        <nav className="navbar" aria-label="Menú de secciones">
-          <ul className="nav-list">
-            <li><Link to="/Dashboard"           className="nav-link">Dashboard</Link></li>
-            <li><Link to="/ModulosIngresos"     className="nav-link">Ingresos</Link></li>
-            <li><Link to="/ModulosGastos"       className="nav-link">Gastos</Link></li>
-            <li><Link to="/ModuloAhorros"       className="nav-link">Ahorros</Link></li>
-            <li><Link to="/ModuloImprevistos"   className="nav-link">Imprevistos</Link></li>
-            <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
-            <li><Link to="/ModulosDependientes" className="nav-link">Dependientes</Link></li>
-            <li><Link to="/ModulosCategorias"   className="nav-link active">Categorias</Link></li>
-            <li><Link to="/noticias" className="nav-link">📰 Noticias</Link></li>
-          </ul>
-        </nav>
-=======
           <nav
             className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
             aria-label="Menú de secciones"
@@ -179,7 +163,6 @@ export default function ModuloCategorias() {
               ))}
             </ul>
           </nav>
->>>>>>> Santiago
 
           <section>
             <header className="mt-[30px] flex flex-col items-start justify-between gap-3 px-2.5 md:flex-row md:items-center">

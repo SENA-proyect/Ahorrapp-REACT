@@ -49,11 +49,11 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
           tipo_flujo: tipoFlujo,
           subtipo_modulo: subtipo,
           datos: {
-            monto: Number(form.monto),
-            descripcion: form.descripcion || null,
-            fuente: form.fuente || null,
+            monto:          Number(form.monto),
+            descripcion:    form.descripcion    || null,
+            fuente:         form.fuente         || null,
             fecha_registro: form.fecha_registro || null,
-            id_categoria: form.id_categoria || null,
+            id_categoria:   form.id_categoria   || null,
           },
         }),
       })
@@ -72,18 +72,16 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
     }
   }
 
+  const inputCls = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200'
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <h3 className="text-xl font-bold text-emerald-700">
-        Datos del ingreso
-      </h3>
+      <h3 className="text-xl font-bold text-emerald-700">Datos del ingreso</h3>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-slate-700">
-          Monto *
-        </label>
+        <label className="block text-sm font-semibold text-slate-700">Monto *</label>
         <input
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          className={inputCls}
           type="number"
           name="monto"
           placeholder="0.00"
@@ -95,11 +93,9 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-slate-700">
-          Fuente
-        </label>
+        <label className="block text-sm font-semibold text-slate-700">Fuente</label>
         <input
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          className={inputCls}
           type="text"
           name="fuente"
           placeholder="Ej: Salario, Freelance..."
@@ -109,11 +105,9 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-slate-700">
-          Categoría
-        </label>
+        <label className="block text-sm font-semibold text-slate-700">Categoría</label>
         <select
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          className={inputCls}
           name="id_categoria"
           value={form.id_categoria}
           onChange={handleChange}
@@ -128,11 +122,9 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-slate-700">
-          Descripción
-        </label>
+        <label className="block text-sm font-semibold text-slate-700">Descripción</label>
         <input
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          className={inputCls}
           type="text"
           name="descripcion"
           placeholder="Descripción opcional"
@@ -142,11 +134,9 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-slate-700">
-          Fecha
-        </label>
+        <label className="block text-sm font-semibold text-slate-700">Fecha</label>
         <input
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          className={inputCls}
           type="date"
           name="fecha_registro"
           value={form.fecha_registro}

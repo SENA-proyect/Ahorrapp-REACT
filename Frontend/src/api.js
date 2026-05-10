@@ -1,10 +1,7 @@
-const API_URL = "/api";
+const API_URL = "http://localhost:3000/api"; 
 
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
-
-// ── Auth ─────────────────────────────────────────────────────────────────────
-
 export const registerUser = async (datos) => {
   // datos viene con { nombre, apellido, correo, password }
   const response = await fetch(`${API_URL}/auth/register`, {
@@ -14,7 +11,6 @@ export const registerUser = async (datos) => {
   });
   return response.json();
 };
-
 
 export const loginUser = async (datos) => {
   // datos viene con { correo, password }
@@ -26,10 +22,33 @@ export const loginUser = async (datos) => {
   return response.json();
 };
 
+// ── Dependientes ────────────────────────────────────────────────────────────────
+export const getDependientes = async () => {
+  const token = localStorage.getItem('token');
+  
+  try {
+    const res = await fetch('http://localhost:3000/api/dependientes', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Error al obtener dependientes');
+    }
+
+    return await res.json(); // Esto devuelve el array de dependientes
+  } catch (error) {
+    console.error("Error en API getDependientes:", error);
+    throw error;
+  }
+};
+
 
 // ── Categorías ────────────────────────────────────────────────────────────────
-
-
 export const getCategorias = async () => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/categorias`, {
@@ -38,7 +57,6 @@ export const getCategorias = async () => {
   const data = await response.json();
   return data.categorias ?? [];
 };
-
 
 export const crearCategoria = async (datos) => {
   const token = localStorage.getItem("token");
@@ -53,7 +71,6 @@ export const crearCategoria = async (datos) => {
   return response.json();
 };
 
-
 export const editarCategoria = async (id, datos) => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/categorias/${id}`, {
@@ -67,7 +84,6 @@ export const editarCategoria = async (id, datos) => {
   return response.json();
 };
 
-
 export const deshabilitarCategoria = async (id) => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/categorias/${id}/deshabilitar`, {
@@ -76,7 +92,6 @@ export const deshabilitarCategoria = async (id) => {
   });
   return response.json();
 };
-
 
 export const habilitarCategoria = async (id) => {
   const token = localStorage.getItem("token");
@@ -88,15 +103,19 @@ export const habilitarCategoria = async (id) => {
 };
 
 // ── Movimientos y Finanzas (Para el Asistente) ────────────────────────────────
-
 export const getMovimientos = async () => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/movimientos`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  
+  if (!response.ok) return []; // Si hay error 404 o 500, devolvemos array vacío
+
   const data = await response.json();
-  return data.movimientos ?? data ?? [];
+  // Esto asegura que siempre devuelva un array para que .filter() no falle
+  return Array.isArray(data) ? data : (data.movimientos || []);
 };
+
 
 export const getResumenFinancieroBreve = async () => {
   try {

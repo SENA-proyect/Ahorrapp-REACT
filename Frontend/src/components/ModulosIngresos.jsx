@@ -1,25 +1,36 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import '../styles/generalModulos.css'
+import { getCategorias } from '../api';
 
 const API = 'http://localhost:3000/api/movimientos'
 
-export default function ModuloIngresos() {
-  const [ingresos,     setIngresos]     = useState([])
-  const [cargando,     setCargando]     = useState(true)
-  const [isMobile,     setIsMobile]     = useState(window.innerWidth <= 600)
-  const [modalEditar,  setModalEditar]  = useState(null)   // objeto ingreso a editar
-  const [confirmarId,  setConfirmarId]  = useState(null)   // id a eliminar
-  const [guardando,    setGuardando]    = useState(false)
-  const [eliminando,   setEliminando]   = useState(false)
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 600)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+const navLinks = [
+  { to: '/Dashboard',          label: 'Dashboard' },
+  { to: '/ModulosIngresos',    label: 'Ingresos',     active: true },
+  { to: '/ModulosGastos',      label: 'Gastos' },
+  { to: '/ModuloAhorros',      label: 'Ahorros' },
+  { to: '/ModuloImprevistos',  label: 'Imprevistos' },
+  { to: '/ModuloDeudas',       label: 'Deudas' },
+  { to: '/ModulosDependientes',label: 'Dependientes' },
+  { to: '/ModulosCategorias',  label: 'Categorías' },
+]
+
+const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200'
+const labelCls = 'block text-xs font-semibold text-slate-500 mb-1 mt-3'
+
+export default function ModuloIngresos() {
+  const [ingresos,    setIngresos]    = useState([])
+  const [cargando,    setCargando]    = useState(true)
+  const [modalEditar, setModalEditar] = useState(null)
+  const [confirmarId, setConfirmarId] = useState(null)
+  const [guardando,   setGuardando]   = useState(false)
+  const [eliminando,  setEliminando]  = useState(false)
+  const [errorModal,  setErrorModal]  = useState(null)
+  const [categorias, setCategorias] = useState([]);
 
   const cargarIngresos = () => {
+    setCargando(true)
     const token = localStorage.getItem('token')
     fetch(`${API}/ingresos`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
@@ -28,43 +39,64 @@ export default function ModuloIngresos() {
       .finally(() => setCargando(false))
   }
 
+  useEffect(() => {
+  getCategorias()
+    .then(data => {
+      if (Array.isArray(data)) setCategorias(data);
+    })
+    .catch(err => console.error("Error cargando categorías:", err));
+}, []);
+
   useEffect(() => { cargarIngresos() }, [])
 
   const total = ingresos.reduce((acc, i) => acc + Number(i.monto), 0)
 
-  // ── Editar ──────────────────────────────────────────────────
-  const abrirEditar = (ingreso) => {
+  // ── Abrir modal de edición ──────────────────────────────────
+  const abrirEditar = (i) => {
+    setErrorModal(null)
     setModalEditar({
-      id:            ingreso.id,
-      monto:         ingreso.monto,
-      descripcion:   ingreso.descripcion || '',
-      fuente:        ingreso.fuente || '',
-      fecha_registro: ingreso.fecha ? ingreso.fecha.slice(0, 10) : '',
-      id_categoria:  ingreso.id_categoria || '',
+      id:             i.id,
+      monto:          String(i.monto),
+      id_categoria: i.id_categoria || '',
+      fuente:         i.fuente         || '',
+      descripcion:    i.descripcion    || '',
+      fecha_registro: i.fecha          ? i.fecha.slice(0, 10) : '',
     })
   }
 
+  const handleEditarChange = (e) => {
+    setModalEditar(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  // ── Guardar edición ─────────────────────────────────────────
   const guardarEdicion = async () => {
+    setErrorModal(null)
+    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0) {
+      setErrorModal('El monto debe ser un número mayor a 0')
+      return
+    }
     setGuardando(true)
     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${API}/ingresos/${modalEditar.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(modalEditar),
+        body: JSON.stringify({
+          monto:          Number(modalEditar.monto),
+          id_categoria:      modalEditar.id_categoria      || null,
+          fuente:         modalEditar.fuente         || null,
+          descripcion:    modalEditar.descripcion    || null,
+          fecha_registro: modalEditar.fecha_registro || null,
+        }),
       })
-      if (res.ok) {
-        setModalEditar(null)
-        cargarIngresos()
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setGuardando(false)
-    }
+      const data = await res.json()
+      if (res.ok) { setModalEditar(null); cargarIngresos() }
+      else setErrorModal(data.mensaje || 'Error al guardar')
+    } catch { setErrorModal('Error al conectar con el servidor') }
+    finally { setGuardando(false) }
   }
 
-  // ── Eliminar ─────────────────────────────────────────────────
+  // ── Eliminar ────────────────────────────────────────────────
   const confirmarEliminar = async () => {
     setEliminando(true)
     const token = localStorage.getItem('token')
@@ -73,152 +105,169 @@ export default function ModuloIngresos() {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (res.ok) {
-        setConfirmarId(null)
-        cargarIngresos()
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setEliminando(false)
-    }
+      if (res.ok) { setConfirmarId(null); cargarIngresos() }
+    } catch { /* silencioso */ }
+    finally { setEliminando(false) }
   }
 
   return (
-    <div className="box-content">
-      <header className="header">
-        <Link to="/"><button className="buttonHeader">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 10">
-            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
-          </svg>
-          Inicio
-        </button></Link>
-        <h1>Ahorrapp</h1>
-        <button className="buttonCerrarSesion">Cerrar Sesion</button>
-      </header>
+    <div className="mx-auto min-h-screen max-w-[1400px] bg-white px-5 py-5 pb-20 font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] text-[#2D2D2D]">
+      <div className="box-border px-4 py-2 lg:px-[100px]">
 
-      <main>
-        <p className="parrafo1">Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos</p>
+        {/* ── Header ── */}
+        <header className="mx-auto mb-5 flex w-full flex-col items-start justify-between gap-3 border-b-2 border-[#82F182] bg-white px-5 py-[5px] md:flex-row md:items-center">
+          <Link to="/">
+            <button className="flex w-[140px] cursor-pointer items-center gap-2 rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 10">
+                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+              </svg>
+              Inicio
+            </button>
+          </Link>
+          <h1 className="text-[28px] font-bold text-[#2E7D2E]">Ahorrapp</h1>
+          <button className="w-[150px] cursor-pointer rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
+            Cerrar Sesión
+          </button>
+        </header>
 
-        <nav className="navbar" aria-label="Menú de secciones">
-          <ul className="nav-list">
-            <li><Link to="/Dashboard"          className="nav-link">Dashboard</Link></li>
-            <li><Link to="/ModulosIngresos"     className="nav-link active">Ingresos</Link></li>
-            <li><Link to="/ModulosGastos"       className="nav-link">Gastos</Link></li>
-            <li><Link to="/ModuloAhorros"       className="nav-link">Ahorros</Link></li>
-            <li><Link to="/ModuloImprevistos"   className="nav-link">Imprevistos</Link></li>
-            <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
-            <li><Link to="/ModulosDependientes" className="nav-link">Dependientes</Link></li>
-            <li><Link to="/ModulosCategorias"   className="nav-link">Categorias</Link></li>
-          </ul>
-        </nav>
+        <main className="animate-[fadeUp_0.6s_ease]">
+          <p className="mb-4 text-[#2D2D2D]">
+            Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos
+          </p>
 
-        <section className="modulo-ahorros">
-          <header className="modulo-header">
-            <h3>Módulo de ingresos</h3>
-            <div className="acciones-ahorro">
+          {/* ── Nav ── */}
+          <nav className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]" aria-label="Menú de secciones">
+            <ul className="flex list-none flex-wrap justify-center gap-2.5 p-0">
+              {navLinks.map(link => (
+                <li key={link.to}>
+                  <Link to={link.to} className={`inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-[0.85rem] font-semibold no-underline shadow-[0_2px_6px_rgba(0,0,0,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#E8FFE8] hover:text-[#2E7D2E] hover:shadow-[0_4px_10px_rgba(0,0,0,0.08)] ${link.active ? 'bg-[#E8FFE8] text-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.12)]' : 'border border-transparent bg-[#F4F6F4] text-[#2D2D2D]'}`}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* ── Sección ── */}
+          <section>
+            <header className="mt-[30px] flex flex-col items-start justify-between gap-3 px-2.5 md:flex-row md:items-center">
+              <h3 className="text-xl font-semibold text-[#2D2D2D]">Módulo de ingresos</h3>
               <Link to="/movimientos/nuevo">
-                <button type="button" className="btn-secundario">Agregar ingreso</button>
+                <button type="button" className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#2E7D2E]">
+                  Agregar ingreso
+                </button>
               </Link>
-            </div>
-          </header>
+            </header>
 
-          <div className="resumen-container">
-            <p className="total-ahorros">Total Ingresos: <strong>${total.toLocaleString('es-CO')}</strong></p>
+            <div className="my-5 w-full rounded-[15px] border-2 border-[#4CB04C]/20 bg-white p-[30px]">
+              <p className="mb-2.5 text-2xl text-[#2D2D2D]">
+                Total Ingresos: <strong>${total.toLocaleString('es-CO')}</strong>
+              </p>
 
-            <div className="tabla-ingresos" style={{ marginTop: '20px' }}>
-              {cargando ? (
-                <p className="mensaje-vacio">Cargando...</p>
-              ) : ingresos.length === 0 ? (
-                <p className="mensaje-vacio">No hay ingresos registrados. Agrega tu primer ingreso para comenzar.</p>
-              ) : isMobile ? (
-                <div className="cards-mobile">
-                  {ingresos.map(i => (
-                    <div key={i.id} className="card-ingreso">
-                      <div className="card-row"><span className="card-label">Fecha</span><span className="card-value">{i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}</span></div>
-                      <div className="card-row"><span className="card-label">Fuente</span><span className="card-value">{i.fuente || '—'}</span></div>
-                      <div className="card-row"><span className="card-label">Categoría</span><span className="card-value">{i.categoria || '—'}</span></div>
-                      <div className="card-row"><span className="card-label">Descripción</span><span className="card-value">{i.descripcion || '—'}</span></div>
-                      <div className="card-row card-monto"><span className="card-label">Monto</span><span className="card-value monto">${Number(i.monto).toLocaleString('es-CO')}</span></div>
-                      <div className="card-row" style={{ justifyContent: 'flex-end', gap: '8px' }}>
-                        <button style={btnEditar} onClick={() => abrirEditar(i)}>Editar</button>
-                        <button style={btnEliminar} onClick={() => setConfirmarId(i.id)}>Eliminar</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-                      <th style={thStyle}>Fecha</th>
-                      <th style={thStyle}>Fuente</th>
-                      <th style={thStyle}>Categoría</th>
-                      <th style={thStyle}>Descripción</th>
-                      <th style={thStyle}>Monto</th>
-                      <th style={thStyle}>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ingresos.map(i => (
-                      <tr key={i.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={tdStyle}>{i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}</td>
-                        <td style={tdStyle}>{i.fuente || '—'}</td>
-                        <td style={tdStyle}>{i.categoria || '—'}</td>
-                        <td style={tdStyle}>{i.descripcion || '—'}</td>
-                        <td style={{ ...tdStyle, color: 'var(--ingresos-dark)', fontWeight: 600 }}>${Number(i.monto).toLocaleString('es-CO')}</td>
-                        <td style={{ ...tdStyle, display: 'flex', gap: '8px' }}>
-                          <button style={btnEditar} onClick={() => abrirEditar(i)}>Editar</button>
-                          <button style={btnEliminar} onClick={() => setConfirmarId(i.id)}>Eliminar</button>
-                        </td>
+              <div className="mt-5 overflow-x-auto">
+                {cargando ? (
+                  <p className="italic text-[#9AA19A]">Cargando...</p>
+                ) : ingresos.length === 0 ? (
+                  <p className="italic text-[#9AA19A]">No hay ingresos registrados. Agrega tu primer ingreso para comenzar.</p>
+                ) : (
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b-2 border-[#D4DCE9]">
+                        {['Fecha', 'Fuente', 'Categoría', 'Descripción', 'Monto', 'Acciones'].map(col => (
+                          <th key={col} className="px-3 py-2.5 text-left text-[0.85rem] font-semibold text-[#4A5568]">{col}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+                    </thead>
+                    <tbody>
+                      {ingresos.map(i => (
+                        <tr key={i.id} className="border-b border-[#D4DCE9] transition-colors hover:bg-slate-50">
+                          <td className="px-3 py-2.5 align-middle text-sm">{i.fecha ? new Date(i.fecha).toLocaleDateString('es-CO') : '—'}</td>
+                          <td className="px-3 py-2.5 align-middle text-sm">{i.fuente || '—'}</td>
+                          <td className="px-3 py-2.5 align-middle text-sm">{i.categoria || '—'}</td>
+                          <td className="px-3 py-2.5 align-middle text-sm">{i.descripcion || '—'}</td>
+                          <td className="px-3 py-2.5 align-middle text-sm font-semibold text-[#1F7A59]">${Number(i.monto).toLocaleString('es-CO')}</td>
+                          <td className="px-3 py-2.5 align-middle">
+                            <div className="flex gap-2">
+                              <button onClick={() => abrirEditar(i)} className="rounded-lg border border-emerald-600 px-3 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50">Editar</button>
+                              <button onClick={() => setConfirmarId(i.id)} className="rounded-lg border border-red-400 px-3 py-1 text-xs font-semibold text-red-500 transition hover:bg-red-50">Eliminar</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
-      </main>
+          </section>
+        </main>
 
-      <footer className="footer-app"><p>&copy; 2026 Mi Aplicación de Finanzas</p></footer>
+        <footer className="fixed bottom-0 left-0 z-[100] w-full border-t border-[#82F182] bg-white p-3 text-center text-xs text-[#9AA19A]">
+          <p>&copy; 2026 Mi Aplicación de Finanzas</p>
+        </footer>
+      </div>
 
       {/* ── Modal Editar ── */}
       {modalEditar && (
-        <div style={overlayStyle}>
-          <div style={modalStyle}>
-            <h4 style={{ marginBottom: '16px' }}>Editar Ingreso</h4>
-            <label style={labelStyle}>Monto</label>
-            <input style={inputStyle} type="number" value={modalEditar.monto}
-              onChange={e => setModalEditar({ ...modalEditar, monto: e.target.value })} />
-            <label style={labelStyle}>Fuente</label>
-            <input style={inputStyle} type="text" value={modalEditar.fuente}
-              onChange={e => setModalEditar({ ...modalEditar, fuente: e.target.value })} />
-            <label style={labelStyle}>Descripción</label>
-            <input style={inputStyle} type="text" value={modalEditar.descripcion}
-              onChange={e => setModalEditar({ ...modalEditar, descripcion: e.target.value })} />
-            <label style={labelStyle}>Fecha</label>
-            <input style={inputStyle} type="date" value={modalEditar.fecha_registro}
-              onChange={e => setModalEditar({ ...modalEditar, fecha_registro: e.target.value })} />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
-              <button style={btnCancelar} onClick={() => setModalEditar(null)}>Cancelar</button>
-              <button style={btnGuardar} onClick={guardarEdicion} disabled={guardando}>
-                {guardando ? 'Guardando...' : 'Guardar'}
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
+            <h4 className="mb-1 text-lg font-bold text-slate-800">Editar Ingreso</h4>
+            <p className="mb-4 text-xs text-slate-400">Modifica los campos que necesites y guarda.</p>
+
+            <label className={labelCls}>Monto *</label>
+            <input className={inputCls} type="number" name="monto" min="0" step="0.01"
+              value={modalEditar.monto} onChange={handleEditarChange} />
+
+            <label className={labelCls}>Categoría</label>
+            <select 
+              className={inputCls} 
+              name="id_categoria" 
+              value={modalEditar.id_categoria || ""} 
+              onChange={handleEditarChange}
+            >
+              <option value="">Sin categoría</option>
+              {categorias.filter(c => c.activa == 1).map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nombre}
+                </option>
+              ))}
+            </select>
+
+            <label className={labelCls}>Fuente</label>
+            <input className={inputCls} type="text" name="fuente" placeholder="Ej: Salario, Freelance..."
+              value={modalEditar.fuente} onChange={handleEditarChange} />
+
+            <label className={labelCls}>Descripción</label>
+            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional"
+              value={modalEditar.descripcion} onChange={handleEditarChange} />
+
+            <label className={labelCls}>Fecha</label>
+            <input className={inputCls} type="date" name="fecha_registro"
+              value={modalEditar.fecha_registro} onChange={handleEditarChange} />
+
+            {errorModal && (
+              <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{errorModal}</p>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setModalEditar(null)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancelar</button>
+              <button onClick={guardarEdicion} disabled={guardando} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:bg-emerald-300">
+                {guardando ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Diálogo Confirmar Eliminar ── */}
+      {/* ── Confirmar Eliminar ── */}
       {confirmarId && (
-        <div style={overlayStyle}>
-          <div style={{ ...modalStyle, maxWidth: '360px' }}>
-            <h4 style={{ marginBottom: '12px' }}>¿Eliminar ingreso?</h4>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Esta acción no se puede deshacer.</p>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
-              <button style={btnCancelar} onClick={() => setConfirmarId(null)}>Cancelar</button>
-              <button style={btnEliminarConfirm} onClick={confirmarEliminar} disabled={eliminando}>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
+            <h4 className="mb-2 text-lg font-bold text-slate-800">¿Eliminar ingreso?</h4>
+            <p className="text-sm text-slate-500">Esta acción no se puede deshacer.</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setConfirmarId(null)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancelar</button>
+              <button onClick={confirmarEliminar} disabled={eliminando} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:bg-red-300">
                 {eliminando ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
@@ -228,15 +277,3 @@ export default function ModuloIngresos() {
     </div>
   )
 }
-
-const thStyle     = { padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }
-const tdStyle     = { padding: '10px 12px', fontSize: '0.9rem', verticalAlign: 'middle' }
-const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
-const modalStyle  = { background: 'var(--bg-card, #fff)', borderRadius: '12px', padding: '28px', width: '100%', maxWidth: '460px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column' }
-const labelStyle  = { fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px', marginTop: '12px' }
-const inputStyle  = { padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' }
-const btnEditar   = { padding: '4px 12px', borderRadius: '6px', border: '1px solid var(--ingresos-dark, #2e7d32)', background: 'transparent', color: 'var(--ingresos-dark, #2e7d32)', cursor: 'pointer', fontSize: '0.8rem' }
-const btnEliminar = { padding: '4px 12px', borderRadius: '6px', border: '1px solid #c0392b', background: 'transparent', color: '#c0392b', cursor: 'pointer', fontSize: '0.8rem' }
-const btnCancelar = { padding: '8px 18px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', fontSize: '0.9rem' }
-const btnGuardar  = { padding: '8px 18px', borderRadius: '6px', border: 'none', background: 'var(--ingresos-dark, #2e7d32)', color: '#fff', cursor: 'pointer', fontSize: '0.9rem' }
-const btnEliminarConfirm = { padding: '8px 18px', borderRadius: '6px', border: 'none', background: '#c0392b', color: '#fff', cursor: 'pointer', fontSize: '0.9rem' }

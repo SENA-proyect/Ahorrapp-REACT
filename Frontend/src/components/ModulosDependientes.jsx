@@ -1,13 +1,5 @@
-<<<<<<< HEAD
-import { Link } from "react-router-dom"
-import { useState, useEffect } from "react"
-import '../styles/generalModulos.css'
-// import '../styles/VentanaModal.css'
-// import '../styles/dependientes.css'
-=======
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
->>>>>>> Santiago
 
 const PESO_LABELS = {
   1: 'Muy bajo',
@@ -38,7 +30,7 @@ const Dependientes = () => {
       .then(res => res.json())
       .then(data => setDependientes(Array.isArray(data) ? data : []))
       .catch(err => console.error('Error cargando dependientes:', err))
-  }, [token])
+  }, [])
 
   const handleChange = e => {
     const { name, value } = e.target
@@ -200,19 +192,6 @@ const Dependientes = () => {
             Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos
           </p>
 
-<<<<<<< HEAD
-          <nav className="navbar" aria-label="Menú de secciones">
-            <ul className="nav-list">
-              <li><Link to="/Dashboard"           className="nav-link">Dashboard</Link></li>
-              <li><Link to="/ModulosIngresos"     className="nav-link">Ingresos</Link></li>
-              <li><Link to="/ModulosGastos"       className="nav-link">Gastos</Link></li>
-              <li><Link to="/ModuloAhorros"       className="nav-link">Ahorros</Link></li>
-              <li><Link to="/ModuloImprevistos"   className="nav-link">Imprevistos</Link></li>
-              <li><Link to="/ModuloDeudas"        className="nav-link">Deudas</Link></li>
-              <li><Link to="/ModulosDependientes" className="nav-link active">Dependientes</Link></li>
-              <li><Link to="/ModulosCategorias"   className="nav-link">Categorías</Link></li>
-              <li><Link to="/noticias" className="nav-link">📰 Noticias</Link></li>
-=======
           <nav className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
             <ul className="flex list-none flex-wrap justify-center gap-2.5 p-0">
               {navLinks.map(link => (
@@ -229,7 +208,6 @@ const Dependientes = () => {
                   </Link>
                 </li>
               ))}
->>>>>>> Santiago
             </ul>
           </nav>
 
