@@ -17,10 +17,12 @@ const {
   deleteImprevistos,
   getDeudas,
   updateDeudas,
-  deleteDeudas
+  deleteDeudas,
+  getMovimientos,
 } = require("../controllers/movimientosController");
 
 router.post("/",          verifyToken, crearMovimiento);
+router.get("/", verifyToken, getMovimientos); 
 router.get("/ingresos",   verifyToken, getIngresos);
 router.get("/ahorros",    verifyToken, getAhorros);
 router.get("/gastos",     verifyToken, getGastos);

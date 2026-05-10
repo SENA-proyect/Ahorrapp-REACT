@@ -7,7 +7,8 @@ error con el update en categorias, de resto todo bien
 
 INSTALACION 
 backend:
-npm install nodemon express cors axios bcrypt jsonwebtoken node-fetch
+npm install express cors axios bcrypt jsonwebtoken nodemon
+
 
 frontend:
 npm install -D tailwindcss postcss autoprefixer axios

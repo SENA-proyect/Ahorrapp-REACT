@@ -1,5 +1,44 @@
 const pool = require("../db/connection");
 
+const getMovimientos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+
+  try {
+    // 1. Consultar Ingresos
+    const [ingresos] = await pool.query(
+      "SELECT 'ingreso' as tipo, Monto as monto, Descripcion as descripcion, Fecha_registro as fecha FROM INGRESOS i JOIN ENTRADA s ON i.ID_entrada = s.ID_entrada JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+      [ID_usuario]
+    );
+    
+    // 2. Consultar Gastos
+    const [gastos] = await pool.query(
+      "SELECT 'gasto' as tipo, Monto as monto, Descripcion as descripcion, Fecha_registro as fecha FROM GASTOS g JOIN SALIDA s ON g.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+      [ID_usuario]
+    );
+    
+    // 3. Consultar Deudas
+    const [deudas] = await pool.query(
+      "SELECT 'deuda' as tipo, Monto as monto, Descripcion as descripcion, Estado as estado FROM DEUDAS d JOIN SALIDA s ON d.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+      [ID_usuario]
+    );
+    
+    // 4. Consultar Ahorros
+    const [ahorros] = await pool.query(
+      "SELECT 'ahorro' as tipo, Monto_acumulado as monto, Descripcion as descripcion FROM AHORROS a JOIN ENTRADA s ON a.ID_entrada = s.ID_entrada JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+      [ID_usuario]
+    );
+
+    // Unificar todo para la IA
+    const todosLosMovimientos = [...ingresos, ...gastos, ...deudas, ...ahorros];
+
+    res.status(200).json(todosLosMovimientos);
+  } catch (error) {
+    console.error("Error en getMovimientos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error al recopilar movimientos" });
+  }
+};
+
+
 const crearMovimiento = async (req, res) => {
   const connection = await pool.getConnection();
 
@@ -580,4 +619,4 @@ const deleteDeudas = async (req, res) => {
 };
 
 
-module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas };
+module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas,getMovimientos };
