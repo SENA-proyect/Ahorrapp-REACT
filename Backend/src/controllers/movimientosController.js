@@ -397,13 +397,15 @@ const getImprevistos = async (req, res) => {
     const [rows] = await pool.query(
       `SELECT i.ID_imprevistos AS id, i.Monto AS monto, i.Causa AS causa,
               i.Fecha_registro AS fecha,
+              i.ID_categoria,    
+              i.ID_dependientes, 
               c.Nombre AS categoria,
               d.Nombre AS dependiente
        FROM IMPREVISTOS i
        INNER JOIN SALIDA s       ON i.ID_salida      = s.ID_salida
        INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
        LEFT  JOIN CATEGORIAS c   ON i.ID_categoria   = c.ID_categoria
-       LEFT  JOIN DEPENDIENTES d ON i.ID_dependiente = d.ID_dependientes
+       LEFT  JOIN DEPENDIENTES d ON i.ID_dependientes = d.ID_dependientes
        WHERE m.ID_usuario = ?
        ORDER BY i.Fecha_registro DESC`,
       [ID_usuario]
@@ -418,23 +420,41 @@ const getImprevistos = async (req, res) => {
 // ── UPDATE Imprevistos ────────────────────────────────────────
 const updateImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
-    const { id } = req.params;
-    const { monto, causa, fecha_registro, id_categoria, id_dependientes } = req.body;
-    try {    const [rows] = await pool.query(
-        `UPDATE IMPREVISTOS    
-            SET Monto = ?, Causa = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependientes = ?
-            WHERE ID_imprevistos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [monto, causa, fecha_registro, id_categoria, id_dependientes, id, ID_usuario]
+  const { id } = req.params;
+  const { monto, causa, fecha_registro, id_categoria, id_dependientes } = req.body;
+
+  try {
+    const [rows] = await pool.query(
+      `UPDATE IMPREVISTOS i
+       JOIN SALIDA s ON i.ID_salida = s.ID_salida
+       JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
+       SET i.Monto = ?, 
+           i.Causa = ?, 
+           i.Fecha_registro = ?, 
+           i.ID_categoria = ?, 
+           i.ID_dependientes = ?
+       WHERE i.ID_imprevistos = ? AND m.ID_usuario = ?`,
+      [
+        monto, 
+        causa || null, 
+        fecha_registro || null, 
+        id_categoria || null, 
+        id_dependientes || null, 
+        id, 
+        ID_usuario
+      ]
     );
+
     if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado" });
+      return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado o sin permisos" });
     }
     res.status(200).json({ ok: true, mensaje: "Imprevisto actualizado exitosamente" });
-    } catch (error) {
+  } catch (error) {
     console.error("Error en updateImprevistos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
+
 
 // ── DELETE Imprevistos ────────────────────────────────────────
 const deleteImprevistos = async (req, res) => {
