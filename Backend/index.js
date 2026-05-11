@@ -4,18 +4,13 @@ require("dotenv").config();
 
 
 const authRoutes = require("./src/routes/authRoutes");
-const categoriasRoutes = require("./src/routes/categoriasRoutes");
-
-const authRoutes        = require("./src/routes/authRoutes");
-const categoriasRoutes  = require("./src/routes/categoriasRoutes");
-
+const categoriasRoutes = require("./src/routes/categoriasRoutes"); 
 const dependientesRoutes = require("./src/routes/dependientesRoutes");
 const movimientosRoutes = require("./src/routes/movimientosRoutes");
 const aiRoutes = require("./src/routes/aiRoutes");
 const noticiasRoutes = require("./src/routes/noticiasRoutes");
 const bolsaRoutes = require('./src/routes/alphaVantageRoutes')
 
-const bolsaRoutes = require('./src/routes/alphaVantageRoutes')
 
 
 const app = express();
