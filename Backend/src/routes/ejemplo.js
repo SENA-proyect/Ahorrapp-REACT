@@ -50,21 +50,50 @@ const getDependientes = async (req, res) => {
     }
 };
 
+
 const getIngresos = async (req, res) => {
-    const id
-}
+    const id_usuario = req.query.id_usuario || 1;
+
+    try {
+        const [rows] = await pool.query(
+            `SELECT 
+                ID_ingresos AS id, 
+                ID_entrada AS entrada, 
+                ID_categoria AS categoria, 
+                Monto AS monto, 
+                Descripcion AS descripcion, 
+                Fuente AS fuente, 
+                Fecha_registro AS fecha
+             FROM INGRESOS 
+             WHERE ID_usuario = ?
+             ORDER BY monto ASC`,
+            [id_usuario]                        
+        );
+        
+        return res.status(200).json({ ok: true, ingresos: rows });
+
+    } catch (error) {
+        console.error("Error en getIngresos:", error.message);
+        return res.status(500).json({ ok: false, mensaje: "Error al obtener los ingresos" });
+    }
+};
+
+
+
 
 // Rutas (Asegúrate de incluir la COMA aquí abajo)
 app.get('/api/categorias', getCategorias);
-app.get('/api/dependientes', getDependientes); // <--- Coma agregada
+app.get('/api/dependientes', getDependientes); 
+app.get('/api/ingresos', getIngresos);
 
 app.get('/', (req, res) => {
     res.send('Servidor AhorrApp activo en el puerto ' + PORT);
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en: http://localhost:${PORT}`);
+    console.log(` Servidor corriendo en: http://localhost:${PORT}`);
     console.log(` Categorías: http://localhost:${PORT}/api/categorias`);
     console.log(` Dependientes: http://localhost:${PORT}/api/dependientes`);
+    console.log(` Ingresos: http://localhost:${PORT}/api/ingresos`);
 
 });
