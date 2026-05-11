@@ -3,10 +3,12 @@ por si falla:
 npm uninstall tailwindcss postcss autoprefixer
 Remove-Item -Recurse -Force node_modules, package-lock.json
 
+FRONTEND:
 Instalacion:
 npm install
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p <= si falla usar este comando: node .\node_modules\tailwindcss\lib\cli.js init -p
+npm install -D tailwindcss postcss autoprefixer axios
+instalar tambien esto: npm install @tailwindcss/postcss
+
 en caso de que no funcione, toca hacerlo manualmente
 
 crear archivo:
@@ -19,4 +21,5 @@ export default {
   },
 }
 
-instalar tambien esto: npm install @tailwindcss/postcss
+BACKEND:
+npm install cors nodemon axios express
