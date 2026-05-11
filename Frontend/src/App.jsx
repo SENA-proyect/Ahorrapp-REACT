@@ -1,8 +1,6 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Index from './components/Index.jsx'
 import Login from './components/Login.jsx'
-import Registrar from './components/Registrar.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import ModuloAhorros from './components/ModuloAhorros.jsx'
 import ModuloDeudas from './components/ModuloDeudas.jsx'
@@ -18,7 +16,6 @@ import PanelHistorial from './components/PanelHistorial.jsx'
 import PanelMovimientos from './components/PanelMovimientos.jsx'
 import PanelUsuarios from './components/PanelUsuarios.jsx'
 import VerificacionCorreo from './components/VerificacionCorreo.jsx'
-import VistaEmail from './components/VistaEmail.jsx'
 import VMIDependientes from './components/VM_I-Dependientes.jsx'
 import FormMovimiento from './components/movimientos/FormMovimientos.jsx'
 
@@ -30,7 +27,6 @@ function App() {
     <BrowserRouter>
      <Routes>
       <Route path="/" element={<Index />} />
-      <Route path="/Registrar" element={<Registrar />} />
       <Route path="/Login" element={<Login />} />
       <Route path="/Dashboard" element={<Dashboard />} />
       <Route path="/ModuloAhorros" element={<ModuloAhorros />} />
@@ -47,7 +43,7 @@ function App() {
       <Route path="/PanelMovimientos" element={<PanelMovimientos />} />
       <Route path="/PanelUsuarios" element={<PanelUsuarios />} />
       <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
-      <Route path="/VistaEmail" element={<VistaEmail />} />
+
       <Route path='/VM_I-Dependientes' element={<VMIDependientes />} />
       <Route path="/movimientos/nuevo" element={<FormMovimiento />} /> 
 
