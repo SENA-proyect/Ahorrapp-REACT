@@ -5,15 +5,15 @@ import { getCategorias } from '../../api'
 export default function FormIngreso({ tipoFlujo, subtipo }) {
   const navigate = useNavigate()
   const [categorias, setCategorias] = useState([])
-  const [cargando, setCargando] = useState(false)
-  const [error, setError] = useState(null)
+  const [cargando,   setCargando]   = useState(false)
+  const [error,      setError]      = useState(null)
 
   const [form, setForm] = useState({
-    monto: '',
-    descripcion: '',
-    fuente: '',
+    monto:          '',
+    descripcion:    '',
+    fuente:         '',
     fecha_registro: '',
-    id_categoria: '',
+    id_categoria:   '',
   })
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          tipo_flujo: tipoFlujo,
+          tipo_flujo:     tipoFlujo,
           subtipo_modulo: subtipo,
           datos: {
             monto:          Number(form.monto),
@@ -114,9 +114,7 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
         >
           <option value="">Sin categoría</option>
           {categorias.filter(c => c.activa == 1).map(cat => (
-            <option key={cat.id} value={cat.id}>
-              {cat.nombre}
-            </option>
+            <option key={cat.id} value={cat.id}>{cat.nombre}</option>
           ))}
         </select>
       </div>

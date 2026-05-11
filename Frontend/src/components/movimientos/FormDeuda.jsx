@@ -3,66 +3,56 @@ import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
 
 export default function FormDeuda({ tipoFlujo, subtipo }) {
-  const navigate = useNavigate()
-  const [categorias, setCategorias] = useState([])
-  const [cargando,   setCargando]   = useState(false)
-  const [error,      setError]      = useState(null)
+  const navigate = useNavigate()
+  const [categorias, setCategorias] = useState([])
+  const [cargando,   setCargando]   = useState(false)
+  const [error,      setError]      = useState(null)
 
+  const [form, setForm] = useState({
+    monto:        '',
+    fuente:       '',
+    descripcion:  '',
+    cuotas_total: '',
+    fecha_inicio: '',
+    fecha_fin:    '',
+    id_categoria: '',
+  })
 
-  const [form, setForm] = useState({
-    monto:        '',
-    fuente:       '',
-    descripcion:  '',
-    cuotas_total: '',
-    fecha_inicio: '',
-    fecha_fin:    '',
-    id_categoria: '',
-  })
+  useEffect(() => {
+    getCategorias()
+      .then(data => { if (Array.isArray(data)) setCategorias(data) })
+      .catch(() => {})
+  }, [])
 
+  const handleChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
 
-  useEffect(() => {
-    getCategorias()
-      .then(data => { if (Array.isArray(data)) setCategorias(data) })
-      .catch(() => {})
-  }, [])
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
 
+    if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0) {
+      setError('El monto debe ser un número mayor a 0')
+      return
+    }
 
-  const handleChange = (e) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+    if (!form.fuente.trim()) {
+      setError('La fuente de la deuda es obligatoria')
+      return
+    }
 
+    if (form.fecha_fin && form.fecha_inicio && form.fecha_fin < form.fecha_inicio) {
+      setError('La fecha de fin no puede ser anterior a la fecha de inicio')
+      return
+    }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError(null)
+    if (form.cuotas_total && (isNaN(form.cuotas_total) || Number(form.cuotas_total) <= 0)) {
+      setError('El número de cuotas debe ser mayor a 0')
+      return
+    }
 
-
-    if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0) {
-      setError('El monto debe ser un número mayor a 0')
-      return
-    }
-
-
-    if (!form.fuente.trim()) {
-      setError('La fuente de la deuda es obligatoria')
-      return
-    }
-
-
-    if (form.fecha_fin && form.fecha_inicio && form.fecha_fin < form.fecha_inicio) {
-      setError('La fecha de fin no puede ser anterior a la fecha de inicio')
-      return
-    }
-
-
-    if (form.cuotas_total && (isNaN(form.cuotas_total) || Number(form.cuotas_total) <= 0)) {
-      setError('El número de cuotas debe ser mayor a 0')
-      return
-    }
-
-
-    setCargando(true)
-
+    setCargando(true)
 
     try {
       const token = localStorage.getItem('token')
@@ -87,8 +77,7 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
         }),
       })
 
-      const data = await res.json()
-
+      const data = await res.json()
 
       if (data.ok) {
         navigate('/ModuloDeudas')

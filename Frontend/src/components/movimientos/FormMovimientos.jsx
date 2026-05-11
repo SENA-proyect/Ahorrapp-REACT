@@ -8,7 +8,7 @@ import FormImprevisto from './FormImprevisto'
 
 const OPCIONES = {
   Entrada: ['Ingreso', 'Ahorro'],
-  Salida: ['Gasto', 'Deuda', 'Imprevisto'],
+  Salida:  ['Gasto', 'Deuda', 'Imprevisto'],
 }
 
 export default function FormMovimiento() {
@@ -23,12 +23,12 @@ export default function FormMovimiento() {
 
   const renderFormDetalle = () => {
     switch (subtipoModulo) {
-      case 'Ingreso': return <FormIngreso tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
-      case 'Ahorro': return <FormAhorro tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
-      case 'Gasto': return <FormGasto tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
-      case 'Deuda': return <FormDeuda tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
+      case 'Ingreso':    return <FormIngreso    tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
+      case 'Ahorro':     return <FormAhorro     tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
+      case 'Gasto':      return <FormGasto      tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
+      case 'Deuda':      return <FormDeuda      tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
       case 'Imprevisto': return <FormImprevisto tipoFlujo={tipoFlujo} subtipo={subtipoModulo} />
-      default: return null
+      default:           return null
     }
   }
 

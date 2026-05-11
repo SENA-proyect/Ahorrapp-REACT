@@ -3,53 +3,45 @@ import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
 
 export default function FormAhorro({ tipoFlujo, subtipo }) {
-  const navigate = useNavigate()
-  const [categorias, setCategorias] = useState([])
-  const [cargando,   setCargando]   = useState(false)
-  const [error,      setError]      = useState(null)
+  const navigate = useNavigate()
+  const [categorias, setCategorias] = useState([])
+  const [cargando,   setCargando]   = useState(false)
+  const [error,      setError]      = useState(null)
 
+  const [form, setForm] = useState({
+    monto:          '',
+    descripcion:    '',
+    meta:           '',
+    fecha_registro: '',
+    fecha_meta:     '',
+    id_categoria:   '',
+  })
 
-  const [form, setForm] = useState({
-    monto:          '',
-    descripcion:    '',
-    meta:           '',
-    fecha_registro: '',
-    fecha_meta:     '',
-    id_categoria:   '',
-  })
+  useEffect(() => {
+    getCategorias()
+      .then(data => { if (Array.isArray(data)) setCategorias(data) })
+      .catch(() => {})
+  }, [])
 
+  const handleChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
 
-  useEffect(() => {
-    getCategorias()
-      .then(data => { if (Array.isArray(data)) setCategorias(data) })
-      .catch(() => {})
-  }, [])
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
 
+    if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0) {
+      setError('El monto debe ser un número mayor a 0')
+      return
+    }
 
-  const handleChange = (e) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+    if (form.fecha_meta && form.fecha_registro && form.fecha_meta < form.fecha_registro) {
+      setError('La fecha meta no puede ser anterior a la fecha de registro')
+      return
+    }
 
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError(null)
-
-
-    if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0) {
-      setError('El monto debe ser un número mayor a 0')
-      return
-    }
-
-
-    if (form.fecha_meta && form.fecha_registro && form.fecha_meta < form.fecha_registro) {
-      setError('La fecha meta no puede ser anterior a la fecha de registro')
-      return
-    }
-
-
-    setCargando(true)
-
+    setCargando(true)
 
     try {
       const token = localStorage.getItem('token')
@@ -73,8 +65,7 @@ export default function FormAhorro({ tipoFlujo, subtipo }) {
         }),
       })
 
-      const data = await res.json()
-
+      const data = await res.json()
 
       if (data.ok) {
         navigate('/ModuloAhorros')

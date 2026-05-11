@@ -3,56 +3,48 @@ import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
 
 export default function FormGasto({ tipoFlujo, subtipo }) {
-  const navigate = useNavigate()
-  const [categorias,   setCategorias]   = useState([])
-  const [dependientes, setDependientes] = useState([])
-  const [cargando,     setCargando]     = useState(false)
-  const [error,        setError]        = useState(null)
+  const navigate = useNavigate()
+  const [categorias,   setCategorias]   = useState([])
+  const [dependientes, setDependientes] = useState([])
+  const [cargando,     setCargando]     = useState(false)
+  const [error,        setError]        = useState(null)
 
+  const [form, setForm] = useState({
+    monto:          '',
+    descripcion:    '',
+    fecha_registro: '',
+    id_categoria:   '',
+    id_dependiente: '',
+  })
 
-  const [form, setForm] = useState({
-    monto:          '',
-    descripcion:    '',
-    fecha_registro: '',
-    id_categoria:   '',
-    id_dependiente: '',
-  })
+  useEffect(() => {
+    getCategorias()
+      .then(data => { if (Array.isArray(data)) setCategorias(data) })
+      .catch(() => {})
 
+    const token = localStorage.getItem('token')
+    fetch('http://localhost:3000/api/dependientes', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => { if (Array.isArray(data)) setDependientes(data) })
+      .catch(() => {})
+  }, [])
 
-  useEffect(() => {
-    getCategorias()
-      .then(data => { if (Array.isArray(data)) setCategorias(data) })
-      .catch(() => {})
+  const handleChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
 
-    const token = localStorage.getItem('token')
-    fetch('http://localhost:3000/api/dependientes', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.ok ? r.json() : [])
-      .then(data => { if (Array.isArray(data)) setDependientes(data) })
-      .catch(() => {})
-  }, [])
+    if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0) {
+      setError('El monto debe ser un número mayor a 0')
+      return
+    }
 
-
-  const handleChange = (e) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError(null)
-
-
-    if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0) {
-      setError('El monto debe ser un número mayor a 0')
-      return
-    }
-
-
-    setCargando(true)
-
+    setCargando(true)
 
     try {
       const token = localStorage.getItem('token')
@@ -75,8 +67,7 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
         }),
       })
 
-      const data = await res.json()
-
+      const data = await res.json()
 
       if (data.ok) {
         navigate('/ModulosGastos')
