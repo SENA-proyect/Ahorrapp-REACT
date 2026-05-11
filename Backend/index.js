@@ -9,6 +9,7 @@ const dependientesRoutes = require("./src/routes/dependientesRoutes");
 const movimientosRoutes = require("./src/routes/movimientosRoutes");
 const aiRoutes = require("./src/routes/aiRoutes");
 const noticiasRoutes = require("./src/routes/noticiasRoutes");
+const bolsaRoutes = require('./src/routes/alphaVantageRoutes')
 
 
 const app = express();
@@ -30,6 +31,7 @@ app.use("/api/dependientes", dependientesRoutes);
 app.use("/api/movimientos", movimientosRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/noticias", noticiasRoutes);
+app.use('/api', bolsaRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

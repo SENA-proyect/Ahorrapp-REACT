@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import BolsaWidget from './BolsaWidget'
 
 const navItems = [
   { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos'     },
@@ -8,6 +9,8 @@ const navItems = [
   { href: '/ModuloDeudas',       emoji: '💳', label: 'Deudas'       },
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias'   },
+  { href: '/movimientos/nuevo',     emoji: '➕', label: 'Nuevo Movimiento' },
+  { href: '/Noticias',           emoji: '📰', label: 'Noticias'     },
 ]
 
 const usuario = JSON.parse(localStorage.getItem('usuario'))
@@ -143,6 +146,11 @@ export default function Dashboard() {
             </article>
           ))}
         </div>
+
+          {/* Widget Bolsa */}
+        <section className="w-full">
+          <BolsaWidget />
+        </section>
 
         {/* Secciones de resumen */}
         {[0, 1].map(i => (
