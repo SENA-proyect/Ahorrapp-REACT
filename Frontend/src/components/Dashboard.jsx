@@ -147,10 +147,12 @@ export default function Dashboard() {
           ))}
         </div>
 
+          {/* Widget Bolsa */}
         <section className="w-full">
           <BolsaWidget />
         </section>
 
+        {/* Secciones de resumen */}
         {[0, 1].map(i => (
           <section
             key={i}
