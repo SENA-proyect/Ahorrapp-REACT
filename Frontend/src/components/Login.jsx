@@ -3,21 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
 
 // ── Mini-componente reutilizable para cada campo del formulario ────────────
-function Field({ id, label, type, placeholder, name, value, onChange }) {
+function Field({ id, label, type, placeholder, name, value, onChange, icon, className }) {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm text-zinc-400 font-medium">
         {label}
       </label>
-      <input
-        id={id}
-        type={type}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-2.5 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-amber-400 transition-colors"
-      />
+      <div className="relative">
+        <input
+          id={id}
+          type={type}
+          name={name}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          className={`w-full bg-[#07152D] border border-zinc-700 text-zinc-100 rounded-xl px-4 py-2.5 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-amber-400 transition-colors ${icon ? "pr-10" : ""} ${className ?? ""}`}
+        />
+        {icon && (
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none">
+            {icon}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -132,7 +139,7 @@ export default function Login() {
 
         {/* Tarjeta principal que contiene los dos lados. */}
         <div
-          className="flex items-center bg-zinc-900 w-[1000px] h-[580px] rounded-3xl shadow-2xl overflow-hidden"
+          className="flex items-center bg-gradient-to-br from-[#050F24] to-[#152E5E] w-[1000px] h-[580px] rounded-3xl shadow-2xl overflow-hidden"
           style={{ border: "1px solid #27272a" }}
         >
 
@@ -157,11 +164,12 @@ export default function Login() {
 
               {/* ── FORMULARIO DE LOGIN ──────────────────────── */}
               <div className="h-[500px] flex flex-col justify-center gap-5">
-
-                <div className="mb-2">
-                  <h2 className="text-2xl font-bold text-zinc-100 tracking-tight">
-                    Bienvenido de vuelta
-                  </h2>
+                <div className="mb-5">
+                  <p className="text-amber-400 text-sm mb-4 tracking-widest">ACCESO SEGURO</p>
+                  <div className="text-4xl font-bold text-white flex gap-2 mb-1">
+                    <p className="text-white">Bienvenido </p>
+                    <p className="text-amber-400">de vuelta</p>
+                  </div>
                   <p className="text-sm text-zinc-500 mt-1">Ingresa tus datos para continuar</p>
                 </div>
 
@@ -173,9 +181,11 @@ export default function Login() {
                     label="Correo electrónico"
                     type="email"
                     name="Email"
+                    icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffbe33"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7" stroke="#ffbe33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <rect x="3" y="5" width="18" height="14" rx="2" stroke="#ffbe33" stroke-width="2" stroke-linecap="round"></rect> </g></svg>}
                     placeholder="juan@correo.com"
                     value={loginForm.Email}
                     onChange={handleLoginChange}
+                    className="bg-[#07152D]"
                   />
                   <Field
                     id="login-password"
@@ -185,8 +195,8 @@ export default function Login() {
                     placeholder="••••••••"
                     value={loginForm.Password_hash}
                     onChange={handleLoginChange}
+                    className="bg-[#07152D]"
                   />
-
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {/* "accent-amber-400" colorea el checkbox de dorado. */}
@@ -210,9 +220,9 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={cargando}
-                    className="bg-amber-400 hover:bg-amber-300 active:scale-95 text-zinc-950 rounded-xl py-3 w-full cursor-pointer transition-all duration-300 font-semibold tracking-wide shadow-md shadow-amber-900 mt-1 disabled:opacity-60"
+                    className="bg-[#1E4B8F] border-1 border-zinc-600 hover:bg-[#102A56] active:scale-95 text-white rounded-xl py-3 w-full cursor-pointer transition-all duration-300 font-semibold tracking-wide shadow-md shadow-zinc-900 mt-1 disabled:opacity-60"
                   >
-                    {cargando ? "Entrando..." : "Entrar"}
+                    {cargando ? "Entrando..." : "Iniciar Sesión →"}
                   </button>
                 </form>
 

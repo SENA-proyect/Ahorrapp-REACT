@@ -1,14 +1,19 @@
 import { useNavigate } from 'react-router-dom'
+import BolsaWidget from './BolsaWidget'
 
 const navItems = [
   { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos'     },
   { href: '/ModulosGastos',       emoji: '💸', label: 'Gastos'       },
-  { href: '/ModulosAhorros',      emoji: '🎯', label: 'Ahorrar'      },
-  { href: '/ModulosImprevistos',  emoji: '🛡️', label: 'Imprevistos'  },
-  { href: '/ModulosDeudas',       emoji: '💳', label: 'Deudas'       },
+  { href: '/ModuloAhorros',      emoji: '🎯', label: 'Ahorrar'      },
+  { href: '/ModuloImprevistos',  emoji: '🛡️', label: 'Imprevistos'  },
+  { href: '/ModuloDeudas',       emoji: '💳', label: 'Deudas'       },
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias'   },
+  { href: '/movimientos/nuevo',     emoji: '➕', label: 'Nuevo Movimiento' },
+  { href: '/Noticias',           emoji: '📰', label: 'Noticias'     },
 ]
+
+const usuario = JSON.parse(localStorage.getItem('usuario'))
 
 const statCards = [
   {
@@ -121,7 +126,9 @@ export default function Dashboard() {
         {/* Bienvenida */}
         <div className="flex flex-col w-full items-start">
           <p className="text-zinc-400 text-sm">Bienvenido de vuelta</p>
-          <h2 className="text-2xl font-bold text-white">Santiago <span>👋.</span></h2>
+          <h2 className="text-2xl font-bold text-white">
+            {usuario?.nombre || 'Usuario'} <span>👋.</span>
+          </h2>
         </div>
 
         {/* Stat Cards */}
@@ -140,7 +147,10 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Secciones de resumen */}
+        <section className="w-full">
+          <BolsaWidget />
+        </section>
+
         {[0, 1].map(i => (
           <section
             key={i}
