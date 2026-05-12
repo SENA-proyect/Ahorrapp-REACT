@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getResumenFinancieroBreve } from '../../api';
+import { getResumenFinancieroBreve } from '../../api.js';
 
 const Asistente = () => {
   const [visible, setVisible] = useState(false);
