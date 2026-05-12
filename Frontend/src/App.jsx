@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Asistente from './components/Asistente/Asistente.jsx'
 import Index from './components/Index.jsx'
 import Login from './components/Login.jsx'
 import Dashboard from './components/Dashboard.jsx'
@@ -27,6 +28,7 @@ function App() {
     <BrowserRouter>
      <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/Asistente" element={<Asistente />} />
       <Route path="/Login" element={<Login />} />
       <Route path="/Dashboard" element={<Dashboard />} />
       <Route path="/ModuloAhorros" element={<ModuloAhorros />} />
