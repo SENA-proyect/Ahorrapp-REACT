@@ -1,6 +1,6 @@
-import {React,  useState, useEffect, useRef } from 'react';
-import "../../styles/asistente.css"
-import { getResumenFinancieroBreve } from '../../api.js';
+import React, { useState, useEffect, useRef } from 'react';
+import '../../styles/asistente.css';
+import { getResumenFinancieroBreve } from '../../api';
 
 const Asistente = () => {
   const [visible, setVisible] = useState(false);
