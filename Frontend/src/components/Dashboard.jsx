@@ -2,14 +2,15 @@ import { useNavigate } from 'react-router-dom'
 import BolsaWidget from './BolsaWidget'
 
 const navItems = [
-  { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos'     },
-  { href: '/ModulosGastos',       emoji: '💸', label: 'Gastos'       },
-  { href: '/ModuloAhorros',      emoji: '🎯', label: 'Ahorrar'      },
-  { href: '/ModuloImprevistos',  emoji: '🛡️', label: 'Imprevistos'  },
-  { href: '/ModuloDeudas',       emoji: '💳', label: 'Deudas'       },
+  { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
+  { href: '/ModulosIngresos', emoji: '💰', label: 'Ingresos' },
+  { href: '/ModulosGastos', emoji: '💸', label: 'Gastos' },
+  { href: '/ModuloAhorros', emoji: '🎯', label: 'Ahorrar' },
+  { href: '/ModuloImprevistos', emoji: '🛡️', label: 'Imprevistos' },
+  { href: '/ModuloDeudas', emoji: '💳', label: 'Deudas' },
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
-  { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias'   },
-  { href: '/movimientos/nuevo',     emoji: '➕', label: 'Nuevo Movimiento' },
+  { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
+  { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
   { href: '/Noticias',           emoji: '📰', label: 'Noticias'     },
 ]
 
