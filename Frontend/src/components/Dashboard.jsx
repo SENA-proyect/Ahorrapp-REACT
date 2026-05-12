@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import BolsaWidget from './BolsaWidget'
 
 const navItems = [
@@ -57,6 +57,7 @@ const statCards = [
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <div
@@ -104,15 +105,22 @@ export default function Dashboard() {
         {/* ── NAV ── */}
         <nav className="w-full px-4">
           <ul className="flex flex-wrap justify-center gap-4 items-center text-md min-w-max mx-auto pb-2">
-            {navItems.map(item => (
-              <li
-                key={item.href}
-                onClick={() => navigate(item.href)}
-                className="px-3 py-1 rounded-[10px] text-white cursor-pointer transition-all duration-300 bg-white/10 shadow-[0_2px_8px_rgba(255,255,255,0.1)] hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)]"
-              >
-                {item.emoji} {item.label}
-              </li>
-            ))}
+            {navItems.map(item => {
+              const isActive = location.pathname === item.href
+              return (
+                <li
+                  key={item.href}
+                  onClick={() => navigate(item.href)}
+                  className={
+                    isActive
+                      ? 'px-3 py-1 rounded-[10px] cursor-pointer transition-all duration-300 font-bold text-amber-300 bg-amber-400/20 border border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.4)]'
+                      : 'px-3 py-1 rounded-[10px] text-white cursor-pointer transition-all duration-300 bg-white/10 shadow-[0_2px_8px_rgba(255,255,255,0.1)] hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)]'
+                  }
+                >
+                  {item.emoji} {item.label}
+                </li>
+              )
+            })}
           </ul>
         </nav>
 
