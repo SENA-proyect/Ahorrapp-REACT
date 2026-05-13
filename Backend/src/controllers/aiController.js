@@ -6,18 +6,24 @@ const chat = async (req, res) => {
   const MODEL = process.env.MODEL;
 
   try {
-    const response = await axios.post("https://openrouter.ai/api/v1/chat/completions", {
-      model: MODEL || "google/gemini-2.0-flash-001", // Modelo por defecto si el .env falla
-      messages: [
-        { role: "system", content: system || "Asistente de AhorrApp" },
-        ...messages
-      ],
-    }, {
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json"
+    const response = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        model: MODEL || "google/gemini-3.1-flash-lite", // Modelo por defecto si el .env falla
+        // Reducir tokens para evitar el error 402 (créditos/token insuficientes)
+        max_tokens: 800,
+        messages: [
+          { role: "system", content: system || "Asistente de AhorraPP" },
+          ...messages,
+        ],
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
 
     if (response.data.choices && response.data.choices[0]) {
       res.json({ reply: response.data.choices[0].message.content });
