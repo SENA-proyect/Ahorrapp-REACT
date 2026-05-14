@@ -1,38 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../api'
 import HeaderModulos from './HeaderModulos'
 
 const API = 'http://localhost:3000/api/movimientos'
-
-const navItems = [
-  { href: '/Dashboard',           emoji: '📊', label: 'Dashboard' },
-  { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos' },
-  { href: '/ModulosGastos',       emoji: '💸', label: 'Gastos' },
-  { href: '/ModuloAhorros',       emoji: '🎯', label: 'Ahorrar' },
-  { href: '/ModuloImprevistos',   emoji: '🛡️', label: 'Imprevistos' },
-  { href: '/ModuloDeudas',        emoji: '💳', label: 'Deudas' },
-  { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
-  { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias' },
-  { href: '/movimientos/nuevo',   emoji: '➕', label: 'Nuevo Movimiento' },
-  { href: '/Noticias',            emoji: '📰', label: 'Noticias' },
-]
-
 const usuario = JSON.parse(localStorage.getItem('usuario'))
-
-const inputModal = {
-  width: '100%', padding: '9px 14px', borderRadius: '10px',
-  border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)',
-  color: '#f4f4f5', fontSize: '0.88rem', outline: 'none', marginTop: '6px',
-}
-const labelModal = {
-  fontSize: '0.72rem', fontWeight: '700', color: '#a1a1aa',
-  textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '14px', display: 'block',
-}
 
 const Deudas = () => {
   const navigate = useNavigate()
-  const location = useLocation()
 
   const [deudas,      setDeudas]      = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -124,92 +99,124 @@ const Deudas = () => {
     finally { setEliminando(false) }
   }
 
-  const bgPage = { minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', color: 'white', overflowX: 'hidden', background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }
-  const modalOverlay = { position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)', padding: '16px' }
-  const modalBox = { width: '100%', maxWidth: '480px', borderRadius: '20px', padding: '28px', background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 24px 60px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }
+  // Clases reutilizables para inputs y labels del modal
+  const inputModal = "w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/[0.07] text-[#f4f4f5] text-sm outline-none mt-1.5"
+  const labelModal = "block text-[0.72rem] font-bold text-[#a1a1aa] uppercase tracking-widest mt-3.5"
 
   return (
-    <div style={bgPage}>
+    <div className="min-h-screen w-full flex flex-col text-white overflow-x-hidden"
+      style={{ background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }}>
 
       {/* HEADER */}
       <HeaderModulos section="Deudas" />
 
-      <hr style={{ margin: '4px 0', border: 'none', height: '1px', background: 'linear-gradient(to right, transparent, #fbbf24, transparent)' }} />
+      <hr className="my-1 border-none h-px"
+        style={{ background: 'linear-gradient(to right, transparent, #fbbf24, transparent)' }} />
 
       {/* MAIN */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '32px', gap: '24px' }}>
+      <main className="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-8 py-8 gap-6">
+
+        {/* Bienvenida */}
         <div>
-          <p style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Bienvenido de vuelta</p>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white' }}>{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
+          <p className="text-[#a1a1aa] text-sm">Bienvenido de vuelta</p>
+          <h2 className="text-2xl font-extrabold text-white">
+            {usuario?.nombre || 'Usuario'} <span>👋</span>
+          </h2>
         </div>
 
         {/* Stat card */}
-        <article style={{ padding: '24px 32px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.10)', background: 'radial-gradient(ellipse at left, rgba(168,85,247,0.35), rgba(147,51,234,0.04))', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <article className="flex items-center justify-between flex-wrap gap-4 px-8 py-6 rounded-2xl border border-white/10"
+          style={{ background: 'radial-gradient(ellipse at left, rgba(168,85,247,0.35), rgba(147,51,234,0.04))' }}>
           <div>
-            <p style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c084fc', marginBottom: '4px' }}>💳 Total Deuda Acumulada</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <p style={{ fontSize: '2rem', fontWeight: '900', color: 'white' }}>${total.toLocaleString('es-CO')}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#c084fc] mb-1">
+              💳 Total Deuda Acumulada
+            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-4xl font-black text-white">${total.toLocaleString('es-CO')}</p>
               {pendientes.length > 0 && (
-                <span style={{ fontSize: '0.78rem', padding: '3px 10px', borderRadius: '999px', background: 'rgba(96,165,250,0.15)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.3)', fontWeight: '700' }}>
+                <span className="text-xs px-2.5 py-1 rounded-full bg-blue-400/15 text-blue-400 border border-blue-400/30 font-bold">
                   {pendientes.length} pendiente{pendientes.length > 1 ? 's' : ''}
                 </span>
               )}
             </div>
           </div>
-          <button onClick={() => navigate('/movimientos/nuevo')} className="px-5 py-2.5 rounded-xl font-bold text-sm cursor-pointer border-none hover:-translate-y-px transition-all duration-300" style={{ background: 'linear-gradient(135deg, #c084fc, #a855f7)', color: 'white' }}>
+          <button
+            onClick={() => navigate('/movimientos/nuevo')}
+            className="px-5 py-2.5 rounded-xl font-bold text-sm cursor-pointer border-none text-white hover:-translate-y-px transition-all duration-300"
+            style={{ background: 'linear-gradient(135deg, #c084fc, #a855f7)' }}>
             ➕ Nueva Deuda
           </button>
         </article>
 
         {/* Tabla */}
-        <section style={{ width: '100%', borderRadius: '16px', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 8px 32px rgba(0,0,0,0.35)', overflow: 'hidden' }}>
-          <div style={{ padding: '20px 28px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#fbbf24' }}>📋 Módulo de Deudas</h3>
-            <span style={{ fontSize: '0.75rem', color: '#52525b' }}>{deudas.length} registro{deudas.length !== 1 ? 's' : ''}</span>
+        <section className="w-full rounded-2xl border border-white/10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
+          style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)' }}>
+
+          {/* Tabla header */}
+          <div className="flex items-center justify-between px-7 py-5 border-b border-white/[0.08]">
+            <h3 className="text-base font-extrabold text-[#fbbf24]">📋 Módulo de Deudas</h3>
+            <span className="text-xs text-zinc-600">
+              {deudas.length} registro{deudas.length !== 1 ? 's' : ''}
+            </span>
           </div>
-          <div style={{ overflowX: 'auto', padding: '0 8px 16px' }}>
+
+          <div className="overflow-x-auto px-2 pb-4">
             {cargando ? (
-              <p style={{ color: '#71717a', fontStyle: 'italic', padding: '24px 20px', fontSize: '0.88rem' }}>⏳ Cargando...</p>
+              <p className="text-zinc-500 italic px-5 py-6 text-sm">⏳ Cargando...</p>
             ) : deudas.length === 0 ? (
-              <p style={{ color: '#71717a', fontStyle: 'italic', padding: '24px 20px', fontSize: '0.88rem' }}>¡Felicidades! No tienes deudas pendientes registradas.</p>
+              <p className="text-zinc-500 italic px-5 py-6 text-sm">
+                ¡Felicidades! No tienes deudas pendientes registradas.
+              </p>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  <tr className="border-b border-white/[0.08]">
                     {['Fuente', 'Categoría', 'Descripción', 'Cuotas', 'Fecha fin', 'Estado', 'Monto', 'Acciones'].map(col => (
-                      <th key={col} style={{ padding: '12px 16px', fontSize: '0.72rem', fontWeight: '700', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{col}</th>
+                      <th key={col} className="px-4 py-3 text-[0.72rem] font-bold text-zinc-500 uppercase tracking-widest">
+                        {col}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {deudas.map(d => (
-                    <tr key={d.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.fuente || '—'}</td>
-                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.categoria || '—'}</td>
-                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.descripcion || '—'}</td>
-                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.cuotas_total ? `${d.cuotas_pagadas}/${d.cuotas_total}` : 'Pago único'}</td>
-                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.fecha_fin ? new Date(d.fecha_fin).toLocaleDateString('es-CO') : '—'}</td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <span style={{
-                          padding: '3px 10px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: '700',
-                          background: d.estado === 'pagada' ? 'rgba(52,211,153,0.15)' : 'rgba(96,165,250,0.15)',
-                          color: d.estado === 'pagada' ? '#34d399' : '#60a5fa',
-                          border: `1px solid ${d.estado === 'pagada' ? 'rgba(52,211,153,0.35)' : 'rgba(96,165,250,0.35)'}`,
-                        }}>
-                          {d.estado === 'pagada' ? '✓ Pagada' : '⏳ Pendiente'}
-                        </span>
+                    <tr key={d.id}
+                      className="border-b border-white/[0.05] transition-colors duration-150 hover:bg-white/[0.04]">
+                      <td className="px-4 py-3 text-sm text-zinc-300">{d.fuente || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-zinc-300">{d.categoria || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-zinc-300">{d.descripcion || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-zinc-300">
+                        {d.cuotas_total ? `${d.cuotas_pagadas}/${d.cuotas_total}` : 'Pago único'}
                       </td>
-                      <td style={{ padding: '12px 16px', fontSize: '0.9rem', fontWeight: '800', color: '#c084fc' }}>${Number(d.monto).toLocaleString('es-CO')}</td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button onClick={() => abrirEditar(d)} style={{ padding: '5px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', border: '1px solid rgba(192,132,252,0.5)', background: 'rgba(192,132,252,0.10)', color: '#c084fc', transition: 'all 0.15s' }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(192,132,252,0.22)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(192,132,252,0.10)'}>Editar</button>
-                          <button onClick={() => setConfirmarId(d.id)} style={{ padding: '5px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', border: '1px solid rgba(248,113,113,0.5)', background: 'rgba(248,113,113,0.10)', color: '#f87171', transition: 'all 0.15s' }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.22)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(248,113,113,0.10)'}>Eliminar</button>
+                      <td className="px-4 py-3 text-sm text-zinc-300">
+                        {d.fecha_fin ? new Date(d.fecha_fin).toLocaleDateString('es-CO') : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {d.estado === 'pagada' ? (
+                          <span className="px-2.5 py-1 rounded-full text-[0.72rem] font-bold bg-emerald-400/15 text-emerald-400 border border-emerald-400/35">
+                            ✓ Pagada
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-full text-[0.72rem] font-bold bg-blue-400/15 text-blue-400 border border-blue-400/35">
+                            ⏳ Pendiente
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-[0.9rem] font-extrabold text-[#c084fc]">
+                        ${Number(d.monto).toLocaleString('es-CO')}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => abrirEditar(d)}
+                            className="px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer border border-purple-400/50 bg-purple-400/10 text-[#c084fc] hover:bg-purple-400/[0.22] transition-colors duration-150">
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => setConfirmarId(d.id)}
+                            className="px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer border border-red-400/50 bg-red-400/10 text-[#f87171] hover:bg-red-400/[0.22] transition-colors duration-150">
+                            Eliminar
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -221,57 +228,76 @@ const Deudas = () => {
         </section>
       </main>
 
-      <footer style={{ width: '100%', padding: '24px', textAlign: 'center', color: '#3f3f46', fontSize: '0.7rem', fontFamily: 'monospace' }}>
-        <p>© <strong style={{ color: '#fbbf24' }}>2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
+      {/* FOOTER */}
+      <footer className="w-full py-6 text-center text-zinc-700 text-[0.7rem] font-mono">
+        <p>© <strong className="text-[#fbbf24]">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
       </footer>
 
       {/* MODAL EDITAR */}
       {modalEditar && (
-        <div style={modalOverlay}>
-          <div style={modalBox}>
-            <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fbbf24', marginBottom: '4px' }}>✏️ Editar Deuda</h4>
-            <p style={{ fontSize: '0.78rem', color: '#71717a', marginBottom: '8px' }}>Modifica los campos que necesites y guarda.</p>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}>
+          <div className="w-full max-w-[480px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
+            style={{ background: 'rgba(15,23,42,0.92)' }}>
 
-            <label style={labelModal}>Fuente *</label>
-            <input style={inputModal} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta..." value={modalEditar.fuente} onChange={handleEditarChange} />
+            <h4 className="text-lg font-extrabold text-[#fbbf24] mb-1">✏️ Editar Deuda</h4>
+            <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
-            <label style={labelModal}>Categoría</label>
-            <select style={inputModal} name="id_categoria" value={modalEditar.id_categoria || ''} onChange={handleEditarChange}>
+            <label className={labelModal}>Fuente *</label>
+            <input className={inputModal} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta..." value={modalEditar.fuente} onChange={handleEditarChange} />
+
+            <label className={labelModal}>Categoría</label>
+            <select className={inputModal} name="id_categoria" value={modalEditar.id_categoria || ''} onChange={handleEditarChange}>
               <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(cat => (<option key={cat.id} value={cat.id}>{cat.nombre}</option>))}
+              {categorias.filter(c => c.activa == 1).map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+              ))}
             </select>
 
-            <label style={labelModal}>Monto *</label>
-            <input style={inputModal} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleEditarChange} />
+            <label className={labelModal}>Monto *</label>
+            <input className={inputModal} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleEditarChange} />
 
-            <label style={labelModal}>Descripción</label>
-            <input style={inputModal} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleEditarChange} />
+            <label className={labelModal}>Descripción</label>
+            <input className={inputModal} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleEditarChange} />
 
-            <label style={labelModal}>Estado</label>
-            <select style={inputModal} name="estado" value={modalEditar.estado} onChange={handleEditarChange}>
+            <label className={labelModal}>Estado</label>
+            <select className={inputModal} name="estado" value={modalEditar.estado} onChange={handleEditarChange}>
               <option value="pendiente">Pendiente</option>
               <option value="pagada">Pagada</option>
             </select>
 
-            <label style={labelModal}>Cuotas pagadas</label>
-            <input style={inputModal} type="number" name="cuotas_pagadas" min="0" step="1" value={modalEditar.cuotas_pagadas} onChange={handleEditarChange} />
+            <label className={labelModal}>Cuotas pagadas</label>
+            <input className={inputModal} type="number" name="cuotas_pagadas" min="0" step="1" value={modalEditar.cuotas_pagadas} onChange={handleEditarChange} />
 
-            <label style={labelModal}>Total de cuotas</label>
-            <input style={inputModal} type="number" name="cuotas_total" min="1" step="1" placeholder="Vacío si es pago único" value={modalEditar.cuotas_total} onChange={handleEditarChange} />
+            <label className={labelModal}>Total de cuotas</label>
+            <input className={inputModal} type="number" name="cuotas_total" min="1" step="1" placeholder="Vacío si es pago único" value={modalEditar.cuotas_total} onChange={handleEditarChange} />
 
-            <label style={labelModal}>Fecha de inicio</label>
-            <input style={inputModal} type="date" name="fecha_inicio" value={modalEditar.fecha_inicio} onChange={handleEditarChange} />
+            <label className={labelModal}>Fecha de inicio</label>
+            <input className={inputModal} type="date" name="fecha_inicio" value={modalEditar.fecha_inicio} onChange={handleEditarChange} />
 
-            <label style={labelModal}>Fecha de fin</label>
-            <input style={inputModal} type="date" name="fecha_fin" value={modalEditar.fecha_fin} onChange={handleEditarChange} />
+            <label className={labelModal}>Fecha de fin</label>
+            <input className={inputModal} type="date" name="fecha_fin" value={modalEditar.fecha_fin} onChange={handleEditarChange} />
 
-            {errorModal && <p style={{ marginTop: '12px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.35)', color: '#f87171', fontSize: '0.8rem', fontWeight: '600' }}>{errorModal}</p>}
+            {errorModal && (
+              <p className="mt-3 px-3.5 py-2.5 rounded-xl bg-red-400/[0.12] border border-red-400/35 text-[#f87171] text-[0.8rem] font-semibold">
+                {errorModal}
+              </p>
+            )}
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setModalEditar(null)} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer', background: 'transparent', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.15)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Cancelar</button>
-              <button onClick={guardarEdicion} disabled={guardando} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: guardando ? 'not-allowed' : 'pointer', border: 'none', background: guardando ? 'rgba(192,132,252,0.4)' : 'linear-gradient(135deg, #c084fc, #a855f7)', color: 'white' }}>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button
+                onClick={() => setModalEditar(null)}
+                className="px-5 py-2 rounded-xl text-sm font-bold cursor-pointer bg-transparent text-[#a1a1aa] border border-white/15 hover:bg-white/[0.07] transition-colors duration-150">
+                Cancelar
+              </button>
+              <button
+                onClick={guardarEdicion}
+                disabled={guardando}
+                className="px-5 py-2 rounded-xl text-sm font-bold text-white border-none transition-all duration-150"
+                style={{
+                  cursor: guardando ? 'not-allowed' : 'pointer',
+                  background: guardando ? 'rgba(192,132,252,0.4)' : 'linear-gradient(135deg, #c084fc, #a855f7)',
+                }}>
                 {guardando ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
@@ -281,15 +307,28 @@ const Deudas = () => {
 
       {/* MODAL ELIMINAR */}
       {confirmarId && (
-        <div style={modalOverlay}>
-          <div style={{ ...modalBox, maxWidth: '380px', border: '1px solid rgba(248,113,113,0.25)' }}>
-            <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#f87171', marginBottom: '8px' }}>🗑️ ¿Eliminar deuda?</h4>
-            <p style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Esta acción no se puede deshacer.</p>
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setConfirmarId(null)} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer', background: 'transparent', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.15)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Cancelar</button>
-              <button onClick={confirmarEliminar} disabled={eliminando} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: eliminando ? 'not-allowed' : 'pointer', border: 'none', background: eliminando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)', color: 'white' }}>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}>
+          <div className="w-full max-w-[380px] rounded-[20px] p-7 border border-red-400/25 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
+            style={{ background: 'rgba(15,23,42,0.92)' }}>
+
+            <h4 className="text-lg font-extrabold text-[#f87171] mb-2">🗑️ ¿Eliminar deuda?</h4>
+            <p className="text-sm text-[#a1a1aa]">Esta acción no se puede deshacer.</p>
+
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button
+                onClick={() => setConfirmarId(null)}
+                className="px-5 py-2 rounded-xl text-sm font-bold cursor-pointer bg-transparent text-[#a1a1aa] border border-white/15 hover:bg-white/[0.07] transition-colors duration-150">
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarEliminar}
+                disabled={eliminando}
+                className="px-5 py-2 rounded-xl text-sm font-bold text-white border-none transition-all duration-150"
+                style={{
+                  cursor: eliminando ? 'not-allowed' : 'pointer',
+                  background: eliminando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)',
+                }}>
                 {eliminando ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
