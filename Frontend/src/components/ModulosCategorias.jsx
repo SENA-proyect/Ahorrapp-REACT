@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   getCategorias,
   crearCategoria,
@@ -8,13 +8,32 @@ import {
   habilitarCategoria,
 } from '../api'
 
+const navItems = [
+  { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
+  { href: '/ModulosIngresos', emoji: '💰', label: 'Ingresos' },
+  { href: '/ModulosGastos', emoji: '💸', label: 'Gastos' },
+  { href: '/ModuloAhorros', emoji: '🎯', label: 'Ahorrar' },
+  { href: '/ModuloImprevistos', emoji: '🛡️', label: 'Imprevistos' },
+  { href: '/ModuloDeudas', emoji: '💳', label: 'Deudas' },
+  { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
+  { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
+  { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
+  { href: '/Noticias', emoji: '📰', label: 'Noticias' },
+]
+
+const usuario = JSON.parse(localStorage.getItem('usuario'))
+
 export default function ModuloCategorias() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [categorias, setCategorias] = useState([])
   const [modalAgregar, setModalAgregar] = useState(false)
   const [modalEditar, setModalEditar] = useState(false)
   const [categoriaEdit, setCategoriaEdit] = useState(null)
   const [formNombre, setFormNombre] = useState('')
-  const [formDescripcion, setFormDescripcion] = useState('')
+  const [formDesc, setFormDesc] = useState('')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     getCategorias()
@@ -24,12 +43,19 @@ export default function ModuloCategorias() {
       .catch(() => {})
   }, [])
 
+  const activas = categorias.filter(c => c.activa == 1 || c.activa === true)
+  const inactivas = categorias.filter(c => c.activa == 0 || c.activa === false)
+
+  const esSistema = cat =>
+    cat.es_global == 1 || cat.es_global === true ||
+    cat.sistema == 1 || cat.sistema === true
+
   const handleAgregar = async () => {
     if (!formNombre.trim()) return alert('El nombre es obligatorio')
 
     const respuesta = await crearCategoria({
       nombre: formNombre.trim(),
-      descripcion: formDescripcion.trim(),
+      descripcion: formDesc.trim(),
     })
 
     if (respuesta.ok) {
@@ -38,14 +64,14 @@ export default function ModuloCategorias() {
         {
           id: respuesta.id,
           nombre: formNombre.trim(),
-          descripcion: formDescripcion.trim(),
+          descripcion: formDesc.trim(),
           activa: true,
           sistema: false,
           es_global: false,
         },
       ])
       setFormNombre('')
-      setFormDescripcion('')
+      setFormDesc('')
       setModalAgregar(false)
     } else {
       alert(respuesta.mensaje || 'Error al crear la categoría')
@@ -81,7 +107,9 @@ export default function ModuloCategorias() {
     const respuesta = await deshabilitarCategoria(id)
 
     if (respuesta.ok) {
-      setCategorias(prev => prev.map(c => (c.id === id ? { ...c, activa: false } : c)))
+      setCategorias(prev =>
+        prev.map(c => (c.id === id ? { ...c, activa: false } : c))
+      )
     } else {
       alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
     }
@@ -91,146 +119,244 @@ export default function ModuloCategorias() {
     const respuesta = await habilitarCategoria(id)
 
     if (respuesta.ok) {
-      setCategorias(prev => prev.map(c => (c.id === id ? { ...c, activa: true } : c)))
+      setCategorias(prev =>
+        prev.map(c => (c.id === id ? { ...c, activa: true } : c))
+      )
     } else {
       alert(respuesta.mensaje || 'Error al habilitar la categoría')
     }
   }
 
-  const activas = categorias.filter(c => c.activa)
-  const inactivas = categorias.filter(c => !c.activa)
+  const navButtonClass = isActive =>
+    isActive
+      ? 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-bold text-amber-300 bg-amber-400/20 border border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.4)] transition-all'
+      : 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-semibold text-white bg-white/10 border border-white/5 hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)] transition-all'
 
-  const navLinks = [
-    { to: '/Dashboard', label: 'Dashboard' },
-    { to: '/ModulosIngresos', label: 'Ingresos' },
-    { to: '/ModulosGastos', label: 'Gastos' },
-    { to: '/ModuloAhorros', label: 'Ahorros' },
-    { to: '/ModuloImprevistos', label: 'Imprevistos' },
-    { to: '/ModuloDeudas', label: 'Deudas' },
-    { to: '/ModulosDependientes', label: 'Dependientes' },
-    { to: '/ModulosCategorias', label: 'Categorias', active: true },
-  ]
+  const inputClass =
+    'mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20'
+
+  const labelClass =
+    'mt-4 block text-xs font-bold uppercase tracking-wider text-zinc-400'
+
+  const closeModal = () => {
+    setModalAgregar(false)
+    setModalEditar(false)
+    setCategoriaEdit(null)
+    setFormNombre('')
+    setFormDesc('')
+  }
 
   return (
-    <div className="mx-auto min-h-screen max-w-[1400px] bg-white px-5 py-5 pb-20 font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] text-[#2D2D2D]">
-      <div className="box-border px-4 py-2 lg:px-[100px]">
-        <header className="mx-auto mb-5 flex w-full flex-col items-start justify-between gap-3 border-b-2 border-[#82F182] bg-white px-5 py-[5px] text-center md:flex-row md:items-center">
-          <Link to="/">
-            <button className="flex w-[140px] cursor-pointer items-center gap-2 rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 20 10"
-              >
-                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-              </svg>
-              Inicio
-            </button>
-          </Link>
+    <div className="min-h-screen w-full overflow-x-hidden text-white [background:radial-gradient(ellipse_at_30%_20%,#1e3a5f_10%,#0f172a_60%,#1a0f2e_100%)]">
+      <header className="relative z-10 flex w-full flex-col items-center pt-4 sm:pt-5">
+        <section className="mb-4 flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-3 px-4 sm:px-6 md:mb-6 md:px-10">
+          <div className="order-1 w-full text-center sm:order-2 sm:w-auto">
+            <h1 className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl md:text-4xl">
+              Ahorrapp
+            </h1>
+            <span className="text-[0.6rem] font-semibold uppercase tracking-widest text-zinc-500 sm:text-[0.65rem]">
+              Categorías
+            </span>
+          </div>
 
-          <h1 className="text-[28px] font-bold text-[#2E7D2E]">Ahorrapp</h1>
-
-          <button className="w-[150px] cursor-pointer rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
-            Cerrar Sesion
-          </button>
-        </header>
-
-        <main className="animate-[fadeUp_0.6s_ease]">
-          <p className="mb-4 text-[#2D2D2D]">
-            Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos
-          </p>
-
-          <nav
-            className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-            aria-label="Menú de secciones"
+          <button
+            onClick={() => navigate('/')}
+            className="order-2 flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-3 py-2 text-xs font-bold text-white transition-all duration-300 hover:-translate-y-px hover:bg-green-600 hover:shadow-[0_4px_10px_rgba(31,187,31,0.4)] sm:order-1 sm:text-sm md:rounded-2xl"
           >
-            <ul className="flex list-none flex-wrap justify-center gap-2.5 p-0">
-              {navLinks.map(link => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    className={`inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-[0.85rem] font-semibold no-underline shadow-[0_2px_6px_rgba(0,0,0,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#2E7D2E] hover:bg-[#E8FFE8] hover:text-[#2E7D2E] hover:shadow-[0_4px_10px_rgba(0,0,0,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2E7D2E] ${
-                      link.active
-                        ? 'border-transparent bg-[#E8FFE8] text-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
-                        : 'border border-transparent bg-[#F4F6F4] text-[#2D2D2D]'
-                    }`}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-5.25H9V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" />
+            </svg>
+            Inicio
+          </button>
+
+          <button
+            onClick={() => navigate('/login')}
+            className="order-3 flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-3 py-2 text-xs font-bold text-white transition-all duration-300 hover:-translate-y-px hover:bg-red-600 hover:shadow-[0_4px_10px_rgba(228,33,33,0.4)] sm:text-sm md:rounded-2xl"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="hidden sm:inline">Cerrar Sesión</span>
+            <span className="sm:hidden">Salir</span>
+          </button>
+        </section>
+
+        <nav className="w-full px-4 sm:px-6 md:px-10">
+          <div className="md:hidden">
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/10 px-4 py-3 font-bold text-white shadow-[0_2px_8px_rgba(255,255,255,0.1)]"
+            >
+              <span>Menú</span>
+              <span>{menuOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {menuOpen && (
+              <ul className="mt-3 grid grid-cols-1 gap-2 rounded-2xl border border-white/10 bg-slate-950/85 p-3 backdrop-blur-lg">
+                {navItems.map(item => {
+                  const isActive = location.pathname === item.href
+
+                  return (
+                    <li key={item.href}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate(item.href)
+                          setMenuOpen(false)
+                        }}
+                        className={navButtonClass(isActive)}
+                      >
+                        <span>{item.emoji}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+
+          <ul className="hidden flex-wrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base">
+            {navItems.map(item => {
+              const isActive = location.pathname === item.href
+
+              return (
+                <li key={item.href}>
+                  <button
+                    type="button"
+                    onClick={() => navigate(item.href)}
+                    className={navButtonClass(isActive)}
                   >
-                    {link.label}
-                  </Link>
+                    <span>{item.emoji}</span>
+                    <span>{item.label}</span>
+                  </button>
                 </li>
-              ))}
-            </ul>
-          </nav>
+              )
+            })}
+          </ul>
+        </nav>
+      </header>
 
-          <section>
-            <header className="mt-[30px] flex flex-col items-start justify-between gap-3 px-2.5 md:flex-row md:items-center">
-              <h3 className="text-xl font-semibold text-[#2D2D2D]">
-                Módulo de categorías
-              </h3>
+      <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
-              <div className="flex gap-2.5">
-                <button
-                  type="button"
-                  className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
-                  onClick={() => setModalAgregar(true)}
-                >
-                  + Agregar categoría
-                </button>
-              </div>
-            </header>
+      <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6 md:gap-6 md:p-8">
+        <div>
+          <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
+          <h2 className="break-words text-xl font-extrabold text-white sm:text-2xl">
+            {usuario?.nombre || 'Usuario'} <span>👋</span>
+          </h2>
+        </div>
 
-            <div className="my-5 flex min-h-[150px] w-full flex-col justify-center rounded-[15px] border-2 border-[#4CB04C]/20 bg-white p-[30px] text-center">
-              <p className="mb-2.5 text-2xl text-[#2D2D2D]">
-                Total categorías activas: <strong>{activas.length}</strong>
+        <article className="flex flex-col justify-between gap-4 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.25),rgba(5,150,105,0.04))] px-5 py-5 sm:flex-row sm:items-center sm:px-8 sm:py-6">
+          <div>
+            <p className="mb-1 text-xs font-bold uppercase tracking-wider text-emerald-400">
+              🧩 Categorías activas
+            </p>
+            <p className="text-3xl font-black text-white">{activas.length}</p>
+          </div>
+
+          <button
+            onClick={() => setModalAgregar(true)}
+            className="w-full rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px sm:w-auto"
+          >
+            + Agregar Categoría
+          </button>
+        </article>
+
+        <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl backdrop-blur-lg">
+          <div className="border-b border-white/10 px-5 py-4 sm:px-7 sm:py-5">
+            <h3 className="text-base font-extrabold text-amber-400">
+              📋 Módulo de Categorías
+            </h3>
+          </div>
+
+          <div className="p-4 sm:p-5">
+            {activas.length === 0 ? (
+              <p className="py-5 text-sm italic text-zinc-500">
+                No hay categorías activas.
               </p>
+            ) : (
+              <>
+                <div className="grid gap-3 md:hidden">
+                  {activas.map(cat => (
+                    <article key={cat.id} className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h4 className="break-words text-sm font-bold text-zinc-100">
+                            {cat.nombre}
+                          </h4>
+                          <p className="mt-1 break-words text-sm text-zinc-400">
+                            {cat.descripcion || 'Sin descripción'}
+                          </p>
+                        </div>
 
-              <div className="mt-5 overflow-x-auto">
-                {activas.length === 0 ? (
-                  <p className="italic text-[#9AA19A]">No hay categorías activas.</p>
-                ) : (
-                  <table className="w-full border-collapse text-left">
+                        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[0.68rem] font-bold ${
+                          cat.es_global
+                            ? 'border-emerald-400/40 bg-emerald-400/15 text-emerald-400'
+                            : 'border-indigo-400/40 bg-indigo-400/15 text-indigo-300'
+                        }`}>
+                          {cat.es_global ? 'Sistema' : 'Personal'}
+                        </span>
+                      </div>
+
+                      {!esSistema(cat) && (
+                        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          <button
+                            onClick={() => abrirEditar(cat)}
+                            className="rounded-lg border border-emerald-400/50 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-400"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDeshabilitar(cat.id)}
+                            className="rounded-lg border border-orange-400/50 bg-orange-400/10 px-4 py-2 text-sm font-bold text-orange-400"
+                          >
+                            Deshabilitar
+                          </button>
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </div>
+
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full min-w-[760px] border-collapse text-left">
                     <thead>
-                      <tr className="border-b-2 border-[#D4DCE9]">
-                        <th className={thClass}>Nombre</th>
-                        <th className={thClass}>Descripción</th>
-                        <th className={thClass}>Tipo</th>
-                        <th className={thClass}>Acciones</th>
+                      <tr className="border-b border-white/10">
+                        {['Nombre', 'Descripción', 'Tipo', 'Acciones'].map(col => (
+                          <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                            {col}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
-
                     <tbody>
                       {activas.map(cat => (
-                        <tr key={cat.id} className="border-b border-[#D4DCE9]">
-                          <td className={tdClass}>
-                            <strong>{cat.nombre}</strong>
-                          </td>
-                          <td className={tdClass}>{cat.descripcion || '—'}</td>
-                          <td className={tdClass}>
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                                cat.es_global
-                                  ? 'bg-[#4CB04C]/10 text-[#2E7D2E]'
-                                  : 'bg-[#E7F7F1] text-[#1F7A59]'
-                              }`}
-                            >
+                        <tr key={cat.id} className="border-b border-white/5 transition-colors hover:bg-white/[0.04]">
+                          <td className="px-4 py-3 text-sm font-bold text-zinc-100">{cat.nombre}</td>
+                          <td className="px-4 py-3 text-sm text-zinc-400">{cat.descripcion || '—'}</td>
+                          <td className="px-4 py-3">
+                            <span className={`rounded-full border px-3 py-1 text-xs font-bold ${
+                              cat.es_global
+                                ? 'border-emerald-400/40 bg-emerald-400/15 text-emerald-400'
+                                : 'border-indigo-400/40 bg-indigo-400/15 text-indigo-300'
+                            }`}>
                               {cat.es_global ? 'Sistema' : 'Personalizada'}
                             </span>
                           </td>
-                          <td className={tdClass}>
-                            {!cat.es_global && (
-                              <div className="flex flex-wrap gap-2">
+                          <td className="px-4 py-3">
+                            {!esSistema(cat) && (
+                              <div className="flex gap-2">
                                 <button
-                                  className="cursor-pointer rounded-md bg-[#3DA63D] px-2.5 py-1 text-[0.8rem] font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
                                   onClick={() => abrirEditar(cat)}
+                                  className="rounded-lg border border-emerald-400/50 bg-emerald-400/10 px-4 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-400/20"
                                 >
                                   Editar
                                 </button>
-
                                 <button
-                                  className="cursor-pointer rounded-md border border-[#FFCC80] bg-[#FFF3E0] px-2.5 py-1 text-[0.8rem] font-semibold text-[#E65100] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FFE0B2]"
                                   onClick={() => handleDeshabilitar(cat.id)}
+                                  className="rounded-lg border border-orange-400/50 bg-orange-400/10 px-4 py-1.5 text-xs font-bold text-orange-400 hover:bg-orange-400/20"
                                 >
                                   Deshabilitar
                                 </button>
@@ -241,27 +367,42 @@ export default function ModuloCategorias() {
                       ))}
                     </tbody>
                   </table>
-                )}
-              </div>
+                </div>
+              </>
+            )}
 
-              {inactivas.length > 0 && (
-                <div className="mt-8 overflow-x-auto">
-                  <p className="mb-2.5 text-left font-semibold text-[#4A5568]">
-                    Categorías deshabilitadas ({inactivas.length})
-                  </p>
+            {inactivas.length > 0 && (
+              <div className="mt-8 opacity-70">
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Categorías deshabilitadas ({inactivas.length})
+                </p>
 
-                  <table className="w-full border-collapse text-left opacity-60">
+                <div className="grid gap-3 md:hidden">
+                  {inactivas.map(cat => (
+                    <article key={cat.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                      <p className="text-sm font-bold text-zinc-500 line-through">{cat.nombre}</p>
+                      <p className="mt-1 text-sm text-zinc-600">{cat.descripcion || 'Sin descripción'}</p>
+                      <button
+                        onClick={() => handleHabilitar(cat.id)}
+                        className="mt-4 w-full rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-400"
+                      >
+                        Habilitar
+                      </button>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full min-w-[620px] border-collapse text-left">
                     <tbody>
                       {inactivas.map(cat => (
-                        <tr key={cat.id} className="border-b border-[#D4DCE9]">
-                          <td className={tdClass}>
-                            <s>{cat.nombre}</s>
-                          </td>
-                          <td className={tdClass}>{cat.descripcion || '—'}</td>
-                          <td className={tdClass}>
+                        <tr key={cat.id} className="border-b border-white/5">
+                          <td className="px-4 py-3 text-sm text-zinc-500 line-through">{cat.nombre}</td>
+                          <td className="px-4 py-3 text-sm text-zinc-600">{cat.descripcion || '—'}</td>
+                          <td className="px-4 py-3 text-right">
                             <button
-                              className="cursor-pointer rounded-md bg-[#3DA63D] px-2.5 py-1 text-[0.8rem] font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
                               onClick={() => handleHabilitar(cat.id)}
+                              className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-1.5 text-xs font-bold text-emerald-400"
                             >
                               Habilitar
                             </button>
@@ -271,20 +412,20 @@ export default function ModuloCategorias() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
-          </section>
-        </main>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
 
-        <footer className="fixed bottom-0 left-0 z-[100] w-full border-t border-[#82F182] bg-white p-3 text-center text-xs text-[#9AA19A]">
-          <p>&copy; 2026 Mi Aplicación de Finanzas</p>
-        </footer>
-      </div>
+      <footer className="w-full px-4 py-6 text-center font-mono text-[0.7rem] text-zinc-600">
+        <p>© <strong className="text-amber-400">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
+      </footer>
 
       {modalAgregar && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
-          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
-            <h3 className="mb-4 text-xl font-semibold text-[#2D2D2D]">Nueva categoría</h3>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+          <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
+            <h4 className="text-lg font-extrabold text-amber-400">🧩 Nueva Categoría</h4>
 
             <label className={labelClass}>Nombre *</label>
             <input
@@ -300,27 +441,22 @@ export default function ModuloCategorias() {
               className={inputClass}
               type="text"
               placeholder="Descripción opcional"
-              value={formDescripcion}
-              onChange={e => setFormDescripcion(e.target.value)}
+              value={formDesc}
+              onChange={e => setFormDesc(e.target.value)}
             />
 
-            <div className="mt-5 flex gap-2.5">
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
-                className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
-                onClick={handleAgregar}
-              >
-                Guardar
-              </button>
-
-              <button
-                className="cursor-pointer rounded-lg border border-[#D4DCE9] bg-white px-[18px] py-2 font-semibold text-[#4A5568] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E8FFE8]"
-                onClick={() => {
-                  setModalAgregar(false)
-                  setFormNombre('')
-                  setFormDescripcion('')
-                }}
+                onClick={closeModal}
+                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
               >
                 Cancelar
+              </button>
+              <button
+                onClick={handleAgregar}
+                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
+              >
+                Guardar
               </button>
             </div>
           </div>
@@ -328,20 +464,16 @@ export default function ModuloCategorias() {
       )}
 
       {modalEditar && categoriaEdit && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
-          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
-            <h3 className="mb-4 text-xl font-semibold text-[#2D2D2D]">
-              Editar categoría
-            </h3>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+          <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
+            <h4 className="text-lg font-extrabold text-amber-400">✏️ Editar Categoría</h4>
 
             <label className={labelClass}>Nombre *</label>
             <input
               className={inputClass}
               type="text"
               value={categoriaEdit.nombre}
-              onChange={e =>
-                setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))
-              }
+              onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))}
             />
 
             <label className={labelClass}>Descripción</label>
@@ -349,24 +481,21 @@ export default function ModuloCategorias() {
               className={inputClass}
               type="text"
               value={categoriaEdit.descripcion || ''}
-              onChange={e =>
-                setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))
-              }
+              onChange={e => setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))}
             />
 
-            <div className="mt-5 flex gap-2.5">
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
-                className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3DA63D]"
-                onClick={handleGuardarEdicion}
-              >
-                Guardar cambios
-              </button>
-
-              <button
-                className="cursor-pointer rounded-lg border border-[#D4DCE9] bg-white px-[18px] py-2 font-semibold text-[#4A5568] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E8FFE8]"
-                onClick={() => setModalEditar(false)}
+                onClick={closeModal}
+                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
               >
                 Cancelar
+              </button>
+              <button
+                onClick={handleGuardarEdicion}
+                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
+              >
+                Guardar cambios
               </button>
             </div>
           </div>
@@ -375,9 +504,3 @@ export default function ModuloCategorias() {
     </div>
   )
 }
-
-const thClass = 'px-3 py-2.5 text-left text-[0.85rem] font-semibold text-[#4A5568]'
-const tdClass = 'px-3 py-2.5 align-middle text-sm'
-const labelClass = 'mb-1.5 mt-3.5 block text-sm font-semibold text-[#1A1A1A]'
-const inputClass =
-  'w-full rounded-lg border border-[#D4DCE9] px-3 py-2.5 text-sm outline-none transition focus:border-[#4CB04C] focus:ring-2 focus:ring-[#4CB04C]/20'
