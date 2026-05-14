@@ -153,3 +153,70 @@ export const getResumenFinancieroBreve = async () => {
     return "No se pudo cargar la información financiera actual del usuario.";
   }
 };
+
+// ── Exportar Datos ──────────────────────────────────────────────────────────
+export const exportarDatos = async (payload, { onError, onDone } = {}) => {
+  const token = localStorage.getItem("token");
+  
+  try {
+    const response = await fetch(`${API_URL}/exportar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const error = new Error(errorData.error || "Error al exportar datos");
+      if (onError) onError(error.message);
+      throw error;
+    }
+
+    // Manejar la descarga del archivo (blob)
+    const contentDisposition = response.headers.get("Content-Disposition");
+    const contentType = response.headers.get("Content-Type") || '';
+
+    let filename = `reporte_financiero.${payload.formato}`;
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename\"?=\"?([^;\"]+)/i);
+      if (match && match[1]) filename = match[1].trim();
+    }
+
+    const blob = await response.blob();
+
+    // Si por error el backend devolvió JSON/HTML, evita “descargas” corruptas.
+    if (!contentType.includes('application/pdf') && !contentType.includes('text/csv') && payload.formato !== 'json') {
+      const text = await blob.text().catch(() => '');
+      try {
+        const asJson = JSON.parse(text);
+        throw new Error(asJson.error || 'Respuesta inesperada del servidor al exportar');
+      } catch {
+        if (text) throw new Error(text.slice(0, 200));
+      }
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+
+    // Limpieza (esperar un tick para que el navegador inicie la descarga)
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 0);
+
+
+    if (onDone) onDone();
+    
+  } catch (error) {
+    console.error("Error en exportarDatos:", error);
+    if (onError) onError(error.message);
+    throw error;
+  }
+};

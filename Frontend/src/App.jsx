@@ -23,6 +23,7 @@ import VMIDependientes from './components/VM_I-Dependientes.jsx'
 import FormMovimiento from './components/movimientos/FormMovimientos.jsx'
 import Asistente from './components/Asistente/Asistente';
 import Noticias from "./components/Noticias";
+import Export from "./components/exportar.jsx"
 
 
 
@@ -53,6 +54,7 @@ function App() {
       <Route path='/VM_I-Dependientes' element={<VMIDependientes />} />
       <Route path="/movimientos/nuevo" element={<FormMovimiento />} /> 
       <Route path="/noticias" element={<Noticias />} />
+      <Route path="/exportar" element={<Export />} />
 
      </Routes>
      <Asistente />

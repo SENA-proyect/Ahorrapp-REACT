@@ -8,6 +8,11 @@
   align-items: flex-end;
   gap: 10px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  /* ── FIX: el wrapper solo ocupa lo que sus hijos necesitan ── */
+  width: fit-content;
+  height: fit-content;
+  pointer-events: none; /* el wrapper nunca bloquea clicks */
 }
 
 /* Botón flotante para abrir/cerrar */
@@ -27,6 +32,7 @@
   transition:
     background 0.2s,
     transform 0.2s;
+  pointer-events: auto; /* siempre clickeable */
 }
 
 .asistente-toggle-btn:hover {
@@ -45,6 +51,7 @@
   flex-direction: column;
   overflow: hidden;
   border: 1px solid #c8e6c9;
+  pointer-events: auto; /* clickeable cuando está visible */
 
   /* Animación de apertura/cierre */
   transform-origin: bottom right;
@@ -56,7 +63,13 @@
 .asistente-container.oculto {
   transform: scale(0.85);
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none; /* no clickeable ni bloquea cuando está oculto */
+
+  /* ── FIX: colapsa el espacio físico cuando está oculto ── */
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
 
 /* Encabezado */

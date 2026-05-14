@@ -13,7 +13,7 @@ const chat = async (req, res) => {
         // Reducir tokens para evitar el error 402 (créditos/token insuficientes)
         max_tokens: 800,
         messages: [
-          { role: "system", content: system || "Asistente de AhorraPP" },
+          { role: "system", content: system || "Asistente de AhorrApp" },
           ...messages,
         ],
       },

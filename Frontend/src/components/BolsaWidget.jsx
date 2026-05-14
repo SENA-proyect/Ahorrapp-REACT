@@ -1,324 +1,477 @@
 import { useState, useEffect } from 'react'
 
 const ACCIONES_DEFAULT = [
-  { symbol: 'EC',   nombre: 'Ecopetrol',            icono: '🛢️', pais: 'Colombia' },
-  { symbol: 'CIB',  nombre: 'Bancolombia',           icono: '🏦', pais: 'Colombia' },
-  { symbol: 'NU',   nombre: 'Nubank',                icono: '💜', pais: 'Brasil/Col' },
-  { symbol: 'BBVA', nombre: 'BBVA',                  icono: '🔵', pais: 'España/Col' },
-  { symbol: 'GEB',  nombre: 'Grupo Energía Bogotá',  icono: '⚡', pais: 'Colombia' },
+  { symbol: 'EC', nombre: 'Ecopetrol', icono: '🛢️', pais: 'Colombia' },
+  { symbol: 'CIB', nombre: 'Bancolombia', icono: '🏦', pais: 'Colombia' },
+  { symbol: 'NU', nombre: 'Nubank', icono: '💜', pais: 'Brasil / Colombia' },
+  { symbol: 'BBVA', nombre: 'BBVA', icono: '🔵', pais: 'España / Colombia' },
+  { symbol: 'GEB', nombre: 'Grupo Energía Bogotá', icono: '⚡', pais: 'Colombia' },
 ]
 
-const API_KEY = 'd7v307pr01qp7l70r6i0d7v307pr01qp7l70r6ig'
-const TRM = 4200 // Tasa de cambio COP/USD aproximada
+const TRM_DEFAULT = 4200
+
+const metricasDetalle = (accion, formatCOP) => [
+  {
+    label: 'Precio actual',
+    valor: `$${accion.precio.toFixed(2)} USD`,
+    apoyo: formatCOP(accion.precio),
+  },
+  {
+    label: 'Máximo del día',
+    valor: `$${accion.maximo.toFixed(2)} USD`,
+    apoyo: formatCOP(accion.maximo),
+  },
+  {
+    label: 'Mínimo del día',
+    valor: `$${accion.minimo.toFixed(2)} USD`,
+    apoyo: formatCOP(accion.minimo),
+  },
+  {
+    label: 'Apertura',
+    valor: `$${accion.apertura.toFixed(2)} USD`,
+    apoyo: formatCOP(accion.apertura),
+  },
+  {
+    label: 'Cierre anterior',
+    valor: `$${accion.cierreAnt.toFixed(2)} USD`,
+    apoyo: formatCOP(accion.cierreAnt),
+  },
+  {
+    label: 'Variación',
+    valor: `${accion.subio ? '+' : ''}${accion.cambio.toFixed(2)} USD`,
+    apoyo: `${accion.porcentaje.toFixed(2)}%`,
+  },
+]
 
 export default function BolsaWidget() {
-  const [acciones, setAcciones]       = useState(ACCIONES_DEFAULT)
-  const [datos, setDatos]             = useState({})
-  const [cargando, setCargando]       = useState(true)
-  const [error, setError]             = useState(null)
+  const [acciones, setAcciones] = useState(ACCIONES_DEFAULT)
+  const [datos, setDatos] = useState({})
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
   const [seleccionada, setSeleccionada] = useState(null)
-  const [busqueda, setBusqueda]       = useState('')
-  const [trm, setTrm]                 = useState(TRM)
+  const [busqueda, setBusqueda] = useState('')
+  const [trm, setTrm] = useState(TRM_DEFAULT)
 
-  // Traer TRM real
+  // ─────────────────────────────────────────────────────────
+  // TRM
+  // ─────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch('https://finnhub.io/api/v1/forex/rates?base=USD&token=' + API_KEY)
-      .then(r => r.json())
-      .then(data => {
-        if (data.quote?.COP) setTrm(data.quote.COP)
+    fetch('http://localhost:3000/api/bolsa/trm/usd-cop')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.trm) {
+          setTrm(data.trm)
+        }
       })
       .catch(() => {})
   }, [])
 
+  // ─────────────────────────────────────────────────────────
+  // Fetch acciones
+  // ─────────────────────────────────────────────────────────
   const fetchAcciones = async (lista) => {
-  try {
-    setError(null)
-    const nuevos = {}
-    await Promise.all(
-      lista.map(async (accion) => {
-        const res = await fetch(`http://localhost:3000/api/bolsa/${accion.symbol}`)
-        const data = await res.json()
-        nuevos[accion.symbol] = {
-          precio:     data.c ?? 0,
-          cambio:     data.d ?? 0,
-          porcentaje: data.dp ?? 0,
-          maximo:     data.h ?? 0,
-          minimo:     data.l ?? 0,
-          apertura:   data.o ?? 0,
-          cierreAnt:  data.pc ?? 0,
-          subio:      (data.d ?? 0) >= 0,
-        }
-      })
-    )
-    setDatos(prev => ({ ...prev, ...nuevos }))
-  } catch (err) {
-    setError('No se pudo conectar con la API')
-  }
-}
+    try {
+      setError(null)
 
+      const nuevos = {}
+
+      await Promise.all(
+        lista.map(async (accion) => {
+          const res = await fetch(
+            `http://localhost:3000/api/bolsa/${accion.symbol}`
+          )
+
+          const data = await res.json()
+
+          if (!res.ok || data.ok === false) return
+
+          nuevos[accion.symbol] = {
+            precio: data.c ?? 0,
+            cambio: data.d ?? 0,
+            porcentaje: data.dp ?? 0,
+            maximo: data.h ?? 0,
+            minimo: data.l ?? 0,
+            apertura: data.o ?? 0,
+            cierreAnt: data.pc ?? 0,
+            subio: (data.d ?? 0) >= 0,
+          }
+        })
+      )
+
+      setDatos((prev) => ({
+        ...prev,
+        ...nuevos,
+      }))
+    } catch (_) {
+      setError('No se pudo conectar con la API de bolsa')
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Auto actualización
+  // ─────────────────────────────────────────────────────────
   useEffect(() => {
-  setCargando(true)
-  fetchAcciones(acciones).finally(() => setCargando(false))
-  const intervalo = setInterval(() => fetchAcciones(acciones), 5 * 60 * 1000)
-  return () => clearInterval(intervalo)
-}, [acciones])
+    setCargando(true)
 
+    fetchAcciones(acciones).finally(() => {
+      setCargando(false)
+    })
+
+    const intervalo = setInterval(() => {
+      fetchAcciones(acciones)
+    }, 5 * 60 * 1000)
+
+    return () => clearInterval(intervalo)
+  }, [acciones])
+
+  // ─────────────────────────────────────────────────────────
+  // Agregar acción
+  // ─────────────────────────────────────────────────────────
   const agregarAccion = async () => {
-  const sym = busqueda.trim().toUpperCase()
-  if (!sym) return
-  if (acciones.find(a => a.symbol === sym)) return alert('Ya está en la lista')
-  const nueva = { symbol: sym, nombre: sym, icono: '📊', pais: 'Internacional' }
-  setAcciones(prev => [...prev, nueva])
-  setBusqueda('')
-  
-  // Traer datos inmediatamente
-  try {
-    const res = await fetch(`http://localhost:3000/api/bolsa/${sym}`)
-    const data = await res.json()
-    setDatos(prev => ({
-      ...prev,
-      [sym]: {
-        precio:     data.c ?? 0,
-        cambio:     data.d ?? 0,
-        porcentaje: data.dp ?? 0,
-        maximo:     data.h ?? 0,
-        minimo:     data.l ?? 0,
-        apertura:   data.o ?? 0,
-        cierreAnt:  data.pc ?? 0,
-        subio:      (data.d ?? 0) >= 0,
+    const sym = busqueda.trim().toUpperCase()
+
+    if (!sym) return
+
+    if (acciones.find((a) => a.symbol === sym)) {
+      setError('Ese símbolo ya está agregado')
+      return
+    }
+
+    const nueva = {
+      symbol: sym,
+      nombre: sym,
+      icono: '📈',
+      pais: 'Internacional',
+    }
+
+    setAcciones((prev) => [...prev, nueva])
+    setBusqueda('')
+
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/bolsa/${sym}`
+      )
+
+      const data = await res.json()
+
+      if (!res.ok || data.ok === false) {
+        setError(data.mensaje || 'No se pudo consultar el símbolo')
+        return
       }
-    }))
-  } catch (_) {}
-}
 
+      setDatos((prev) => ({
+        ...prev,
+        [sym]: {
+          precio: data.c ?? 0,
+          cambio: data.d ?? 0,
+          porcentaje: data.dp ?? 0,
+          maximo: data.h ?? 0,
+          minimo: data.l ?? 0,
+          apertura: data.o ?? 0,
+          cierreAnt: data.pc ?? 0,
+          subio: (data.d ?? 0) >= 0,
+        },
+      }))
+    } catch (_) {
+      setError('No se pudo conectar con la API')
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Eliminar acción
+  // ─────────────────────────────────────────────────────────
   const eliminarAccion = (symbol) => {
-    setAcciones(prev => prev.filter(a => a.symbol !== symbol))
-    setDatos(prev => { const d = { ...prev }; delete d[symbol]; return d })
-    if (seleccionada?.symbol === symbol) setSeleccionada(null)
+    setAcciones((prev) =>
+      prev.filter((a) => a.symbol !== symbol)
+    )
+
+    setDatos((prev) => {
+      const copia = { ...prev }
+      delete copia[symbol]
+      return copia
+    })
+
+    if (seleccionada?.symbol === symbol) {
+      setSeleccionada(null)
+    }
   }
 
+  // ─────────────────────────────────────────────────────────
+  // Seleccionar acción
+  // ─────────────────────────────────────────────────────────
+  const seleccionarAccion = (accion) => {
+    setSeleccionada(
+      seleccionada?.symbol === accion.symbol
+        ? null
+        : {
+            ...accion,
+            ...datos[accion.symbol],
+          }
+    )
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Formato COP
+  // ─────────────────────────────────────────────────────────
   const formatCOP = (usd) => {
-    return (usd * trm).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+    return (usd * trm).toLocaleString('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      maximumFractionDigits: 0,
+    })
   }
 
-  // ── Tokens de diseño (coinciden con el tema del Dashboard) ──────────────────
-  const S = {
-    section: {
-      width: '100%',
-      background: 'rgba(255,255,255,0.04)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      border: '1px solid rgba(255,255,255,0.10)',
-      borderRadius: '1rem',
-      padding: '1.5rem',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-    },
-    header: {
-      display: 'flex', justifyContent: 'space-between',
-      alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '8px',
-    },
-    titulo: {
-      fontSize: '1rem', fontWeight: '800',
-      background: 'linear-gradient(90deg, #fbbf24, #f59e0b)',
-      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-      letterSpacing: '-0.01em',
-    },
-    badgeTrm: {
-      fontSize: '0.7rem', color: '#a1a1aa',
-    },
-    badgeApi: {
-      fontSize: '0.68rem', padding: '3px 10px', borderRadius: '999px',
-      background: 'rgba(251,191,36,0.12)', color: '#fbbf24',
-      border: '1px solid rgba(251,191,36,0.30)', fontWeight: '600',
-    },
-    inputRow: {
-      display: 'flex', gap: '8px', marginBottom: '1.1rem',
-    },
-    input: {
-      flex: 1, padding: '9px 14px', borderRadius: '10px',
-      border: '1px solid rgba(255,255,255,0.12)',
-      background: 'rgba(255,255,255,0.06)',
-      color: '#f4f4f5', fontSize: '0.85rem', outline: 'none',
-      transition: 'border-color 0.2s',
-    },
-    btnAgregar: {
-      padding: '9px 18px', borderRadius: '10px', fontWeight: '700',
-      fontSize: '0.85rem', cursor: 'pointer', border: 'none',
-      background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-      color: '#0f172a', transition: 'opacity 0.2s, transform 0.15s',
-    },
-    cargando: {
-      color: '#a1a1aa', fontSize: '0.82rem', marginBottom: '8px',
-    },
-    errorTxt: {
-      color: '#f87171', fontSize: '0.82rem', marginBottom: '8px',
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
-      gap: '12px', width: '100%',
-    },
-    cardBase: (subio, activa) => ({
-      padding: '14px', borderRadius: '14px', cursor: 'pointer',
-      position: 'relative', transition: 'transform 0.18s, box-shadow 0.18s',
-      background: subio
-        ? 'radial-gradient(ellipse at left, rgba(34,197,94,0.18), rgba(16,185,129,0.05))'
-        : 'radial-gradient(ellipse at left, rgba(239,68,68,0.18), rgba(220,38,38,0.05))',
-      border: `1px solid ${activa
-        ? subio ? 'rgba(52,211,153,0.7)' : 'rgba(248,113,113,0.7)'
-        : 'rgba(255,255,255,0.08)'}`,
-      boxShadow: activa ? '0 0 16px rgba(251,191,36,0.18)' : 'none',
-    }),
-    btnEliminar: {
-      position: 'absolute', top: '7px', right: '7px',
-      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',
-      borderRadius: '50%', width: '18px', height: '18px',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      cursor: 'pointer', color: '#a1a1aa', fontSize: '0.6rem',
-      transition: 'background 0.15s',
-    },
-    cardLabel: { fontSize: '0.8rem', fontWeight: '700', color: '#f4f4f5' },
-    cardSub:   { fontSize: '0.65rem', color: '#71717a' },
-    cardPrecio: { fontSize: '1.05rem', fontWeight: '900', color: '#ffffff', marginTop: '8px' },
-    cardUsd:    { fontSize: '0.6rem', color: '#71717a', marginLeft: '3px' },
-    cardCop:    { fontSize: '0.68rem', color: '#a1a1aa', marginTop: '1px' },
-    cardVar: (subio) => ({
-      fontSize: '0.76rem', fontWeight: '700', marginTop: '5px',
-      color: subio ? '#34d399' : '#f87171',
-    }),
-    detalle: {
-      marginTop: '16px', padding: '18px', borderRadius: '14px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.10)',
-    },
-    detalleTitle: {
-      fontWeight: '800', fontSize: '0.95rem', color: '#fbbf24', marginBottom: '14px',
-    },
-    detalleGrid: {
-      display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px',
-    },
-    detalleCell: {
-      padding: '10px 12px', borderRadius: '10px',
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(255,255,255,0.07)',
-    },
-    detalleCellLabel: { fontSize: '0.65rem', color: '#71717a', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' },
-    detalleCellValor: { fontSize: '0.88rem', fontWeight: '800', color: '#f4f4f5' },
-    detalleCellCop:   { fontSize: '0.65rem', color: '#a1a1aa', marginTop: '2px' },
-    footer: {
-      fontSize: '0.67rem', color: '#52525b',
-      marginTop: '14px', textAlign: 'right', letterSpacing: '0.01em',
-    },
-  }
+  const accionesConDatos = acciones.filter(
+    (accion) => datos[accion.symbol]
+  )
 
   return (
-    <section style={S.section}>
+    <section className="w-full rounded-2xl border border-white/10 bg-slate-950/40 p-6 shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur-xl">
 
-      {/* ── HEADER ── */}
-      <div style={S.header}>
-        <p style={S.titulo}>📈 Bolsa de Valores — Enfoque Colombiano</p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={S.badgeTrm}>TRM: ${trm.toLocaleString('es-CO')} COP</span>
-          <span style={S.badgeApi}>Finnhub API</span>
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+        <div className="flex items-center gap-4">
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-cyan-400/10 border border-cyan-300/20 text-cyan-100 font-black">
+            BV
+          </div>
+
+          <div>
+            <h2 className="text-xl font-black text-white">
+              Bolsa de Valores
+            </h2>
+
+            <p className="text-sm text-slate-400">
+              Seguimiento financiero en tiempo real
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+
+          <span className="rounded-lg border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-xs font-bold text-emerald-100">
+            TRM {trm.toLocaleString('es-CO')} COP
+          </span>
+
+          <span className="rounded-lg border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-100">
+            Finnhub API
+          </span>
+
         </div>
       </div>
 
-      {/* ── BUSCADOR ── */}
-      <div style={S.inputRow}>
+      {/* BUSCADOR */}
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+
         <input
           type="text"
           value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && agregarAccion()}
-          placeholder="Agregar símbolo (ej: AAPL, TSLA…)"
-          style={S.input}
+          onChange={(e) => setBusqueda(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') agregarAccion()
+          }}
+          placeholder="Agregar símbolo (AAPL, TSLA, NVDA...)"
+          className="min-h-11 flex-1 rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-300/10"
         />
+
         <button
+          type="button"
           onClick={agregarAccion}
-          style={S.btnAgregar}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = '1';    e.currentTarget.style.transform = 'translateY(0)' }}
+          disabled={!busqueda.trim()}
+          className="min-h-11 rounded-xl bg-cyan-400 px-5 text-sm font-black text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
         >
-          + Agregar
+          Agregar
         </button>
+
       </div>
 
-      {cargando && <p style={S.cargando}>⏳ Consultando precios…</p>}
-      {error    && <p style={S.errorTxt}>⚠ {error}</p>}
+      {/* MENSAJES */}
+      <div className="mt-4 min-h-6">
 
-      {/* ── TARJETAS ── */}
-      {!error && (
-        <div style={S.grid}>
-          {acciones.map((accion) => {
-            const d = datos[accion.symbol]
-            if (!d) return null
-            const activa = seleccionada?.symbol === accion.symbol
-            return (
-              <div
-                key={accion.symbol}
-                style={S.cardBase(d.subio, activa)}
-                onClick={() => setSeleccionada(activa ? null : { ...accion, ...datos[accion.symbol] })}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)';    e.currentTarget.style.boxShadow = activa ? '0 0 16px rgba(251,191,36,0.18)' : 'none' }}
+        {cargando && (
+          <p className="text-sm text-slate-400">
+            Consultando precios...
+          </p>
+        )}
+
+        {error && (
+          <p className="rounded-lg border border-rose-300/20 bg-rose-300/10 px-3 py-2 text-sm text-rose-100">
+            {error}
+          </p>
+        )}
+
+      </div>
+
+      {/* GRID */}
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
+        {accionesConDatos.map((accion) => {
+          const d = datos[accion.symbol]
+
+          const activa =
+            seleccionada?.symbol === accion.symbol
+
+          return (
+            <article
+              key={accion.symbol}
+              onClick={() => seleccionarAccion(accion)}
+              className={`group relative cursor-pointer rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-1 ${
+                activa
+                  ? 'border-cyan-300/60 bg-cyan-300/10'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+              }`}
+            >
+
+              {/* ELIMINAR */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  eliminarAccion(accion.symbol)
+                }}
+                className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-lg border border-white/10 text-xs text-slate-400 opacity-70 transition hover:border-rose-300/40 hover:bg-rose-400/10 hover:text-rose-100 group-hover:opacity-100"
               >
-                {/* Botón eliminar */}
-                <button
-                  onClick={e => { e.stopPropagation(); eliminarAccion(accion.symbol) }}
-                  style={S.btnEliminar}
-                  title="Eliminar"
-                >✕</button>
+                ✕
+              </button>
 
-                {/* Nombre */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '6px', paddingRight: '18px' }}>
-                  <span style={{ fontSize: '1.3rem' }}>{accion.icono}</span>
-                  <div>
-                    <p style={S.cardLabel}>{accion.nombre}</p>
-                    <p style={S.cardSub}>{accion.symbol} · {accion.pais}</p>
-                  </div>
+              {/* TOP */}
+              <div className="flex items-start gap-3 pr-8">
+
+                <div className="text-3xl">
+                  {accion.icono}
                 </div>
 
-                {/* Precio */}
-                <p style={S.cardPrecio}>
-                  ${d.precio.toFixed(2)}<span style={S.cardUsd}>USD</span>
-                </p>
-                <p style={S.cardCop}>≈ {formatCOP(d.precio)}</p>
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-black text-white">
+                    {accion.nombre}
+                  </h3>
 
-                {/* Variación */}
-                <p style={S.cardVar(d.subio)}>
-                  {d.subio ? '▲' : '▼'} {d.subio ? '+' : ''}{d.cambio.toFixed(2)} ({d.porcentaje.toFixed(2)}%)
-                </p>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {accion.symbol} · {accion.pais}
+                  </p>
+                </div>
+
               </div>
-            )
-          })}
-        </div>
-      )}
 
-      {/* ── DETALLE ── */}
+              {/* PRECIO */}
+              <div className="mt-5">
+
+                <p className="text-2xl font-black text-white">
+                  ${d.precio.toFixed(2)}
+
+                  <span className="ml-1 text-[0.65rem] text-slate-400">
+                    USD
+                  </span>
+                </p>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  {formatCOP(d.precio)}
+                </p>
+
+              </div>
+
+              {/* VARIACIÓN */}
+              <div
+                className={`mt-4 inline-flex rounded-lg px-2.5 py-1 text-xs font-black ${
+                  d.subio
+                    ? 'bg-emerald-400/10 text-emerald-200'
+                    : 'bg-rose-400/10 text-rose-200'
+                }`}
+              >
+                {d.subio ? '▲' : '▼'}{' '}
+                {d.subio ? '+' : ''}
+                {d.cambio.toFixed(2)} (
+                {d.porcentaje.toFixed(2)}%)
+              </div>
+
+            </article>
+          )
+        })}
+      </div>
+
+      {/* DETALLE */}
       {seleccionada && (
-        <div style={S.detalle}>
-          <p style={S.detalleTitle}>{seleccionada.icono} {seleccionada.nombre} — Detalle</p>
-          <div style={S.detalleGrid}>
-            {[
-              { label: 'Precio actual',   valor: `$${seleccionada.precio.toFixed(2)} USD`,    cop: formatCOP(seleccionada.precio) },
-              { label: 'Máximo del día',  valor: `$${seleccionada.maximo.toFixed(2)} USD`,    cop: formatCOP(seleccionada.maximo) },
-              { label: 'Mínimo del día',  valor: `$${seleccionada.minimo.toFixed(2)} USD`,    cop: formatCOP(seleccionada.minimo) },
-              { label: 'Apertura',        valor: `$${seleccionada.apertura.toFixed(2)} USD`,  cop: formatCOP(seleccionada.apertura) },
-              { label: 'Cierre anterior', valor: `$${seleccionada.cierreAnt.toFixed(2)} USD`, cop: formatCOP(seleccionada.cierreAnt) },
-              { label: 'Variación',       valor: `${seleccionada.subio ? '+' : ''}${seleccionada.cambio.toFixed(2)} USD`, cop: `${seleccionada.porcentaje.toFixed(2)}%` },
-            ].map((item, i) => (
-              <div key={i} style={S.detalleCell}>
-                <p style={S.detalleCellLabel}>{item.label}</p>
-                <p style={S.detalleCellValor}>{item.valor}</p>
-                <p style={S.detalleCellCop}>{item.cop}</p>
+        <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-cyan-200">
+                Detalle de acción
+              </p>
+
+              <h3 className="mt-1 text-2xl font-black text-white">
+                {seleccionada.icono} {seleccionada.nombre}
+              </h3>
+
+              <p className="text-sm text-slate-400">
+                {seleccionada.symbol} · {seleccionada.pais}
+              </p>
+            </div>
+
+            <div
+              className={`rounded-xl px-4 py-2 ${
+                seleccionada.subio
+                  ? 'bg-emerald-400/10 text-emerald-100'
+                  : 'bg-rose-400/10 text-rose-100'
+              }`}
+            >
+              <p className="text-xs font-bold uppercase">
+                Variación
+              </p>
+
+              <p className="text-lg font-black">
+                {seleccionada.subio ? '+' : ''}
+                {seleccionada.porcentaje.toFixed(2)}%
+              </p>
+            </div>
+
+          </div>
+
+          {/* MÉTRICAS */}
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
+            {metricasDetalle(
+              seleccionada,
+              formatCOP
+            ).map((item) => (
+              <div
+                key={item.label}
+                className="rounded-xl border border-white/10 bg-slate-950/35 p-4"
+              >
+
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  {item.label}
+                </p>
+
+                <p className="mt-2 text-lg font-black text-white">
+                  {item.valor}
+                </p>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  {item.apoyo}
+                </p>
+
               </div>
             ))}
+
           </div>
-        </div>
+
+        </section>
       )}
 
-      <p style={S.footer}>
-        Datos: Finnhub API · TRM referencial · Se actualiza cada 5 min · Haz clic en una acción para ver detalles
-      </p>
+      {/* FOOTER */}
+      <div className="mt-5 flex flex-col gap-1 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+
+        <span>
+          Actualización automática cada 5 minutos
+        </span>
+
+        <span>
+          Haz clic en una acción para ver detalles
+        </span>
+
+      </div>
 
     </section>
   )

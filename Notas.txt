@@ -1,25 +1,2 @@
-TAILWIND
-por si falla:
-npm uninstall tailwindcss postcss autoprefixer
-Remove-Item -Recurse -Force node_modules, package-lock.json
-
-FRONTEND:
-Instalacion:
-npm install
-npm install -D tailwindcss postcss autoprefixer axios
-instalar tambien esto: npm install @tailwindcss/postcss
-
-en caso de que no funcione, toca hacerlo manualmente
-
-crear archivo:
-
-postcss.config.js:
-export default {
-  plugins: {
-    '@tailwindcss/postcss': {},
-    'autoprefixer': {},
-  },
-}
-
-BACKEND:
-npm install cors nodemon axios express
+Al momento de hacer los ultimos merges, se eligieron diseños mixtos, prevaleciendo la seguridad,
+estructura y el codigo limpio mas que el diseño como tal 
