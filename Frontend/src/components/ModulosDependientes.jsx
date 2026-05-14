@@ -9,6 +9,8 @@ const PESO_LABELS = {
   5: 'Muy alto',
 }
 
+const API = 'http://localhost:3000/api/dependientes'
+
 const Dependientes = () => {
   const [mostrarModal, setMostrarModal] = useState(false)
   const [dependientes, setDependientes] = useState([])
@@ -24,7 +26,7 @@ const Dependientes = () => {
   const token = localStorage.getItem('token')
 
   useEffect(() => {
-    fetch('/api/dependientes', {
+    fetch(API, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -48,7 +50,7 @@ const Dependientes = () => {
 
     if (editandoId) {
       try {
-        const res = await fetch(`/api/dependientes/${editandoId}`, {
+        const res = await fetch(`${API}/${editandoId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -73,7 +75,7 @@ const Dependientes = () => {
       }
     } else {
       try {
-        const res = await fetch('/api/dependientes', {
+        const res = await fetch(API, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -116,7 +118,7 @@ const Dependientes = () => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
 
     try {
-      const res = await fetch(`/api/dependientes/${id}`, {
+      const res = await fetch(`${API}/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

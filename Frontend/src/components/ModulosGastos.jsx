@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getCategorias } from '../api';
 import { getDependientes } from '../api';
+import ilustracionGastos from '../assets/Gemini_Generated_Image_qqfyy7qqfyy7qqfy.png'
 
 const API = 'http://localhost:3000/api/movimientos'
 
@@ -14,6 +15,7 @@ const navLinks = [
   { to: '/ModuloDeudas',       label: 'Deudas' },
   { to: '/ModulosDependientes',label: 'Dependientes' },
   { to: '/ModulosCategorias',  label: 'Categorías' },
+  { to: '/exportar',           label: 'Exportar' },
 ]
 
 const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
@@ -134,7 +136,35 @@ const Gastos = () => {
         </header>
 
         <main className="animate-[fadeUp_0.6s_ease]">
-          <p className="mb-4 text-[#2D2D2D]">Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos</p>
+
+          {/* ── Hero Section ── */}
+          <div className="relative mb-6 flex min-h-[220px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#d4f7d4] via-[#eafaea] to-[#f0fff0] shadow-md">
+            {/* Círculos decorativos de fondo */}
+            <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-[#4CB04C]/10" />
+            <div className="absolute -bottom-8 left-1/3 h-32 w-32 rounded-full bg-[#2E7D2E]/10" />
+
+            {/* Texto izquierda */}
+            <div className="relative z-10 flex flex-1 flex-col justify-center gap-3 px-8 py-8">
+              <span className="w-fit rounded-full bg-[#2E7D2E]/10 px-3 py-1 text-xs font-semibold text-[#2E7D2E]">
+                💰 Finanzas personales
+              </span>
+              <h2 className="text-3xl font-extrabold leading-tight text-[#1a5c1a]">
+                Control de<br />Gastos
+              </h2>
+              <p className="max-w-xs text-sm text-[#4A5568]">
+                Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos.
+              </p>
+            </div>
+
+            {/* Imagen derecha, grande */}
+            <div className="relative z-10 flex items-end justify-end pr-2">
+              <img
+                src={ilustracionGastos}
+                alt="Ilustración gastos"
+                className="h-[215px] w-auto object-contain drop-shadow-lg"
+              />
+            </div>
+          </div>
 
           <nav className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]" aria-label="Menú de secciones">
             <ul className="flex list-none flex-wrap justify-center gap-2.5 p-0">
@@ -153,7 +183,7 @@ const Gastos = () => {
               <h3 className="text-xl font-semibold text-[#2D2D2D]">Módulo de Gastos</h3>
               <Link to="/movimientos/nuevo">
                 <button type="button" className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#2E7D2E]">
-                  Registrar Gasto
+                  + Registrar Gasto
                 </button>
               </Link>
             </header>
@@ -167,7 +197,17 @@ const Gastos = () => {
                 {cargando ? (
                   <p className="italic text-[#9AA19A]">Cargando...</p>
                 ) : gastos.length === 0 ? (
-                  <p className="italic text-[#9AA19A]">No has registrado gastos. Mantén tus cuentas claras agregando tus consumos.</p>
+                  <div className="flex flex-col items-center justify-center gap-4 py-10">
+                    <img
+                      src={ilustracionGastos}
+                      alt="Sin gastos registrados"
+                      className="h-[180px] w-auto object-contain opacity-80"
+                    />
+                    <p className="text-center text-sm italic text-[#9AA19A]">
+                      Aún no tienes gastos registrados.<br />
+                      ¡Empieza a llevar el control de tus finanzas!
+                    </p>
+                  </div>
                 ) : (
                   <table className="w-full border-collapse text-left">
                     <thead>

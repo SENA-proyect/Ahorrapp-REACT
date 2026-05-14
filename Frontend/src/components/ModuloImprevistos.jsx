@@ -14,6 +14,7 @@ const navLinks = [
   { to: '/ModuloDeudas',       label: 'Deudas' },
   { to: '/ModulosDependientes',label: 'Dependientes' },
   { to: '/ModulosCategorias',  label: 'Categorías' },
+  { to: '/exportar',           label: 'Exportar' },
 ]
 
 const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-200'

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import FormIngreso    from './FormIngreso'
 import FormAhorro     from './FormAhorro'
 import FormGasto      from './FormGasto'
@@ -13,8 +13,15 @@ const OPCIONES = {
 
 export default function FormMovimiento() {
   const navigate = useNavigate()
-  const [tipoFlujo,    setTipoFlujo]    = useState(null)
-  const [subtipoModulo, setSubtipoModulo] = useState(null)
+  const [searchParams] = useSearchParams()
+  const tipoInicial = searchParams.get('tipo')
+  const subtipoInicial = searchParams.get('subtipo')
+  const subtipoValido =
+    tipoInicial &&
+    OPCIONES[tipoInicial]?.includes(subtipoInicial)
+
+  const [tipoFlujo,    setTipoFlujo]    = useState(subtipoValido ? tipoInicial : null)
+  const [subtipoModulo, setSubtipoModulo] = useState(subtipoValido ? subtipoInicial : null)
 
   const handleTipoFlujo = (tipo) => {
     setTipoFlujo(tipo)

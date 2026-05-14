@@ -13,6 +13,7 @@ const navLinks = [
   { to: '/ModuloDeudas',       label: 'Deudas',       active: true },
   { to: '/ModulosDependientes',label: 'Dependientes' },
   { to: '/ModulosCategorias',  label: 'Categorías' },
+  { to: '/exportar',           label: 'Exportar' },
 ]
 
 const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200'
@@ -167,7 +168,7 @@ const Deudas = () => {
           <section>
             <header className="mt-[30px] flex flex-col items-start justify-between gap-3 px-2.5 md:flex-row md:items-center">
               <h3 className="text-xl font-semibold text-[#2D2D2D]">Módulo de Deudas</h3>
-              <Link to="/movimientos/nuevo">
+              <Link to="/movimientos/nuevo?tipo=Salida&subtipo=Deuda">
                 <button type="button" className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#2E7D2E]">
                   Nueva Deuda
                 </button>
