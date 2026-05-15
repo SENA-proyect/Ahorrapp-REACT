@@ -1,28 +1,51 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import HeaderModulos from './HeaderModulos'
 import BolsaWidget from './BolsaWidget'
-
-const navItems = [
-  { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
-  { href: '/ModulosIngresos', emoji: '💰', label: 'Ingresos' },
-  { href: '/ModulosGastos', emoji: '💸', label: 'Gastos' },
-  { href: '/ModuloAhorros', emoji: '🎯', label: 'Ahorrar' },
-  { href: '/ModuloImprevistos', emoji: '🛡️', label: 'Imprevistos' },
-  { href: '/ModuloDeudas', emoji: '💳', label: 'Deudas' },
-  { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
-  { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
-  { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
-  { href: '/Noticias', emoji: '📰', label: 'Noticias' },
-]
+import { getIngresos } from '../api'
+import { getGastos } from '../api'
 
 const usuario = JSON.parse(localStorage.getItem('usuario'))
+
+export default function Dashboard() {
+
+  const [ingresos, setIngresos] = useState([]);
+
+  useEffect(() => {
+    getIngresos()
+      .then(data => {
+        if (Array.isArray(data)) setIngresos(data);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  const totalIngresos = ingresos.reduce((total, ingreso) => {
+    return total + Number(ingreso.Monto || ingreso.monto || 0);
+  }, 0);
+
+  const [gastos, setGastos] = useState([]);
+  useEffect(() => {
+    getGastos()
+    .then(data => {
+      if (Array.isArray(data)) setGastos(data);
+    })
+    .catch(err => console.error(err));
+  }, []);
+
+  const totalGastos = gastos.reduce((total, gasto) => {
+    return total + Number(gasto.Monto || gasto.monto || 0);
+  }, 0);
+  
+  const [ahorros, setAhorros] = useState([]);
+  const [balance, setBalance] = useState([]);
+
+  
 
 const statCards = [
   {
     id: 'ingresos',
     label: 'Ingresos',
-    value: '$4,200',
+    value: `$${totalIngresos.toLocaleString('es-CO')}`,
     sub: '+12% vs. mes anterior',
     emoji: '💰',
     color: 'text-emerald-400',
@@ -31,7 +54,7 @@ const statCards = [
   {
     id: 'gastos',
     label: 'Gastos',
-    value: '$2,850',
+    value: `$${totalGastos.toLocaleString('es-CO')}`,
     sub: '−5% vs. mes anterior',
     emoji: '💸',
     color: 'text-red-400',
@@ -56,11 +79,6 @@ const statCards = [
     gradient: 'radial-gradient(ellipse at left, rgba(168,85,247,0.527), rgba(147,51,234,0.05))',
   },
 ]
-
-export default function Dashboard() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <div

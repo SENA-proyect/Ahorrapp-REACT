@@ -7,9 +7,6 @@ const API = 'http://localhost:3000/api/movimientos'
 const usuario = JSON.parse(localStorage.getItem('usuario'))
 
 const Ahorros = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-
   const [ahorros,     setAhorros]     = useState([])
   const [cargando,    setCargando]    = useState(true)
   const [modalEditar, setModalEditar] = useState(null)

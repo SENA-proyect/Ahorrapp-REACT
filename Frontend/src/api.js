@@ -153,3 +153,37 @@ export const getResumenFinancieroBreve = async () => {
     return "No se pudo cargar la información financiera actual del usuario.";
   }
 };
+
+export const getIngresos = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/movimientos`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  
+  if (!response.ok) return [];
+
+  const data = await response.json();
+  
+  const movimientos = Array.isArray(data) ? data : (data.movimientos || []);
+  return movimientos.filter(movimiento =>
+    movimiento.tipo === 'ingreso' || 
+    movimiento.Tipo === 'Ingreso'
+  );
+};
+
+export const getGastos = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/movimientos`, {
+    headers: {Authorization: `Bearer ${token}`}
+  });
+
+  if (!response.ok) return [];
+
+  const data = await response.json();
+  const movimientos = Array.isArray(data) ? data : (data.movimientos || []);
+  return movimientos.filter(movimiento => 
+    movimiento.tipo === 'gasto' ||
+    movimiento.Tipo === 'Gasto'
+  )
+}

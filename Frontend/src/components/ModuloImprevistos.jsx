@@ -5,24 +5,11 @@ import HeaderModulos from './HeaderModulos'
 
 const API = 'http://localhost:3000/api/movimientos'
 
-const navItems = [
-  { href: '/Dashboard',           emoji: '📊', label: 'Dashboard' },
-  { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos' },
-  { href: '/ModulosGastos',       emoji: '💸', label: 'Gastos' },
-  { href: '/ModuloAhorros',       emoji: '🎯', label: 'Ahorrar' },
-  { href: '/ModuloImprevistos',   emoji: '🛡️', label: 'Imprevistos' },
-  { href: '/ModuloDeudas',        emoji: '💳', label: 'Deudas' },
-  { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
-  { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias' },
-  { href: '/movimientos/nuevo',   emoji: '➕', label: 'Nuevo Movimiento' },
-  { href: '/Noticias',            emoji: '📰', label: 'Noticias' },
-]
 
 const usuario = JSON.parse(localStorage.getItem('usuario'))
 
 const Imprevistos = () => {
   const navigate = useNavigate()
-  const location = useLocation()
 
   const [imprevistos,  setImprevistos]  = useState([])
   const [cargando,     setCargando]     = useState(true)
