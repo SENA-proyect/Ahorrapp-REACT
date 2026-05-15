@@ -101,190 +101,103 @@ export default function BolsaWidget() {
     return (usd * trm).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
   }
 
-  // ── Tokens de diseño (coinciden con el tema del Dashboard) ──────────────────
-  const S = {
-    section: {
-      width: '100%',
-      background: 'rgba(255,255,255,0.04)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      border: '1px solid rgba(255,255,255,0.10)',
-      borderRadius: '1rem',
-      padding: '1.5rem',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-    },
-    header: {
-      display: 'flex', justifyContent: 'space-between',
-      alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '8px',
-    },
-    titulo: {
-      fontSize: '1rem', fontWeight: '800',
-      background: 'linear-gradient(90deg, #fbbf24, #f59e0b)',
-      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-      letterSpacing: '-0.01em',
-    },
-    badgeTrm: {
-      fontSize: '0.7rem', color: '#a1a1aa',
-    },
-    badgeApi: {
-      fontSize: '0.68rem', padding: '3px 10px', borderRadius: '999px',
-      background: 'rgba(251,191,36,0.12)', color: '#fbbf24',
-      border: '1px solid rgba(251,191,36,0.30)', fontWeight: '600',
-    },
-    inputRow: {
-      display: 'flex', gap: '8px', marginBottom: '1.1rem',
-    },
-    input: {
-      flex: 1, padding: '9px 14px', borderRadius: '10px',
-      border: '1px solid rgba(255,255,255,0.12)',
-      background: 'rgba(255,255,255,0.06)',
-      color: '#f4f4f5', fontSize: '0.85rem', outline: 'none',
-      transition: 'border-color 0.2s',
-    },
-    btnAgregar: {
-      padding: '9px 18px', borderRadius: '10px', fontWeight: '700',
-      fontSize: '0.85rem', cursor: 'pointer', border: 'none',
-      background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-      color: '#0f172a', transition: 'opacity 0.2s, transform 0.15s',
-    },
-    cargando: {
-      color: '#a1a1aa', fontSize: '0.82rem', marginBottom: '8px',
-    },
-    errorTxt: {
-      color: '#f87171', fontSize: '0.82rem', marginBottom: '8px',
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
-      gap: '12px', width: '100%',
-    },
-    cardBase: (subio, activa) => ({
-      padding: '14px', borderRadius: '14px', cursor: 'pointer',
-      position: 'relative', transition: 'transform 0.18s, box-shadow 0.18s',
-      background: subio
-        ? 'radial-gradient(ellipse at left, rgba(34,197,94,0.18), rgba(16,185,129,0.05))'
-        : 'radial-gradient(ellipse at left, rgba(239,68,68,0.18), rgba(220,38,38,0.05))',
-      border: `1px solid ${activa
-        ? subio ? 'rgba(52,211,153,0.7)' : 'rgba(248,113,113,0.7)'
-        : 'rgba(255,255,255,0.08)'}`,
-      boxShadow: activa ? '0 0 16px rgba(251,191,36,0.18)' : 'none',
-    }),
-    btnEliminar: {
-      position: 'absolute', top: '7px', right: '7px',
-      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',
-      borderRadius: '50%', width: '18px', height: '18px',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      cursor: 'pointer', color: '#a1a1aa', fontSize: '0.6rem',
-      transition: 'background 0.15s',
-    },
-    cardLabel: { fontSize: '0.8rem', fontWeight: '700', color: '#f4f4f5' },
-    cardSub:   { fontSize: '0.65rem', color: '#71717a' },
-    cardPrecio: { fontSize: '1.05rem', fontWeight: '900', color: '#ffffff', marginTop: '8px' },
-    cardUsd:    { fontSize: '0.6rem', color: '#71717a', marginLeft: '3px' },
-    cardCop:    { fontSize: '0.68rem', color: '#a1a1aa', marginTop: '1px' },
-    cardVar: (subio) => ({
-      fontSize: '0.76rem', fontWeight: '700', marginTop: '5px',
-      color: subio ? '#34d399' : '#f87171',
-    }),
-    detalle: {
-      marginTop: '16px', padding: '18px', borderRadius: '14px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.10)',
-    },
-    detalleTitle: {
-      fontWeight: '800', fontSize: '0.95rem', color: '#fbbf24', marginBottom: '14px',
-    },
-    detalleGrid: {
-      display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px',
-    },
-    detalleCell: {
-      padding: '10px 12px', borderRadius: '10px',
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(255,255,255,0.07)',
-    },
-    detalleCellLabel: { fontSize: '0.65rem', color: '#71717a', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' },
-    detalleCellValor: { fontSize: '0.88rem', fontWeight: '800', color: '#f4f4f5' },
-    detalleCellCop:   { fontSize: '0.65rem', color: '#a1a1aa', marginTop: '2px' },
-    footer: {
-      fontSize: '0.67rem', color: '#52525b',
-      marginTop: '14px', textAlign: 'right', letterSpacing: '0.01em',
-    },
-  }
-
   return (
-    <section style={S.section}>
+    <section className="box2" style={{ marginTop: '20px' }}>
 
-      {/* ── HEADER ── */}
-      <div style={S.header}>
-        <p style={S.titulo}>📈 Bolsa de Valores — Enfoque Colombiano</p>
+      {/* HEADER */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <p style={{ color: 'var(--deudas-base)', fontWeight: 'var(--font-bold)', fontSize: '1rem' }}>
+          📈 Bolsa de Valores — Enfoque Colombiano
+        </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={S.badgeTrm}>TRM: ${trm.toLocaleString('es-CO')} COP</span>
-          <span style={S.badgeApi}>Finnhub API</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+            TRM: ${trm.toLocaleString('es-CO')} COP
+          </span>
+          <span style={{
+            fontSize: '0.72rem', padding: '3px 10px', borderRadius: '20px',
+            background: 'var(--color-primary-soft)', color: 'var(--color-primary-dark)',
+            border: '1px solid var(--color-primary-low)',
+          }}>
+            Finnhub API
+          </span>
         </div>
       </div>
 
-      {/* ── BUSCADOR ── */}
-      <div style={S.inputRow}>
+      {/* BUSCADOR */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         <input
           type="text"
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && agregarAccion()}
-          placeholder="Agregar símbolo (ej: AAPL, TSLA…)"
-          style={S.input}
+          placeholder="Agregar símbolo (ej: AAPL, TSLA...)"
+          style={{
+            flex: 1, padding: '8px 12px', borderRadius: '8px',
+            border: '1px solid var(--color-border)', background: 'var(--color-bg-input)',
+            color: 'var(--color-text-main)', fontSize: '0.85rem', outline: 'none'
+          }}
         />
         <button
           onClick={agregarAccion}
-          style={S.btnAgregar}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = '1';    e.currentTarget.style.transform = 'translateY(0)' }}
+          className="btn-secundario"
+          style={{ padding: '8px 16px', fontSize: '0.85rem' }}
         >
           + Agregar
         </button>
       </div>
 
-      {cargando && <p style={S.cargando}>⏳ Consultando precios…</p>}
-      {error    && <p style={S.errorTxt}>⚠ {error}</p>}
+      {cargando && <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>Consultando precios...</p>}
+      {error && <p style={{ color: 'var(--color-error)', fontSize: 'var(--text-sm)' }}>{error}</p>}
 
-      {/* ── TARJETAS ── */}
+      {/* TARJETAS */}
       {!error && (
-        <div style={S.grid}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px', width: '100%' }}>
           {acciones.map((accion) => {
             const d = datos[accion.symbol]
             if (!d) return null
-            const activa = seleccionada?.symbol === accion.symbol
             return (
               <div
                 key={accion.symbol}
-                style={S.cardBase(d.subio, activa)}
-                onClick={() => setSeleccionada(activa ? null : { ...accion, ...datos[accion.symbol] })}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)';    e.currentTarget.style.boxShadow = activa ? '0 0 16px rgba(251,191,36,0.18)' : 'none' }}
+                onClick={() => setSeleccionada(
+  seleccionada?.symbol === accion.symbol 
+    ? null 
+    : { ...accion, ...datos[accion.symbol] }
+)}
+               style={{
+  padding: '14px', borderRadius: '12px', cursor: 'pointer',
+  background: d.subio ? 'var(--ingresos-bg)' : 'var(--imprevistos-bg)',
+  border: `1px solid ${seleccionada?.symbol === accion.symbol ? 'var(--color-primary)' : 'transparent'}`,
+  transition: 'all 0.2s', position: 'relative'
+}}
               >
                 {/* Botón eliminar */}
                 <button
                   onClick={e => { e.stopPropagation(); eliminarAccion(accion.symbol) }}
-                  style={S.btnEliminar}
-                  title="Eliminar"
+                  style={{
+                    position: 'absolute', top: '6px', right: '6px',
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    color: 'var(--color-text-muted)', fontSize: '0.75rem'
+                  }}
                 >✕</button>
 
-                {/* Nombre */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '6px', paddingRight: '18px' }}>
-                  <span style={{ fontSize: '1.3rem' }}>{accion.icono}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '1.2rem' }}>{accion.icono}</span>
                   <div>
-                    <p style={S.cardLabel}>{accion.nombre}</p>
-                    <p style={S.cardSub}>{accion.symbol} · {accion.pais}</p>
+                    <p style={{ fontSize: '0.82rem', fontWeight: 'bold', color: 'var(--color-text-main)' }}>{accion.nombre}</p>
+                    <p style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>{accion.symbol} · {accion.pais}</p>
                   </div>
                 </div>
 
-                {/* Precio */}
-                <p style={S.cardPrecio}>
-                  ${d.precio.toFixed(2)}<span style={S.cardUsd}>USD</span>
+                <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--color-text-main)' }}>
+                  ${d.precio.toFixed(2)} <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>USD</span>
                 </p>
-                <p style={S.cardCop}>≈ {formatCOP(d.precio)}</p>
-
-                {/* Variación */}
-                <p style={S.cardVar(d.subio)}>
+                <p style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginBottom: '2px' }}>
+                  ≈ {formatCOP(d.precio)}
+                </p>
+                <p style={{
+                  fontSize: '0.78rem', fontWeight: 'bold',
+                  color: d.subio ? 'var(--ingresos-dark)' : 'var(--imprevistos-dark)'
+                }}>
                   {d.subio ? '▲' : '▼'} {d.subio ? '+' : ''}{d.cambio.toFixed(2)} ({d.porcentaje.toFixed(2)}%)
                 </p>
               </div>
@@ -293,30 +206,35 @@ export default function BolsaWidget() {
         </div>
       )}
 
-      {/* ── DETALLE ── */}
+      {/* DETALLE AL HACER CLIC */}
       {seleccionada && (
-        <div style={S.detalle}>
-          <p style={S.detalleTitle}>{seleccionada.icono} {seleccionada.nombre} — Detalle</p>
-          <div style={S.detalleGrid}>
+        <div style={{
+          marginTop: '16px', padding: '16px', borderRadius: '12px',
+          background: 'var(--color-bg-card)', border: '1px solid var(--color-border)'
+        }}>
+          <p style={{ fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '12px' }}>
+            {seleccionada.icono} {seleccionada.nombre} — Detalle
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
             {[
-              { label: 'Precio actual',   valor: `$${seleccionada.precio.toFixed(2)} USD`,    cop: formatCOP(seleccionada.precio) },
-              { label: 'Máximo del día',  valor: `$${seleccionada.maximo.toFixed(2)} USD`,    cop: formatCOP(seleccionada.maximo) },
-              { label: 'Mínimo del día',  valor: `$${seleccionada.minimo.toFixed(2)} USD`,    cop: formatCOP(seleccionada.minimo) },
-              { label: 'Apertura',        valor: `$${seleccionada.apertura.toFixed(2)} USD`,  cop: formatCOP(seleccionada.apertura) },
+              { label: 'Precio actual', valor: `$${seleccionada.precio.toFixed(2)} USD`, cop: formatCOP(seleccionada.precio) },
+              { label: 'Máximo del día', valor: `$${seleccionada.maximo.toFixed(2)} USD`, cop: formatCOP(seleccionada.maximo) },
+              { label: 'Mínimo del día', valor: `$${seleccionada.minimo.toFixed(2)} USD`, cop: formatCOP(seleccionada.minimo) },
+              { label: 'Apertura', valor: `$${seleccionada.apertura.toFixed(2)} USD`, cop: formatCOP(seleccionada.apertura) },
               { label: 'Cierre anterior', valor: `$${seleccionada.cierreAnt.toFixed(2)} USD`, cop: formatCOP(seleccionada.cierreAnt) },
-              { label: 'Variación',       valor: `${seleccionada.subio ? '+' : ''}${seleccionada.cambio.toFixed(2)} USD`, cop: `${seleccionada.porcentaje.toFixed(2)}%` },
+              { label: 'Variación', valor: `${seleccionada.subio ? '+' : ''}${seleccionada.cambio.toFixed(2)} USD`, cop: `${seleccionada.porcentaje.toFixed(2)}%` },
             ].map((item, i) => (
-              <div key={i} style={S.detalleCell}>
-                <p style={S.detalleCellLabel}>{item.label}</p>
-                <p style={S.detalleCellValor}>{item.valor}</p>
-                <p style={S.detalleCellCop}>{item.cop}</p>
+              <div key={i} style={{ padding: '10px', borderRadius: '8px', background: 'var(--color-bg-soft)' }}>
+                <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>{item.label}</p>
+                <p style={{ fontSize: '0.88rem', fontWeight: 'bold', color: 'var(--color-text-main)' }}>{item.valor}</p>
+                <p style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>{item.cop}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <p style={S.footer}>
+      <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '12px', textAlign: 'right' }}>
         Datos: Finnhub API · TRM referencial · Se actualiza cada 5 min · Haz clic en una acción para ver detalles
       </p>
 
