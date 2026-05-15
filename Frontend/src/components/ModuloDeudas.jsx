@@ -1,25 +1,39 @@
-import { useState, useEffect, use } from 'react'
-import { data, Link } from 'react-router-dom'
-import { getCategorias } from '../api';
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { getCategorias } from '../api'
+import HeaderModulos from './HeaderModulos'
 
 const API = 'http://localhost:3000/api/movimientos'
 
-const navLinks = [
-  { to: '/Dashboard',          label: 'Dashboard' },
-  { to: '/ModulosIngresos',    label: 'Ingresos' },
-  { to: '/ModulosGastos',      label: 'Gastos' },
-  { to: '/ModuloAhorros',      label: 'Ahorros' },
-  { to: '/ModuloImprevistos',  label: 'Imprevistos' },
-  { to: '/ModuloDeudas',       label: 'Deudas',       active: true },
-  { to: '/ModulosDependientes',label: 'Dependientes' },
-  { to: '/ModulosCategorias',  label: 'Categorías' },
-  { to: '/exportar',           label: 'Exportar' },
+const navItems = [
+  { href: '/Dashboard',           emoji: '📊', label: 'Dashboard' },
+  { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos' },
+  { href: '/ModulosGastos',       emoji: '💸', label: 'Gastos' },
+  { href: '/ModuloAhorros',       emoji: '🎯', label: 'Ahorrar' },
+  { href: '/ModuloImprevistos',   emoji: '🛡️', label: 'Imprevistos' },
+  { href: '/ModuloDeudas',        emoji: '💳', label: 'Deudas' },
+  { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
+  { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias' },
+  { href: '/movimientos/nuevo',   emoji: '➕', label: 'Nuevo Movimiento' },
+  { href: '/Noticias',            emoji: '📰', label: 'Noticias' },
 ]
 
-const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200'
-const labelCls = 'block text-xs font-semibold text-slate-500 mb-1 mt-3'
+const usuario = JSON.parse(localStorage.getItem('usuario'))
+
+const inputModal = {
+  width: '100%', padding: '9px 14px', borderRadius: '10px',
+  border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)',
+  color: '#f4f4f5', fontSize: '0.88rem', outline: 'none', marginTop: '6px',
+}
+const labelModal = {
+  fontSize: '0.72rem', fontWeight: '700', color: '#a1a1aa',
+  textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '14px', display: 'block',
+}
 
 const Deudas = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [deudas,      setDeudas]      = useState([])
   const [cargando,    setCargando]    = useState(true)
   const [modalEditar, setModalEditar] = useState(null)
@@ -27,7 +41,7 @@ const Deudas = () => {
   const [guardando,   setGuardando]   = useState(false)
   const [eliminando,  setEliminando]  = useState(false)
   const [errorModal,  setErrorModal]  = useState(null)
-  const [categorias,    setCategorias]   = useState([])
+  const [categorias,  setCategorias]  = useState([])
 
   const cargarDeudas = () => {
     setCargando(true)
@@ -40,12 +54,8 @@ const Deudas = () => {
   }
 
   useEffect(() => {
-    getCategorias()
-      .then(data => {
-        if (Array.isArray(data)) setCategorias(data);
-      })
-      .catch(err => console.error("Error cargando categorías:", err));
-  }, []);
+    getCategorias().then(data => { if (Array.isArray(data)) setCategorias(data) }).catch(() => {})
+  }, [])
 
   useEffect(() => { cargarDeudas() }, [])
 
@@ -55,45 +65,32 @@ const Deudas = () => {
   const abrirEditar = (d) => {
     setErrorModal(null)
     setModalEditar({
-      id:             d.id,
-      monto:          String(d.monto),
-      fuente:         d.fuente          || '',
-      id_categoria:      d.ID_categoria       || '',
-      descripcion:    d.descripcion     || '',
-      estado:         d.estado          || 'pendiente',
+      id: d.id, monto: String(d.monto), fuente: d.fuente || '',
+      id_categoria: d.ID_categoria || '', descripcion: d.descripcion || '',
+      estado: d.estado || 'pendiente',
       cuotas_pagadas: String(d.cuotas_pagadas ?? 0),
-      cuotas_total:   d.cuotas_total    ? String(d.cuotas_total) : '',
-      fecha_inicio:   d.fecha_inicio    ? d.fecha_inicio.slice(0, 10) : '',
-      fecha_fin:      d.fecha_fin       ? d.fecha_fin.slice(0, 10)    : '',
+      cuotas_total: d.cuotas_total ? String(d.cuotas_total) : '',
+      fecha_inicio: d.fecha_inicio ? d.fecha_inicio.slice(0, 10) : '',
+      fecha_fin:    d.fecha_fin    ? d.fecha_fin.slice(0, 10)    : '',
     })
   }
 
-  const handleEditarChange = (e) => {
+  const handleEditarChange = (e) =>
     setModalEditar(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
 
   const guardarEdicion = async () => {
     setErrorModal(null)
     if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0) {
-      setErrorModal('El monto debe ser un número mayor a 0')
-      return
+      setErrorModal('El monto debe ser un número mayor a 0'); return
     }
-    if (!modalEditar.fuente.trim()) {
-      setErrorModal('La fuente de la deuda es obligatoria')
-      return
-    }
-    if (
-      modalEditar.fecha_fin && modalEditar.fecha_inicio &&
-      modalEditar.fecha_fin < modalEditar.fecha_inicio
-    ) {
-      setErrorModal('La fecha de fin no puede ser anterior a la fecha de inicio')
-      return
+    if (!modalEditar.fuente.trim()) { setErrorModal('La fuente de la deuda es obligatoria'); return }
+    if (modalEditar.fecha_fin && modalEditar.fecha_inicio && modalEditar.fecha_fin < modalEditar.fecha_inicio) {
+      setErrorModal('La fecha de fin no puede ser anterior a la de inicio'); return
     }
     const cuotasPagadas = Number(modalEditar.cuotas_pagadas)
     const cuotasTotal   = modalEditar.cuotas_total ? Number(modalEditar.cuotas_total) : null
     if (cuotasTotal !== null && cuotasPagadas > cuotasTotal) {
-      setErrorModal('Las cuotas pagadas no pueden superar el total de cuotas')
-      return
+      setErrorModal('Las cuotas pagadas no pueden superar el total'); return
     }
     setGuardando(true)
     const token = localStorage.getItem('token')
@@ -102,15 +99,10 @@ const Deudas = () => {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          monto:          Number(modalEditar.monto),
-          fuente:         modalEditar.fuente.trim(),
-          id_categoria:      modalEditar.id_categoria || null,
-          descripcion:    modalEditar.descripcion  || null,
-          estado:         modalEditar.estado,
-          cuotas_pagadas: cuotasPagadas,
-          cuotas_total:   cuotasTotal,
-          fecha_inicio:   modalEditar.fecha_inicio || null,
-          fecha_fin:      modalEditar.fecha_fin    || null,
+          monto: Number(modalEditar.monto), fuente: modalEditar.fuente.trim(),
+          id_categoria: modalEditar.id_categoria || null, descripcion: modalEditar.descripcion || null,
+          estado: modalEditar.estado, cuotas_pagadas: cuotasPagadas, cuotas_total: cuotasTotal,
+          fecha_inicio: modalEditar.fecha_inicio || null, fecha_fin: modalEditar.fecha_fin || null,
         }),
       })
       const data = await res.json()
@@ -125,178 +117,161 @@ const Deudas = () => {
     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${API}/deudas/${confirmarId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
       })
       if (res.ok) { setConfirmarId(null); cargarDeudas() }
-    } catch { /* silencioso */ }
+    } catch { }
     finally { setEliminando(false) }
   }
 
+  const bgPage = { minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', color: 'white', overflowX: 'hidden', background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }
+  const modalOverlay = { position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)', padding: '16px' }
+  const modalBox = { width: '100%', maxWidth: '480px', borderRadius: '20px', padding: '28px', background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 24px 60px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }
+
   return (
-    <div className="mx-auto min-h-screen max-w-[1400px] bg-white px-5 py-5 pb-20 font-['Segoe_UI',Tahoma,Geneva,Verdana,sans-serif] text-[#2D2D2D]">
-      <div className="box-border px-4 py-2 lg:px-[100px]">
+    <div style={bgPage}>
 
-        <header className="mx-auto mb-5 flex w-full flex-col items-start justify-between gap-3 border-b-2 border-[#82F182] bg-white px-5 py-[5px] md:flex-row md:items-center">
-          <Link to="/">
-            <button className="flex w-[140px] cursor-pointer items-center gap-2 rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 10">
-                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
-              </svg>
-              Inicio
-            </button>
-          </Link>
-          <h1 className="text-[28px] font-bold text-[#2E7D2E]">Ahorrapp</h1>
-          <button className="w-[150px] cursor-pointer rounded-[10px] border border-[#82F182] bg-white px-4 py-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#82F182]">Cerrar Sesión</button>
-        </header>
+      {/* HEADER */}
+      <HeaderModulos section="Deudas" />
 
-        <main className="animate-[fadeUp_0.6s_ease]">
-          <p className="mb-4 text-[#2D2D2D]">Gestiona de manera integral tus finanzas: ingresos, gastos, ahorros, deudas e imprevistos</p>
+      <hr style={{ margin: '4px 0', border: 'none', height: '1px', background: 'linear-gradient(to right, transparent, #fbbf24, transparent)' }} />
 
-          <nav className="my-2.5 flex w-full flex-wrap items-center justify-center gap-1.5 rounded-lg border border-black/5 bg-[#4CB04C]/10 px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]" aria-label="Menú de secciones">
-            <ul className="flex list-none flex-wrap justify-center gap-2.5 p-0">
-              {navLinks.map(link => (
-                <li key={link.to}>
-                  <Link to={link.to} className={`inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-[0.85rem] font-semibold no-underline shadow-[0_2px_6px_rgba(0,0,0,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#E8FFE8] hover:text-[#2E7D2E] hover:shadow-[0_4px_10px_rgba(0,0,0,0.08)] ${link.active ? 'bg-[#E8FFE8] text-[#2D2D2D] shadow-[0_4px_12px_rgba(0,0,0,0.12)]' : 'border border-transparent bg-[#F4F6F4] text-[#2D2D2D]'}`}>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+      {/* MAIN */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '32px', gap: '24px' }}>
+        <div>
+          <p style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Bienvenido de vuelta</p>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white' }}>{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
+        </div>
 
-          <section>
-            <header className="mt-[30px] flex flex-col items-start justify-between gap-3 px-2.5 md:flex-row md:items-center">
-              <h3 className="text-xl font-semibold text-[#2D2D2D]">Módulo de Deudas</h3>
-              <Link to="/movimientos/nuevo?tipo=Salida&subtipo=Deuda">
-                <button type="button" className="cursor-pointer rounded-[10px] bg-[#3DA63D] px-5 py-2.5 font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#2E7D2E]">
-                  Nueva Deuda
-                </button>
-              </Link>
-            </header>
-
-            <div className="my-5 w-full rounded-[15px] border-2 border-[#4CB04C]/20 bg-white p-[30px]">
-              <p className="mb-2.5 text-2xl text-[#2D2D2D]">
-                Total Deuda Acumulada: <strong>${total.toLocaleString('es-CO')}</strong>
-                {pendientes.length > 0 && (
-                  <span className="ml-3 text-[0.85rem] text-[#1D4ED8]">
-                    ({pendientes.length} pendiente{pendientes.length > 1 ? 's' : ''})
-                  </span>
-                )}
-              </p>
-
-              <div className="mt-5 overflow-x-auto">
-                {cargando ? (
-                  <p className="italic text-[#9AA19A]">Cargando...</p>
-                ) : deudas.length === 0 ? (
-                  <p className="italic text-[#9AA19A]">¡Felicidades! No tienes deudas pendientes registradas.</p>
-                ) : (
-                  <table className="w-full border-collapse text-left">
-                    <thead>
-                      <tr className="border-b-2 border-[#D4DCE9]">
-                        {['Fuente', 'Categoría', 'Descripción', 'Cuotas', 'Fecha fin', 'Estado', 'Monto', 'Acciones'].map(col => (
-                          <th key={col} className="px-3 py-2.5 text-left text-[0.85rem] font-semibold text-[#4A5568]">{col}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {deudas.map(d => (
-                        <tr key={d.id} className="border-b border-[#D4DCE9] transition-colors hover:bg-slate-50">
-                          <td className="px-3 py-2.5 align-middle text-sm">{d.fuente || '—'}</td>
-                          <td className="px-3 py-2.5 align-middle text-sm">{d.categoria || '—'}</td>
-                          <td className="px-3 py-2.5 align-middle text-sm">{d.descripcion || '—'}</td>
-                          <td className="px-3 py-2.5 align-middle text-sm">{d.cuotas_total ? `${d.cuotas_pagadas}/${d.cuotas_total}` : 'Pago único'}</td>
-                          <td className="px-3 py-2.5 align-middle text-sm">{d.fecha_fin ? new Date(d.fecha_fin).toLocaleDateString('es-CO') : '—'}</td>
-                          <td className="px-3 py-2.5 align-middle text-sm">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${d.estado === 'pagada' ? 'bg-[#E7F7F1] text-[#1F7A59]' : 'bg-[#EAF2FF] text-[#1D4ED8]'}`}>
-                              {d.estado === 'pagada' ? 'Pagada' : 'Pendiente'}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2.5 align-middle text-sm font-semibold text-[#1D4ED8]">${Number(d.monto).toLocaleString('es-CO')}</td>
-                          <td className="px-3 py-2.5 align-middle">
-                            <div className="flex gap-2">
-                              <button onClick={() => abrirEditar(d)} className="rounded-lg border border-rose-500 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-50">Editar</button>
-                              <button onClick={() => setConfirmarId(d.id)} className="rounded-lg border border-red-400 px-3 py-1 text-xs font-semibold text-red-500 transition hover:bg-red-50">Eliminar</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+        {/* Stat card */}
+        <article style={{ padding: '24px 32px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.10)', background: 'radial-gradient(ellipse at left, rgba(168,85,247,0.35), rgba(147,51,234,0.04))', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <p style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c084fc', marginBottom: '4px' }}>💳 Total Deuda Acumulada</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <p style={{ fontSize: '2rem', fontWeight: '900', color: 'white' }}>${total.toLocaleString('es-CO')}</p>
+              {pendientes.length > 0 && (
+                <span style={{ fontSize: '0.78rem', padding: '3px 10px', borderRadius: '999px', background: 'rgba(96,165,250,0.15)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.3)', fontWeight: '700' }}>
+                  {pendientes.length} pendiente{pendientes.length > 1 ? 's' : ''}
+                </span>
+              )}
             </div>
-          </section>
-        </main>
+          </div>
+          <button onClick={() => navigate('/movimientos/nuevo')} className="px-5 py-2.5 rounded-xl font-bold text-sm cursor-pointer border-none hover:-translate-y-px transition-all duration-300" style={{ background: 'linear-gradient(135deg, #c084fc, #a855f7)', color: 'white' }}>
+            ➕ Nueva Deuda
+          </button>
+        </article>
 
-        <footer className="fixed bottom-0 left-0 z-[100] w-full border-t border-[#82F182] bg-white p-3 text-center text-xs text-[#9AA19A]">
-          <p>&copy; 2026 Mi Aplicación de Finanzas</p>
-        </footer>
-      </div>
+        {/* Tabla */}
+        <section style={{ width: '100%', borderRadius: '16px', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 8px 32px rgba(0,0,0,0.35)', overflow: 'hidden' }}>
+          <div style={{ padding: '20px 28px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#fbbf24' }}>📋 Módulo de Deudas</h3>
+            <span style={{ fontSize: '0.75rem', color: '#52525b' }}>{deudas.length} registro{deudas.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div style={{ overflowX: 'auto', padding: '0 8px 16px' }}>
+            {cargando ? (
+              <p style={{ color: '#71717a', fontStyle: 'italic', padding: '24px 20px', fontSize: '0.88rem' }}>⏳ Cargando...</p>
+            ) : deudas.length === 0 ? (
+              <p style={{ color: '#71717a', fontStyle: 'italic', padding: '24px 20px', fontSize: '0.88rem' }}>¡Felicidades! No tienes deudas pendientes registradas.</p>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                    {['Fuente', 'Categoría', 'Descripción', 'Cuotas', 'Fecha fin', 'Estado', 'Monto', 'Acciones'].map(col => (
+                      <th key={col} style={{ padding: '12px 16px', fontSize: '0.72rem', fontWeight: '700', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{col}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {deudas.map(d => (
+                    <tr key={d.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.fuente || '—'}</td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.categoria || '—'}</td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.descripcion || '—'}</td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.cuotas_total ? `${d.cuotas_pagadas}/${d.cuotas_total}` : 'Pago único'}</td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: '#d4d4d8' }}>{d.fecha_fin ? new Date(d.fecha_fin).toLocaleDateString('es-CO') : '—'}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{
+                          padding: '3px 10px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: '700',
+                          background: d.estado === 'pagada' ? 'rgba(52,211,153,0.15)' : 'rgba(96,165,250,0.15)',
+                          color: d.estado === 'pagada' ? '#34d399' : '#60a5fa',
+                          border: `1px solid ${d.estado === 'pagada' ? 'rgba(52,211,153,0.35)' : 'rgba(96,165,250,0.35)'}`,
+                        }}>
+                          {d.estado === 'pagada' ? '✓ Pagada' : '⏳ Pendiente'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.9rem', fontWeight: '800', color: '#c084fc' }}>${Number(d.monto).toLocaleString('es-CO')}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => abrirEditar(d)} style={{ padding: '5px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', border: '1px solid rgba(192,132,252,0.5)', background: 'rgba(192,132,252,0.10)', color: '#c084fc', transition: 'all 0.15s' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(192,132,252,0.22)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(192,132,252,0.10)'}>Editar</button>
+                          <button onClick={() => setConfirmarId(d.id)} style={{ padding: '5px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', border: '1px solid rgba(248,113,113,0.5)', background: 'rgba(248,113,113,0.10)', color: '#f87171', transition: 'all 0.15s' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.22)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(248,113,113,0.10)'}>Eliminar</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </section>
+      </main>
 
-      {/* ── Modal Editar ── */}
+      <footer style={{ width: '100%', padding: '24px', textAlign: 'center', color: '#3f3f46', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+        <p>© <strong style={{ color: '#fbbf24' }}>2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
+      </footer>
+
+      {/* MODAL EDITAR */}
       {modalEditar && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
-            <h4 className="mb-1 text-lg font-bold text-slate-800">Editar Deuda</h4>
-            <p className="mb-4 text-xs text-slate-400">Modifica los campos que necesites y guarda.</p>
+        <div style={modalOverlay}>
+          <div style={modalBox}>
+            <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fbbf24', marginBottom: '4px' }}>✏️ Editar Deuda</h4>
+            <p style={{ fontSize: '0.78rem', color: '#71717a', marginBottom: '8px' }}>Modifica los campos que necesites y guarda.</p>
 
-            <label className={labelCls}>Fuente *</label>
-            <input className={inputCls} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta de crédito..."
-              value={modalEditar.fuente} onChange={handleEditarChange} />
+            <label style={labelModal}>Fuente *</label>
+            <input style={inputModal} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta..." value={modalEditar.fuente} onChange={handleEditarChange} />
 
-            <label className={labelCls}>Categoría</label>
-            <select 
-              className={inputCls} 
-              name="id_categoria" 
-              value={modalEditar.id_categoria || ""} 
-              onChange={handleEditarChange}
-            >
+            <label style={labelModal}>Categoría</label>
+            <select style={inputModal} name="id_categoria" value={modalEditar.id_categoria || ''} onChange={handleEditarChange}>
               <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(cat => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.nombre}
-              </option>
-              ))}
+              {categorias.filter(c => c.activa == 1).map(cat => (<option key={cat.id} value={cat.id}>{cat.nombre}</option>))}
             </select>
 
-            <label className={labelCls}>Monto *</label>
-            <input className={inputCls} type="number" name="monto" min="0" step="0.01"
-              value={modalEditar.monto} onChange={handleEditarChange} />
+            <label style={labelModal}>Monto *</label>
+            <input style={inputModal} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleEditarChange} />
 
-            <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional"
-              value={modalEditar.descripcion} onChange={handleEditarChange} />
+            <label style={labelModal}>Descripción</label>
+            <input style={inputModal} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleEditarChange} />
 
-            <label className={labelCls}>Estado</label>
-            <select className={inputCls} name="estado" value={modalEditar.estado} onChange={handleEditarChange}>
+            <label style={labelModal}>Estado</label>
+            <select style={inputModal} name="estado" value={modalEditar.estado} onChange={handleEditarChange}>
               <option value="pendiente">Pendiente</option>
               <option value="pagada">Pagada</option>
             </select>
 
-            <label className={labelCls}>Cuotas pagadas</label>
-            <input className={inputCls} type="number" name="cuotas_pagadas" min="0" step="1"
-              value={modalEditar.cuotas_pagadas} onChange={handleEditarChange} />
+            <label style={labelModal}>Cuotas pagadas</label>
+            <input style={inputModal} type="number" name="cuotas_pagadas" min="0" step="1" value={modalEditar.cuotas_pagadas} onChange={handleEditarChange} />
 
-            <label className={labelCls}>Total de cuotas</label>
-            <input className={inputCls} type="number" name="cuotas_total" min="1" step="1" placeholder="Vacío si es pago único"
-              value={modalEditar.cuotas_total} onChange={handleEditarChange} />
+            <label style={labelModal}>Total de cuotas</label>
+            <input style={inputModal} type="number" name="cuotas_total" min="1" step="1" placeholder="Vacío si es pago único" value={modalEditar.cuotas_total} onChange={handleEditarChange} />
 
-            <label className={labelCls}>Fecha de inicio</label>
-            <input className={inputCls} type="date" name="fecha_inicio"
-              value={modalEditar.fecha_inicio} onChange={handleEditarChange} />
+            <label style={labelModal}>Fecha de inicio</label>
+            <input style={inputModal} type="date" name="fecha_inicio" value={modalEditar.fecha_inicio} onChange={handleEditarChange} />
 
-            <label className={labelCls}>Fecha de fin</label>
-            <input className={inputCls} type="date" name="fecha_fin"
-              value={modalEditar.fecha_fin} onChange={handleEditarChange} />
+            <label style={labelModal}>Fecha de fin</label>
+            <input style={inputModal} type="date" name="fecha_fin" value={modalEditar.fecha_fin} onChange={handleEditarChange} />
 
-            {errorModal && (
-              <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{errorModal}</p>
-            )}
+            {errorModal && <p style={{ marginTop: '12px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.35)', color: '#f87171', fontSize: '0.8rem', fontWeight: '600' }}>{errorModal}</p>}
 
-            <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setModalEditar(null)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancelar</button>
-              <button onClick={guardarEdicion} disabled={guardando} className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:bg-rose-300">
+            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button onClick={() => setModalEditar(null)} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer', background: 'transparent', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.15)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Cancelar</button>
+              <button onClick={guardarEdicion} disabled={guardando} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: guardando ? 'not-allowed' : 'pointer', border: 'none', background: guardando ? 'rgba(192,132,252,0.4)' : 'linear-gradient(135deg, #c084fc, #a855f7)', color: 'white' }}>
                 {guardando ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
@@ -304,15 +279,17 @@ const Deudas = () => {
         </div>
       )}
 
-      {/* ── Confirmar Eliminar ── */}
+      {/* MODAL ELIMINAR */}
       {confirmarId && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
-            <h4 className="mb-2 text-lg font-bold text-slate-800">¿Eliminar deuda?</h4>
-            <p className="text-sm text-slate-500">Esta acción no se puede deshacer.</p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setConfirmarId(null)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Cancelar</button>
-              <button onClick={confirmarEliminar} disabled={eliminando} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:bg-red-300">
+        <div style={modalOverlay}>
+          <div style={{ ...modalBox, maxWidth: '380px', border: '1px solid rgba(248,113,113,0.25)' }}>
+            <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#f87171', marginBottom: '8px' }}>🗑️ ¿Eliminar deuda?</h4>
+            <p style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Esta acción no se puede deshacer.</p>
+            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button onClick={() => setConfirmarId(null)} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer', background: 'transparent', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.15)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Cancelar</button>
+              <button onClick={confirmarEliminar} disabled={eliminando} style={{ padding: '9px 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700', cursor: eliminando ? 'not-allowed' : 'pointer', border: 'none', background: eliminando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)', color: 'white' }}>
                 {eliminando ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>

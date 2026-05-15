@@ -44,7 +44,7 @@ export default function Index() {
 
       <main>
         <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#4ADE80]/10 px-10 pb-[100px] pt-20 text-center before:pointer-events-none before:absolute before:left-1/2 before:top-[-100px] before:h-[600px] before:w-[600px] before:-translate-x-1/2 before:bg-[radial-gradient(circle,rgba(74,222,128,0.08)_0%,transparent_70%)]">
-          <h1 className="relative z-10 mb-[30px] mt-[-80px] bg-[url('../assets/08c4711743f9b996bfae50325a4f3c14.jpg')] bg-cover bg-center bg-clip-text text-[clamp(40px,7vw,90px)] font-extrabold leading-[1.1] tracking-[-2px] text-[#15803D] text-transparent">
+          <h1 className="relative z-10 mb-[30px] mt-[-80px] text-green-900 text-[clamp(40px,7vw,90px)] font-extrabold leading-[1.1] tracking-[-2px]">
             Controla tus Finanzas Personales.
           </h1>
 
