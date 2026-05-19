@@ -1,4 +1,3 @@
-import { useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import HeaderModulos from './HeaderModulos'
 import BolsaWidget from './BolsaWidget'
