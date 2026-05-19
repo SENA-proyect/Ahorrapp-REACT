@@ -2,35 +2,35 @@ import { Link } from 'react-router-dom'
 
 export default function PanelAdmin() {
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #081374ff, #928400ff)' }}>
 
       {/* TABLAS GENERALES */}
       <div className="inf-container">
         <h2>Tablas generales del panel de control</h2>
 
-        <div className="inf-listas">
+        <div className="flex justify-between">
 
           <div className="general-card">
             <Link to="/PanelDependientes">
-              <button>Panel de Dependientes</button>
+              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Dependientes</button>
             </Link>
           </div>
 
           <div className="general-card">
             <Link to="/PanelHistorial">
-              <button>Panel de Historial</button>
+              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Historial</button>
             </Link>
           </div>
 
           <div className="general-card">
             <Link to="/PanelMovimientos">
-              <button>Panel de Movimientos</button>
+              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Movimientos</button>
             </Link>
           </div>
 
           <div className="general-card">
             <Link to="/PanelUsuarios">
-              <button>Panel de Usuario</button>
+              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Usuario</button>
             </Link>
           </div>
 
