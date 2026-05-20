@@ -6,35 +6,35 @@ export default function PanelAdmin() {
 
       {/* TABLAS GENERALES */}
       <div className="inf-container">
-        <h2>Tablas generales del panel de control</h2>
+        <h2 className='text-white font-bold text-3xl mb-5 bg-black w-1/2 rounded-xl p-3 text-center mx-auto'>Panel de administrador.</h2>
+        <section className=' flex flex-col w-fit justify-left align-left h-screen rounded-r-[50px]'>
+        <ul className="flex flex-col justify-top h-full bg-blue-900 p-10 rounded-xl gap-5">
 
-        <div className="flex justify-between">
-
-          <div className="general-card">
+          <li className="">
             <Link to="/PanelDependientes">
-              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Dependientes</button>
+              <button className='p-5 border-gray-300 rounded-md border-1 text-gray-400 hover:text-white text-sm font-bold cursor-pointer transition-all duration-300'>Panel de Dependientes</button>
             </Link>
-          </div>
+          </li>
 
-          <div className="general-card">
+          <li className="">
             <Link to="/PanelHistorial">
-              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Historial</button>
+              <button className='p-5 border-gray-300 rounded-md border-1 text-gray-400 hover:text-white text-sm font-bold cursor-pointer transition-all duration-300'>Panel de Historial</button>
             </Link>
-          </div>
+          </li>
 
-          <div className="general-card">
+          <li className="">
             <Link to="/PanelMovimientos">
-              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Movimientos</button>
+              <button className='p-5 border-gray-300 rounded-md border-1 text-gray-400 hover:text-white text-sm font-bold cursor-pointer transition-all duration-300'>Panel de Movimientos</button>
             </Link>
-          </div>
+          </li>
 
-          <div className="general-card">
+          <li className="">
             <Link to="/PanelUsuarios">
-              <button className='p-10 bg-black rounded-xl text-white text-sm font-bold'>Panel de Usuario</button>
+              <button className='p-5 border-gray-300 rounded-md border-1 text-gray-400 hover:text-white text-sm font-bold cursor-pointer transition-all duration-300'>Panel de Usuario</button>
             </Link>
-          </div>
-
-        </div>
+          </li>
+        </ul>
+        </section>
       </div>
 
     </div>
