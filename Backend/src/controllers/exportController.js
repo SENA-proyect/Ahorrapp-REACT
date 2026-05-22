@@ -304,4 +304,67 @@ exports.exportarDatos = async (req, res) => {
   }
 };
 
+exports.obtenerExportaciones = async (req, res) => {
+  try {
+    const userId = req.usuario?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'No hay usuario autenticado' });
+    }
+
+    const limit = Math.max(parseInt(req.query.limit, 10) || 20, 1);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const offset = (page - 1) * limit;
+    const { tipo, formato } = req.query;
+
+    let sql = 'SELECT ID_historial, accion, detalles, fecha FROM HISTORIAL WHERE ID_usuario = ?';
+    const params = [userId];
+
+    if (tipo) {
+      sql += ' AND detalles LIKE ?';
+      params.push(`%"tipo_reporte":"${tipo}"%`);
+    }
+    if (formato) {
+      sql += ' AND detalles LIKE ?';
+      params.push(`%"formato":"${formato}"%`);
+    }
+
+    sql += ' ORDER BY fecha DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const [rows] = await db.execute(sql, params);
+    return res.json(rows);
+  } catch (err) {
+    console.error('❌ Error al obtener exportaciones:', err);
+    return res.status(500).json({ error: 'Error interno al obtener exportaciones.' });
+  }
+};
+
+exports.eliminarExportacion = async (req, res) => {
+  try {
+    const userId = req.usuario?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'No hay usuario autenticado' });
+    }
+
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'ID de exportación inválido' });
+    }
+
+    const [result] = await db.execute(
+      'DELETE FROM HISTORIAL WHERE ID_historial = ? AND ID_usuario = ?',
+      [id, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Exportación no encontrada o no pertenece al usuario' });
+    }
+
+    return res.json({ message: 'Exportación eliminada correctamente' });
+  } catch (err) {
+    console.error('❌ Error al eliminar exportación:', err);
+    return res.status(500).json({ error: 'Error interno al eliminar exportación.' });
+  }
+};
+
 module.exports = exports;

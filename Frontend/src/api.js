@@ -220,3 +220,33 @@ export const exportarDatos = async (payload, { onError, onDone } = {}) => {
     throw error;
   }
 };
+
+export const getHistorialExportaciones = async (params = {}) => {
+  const token = localStorage.getItem('token');
+  const query = new URLSearchParams(params).toString();
+  const response = await fetch(`${API_URL}/exportar?${query}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Error al obtener historial de exportaciones');
+  }
+  return response.json();
+};
+
+export const eliminarExportacion = async (id) => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_URL}/exportar/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Error al eliminar exportación');
+  }
+  return response.json();
+};

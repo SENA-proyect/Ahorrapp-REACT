@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { exportarDatos } from '../api';
+import { exportarDatos, getHistorialExportaciones, eliminarExportacion } from '../api';
 
 const Exportar = () => {
   const navigate = useNavigate();
@@ -10,6 +10,8 @@ const Exportar = () => {
   const [fechaFin, setFechaFin] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [historial, setHistorial] = useState([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
 
   const tipos = useMemo(
     () => [
@@ -17,9 +19,6 @@ const Exportar = () => {
       { value: 'ingresos', label: 'Ingresos' },
       { value: 'movimientos', label: 'Movimientos' },
       { value: 'dependientes', label: 'Dependientes' },
-      { value: 'ahorros', label: 'Ahorros' },
-      { value: 'deudas', label: 'Deudas' },
-      { value: 'imprevistos', label: 'Imprevistos' },
     ],
     []
   );
@@ -43,13 +42,50 @@ const Exportar = () => {
 
     try {
       setLoading(true);
-      await exportarDatos(payload, { onError: setError, onDone: () => {} });
+      await exportarDatos(payload, {
+        onError: setError,
+      });
+      await cargarHistorial();
     } catch (err) {
       setError(err?.message || 'Error al exportar');
     } finally {
       setLoading(false);
     }
   };
+
+  const cargarHistorial = async () => {
+    setLoadingHistorial(true);
+    try {
+      const data = await getHistorialExportaciones();
+      setHistorial(data);
+    } catch (err) {
+      setError(err?.message || 'Error al cargar historial');
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+
+  const parseDetalles = (detalles) => {
+    try {
+      return typeof detalles === 'string' ? JSON.parse(detalles) : detalles || {};
+    } catch {
+      return {};
+    }
+  };
+
+  const handleEliminar = async (id) => {
+    if (!window.confirm('¿Deseas eliminar esta exportación del historial?')) return;
+    try {
+      await eliminarExportacion(id);
+      setHistorial((prev) => prev.filter((item) => item.ID_historial !== id));
+    } catch (err) {
+      setError(err?.message || 'Error al eliminar exportación');
+    }
+  };
+
+  useEffect(() => {
+    cargarHistorial();
+  }, []);
 
   // Estilos que coinciden con tu dashboard oscuro
   const styles = {
@@ -60,13 +96,13 @@ const Exportar = () => {
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     },
     card: {
-      maxWidth: '600px',
+      maxWidth: '980px',
       margin: '0 auto',
-      background: 'rgba(30, 40, 60, 0.6)',
-      backdropFilter: 'blur(10px)',
-      borderRadius: '16px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+      background: 'rgba(30, 40, 60, 0.7)',
+      backdropFilter: 'blur(12px)',
+      borderRadius: '18px',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
+      boxShadow: '0 12px 48px rgba(0, 0, 0, 0.4)',
       padding: '40px',
     },
     header: {
@@ -76,6 +112,26 @@ const Exportar = () => {
       marginBottom: '35px',
       paddingBottom: '20px',
       borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
+    },
+    mainGrid: {
+      display: 'grid',
+      gap: '32px',
+    },
+    sectionCard: {
+      padding: '28px',
+      borderRadius: '16px',
+      background: 'rgba(15, 25, 45, 0.85)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+    },
+    sectionTitle: {
+      color: '#ffd700',
+      fontSize: '20px',
+      marginBottom: '18px',
+      fontWeight: '700',
+    },
+    tableContainer: {
+      overflowX: 'auto',
+      marginBottom: '20px',
     },
     title: {
       color: '#FFD700',
@@ -159,6 +215,77 @@ const Exportar = () => {
       marginBottom: '20px',
       border: '1px solid rgba(220, 53, 69, 0.3)',
     },
+    historialCard: {
+      marginTop: '40px',
+      padding: '24px',
+      borderRadius: '16px',
+      background: 'rgba(10, 20, 40, 0.7)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+    },
+    historialTitle: {
+      color: '#ffd700',
+      fontSize: '20px',
+      marginBottom: '18px',
+      fontWeight: '700',
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
+      marginBottom: '20px',
+    },
+    tableHeader: {
+      borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
+      color: '#dddddd',
+      textAlign: 'left',
+      padding: '12px 10px',
+      fontSize: '13px',
+    },
+    tableRow: {
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+    },
+    tableCell: {
+      color: '#e0e0e0',
+      padding: '12px 10px',
+      fontSize: '14px',
+      verticalAlign: 'middle',
+    },
+    tableButton: {
+      border: 'none',
+      borderRadius: '8px',
+      padding: '8px 12px',
+      fontSize: '13px',
+      cursor: 'pointer',
+      marginRight: '8px',
+      transition: 'all 0.2s ease',
+    },
+    detailPanel: {
+      background: 'rgba(255, 255, 255, 0.04)',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
+      borderRadius: '12px',
+      padding: '18px',
+      color: '#dadada',
+    },
+    detailField: {
+      width: '100%',
+      padding: '12px 14px',
+      marginTop: '8px',
+      marginBottom: '16px',
+      borderRadius: '8px',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
+      background: 'rgba(20, 30, 50, 0.85)',
+      color: '#ffffff',
+      fontSize: '14px',
+    },
+    panelTitle: {
+      margin: 0,
+      marginBottom: '14px',
+      color: '#ffd700',
+      fontSize: '18px',
+      fontWeight: '700',
+    },
+    icon: {
+      fontSize: '18px',
+    },
     infoText: {
       textAlign: 'center',
       color: '#a0a0a0',
@@ -166,9 +293,6 @@ const Exportar = () => {
       marginTop: '25px',
       paddingTop: '20px',
       borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    icon: {
-      fontSize: '18px',
     }
   };
 
@@ -195,60 +319,16 @@ const Exportar = () => {
           </button>
         </div>
 
-        <form onSubmit={onSubmit}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Formato de exportación</label>
-            <select
-              value={formato}
-              onChange={(e) => setFormato(e.target.value)}
-              style={styles.select}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = 'rgba(255, 215, 0, 0.5)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(255, 215, 0, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                e.target.style.boxShadow = 'none';
-              }}
-            >
-              <option value="json">JSON</option>
-              <option value="csv">CSV</option>
-              <option value="pdf">PDF</option>
-            </select>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Tipo de datos</label>
-            <select
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value)}
-              style={styles.select}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = 'rgba(255, 215, 0, 0.5)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(255, 215, 0, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                e.target.style.boxShadow = 'none';
-              }}
-            >
-              {tipos.map((t) => (
-                <option key={t.value} value={t.value} style={{ background: '#1a1a2e', color: '#ffffff' }}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Rango de fechas</label>
-            <div style={styles.fechasContainer}>
-              <div>
-                <input
-                  type="date"
-                  value={fechaInicio}
-                  onChange={(e) => setFechaInicio(e.target.value)}
-                  style={styles.input}
+        <div style={styles.mainGrid}>
+          <div style={styles.sectionCard}>
+            <h2 style={styles.sectionTitle}>Crear exportación</h2>
+            <form onSubmit={onSubmit}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Formato de exportación</label>
+                <select
+                  value={formato}
+                  onChange={(e) => setFormato(e.target.value)}
+                  style={styles.select}
                   onMouseEnter={(e) => {
                     e.target.style.borderColor = 'rgba(255, 215, 0, 0.5)';
                     e.target.style.boxShadow = '0 0 0 3px rgba(255, 215, 0, 0.1)';
@@ -257,14 +337,19 @@ const Exportar = () => {
                     e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
                     e.target.style.boxShadow = 'none';
                   }}
-                />
+                >
+                  <option value="json">JSON</option>
+                  <option value="csv">CSV</option>
+                  <option value="pdf">PDF</option>
+                </select>
               </div>
-              <div>
-                <input
-                  type="date"
-                  value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  style={styles.input}
+
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Tipo de datos</label>
+                <select
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
+                  style={styles.select}
                   onMouseEnter={(e) => {
                     e.target.style.borderColor = 'rgba(255, 215, 0, 0.5)';
                     e.target.style.boxShadow = '0 0 0 3px rgba(255, 215, 0, 0.1)';
@@ -273,39 +358,133 @@ const Exportar = () => {
                     e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
                     e.target.style.boxShadow = 'none';
                   }}
-                />
+                >
+                  {tipos.map((t) => (
+                    <option key={t.value} value={t.value} style={{ background: '#1a1a2e', color: '#ffffff' }}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Rango de fechas</label>
+                <div style={styles.fechasContainer}>
+                  <div>
+                    <input
+                      type="date"
+                      value={fechaInicio}
+                      onChange={(e) => setFechaInicio(e.target.value)}
+                      style={styles.input}
+                      onMouseEnter={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(255, 215, 0, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="date"
+                      value={fechaFin}
+                      onChange={(e) => setFechaFin(e.target.value)}
+                      style={styles.input}
+                      onMouseEnter={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(255, 215, 0, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {error && <div style={styles.error}>⚠️ {error}</div>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  ...styles.btnExportar,
+                  opacity: loading ? 0.6 : 1,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.3)';
+                }}
+              >
+                {loading ? '⏳ Exportando...' : '📥 Exportar datos'}
+              </button>
+
+              <p style={styles.infoText}>
+                💡 El reporte se descargará automáticamente en el formato seleccionado.
+              </p>
+            </form>
+          </div>
+
+          <div style={styles.sectionCard}>
+            <h2 style={styles.sectionTitle}>Historial de exportaciones</h2>
+            <div style={styles.historialCard}>
+              {loadingHistorial ? (
+                <p style={{ color: '#e0e0e0' }}>Cargando historial...</p>
+              ) : historial.length === 0 ? (
+                <p style={{ color: '#c0c0c0' }}>No hay exportaciones registradas aún.</p>
+              ) : (
+                <div style={styles.tableContainer}>
+                  <table style={styles.table}>
+                    <thead>
+                      <tr style={styles.tableRow}>
+                        <th style={styles.tableHeader}>Tipo</th>
+                        <th style={styles.tableHeader}>Formato</th>
+                        <th style={styles.tableHeader}>Fecha</th>
+                        <th style={styles.tableHeader}>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historial.map((item) => {
+                        const detalles = parseDetalles(item.detalles);
+                        return (
+                          <tr key={item.ID_historial} style={styles.tableRow}>
+                            <td style={styles.tableCell}>{detalles.tipo_reporte || item.accion || 'N/A'}</td>
+                            <td style={styles.tableCell}>{detalles.formato || '-'}</td>
+                            <td style={styles.tableCell}>{new Date(item.fecha).toLocaleString()}</td>
+                            <td style={styles.tableCell}>
+                              <button
+                                type="button"
+                                style={{
+                                  ...styles.tableButton,
+                                  background: '#d9534f',
+                                  color: '#fff',
+                                }}
+                                onClick={() => handleEliminar(item.ID_historial)}
+                              >
+                                Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
 
-          {error && <div style={styles.error}>⚠️ {error}</div>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              ...styles.btnExportar,
-              opacity: loading ? 0.6 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.3)';
-            }}
-          >
-            {loading ? '⏳ Exportando...' : '📥 Exportar datos'}
-          </button>
-
-          <p style={styles.infoText}>
-            💡 El reporte se descargará automáticamente en el formato seleccionado.
-          </p>
-        </form>
+        </div>
       </div>
     </div>
   );
