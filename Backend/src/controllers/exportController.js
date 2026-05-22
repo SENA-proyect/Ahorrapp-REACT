@@ -1,10 +1,41 @@
-const db = require('../db/connection');
+﻿const db = require('../db/connection');
 const PDFDocument = require('pdfkit');
 
-// 📌 Helper: Escapa valores para CSV
+
+
+// ============================================================
+// HELPERS: Registro en Historial con Transacción
+// ============================================================
+
+/**
+ * Registra una acción en la tabla HISTORIAL usando una conexión existente (transacción).
+ * @param {Connection} connection - Conexión activa con transacción iniciada
+ * @param {number} userId - ID del usuario que realiza la acción
+ * @param {string} accion - Descripción breve de la acción (ej: 'EXPORTAR_REPORTE')
+ * @param {string} detalles - Detalles adicionales (ej: 'Tipo: PDF, Formato: movimientos')
+ * @returns {Promise<number>} ID del registro insertado
+ */
+const registrarEnHistorial = async (connection, userId, accion, detalles) => {
+  const sqlHistorial = `
+    INSERT INTO HISTORIAL (ID_usuario, accion, detalles, fecha)
+    VALUES (?, ?, ?, NOW())
+  `;
+  const [result] = await connection.execute(sqlHistorial, [
+    userId,
+    accion,
+    detalles
+  ]);
+  return result.insertId;
+};
+
+// ============================================================
+// HELPERS: Generación de Archivos (existentes)
+// ============================================================
+
+// Helper: Escapa valores para CSV
 const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
 
-// 📌 Helper: Genera CSV en memoria
+// Helper: Genera CSV en memoria
 const generateCSV = (data) => {
   if (!data || !data.length) return '';
   const headers = Object.keys(data[0]);
@@ -12,7 +43,7 @@ const generateCSV = (data) => {
   return [headers.map(escapeCSV).join(','), ...rows].join('\r\n');
 };
 
-// 📌 Helper: Genera PDF con pdfkit
+// Helper: Genera PDF con pdfkit
 const generatePDF = (data, tipo) => {
   const doc = new PDFDocument({ margin: 40, size: 'A4' });
   doc.font('Helvetica');
@@ -25,13 +56,11 @@ const generatePDF = (data, tipo) => {
   if (!data || data.length === 0) {
     doc.fontSize(12).text('No se encontraron registros para exportar.', { align: 'center' });
   } else {
-    // Obtener headers y filtrar solo los campos importantes
     const headers = Object.keys(data[0]).filter(h => 
       !h.toLowerCase().includes('password') && 
       !h.toLowerCase().includes('token')
     );
     
-    // Configurar columnas con anchos dinámicos
     const pageWidth = doc.page.width;
     const marginLeft = 40;
     const marginRight = 40;
@@ -60,7 +89,6 @@ const generatePDF = (data, tipo) => {
     // Datos de la tabla
     doc.font('Helvetica').fontSize(9);
     data.forEach((row, rowIndex) => {
-      // Verificar si necesitamos nueva página
       if (y > doc.page.height - 100) {
         doc.addPage();
         y = 50;
@@ -70,7 +98,6 @@ const generatePDF = (data, tipo) => {
         const x = marginLeft + i * colWidth;
         let value = row[h];
         
-        // Formatear valores
         if (value instanceof Date) {
           value = value.toLocaleDateString('es-CO');
         } else if (typeof value === 'number' && (h.toLowerCase().includes('monto') || h.toLowerCase().includes('total'))) {
@@ -81,7 +108,6 @@ const generatePDF = (data, tipo) => {
           value = String(value);
         }
         
-        // Truncar texto muy largo
         if (value.length > 25) {
           value = value.substring(0, 25) + '...';
         }
@@ -99,7 +125,7 @@ const generatePDF = (data, tipo) => {
   return doc;
 };
 
-// 📌 Configuración de consultas según tipo de dato
+// Configuración de consultas según tipo de dato
 const getQueryConfig = (tipo) => {
   const configs = {
     ingresos: {
@@ -134,8 +160,11 @@ const getQueryConfig = (tipo) => {
   return configs[tipo];
 };
 
-// 📌 Endpoint principal
+// ENDPOINT PRINCIPAL: Exportar con Registro en Historial
+
 exports.exportarDatos = async (req, res) => {
+  let connection;
+  
   try {
     const { formato, tipo = 'movimientos', fechaInicio, fechaFin } = req.body;
     
@@ -184,39 +213,95 @@ exports.exportarDatos = async (req, res) => {
       sql += ` ORDER BY ${config.dateField} DESC`;
     }
 
-    console.log('SQL:', sql);
-    console.log('Params:', params);
+    // ==============================================
+    // INICIAR TRANSACCIÓN para registro atómico
+    // ==============================================
+    connection = await db.getConnection();
+    await connection.beginTransaction();
 
-    // Ejecutar consulta
-    const [rows] = await db.query(sql, params);
+    try {
+      // Ejecutar consulta principal
+      const [rows] = await connection.execute(sql, params);
 
-    // Nombre del archivo
-    const filename = `reporte_financiero_${new Date().toISOString().slice(0, 10)}`;
+      // Nombre del archivo
+      const filename = `reporte_financiero_${new Date().toISOString().slice(0, 10)}`;
 
-    // Respuesta según formato
-    if (formato === 'json') {
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename=${filename}.json`);
-      return res.json(rows);
+      // Construir detalles para el historial
+      const detallesHistorial = JSON.stringify({
+        tipo_reporte: tipo,
+        formato: formato,
+        cantidad_registros: rows.length,
+        filtros: { fechaInicio, fechaFin },
+        ruta_archivo: `/exports/${filename}.${formato}`,
+        IP: req.ip || req.connection.remoteAddress
+      });
+
+      // REGISTRAR EN HISTORIAL (dentro de la transacción)
+      await registrarEnHistorial(
+        connection,
+        userId,
+        'EXPORTAR_REPORTE',
+        detallesHistorial
+      );
+
+      // CONFIRMAR TRANSACCIÓN antes de enviar respuesta
+      await connection.commit();
+
+      // Respuesta según formato
+      if (formato === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}.json`);
+        return res.json(rows);
+      }
+
+      if (formato === 'csv') {
+        const csvContent = generateCSV(rows);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}.csv`);
+        return res.send(csvContent);
+      }
+
+      if (formato === 'pdf') {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}.pdf`);
+        const doc = generatePDF(rows, tipo);
+        doc.pipe(res);
+        doc.end();
+        return;
+      }
+
+    } catch (queryError) {
+      //ROLLBACK en caso de error en la consulta o historial
+      await connection.rollback();
+      throw queryError;
     }
 
-    if (formato === 'csv') {
-      const csvContent = generateCSV(rows);
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=${filename}.csv`);
-      return res.send(csvContent);
-    }
-
-    if (formato === 'pdf') {
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=${filename}.pdf`);
-      const doc = generatePDF(rows, tipo);
-      doc.pipe(res);
-      doc.end();
-      return;
-    }
   } catch (err) {
     console.error('❌ Error en exportación:', err);
+    
+    // Registrar error en historial si la conexión está disponible
+    if (connection) {
+      try {
+        await connection.rollback(); // Asegurar que no hay transacción huérfana
+        const errorHistorial = JSON.stringify({
+          tipo_reporte: req.body?.tipo || 'desconocido',
+          formato: req.body?.formato || 'desconocido',
+          error: err.message
+        });
+        await registrarEnHistorial(connection, req.usuario?.id, 'ERROR_EXPORTAR', errorHistorial);
+        await connection.commit();
+      } catch (logError) {
+        console.error('Error al registrar fallo en historial:', logError);
+      }
+    }
+    
     res.status(500).json({ error: 'Error interno al generar el reporte.' });
+  } finally {
+    // Liberar conexión siempre
+    if (connection) {
+      connection.release();
+    }
   }
 };
+
+module.exports = exports;
