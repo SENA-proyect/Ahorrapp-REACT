@@ -4,6 +4,10 @@ const { verifyToken } = require("../middlewares/authMiddleware");
 const {
   getCategorias,
   getGastosPorCategoria,
+  getIngresosPorCategoria,
+  getAhorrosPorCategoria,
+  getImprevistosPorCategoria,
+  getDeudasPorCategoria,
   crearCategoria,
   actualizarCategoria,
   deshabilitarCategoria,

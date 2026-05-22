@@ -86,7 +86,235 @@ const getGastosPorCategoria = async (req, res) => {
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
+const getIngresosPorCategoria = async (req, res) => {
+  const id_usuario = req.usuario.id;
 
+  try {
+    const [categorias] = await pool.query(
+      `SELECT
+        ID_categoria AS id,
+        ID_usuario AS id_usuario,
+        Nombre AS nombre,
+        Descripcion AS descripcion,
+        Color AS color,
+        Icono AS icono,
+        Activa AS activa,
+        Sistema AS sistema,
+        ES_global AS es_global
+       FROM CATEGORIAS
+       WHERE ES_global = TRUE OR ID_usuario = ?
+       ORDER BY ES_global DESC, Nombre ASC`,
+      [id_usuario]
+    );
+
+    const [ingresos] = await pool.query(
+      `SELECT
+        i.ID_ingresos AS id,
+        i.ID_categoria AS id_categoria,
+        i.Monto AS monto,
+        i.Descripcion AS descripcion,
+        i.Fecha_registro AS fecha
+       FROM INGRESOS i
+       INNER JOIN ENTRADA e ON i.ID_entrada = e.ID_entrada
+       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?
+       ORDER BY i.Fecha_registro DESC, i.ID_ingresos DESC`,
+      [id_usuario]
+    );
+
+    const categoriasConIngresos = categorias.map((categoria) => {
+      const ingresosCategoria = ingresos.filter(
+        (ingreso) => Number(ingreso.id_categoria) === Number(categoria.id)
+      );
+
+      return {
+        ...categoria,
+        cantidad_ingresos: ingresosCategoria.length,
+        total_ingresos: ingresosCategoria.reduce(
+          (total, ingreso) => total + Number(ingreso.monto || 0),
+          0
+        ),
+        ingresos: ingresosCategoria,
+      };
+    });
+
+    return res.status(200).json({ ok: true, categorias: categoriasConIngresos });
+  } catch (error) {
+    console.error("Error en getIngresosPorCategoria:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+const getImprevistosPorCategoria = async (req, res) => {
+  const id_usuario = req.usuario.id;
+
+  try {
+    const [categorias] = await pool.query(
+      `SELECT
+        ID_categoria AS id,
+        ID_usuario AS id_usuario,
+        Nombre AS nombre,
+        Descripcion AS descripcion,
+        Color AS color,
+        Icono AS icono,
+        Activa AS activa,
+        Sistema AS sistema,
+        ES_global AS es_global
+       FROM CATEGORIAS
+       WHERE ES_global = TRUE OR ID_usuario = ?
+       ORDER BY ES_global DESC, Nombre ASC`,
+      [id_usuario]
+    );
+
+    const [imprevistos] = await pool.query(
+      `SELECT
+        imp.ID_imprevistos AS id,
+        imp.ID_categoria AS id_categoria,
+        imp.Monto AS monto,
+        imp.Descripcion AS descripcion,
+        imp.Fecha_registro AS fecha
+       FROM IMPREVISTOS imp
+       INNER JOIN MOVIMIENTOS m ON imp.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?
+       ORDER BY imp.Fecha_registro DESC, imp.ID_imprevistos DESC`,
+      [id_usuario]
+    );
+
+    const categoriasConImprevistos = categorias.map((categoria) => {
+      const imprevistosCategoria = imprevistos.filter(
+        (imprevisto) => Number(imprevisto.id_categoria) === Number(categoria.id)
+      );
+
+      return {
+        ...categoria,
+        cantidad_imprevistos: imprevistosCategoria.length,
+        total_imprevistos: imprevistosCategoria.reduce(
+          (total, imprevisto) => total + Number(imprevisto.monto || 0),
+          0
+        ),
+        imprevistos: imprevistosCategoria,
+      };
+    });
+
+    return res.status(200).json({ ok: true, categorias: categoriasConImprevistos });
+  } catch (error) {
+    console.error("Error en getImprevistosPorCategoria:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+const getDeudasPorCategoria = async (req, res) => {
+  const id_usuario = req.usuario.id;
+
+  try {
+    const [categorias] = await pool.query(
+      `SELECT
+        ID_categoria AS id,
+        ID_usuario AS id_usuario,
+        Nombre AS nombre,
+        Descripcion AS descripcion,
+        Color AS color,
+        Icono AS icono,
+        Activa AS activa,
+        Sistema AS sistema,
+        ES_global AS es_global
+       FROM CATEGORIAS
+       WHERE ES_global = TRUE OR ID_usuario = ?
+       ORDER BY ES_global DESC, Nombre ASC`,
+      [id_usuario]
+    );
+
+    const [deudas] = await pool.query(
+      `SELECT
+        d.ID_deudas AS id,
+        d.ID_categoria AS id_categoria,
+        d.Monto AS monto,
+        d.Descripcion AS descripcion,
+        d.Fecha_registro AS fecha
+       FROM DEUDAS d
+       INNER JOIN MOVIMIENTOS m ON d.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?
+       ORDER BY d.Fecha_registro DESC, d.ID_deudas DESC`,
+      [id_usuario]
+    );
+
+    const categoriasConDeudas = categorias.map((categoria) => {
+      const deudasCategoria = deudas.filter(
+        (deuda) => Number(deuda.id_categoria) === Number(categoria.id)
+      );
+
+      return {
+        ...categoria,
+        cantidad_deudas: deudasCategoria.length,
+        total_deudas: deudasCategoria.reduce(
+          (total, deuda) => total + Number(deuda.monto || 0),
+          0
+        ),
+        deudas: deudasCategoria,
+      };
+    });
+
+    return res.status(200).json({ ok: true, categorias: categoriasConDeudas });
+  } catch (error) {
+    console.error("Error en getDeudasPorCategoria:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+const getAhorrosPorCategoria = async (req, res) => {
+  const id_usuario = req.usuario.id;
+
+  try {
+    const [categorias] = await pool.query(
+      `SELECT
+        ID_categoria AS id,
+        ID_usuario AS id_usuario,
+        Nombre AS nombre,
+        Descripcion AS descripcion,
+        Color AS color,
+        Icono AS icono,
+        Activa AS activa,
+        Sistema AS sistema,
+        ES_global AS es_global
+       FROM CATEGORIAS
+       WHERE ES_global = TRUE OR ID_usuario = ?
+       ORDER BY ES_global DESC, Nombre ASC`,
+      [id_usuario]
+    );
+
+    const [ahorros] = await pool.query(
+      `SELECT
+        a.ID_ahorros AS id,
+        a.ID_categoria AS id_categoria,
+        a.Monto AS monto,
+        a.Descripcion AS descripcion,
+        a.Fecha_registro AS fecha
+       FROM AHORROS a
+       INNER JOIN MOVIMIENTOS m ON a.ID_movimiento = m.ID_movimiento
+       WHERE m.ID_usuario = ?
+       ORDER BY a.Fecha_registro DESC, a.ID_ahorros DESC`,
+      [id_usuario]
+    );
+
+    const categoriasConAhorros = categorias.map((categoria) => {
+      const ahorrosCategoria = ahorros.filter(
+        (ahorro) => Number(ahorro.id_categoria) === Number(categoria.id)
+      );
+
+      return {
+        ...categoria,
+        cantidad_ahorros: ahorrosCategoria.length,
+        total_ahorros: ahorrosCategoria.reduce(
+          (total, ahorro) => total + Number(ahorro.monto || 0),
+          0
+        ),
+        ahorros: ahorrosCategoria,
+      };
+    });
+
+    return res.status(200).json({ ok: true, categorias: categoriasConAhorros });
+  } catch (error) {
+    console.error("Error en getAhorrosPorCategoria:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
 const crearCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
   const { nombre, descripcion } = req.body;
@@ -196,6 +424,10 @@ const habilitarCategoria = async (req, res) => {
 module.exports = {
   getCategorias,
   getGastosPorCategoria,
+  getIngresosPorCategoria,
+  getAhorrosPorCategoria,
+  getImprevistosPorCategoria,
+  getDeudasPorCategoria,
   crearCategoria,
   actualizarCategoria,
   deshabilitarCategoria,
