@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom'
 
 export default function PanelAdmin() {
   return (
-    <div className='min-h-screen bg-gradient-to-b from-black to-blue-900 flex flex-col'>
+    <div className='min-h-screen bg-gradient-to-br from-black via-green-950 to-blue-900 flex flex-col'>
 
       <header className='p-5'>
-        <h2 className='text-white font-bold text-3xl bg-black w-1/2 rounded-xl p-3 text-center mx-auto'>
+        <h2 className='text-white font-bold text-3xl w-1/2 rounded-xl p-3 text-center'>
           Panel de administrador.
         </h2>
       </header>
@@ -69,33 +69,35 @@ export default function PanelAdmin() {
             </li>
 
           </ul>
-          <div className='border-1 border-red-500 h-20 mt-96 mx-0 flex-col justify-center items-center rounded-lg'>
+          <div className='border-1 border-gray-700 p-5 mt-96 mx-0 flex-col justify-center items-center rounded-lg'>
 
-            <h1 className='text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 hover:bg-blue-900/40 hover:scale-[1.02] active:scale-[0.98]'>
-              Bienvenido, {}. 
+            <h1 className='text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 
+            hover:bg-blue-900/40 hover:scale-[1.02] active:scale-[0.98]'>
+              Bienvenido, Administrador. 
             </h1>
-            <button className='w-full p-3 border border-red-400 hover:border-red-600 rounded-lg text-red-400 hover:text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 hover:bg-red-900/40 hover:scale-[1.02] active:scale-[0.98]'>
+            <button className='w-full p-2 mt-1
+            border-red-600 rounded-lg text-red-400 text-white font-semibold cursor-pointer 
+            transition-all duration-300 flex items-center gap-3 bg-red-700 hover:bg-red-800/40 hover:scale-[1.02] active:scale-[0.98]'>
               Cerrar sesion
             </button>
           </div>
         </div>
 
         <section className='flex flex-wrap justify-around flex-1 p-10 gap-3 ml-56'>
-          <section className='bg-transparent border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
-            
-             <h1 className='text-white font-bold text-xl text-center'> Contenido 1</h1>
-            <p className='text-white text-center mt-5'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis, officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem. Recusandae voluptatem nisi amet saepe, in quaerat officiis.</p>
-            
+          <section className='bg-gradient-to-br from-green-950 to-blue-900 border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>      
+            <h1 className='text-white font-bold text-xl text-center'>Usuarios</h1>
+            <p className='text-white text-center mt-5'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis, 
+              officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem. Recusandae voluptatem nisi amet saepe, in quaerat officiis.</p> 
           </section>
-          <section className='bg-transparent border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
-            <h1 className='text-white font-bold text-xl text-center'> Contenido 2</h1>
-            <p className='text-white text-center mt-5'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis, officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem. Recusandae voluptatem nisi amet saepe, in quaerat officiis.</p>
-            
+          <section className='bg-gradient-to-br from-green-950 to-blue-900 border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
+            <h1 className='text-white font-bold text-xl text-center'>Movimientos</h1>
+            <p className='text-white text-center mt-5'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis, 
+              officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem. Recusandae voluptatem nisi amet saepe, in quaerat officiis.</p> 
           </section>
-          <section className='bg-transparent border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
-            <h1 className='text-white font-bold text-xl text-center'> Contenido 3</h1>
-            <p className='text-white text-center mt-5'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis, officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem. Recusandae voluptatem nisi amet saepe, in quaerat officiis.</p>
-
+          <section className='bg-gradient-to-br from-green-950 to-blue-900 border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
+            <h1 className='text-white font-bold text-xl text-center'>Dependientes</h1>
+            <p className='text-white text-center mt-5'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis, 
+              officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem. Recusandae voluptatem nisi amet saepe, in quaerat officiis.</p>
           </section>
         </section>
 
