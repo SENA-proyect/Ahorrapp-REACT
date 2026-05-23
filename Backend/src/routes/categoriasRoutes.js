@@ -16,6 +16,10 @@ const {
 
 router.get("/", verifyToken, getCategorias);
 router.get("/gastos", verifyToken, getGastosPorCategoria);
+router.get("/ingresos",    verifyToken, getIngresosPorCategoria);
+router.get("/ahorros",     verifyToken, getAhorrosPorCategoria);
+router.get("/imprevistos", verifyToken, getImprevistosPorCategoria);
+router.get("/deudas",      verifyToken, getDeudasPorCategoria);
 router.post("/", verifyToken, crearCategoria);
 router.put("/:id", verifyToken, actualizarCategoria);
 router.patch("/:id/deshabilitar", verifyToken, deshabilitarCategoria);

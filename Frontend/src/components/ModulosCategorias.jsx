@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   getGastosPorCategoria,
+  getIngresosPorCategoria,
+  getAhorrosPorCategoria,
+  getImprevistosPorCategoria,
+  getDeudasPorCategoria,
   crearCategoria,
   editarCategoria,
   deshabilitarCategoria,
@@ -36,11 +40,34 @@ export default function ModuloCategorias() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    getGastosPorCategoria()
-      .then(data => {
-        if (Array.isArray(data)) setCategorias(data)
+    Promise.all([
+      getGastosPorCategoria(),
+      getIngresosPorCategoria(),
+      getAhorrosPorCategoria(),
+      getImprevistosPorCategoria(),
+      getDeudasPorCategoria(),
+    ]).then(([gastos, ingresos, ahorros, imprevistos, deudas]) => {
+      if (!Array.isArray(gastos)) return
+
+      const combinadas = gastos.map(cat => {
+        const ing = ingresos.find(c => c.id === cat.id)
+        const aho = ahorros.find(c => c.id === cat.id)
+        const imp = imprevistos.find(c => c.id === cat.id)
+        const deu = deudas.find(c => c.id === cat.id)
+
+        return {
+          ...cat,
+          total_movimientos:
+            Number(cat.total_gastos || 0) +
+            Number(ing?.total_ingresos || 0) +
+            Number(aho?.total_ahorros || 0) +
+            Number(imp?.total_imprevistos || 0) +
+            Number(deu?.total_deudas || 0),
+        }
       })
-      .catch(() => {})
+
+      setCategorias(combinadas)
+    }).catch(() => {})
   }, [])
 
   const activas = categorias.filter(c => c.activa == 1 || c.activa === true)
@@ -68,9 +95,7 @@ export default function ModuloCategorias() {
           activa: true,
           sistema: false,
           es_global: false,
-          cantidad_gastos: 0,
-          total_gastos: 0,
-          gastos: [],
+          total_movimientos: 0,
         },
       ])
       setFormNombre('')
@@ -206,15 +231,11 @@ export default function ModuloCategorias() {
               <ul className="mt-3 grid grid-cols-1 gap-2 rounded-2xl border border-white/10 bg-slate-950/85 p-3 backdrop-blur-lg">
                 {navItems.map(item => {
                   const isActive = location.pathname === item.href
-
                   return (
                     <li key={item.href}>
                       <button
                         type="button"
-                        onClick={() => {
-                          navigate(item.href)
-                          setMenuOpen(false)
-                        }}
+                        onClick={() => { navigate(item.href); setMenuOpen(false) }}
                         className={navButtonClass(isActive)}
                       >
                         <span>{item.emoji}</span>
@@ -230,7 +251,6 @@ export default function ModuloCategorias() {
           <ul className="hidden flex-wrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base">
             {navItems.map(item => {
               const isActive = location.pathname === item.href
-
               return (
                 <li key={item.href}>
                   <button
@@ -265,7 +285,6 @@ export default function ModuloCategorias() {
             </p>
             <p className="text-3xl font-black text-white">{activas.length}</p>
           </div>
-
           <button
             onClick={() => setModalAgregar(true)}
             className="w-full rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px sm:w-auto"
@@ -276,41 +295,27 @@ export default function ModuloCategorias() {
 
         <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl backdrop-blur-lg">
           <div className="border-b border-white/10 px-5 py-4 sm:px-7 sm:py-5">
-            <h3 className="text-base font-extrabold text-amber-400">
-              📋 Módulo de Categorías
-            </h3>
+            <h3 className="text-base font-extrabold text-amber-400">📋 Módulo de Categorías</h3>
           </div>
 
           <div className="p-4 sm:p-5">
             {activas.length === 0 ? (
-              <p className="py-5 text-sm italic text-zinc-500">
-                No hay categorías activas.
-              </p>
+              <p className="py-5 text-sm italic text-zinc-500">No hay categorías activas.</p>
             ) : (
               <>
+                {/* CARDS MÓVIL */}
                 <div className="grid gap-3 md:hidden">
                   {activas.map(cat => (
                     <article key={cat.id} className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h4 className="break-words text-sm font-bold text-zinc-100">
-                            {cat.nombre}
-                          </h4>
-                          <p className="mt-1 break-words text-sm text-zinc-400">
-                            {cat.descripcion || 'Sin descripción'}
-                          </p>
-                          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                            <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
-                              <p className="text-zinc-500">Gastos</p>
-                              <p className="font-bold text-zinc-100">{cat.cantidad_gastos || 0}</p>
-                            </div>
-                            <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
-                              <p className="text-zinc-500">Total</p>
-                              <p className="font-bold text-amber-300">{formatMoney(cat.total_gastos)}</p>
-                            </div>
+                          <h4 className="break-words text-sm font-bold text-zinc-100">{cat.nombre}</h4>
+                          <p className="mt-1 break-words text-sm text-zinc-400">{cat.descripcion || 'Sin descripción'}</p>
+                          <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs">
+                            <p className="text-zinc-500">Total movimientos</p>
+                            <p className="font-bold text-amber-300">{formatMoney(cat.total_movimientos)}</p>
                           </div>
                         </div>
-
                         <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[0.68rem] font-bold ${
                           cat.es_global
                             ? 'border-emerald-400/40 bg-emerald-400/15 text-emerald-400'
@@ -319,7 +324,6 @@ export default function ModuloCategorias() {
                           {cat.es_global ? 'Sistema' : 'Personal'}
                         </span>
                       </div>
-
                       {!esSistema(cat) && (
                         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                           <button
@@ -340,11 +344,12 @@ export default function ModuloCategorias() {
                   ))}
                 </div>
 
+                {/* TABLA DESKTOP */}
                 <div className="hidden overflow-x-auto md:block">
-                  <table className="w-full min-w-[980px] border-collapse text-left">
+                  <table className="w-full min-w-[760px] border-collapse text-left">
                     <thead>
                       <tr className="border-b border-white/10">
-                        {['Nombre', 'Descripción', 'Tipo', 'Gastos', 'Total gastado', 'Acciones'].map(col => (
+                        {['Nombre', 'Descripción', 'Tipo', 'Total movimientos', 'Acciones'].map(col => (
                           <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
                             {col}
                           </th>
@@ -365,11 +370,8 @@ export default function ModuloCategorias() {
                               {cat.es_global ? 'Sistema' : 'Personalizada'}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm font-bold text-zinc-100">
-                            {cat.cantidad_gastos || 0}
-                          </td>
                           <td className="px-4 py-3 text-sm font-bold text-amber-300">
-                            {formatMoney(cat.total_gastos)}
+                            {formatMoney(cat.total_movimientos)}
                           </td>
                           <td className="px-4 py-3">
                             {!esSistema(cat) && (
@@ -452,7 +454,6 @@ export default function ModuloCategorias() {
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
           <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
             <h4 className="text-lg font-extrabold text-amber-400">🧩 Nueva Categoría</h4>
-
             <label className={labelClass}>Nombre *</label>
             <input
               className={inputClass}
@@ -461,7 +462,6 @@ export default function ModuloCategorias() {
               value={formNombre}
               onChange={e => setFormNombre(e.target.value)}
             />
-
             <label className={labelClass}>Descripción</label>
             <input
               className={inputClass}
@@ -470,18 +470,11 @@ export default function ModuloCategorias() {
               value={formDesc}
               onChange={e => setFormDesc(e.target.value)}
             />
-
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                onClick={closeModal}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
-              >
+              <button onClick={closeModal} className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10">
                 Cancelar
               </button>
-              <button
-                onClick={handleAgregar}
-                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
-              >
+              <button onClick={handleAgregar} className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900">
                 Guardar
               </button>
             </div>
@@ -493,7 +486,6 @@ export default function ModuloCategorias() {
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
           <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
             <h4 className="text-lg font-extrabold text-amber-400">✏️ Editar Categoría</h4>
-
             <label className={labelClass}>Nombre *</label>
             <input
               className={inputClass}
@@ -501,7 +493,6 @@ export default function ModuloCategorias() {
               value={categoriaEdit.nombre}
               onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))}
             />
-
             <label className={labelClass}>Descripción</label>
             <input
               className={inputClass}
@@ -509,18 +500,11 @@ export default function ModuloCategorias() {
               value={categoriaEdit.descripcion || ''}
               onChange={e => setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))}
             />
-
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                onClick={closeModal}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
-              >
+              <button onClick={closeModal} className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10">
                 Cancelar
               </button>
-              <button
-                onClick={handleGuardarEdicion}
-                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
-              >
+              <button onClick={handleGuardarEdicion} className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900">
                 Guardar cambios
               </button>
             </div>
