@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import HeaderModulos from './HeaderModulos'
+
 import {
   getCategorias,
   crearCategoria,
@@ -8,24 +9,10 @@ import {
   habilitarCategoria,
 } from '../api'
 
-const navItems = [
-  { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
-  { href: '/ModulosIngresos', emoji: '💰', label: 'Ingresos' },
-  { href: '/ModulosGastos', emoji: '💸', label: 'Gastos' },
-  { href: '/ModuloAhorros', emoji: '🎯', label: 'Ahorrar' },
-  { href: '/ModuloImprevistos', emoji: '🛡️', label: 'Imprevistos' },
-  { href: '/ModuloDeudas', emoji: '💳', label: 'Deudas' },
-  { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
-  { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
-  { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
-  { href: '/Noticias', emoji: '📰', label: 'Noticias' },
-]
 
 const usuario = JSON.parse(localStorage.getItem('usuario'))
 
 export default function ModuloCategorias() {
-  const navigate = useNavigate()
-  const location = useLocation()
 
   const [categorias, setCategorias] = useState([])
   const [modalAgregar, setModalAgregar] = useState(false)
@@ -33,7 +20,6 @@ export default function ModuloCategorias() {
   const [categoriaEdit, setCategoriaEdit] = useState(null)
   const [formNombre, setFormNombre] = useState('')
   const [formDesc, setFormDesc] = useState('')
-  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     getCategorias()
@@ -148,95 +134,8 @@ export default function ModuloCategorias() {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden text-white [background:radial-gradient(ellipse_at_30%_20%,#1e3a5f_10%,#0f172a_60%,#1a0f2e_100%)]">
-      <header className="relative z-10 flex w-full flex-col items-center pt-4 sm:pt-5">
-        <section className="mb-4 flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-3 px-4 sm:px-6 md:mb-6 md:px-10">
-          <div className="order-1 w-full text-center sm:order-2 sm:w-auto">
-            <h1 className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl md:text-4xl">
-              Ahorrapp
-            </h1>
-            <span className="text-[0.6rem] font-semibold uppercase tracking-widest text-zinc-500 sm:text-[0.65rem]">
-              Categorías
-            </span>
-          </div>
-
-          <button
-            onClick={() => navigate('/')}
-            className="order-2 flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-3 py-2 text-xs font-bold text-white transition-all duration-300 hover:-translate-y-px hover:bg-green-600 hover:shadow-[0_4px_10px_rgba(31,187,31,0.4)] sm:order-1 sm:text-sm md:rounded-2xl"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-5.25H9V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" />
-            </svg>
-            Inicio
-          </button>
-
-          <button
-            onClick={() => navigate('/login')}
-            className="order-3 flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-3 py-2 text-xs font-bold text-white transition-all duration-300 hover:-translate-y-px hover:bg-red-600 hover:shadow-[0_4px_10px_rgba(228,33,33,0.4)] sm:text-sm md:rounded-2xl"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span className="hidden sm:inline">Cerrar Sesión</span>
-            <span className="sm:hidden">Salir</span>
-          </button>
-        </section>
-
-        <nav className="w-full px-4 sm:px-6 md:px-10">
-          <div className="md:hidden">
-            <button
-              type="button"
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/10 px-4 py-3 font-bold text-white shadow-[0_2px_8px_rgba(255,255,255,0.1)]"
-            >
-              <span>Menú</span>
-              <span>{menuOpen ? '▲' : '▼'}</span>
-            </button>
-
-            {menuOpen && (
-              <ul className="mt-3 grid grid-cols-1 gap-2 rounded-2xl border border-white/10 bg-slate-950/85 p-3 backdrop-blur-lg">
-                {navItems.map(item => {
-                  const isActive = location.pathname === item.href
-
-                  return (
-                    <li key={item.href}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigate(item.href)
-                          setMenuOpen(false)
-                        }}
-                        className={navButtonClass(isActive)}
-                      >
-                        <span>{item.emoji}</span>
-                        <span>{item.label}</span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
-
-          <ul className="hidden flex-wrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base">
-            {navItems.map(item => {
-              const isActive = location.pathname === item.href
-
-              return (
-                <li key={item.href}>
-                  <button
-                    type="button"
-                    onClick={() => navigate(item.href)}
-                    className={navButtonClass(isActive)}
-                  >
-                    <span>{item.emoji}</span>
-                    <span>{item.label}</span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
-      </header>
+      {/* HEADER */}
+      <HeaderModulos section="Categorías" />
 
       <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 

@@ -14,7 +14,7 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
     descripcion:    '',
     fecha_registro: '',
     id_categoria:   '',
-    id_dependiente: '',
+    id_dependientes: '',
   })
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
             descripcion:    form.descripcion    || null,
             fecha_registro: form.fecha_registro || null,
             id_categoria:   form.id_categoria   || null,
-            id_dependiente: form.id_dependiente || null,
+            id_dependientes: form.id_dependientes || null,
           },
         }),
       })
@@ -120,8 +120,8 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
         <label className="block text-sm font-semibold text-slate-700">Dependiente</label>
         <select
           className={inputCls}
-          name="id_dependiente"
-          value={form.id_dependiente}
+          name="id_dependientes"
+          value={form.id_dependientes}
           onChange={handleChange}
         >
           <option value="">Ninguno (Gasto propio)</option>
