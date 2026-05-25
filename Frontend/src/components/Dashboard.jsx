@@ -153,14 +153,19 @@ export default function Dashboard() {
           ))}
         </section>
 
-        {/* Bolsa Widget */}
+        {/* Sección inferior asimétrica */}
         <section className="mt-7 w-full">
-          <BolsaWidget />
-        </section>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
+            {/* Columna principal: Bolsa */}
+            <div className="min-h-[400px]">
+              <BolsaWidget />
+            </div>
 
-        {/* Últimas Noticias */}
-        <section className="mt-7">
-          <NewsDashboard />
+            {/* Columna secundaria: Noticias */}
+            <div className="min-h-[400px]">
+              <NewsDashboard />
+            </div>
+          </div>
         </section>
 
       </main>
