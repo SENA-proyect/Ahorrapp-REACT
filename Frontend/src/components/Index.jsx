@@ -9,131 +9,268 @@ export default function Index() {
   }
 
   const features = [
-    ['Gestión de ingresos', 'Registra y monitorea todos tus ingresos de manera organizada'],
-    ['Gestión de gastos', 'Controla tus gastos y evita exceder tu presupuesto'],
-    ['Metas de Ahorro', 'Establece objetivos financieros y sigue tu progreso'],
-    ['Fondo de Imprevistos', 'Prepárate para gastos inesperados con un fondo de emergencia'],
-    ['Control de Deudas', 'Administra tus deudas y programa pagos estratégicos'],
-    ['Personas a Cargo', 'Organiza información y gastos de tus dependientes'],
-    ['Reportes Detallados', 'Genera análisis completos con recomendaciones'],
-    ['Registro de Actividad', 'Historial completo de todas tus transacciones'],
-    ['Alertas y Recordatorios', 'Notificaciones automáticas y recordatorios personalizados'],
-    ['Dashboard Inteligente', 'Visualiza tus finanzas con gráficos y métricas en tiempo real'],
+    ['Gestión de ingresos',   'Registra y monitorea todos tus ingresos de manera organizada',   '💰'],
+    ['Gestión de gastos',     'Controla tus gastos y evita exceder tu presupuesto',              '📊'],
+    ['Metas de Ahorro',       'Establece objetivos financieros y sigue tu progreso',             '🎯'],
+    ['Fondo de Imprevistos',  'Prepárate para gastos inesperados',                               '🛡️'],
+    ['Control de Deudas',     'Administra tus deudas y programa pagos estratégicos',             '💳'],
+    ['Personas a Cargo',      'Organiza información y gastos de tus dependientes',               '👨‍👩‍👧'],
+    ['Reportes Detallados',   'Genera análisis completos con recomendaciones',                   '📈'],
+    ['Dashboard Inteligente', 'Visualiza tus finanzas con gráficos en tiempo real',              '📱'],
   ]
 
   return (
-    <div className="relative min-h-screen w-full font-['Plus_Jakarta_Sans','Segoe_UI',sans-serif]">
-      <header className="sticky top-0 z-[100] flex h-[70px] w-full items-center justify-between border-b border-[#4ADE80]/15 bg-[#F8FFFE]/85 px-5 backdrop-blur-md md:px-10">
-        <div>
-          <h2 className="text-2xl font-extrabold tracking-[-0.02em] text-[#15803D]">
-            Ahorrapp
-          </h2>
-        </div>
+    <div
+      className="relative min-h-screen w-full overflow-x-hidden text-white"
+      style={{
+        background:
+          'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+      }}
+    >
+      {/* Background glows — igual al Dashboard */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl"
+             style={{ background: 'rgba(34,197,94,0.07)' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl"
+             style={{ background: 'rgba(251,191,36,0.07)' }} />
+      </div>
 
-        <div className="flex items-center">
-          <Link to="/Login">
-            <button
-              className="cursor-pointer rounded-lg border-[1.5px] border-[#86EFAC] bg-transparent px-[22px] py-2.5 text-sm font-semibold tracking-[0.01em] text-[#15803D] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#4ADE80] hover:bg-[#4ADE80] hover:text-white hover:shadow-[0_4px_15px_rgba(74,222,128,0.3)]"
-              onClick={() => navigate('/Login')}
-            >
-              Iniciar sesión.
-            </button>
-          </Link>
-        </div>
-      </header>
+      {/* ───────────────── HEADER ───────────────── */}
+      <header className="relative z-10 w-full border-b border-white/5 backdrop-blur-sm sticky top-0">
+        <section className="w-full flex items-center justify-between px-6 py-5 md:px-12">
 
-      <main>
-        <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#4ADE80]/10 px-10 pb-[100px] pt-20 text-center before:pointer-events-none before:absolute before:left-1/2 before:top-[-100px] before:h-[600px] before:w-[600px] before:-translate-x-1/2 before:bg-[radial-gradient(circle,rgba(74,222,128,0.08)_0%,transparent_70%)]">
-          <h1 className="relative z-10 mb-[30px] mt-[-80px] text-green-900 text-[clamp(40px,7vw,90px)] font-extrabold leading-[1.1] tracking-[-2px]">
-            Controla tus Finanzas Personales.
-          </h1>
-
-          <p className="relative z-10 mx-auto max-w-full text-center text-[clamp(16px,2vw,20px)] font-normal leading-[1.8] text-[#6B7280]">
-            Una aplicación completa para gestionar tus ingresos, gastos, ahorros, deudas,
-            dependientes y más. Todo en un solo lugar, con un diseño minimalista y herramientas
-            avanzadas de análisis financiero.
-          </p>
-        </section>
-
-        <section className="w-full bg-gradient-to-b from-[#4ADE80]/10 to-[#DCFCE7] px-10 py-20">
-          <div className="mb-[50px] text-center">
-            <h2 className="text-[clamp(24px,3vw,36px)] font-extrabold tracking-[-0.03em] text-[#15803D]">
-              Características principales.
-            </h2>
+          {/* Logo — mismo estilo que el Dashboard */}
+          <div className="flex flex-col">
+            <h1 className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-3xl font-black tracking-tight text-transparent">
+              Ahorrapp
+            </h1>
+            <span className="text-[0.6rem] font-semibold uppercase tracking-[0.25em] text-zinc-500">
+              Tu aliado financiero
+            </span>
           </div>
 
-          <div className="mx-auto flex max-w-[1200px] flex-wrap justify-center gap-5">
-            {features.map(([title, description]) => (
-              <div
-                key={title}
-                className="flex min-h-[160px] w-[calc(50%-10px)] cursor-default flex-col gap-2.5 rounded-2xl border border-[#4ADE80]/25 bg-white px-4 py-6 shadow-[0_2px_12px_rgba(74,222,128,0.08)] transition-all duration-200 hover:-translate-y-1.5 hover:border-[#4ADE80] hover:shadow-[0_12px_30px_rgba(74,222,128,0.2)] md:w-[200px]"
-              >
-                <p className="text-[0.95rem] font-bold text-[#15803D]">{title}</p>
-                <p className="text-[0.8rem] leading-[1.5] text-[#6B7280]">{description}</p>
-              </div>
-            ))}
+          {/* Botones de sesión */}
+          <div className="flex items-center gap-3">
+            <Link to="/login">
+              <button className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-px hover:border-amber-400/30 hover:bg-white/10 hover:shadow-[0_4px_12px_rgba(251,191,36,0.15)]">
+                Iniciar sesión
+              </button>
+            </Link>
+            <Link to="/registro">
+              <button className="cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-2 text-sm font-bold text-slate-950 transition-all duration-300 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(251,191,36,0.3)]">
+                Registrarse
+              </button>
+            </Link>
+          </div>
+        </section>
+
+        {/* Línea decorativa amber — igual al Dashboard */}
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-70" />
+      </header>
+
+      <main className="relative">
+
+        {/* ───────────────── HERO ───────────────── */}
+        <section className="relative w-full overflow-hidden px-6 py-32 md:px-12 md:py-40">
+          <div className="mx-auto max-w-6xl text-center">
+
+            {/* Badge */}
+            <div
+              className="mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm"
+              style={{
+                borderColor: 'rgba(251,191,36,0.25)',
+                background: 'rgba(251,191,36,0.08)',
+                color: '#fbbf24',
+              }}
+            >
+              <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              Tu aliado financiero inteligente
+            </div>
+
+            <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tight md:text-7xl lg:text-8xl text-white">
+              Controla tus{' '}
+              <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-transparent">
+                Finanzas
+              </span>
+              <br />
+              Personales
+            </h1>
+
+            <p className="mx-auto mb-10 max-w-2xl text-lg text-zinc-400 md:text-xl leading-relaxed">
+              Una aplicación completa para gestionar tus ingresos, gastos, ahorros, deudas y más.
+              Todo en un solo lugar, con un diseño minimalista y herramientas avanzadas de análisis financiero.
+            </p>
+
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link to="/login">
+                <button className="group cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-orange-500 px-8 py-4 text-base font-bold text-slate-950 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/25">
+                  Comenzar gratis
+                  <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </Link>
+            </div>
+
+            {/* Stats — tarjetas estilo stat-cards del Dashboard */}
+            <div className="mt-20 grid grid-cols-3 gap-5">
+              {[
+                { value: '10K+',  label: 'Usuarios activos', emoji: '👥',
+                  gradient: 'radial-gradient(ellipse at left, rgba(34,197,94,0.35), rgba(16,185,129,0.04))',
+                  color: 'text-emerald-400' },
+                { value: '$50M+', label: 'Gestionados',      emoji: '💰',
+                  gradient: 'radial-gradient(ellipse at left, rgba(245,158,11,0.35), rgba(249,115,22,0.04))',
+                  color: 'text-amber-400' },
+                { value: '99%',   label: 'Satisfacción',     emoji: '⭐',
+                  gradient: 'radial-gradient(ellipse at left, rgba(168,85,247,0.35), rgba(147,51,234,0.04))',
+                  color: 'text-violet-400' },
+              ].map(({ value, label, emoji, gradient, color }) => (
+                <article
+                  key={label}
+                  className="rounded-3xl border border-white/10 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)]"
+                  style={{ background: gradient }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="text-left">
+                      <p className={`mb-2 text-xs font-bold uppercase tracking-[0.2em] ${color}`}>{label}</p>
+                      <p className="text-3xl font-black text-white">{value}</p>
+                    </div>
+                    <span className="text-4xl opacity-30">{emoji}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ───────────────── FEATURES ───────────────── */}
+        <section className="relative w-full border-t border-white/5 px-6 py-24 md:px-12 md:py-32"
+                 style={{ background: 'rgba(255,255,255,0.02)' }}>
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+                Características{' '}
+                <span className="bg-gradient-to-r from-amber-300 to-orange-500 bg-clip-text text-transparent">
+                  principales
+                </span>
+              </h2>
+              <p className="mx-auto max-w-2xl text-lg text-zinc-400">
+                Todo lo que necesitas para tomar el control de tu vida financiera
+              </p>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {features.map(([title, description, icon]) => (
+                <article
+                  key={title}
+                  className="group relative overflow-hidden rounded-3xl border border-white/10 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)]"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at left, rgba(245,158,11,0.12), rgba(15,23,42,0.6))',
+                  }}
+                >
+                  <span className="mb-4 block text-3xl opacity-80">{icon}</span>
+                  <h3 className="mb-2 text-base font-bold text-white">{title}</h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed">{description}</p>
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ───────────────── CTA ───────────────── */}
+        <section className="relative w-full overflow-hidden px-6 py-24 md:px-12 md:py-32">
+          <div className="absolute inset-0 pointer-events-none"
+               style={{ background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.12) 0%, transparent 70%)' }} />
+
+          <div className="relative mx-auto max-w-4xl text-center">
+            <h2 className="mb-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+              Comienza a gestionar tus finanzas{' '}
+              <span className="bg-gradient-to-r from-amber-300 to-orange-500 bg-clip-text text-transparent">
+                hoy mismo
+              </span>
+            </h2>
+            <p className="mb-10 text-lg text-zinc-400 md:text-xl">
+              Únete a miles de usuarios que ya están tomando el control de su dinero
+            </p>
+            <Link to="/registro">
+              <button className="cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-10 py-4 text-lg font-bold text-slate-950 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(251,191,36,0.35)]">
+                Crear cuenta gratis →
+              </button>
+            </Link>
           </div>
         </section>
       </main>
 
-      <footer className="relative overflow-hidden bg-gradient-to-b from-[#DCFCE7] to-[#22C55E] px-[6vw] pb-8 pt-20 text-[#0A0A0A] before:pointer-events-none before:absolute before:left-[30%] before:top-[-80px] before:h-[300px] before:w-[500px] before:bg-[radial-gradient(ellipse,rgba(255,255,255,0.2)_0%,transparent_70%)]">
-        <div className="relative z-10 grid gap-12 border-b border-white/30 pb-16 md:grid-cols-[1fr_1.2fr] md:gap-20">
-          <div>
-            <div className="mb-6 text-[2.5rem] font-extrabold leading-none tracking-[3px] text-[#0A0A0A]">
-              Ahorrapp<span className="text-[#15803D]">.</span>
+      {/* ───────────────── FOOTER ───────────────── */}
+      <footer className="relative border-t border-white/5 px-6 py-16 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1fr_1.5fr]">
+
+            {/* Marca */}
+            <div>
+              <h3 className="mb-1 bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-2xl font-black text-transparent">
+                Ahorrapp
+              </h3>
+              <span className="block mb-4 text-[0.6rem] font-semibold uppercase tracking-[0.25em] text-zinc-500">
+                Tu aliado financiero
+              </span>
+              <p className="text-zinc-400 leading-relaxed text-sm">
+                Toma el control de tus finanzas personales con herramientas poderosas y fáciles de usar.
+              </p>
             </div>
 
-            <p className="max-w-[280px] text-sm font-light leading-[1.8] text-[#0A0A0A]">
-              Tu aliado financiero inteligente.
-            </p>
+            {/* Formulario de contacto */}
+            <div>
+              <h4 className="mb-6 text-sm font-bold uppercase tracking-wider text-amber-400">
+                Contáctanos
+              </h4>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <input
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-zinc-600 focus:border-amber-400/40 focus:bg-white/8 focus:shadow-[0_4px_12px_rgba(251,191,36,0.1)]"
+                    type="text" name="nombre" placeholder="Nombre" required
+                  />
+                  <input
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-zinc-600 focus:border-amber-400/40 focus:bg-white/8 focus:shadow-[0_4px_12px_rgba(251,191,36,0.1)]"
+                    type="email" name="email" placeholder="Email" required
+                  />
+                </div>
+
+                <textarea
+                  name="mensaje"
+                  className="w-full resize-y rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-zinc-600 focus:border-amber-400/40 focus:bg-white/8 focus:shadow-[0_4px_12px_rgba(251,191,36,0.1)]"
+                  rows="3"
+                  placeholder="¿En qué podemos ayudarte?"
+                  required
+                />
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-zinc-600">Tus datos están seguros 🔒</span>
+                  <button
+                    type="submit"
+                    className="cursor-pointer rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-sm font-bold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(251,191,36,0.3)]"
+                  >
+                    Enviar mensaje →
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
 
-          <div>
-            <h3 className="mb-1.5 text-[1.1rem] font-extrabold uppercase tracking-[0.1em] text-[#15803D]">
-              Contáctanos Aquí!
-            </h3>
-
-            <p className="mb-6 text-[13px] font-normal text-[#0A0A0A]/70">
-              Respondemos en menos de 24 horas.
+          {/* Copyright — igual al Dashboard */}
+          <div className="mt-12 border-t border-white/5 pt-8 text-center text-[0.7rem] font-mono text-zinc-500">
+            <p>
+              &copy;{' '}
+              <strong className="text-amber-400">
+                {new Date().getFullYear()} Ahorrapp
+              </strong>{' '}
+              — Todos los derechos reservados.
             </p>
-
-            <form onSubmit={handleSubmit}>
-              <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
-                <input className={inputClass} type="text" name="nombre" placeholder="Nombre" required />
-                <input className={inputClass} type="text" name="empresa" placeholder="Empresa" />
-                <input className={inputClass} type="email" name="email" placeholder="Email" required />
-                <input className={inputClass} type="text" name="presupuesto" placeholder="Presupuesto aprox." />
-              </div>
-
-              <textarea
-                name="mensaje"
-                className={`${inputClass} mb-3 block w-full resize-y`}
-                rows="3"
-                placeholder="¿Qué quieres construir?"
-                required
-              />
-
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-[#0A0A0A]/60">Tus datos están seguros</span>
-
-                <button
-                  type="submit"
-                  className="cursor-pointer rounded-lg bg-[#15803D] px-7 py-[11px] text-[13px] font-bold uppercase tracking-[1px] text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0A0A0A] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)]"
-                >
-                  Enviar →
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-
-        <div className="relative z-10 pt-8 text-center text-[13px] text-[#0A0A0A]/60">
-          <span>&copy; {new Date().getFullYear()} Ahorrapp</span>
         </div>
       </footer>
     </div>
   )
 }
-
-const inputClass =
-  'rounded-lg border border-white/60 bg-white/50 px-3.5 py-[11px] font-[\'Plus_Jakarta_Sans\',sans-serif] text-[13px] text-[#0A0A0A] outline-none transition placeholder:text-black/45 focus:border-[#15803D] focus:bg-white/80 focus:shadow-[0_0_0_3px_rgba(74,222,128,0.15)]'

@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
 
 // ── Mini-componente reutilizable para cada campo del formulario ────────────
-function Field({ id, label, type, placeholder, name, value, onChange, icon, className }) {
+function Field({ id, label, type, placeholder, name, value, onChange, icon, className, autoComplete }) {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm text-zinc-400 font-medium">
@@ -17,6 +17,7 @@ function Field({ id, label, type, placeholder, name, value, onChange, icon, clas
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          autoComplete={autoComplete}
           className={`w-full bg-[#07152D] border border-zinc-700 text-zinc-100 rounded-xl px-4 py-2.5 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-amber-400 transition-colors ${icon ? "pr-10" : ""} ${className ?? ""}`}
         />
         {icon && (
@@ -31,14 +32,30 @@ function Field({ id, label, type, placeholder, name, value, onChange, icon, clas
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(location.pathname.toLowerCase() === '/registro');
+
+  useEffect(() => {
+    setIsRegister(location.pathname.toLowerCase() === '/registro');
+  }, [location.pathname]);
 
   const [loginForm, setLoginForm] = useState({
     Email: "",
     Password_hash: "",
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const emailInput = document.getElementById("login-email");
+      const passwordInput = document.getElementById("login-password");
+      if (emailInput) emailInput.value = "";
+      if (passwordInput) passwordInput.value = "";
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const [registerForm, setRegisterForm] = useState({
     Nombre: "",
@@ -47,8 +64,14 @@ export default function Login() {
     Password_hash: "",
   });
 
+  const loginFieldMap = {
+    loginEmail: "Email",
+    loginPassword: "Password_hash",
+  };
+
   const handleLoginChange = (e) => {
-    setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
+    const key = loginFieldMap[e.target.name] ?? e.target.name;
+    setLoginForm({ ...loginForm, [key]: e.target.value });
   };
 
   const handleLoginSubmit = async (e) => {
@@ -83,8 +106,16 @@ export default function Login() {
     }
   };
 
+  const registerFieldMap = {
+    registerNombre: "Nombre",
+    registerApellido: "Apellido",
+    registerEmail: "Email",
+    registerPassword: "Password_hash",
+  };
+
   const handleRegisterChange = (e) => {
-    setRegisterForm({ ...registerForm, [e.target.name]: e.target.value });
+    const key = registerFieldMap[e.target.name] ?? e.target.name;
+    setRegisterForm({ ...registerForm, [key]: e.target.value });
   };
 
   const handleRegisterSubmit = async (e) => {
@@ -224,12 +255,15 @@ export default function Login() {
                   <p className="text-sm text-zinc-500 mt-1">Ingresa tus datos para continuar</p>
                 </div>
 
-                <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5">
+                <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5" autoComplete="off">
+                  <input type="text" name="fakeusername" autoComplete="username" className="hidden" />
+                  <input type="password" name="fakepassword" autoComplete="new-password" className="hidden" />
                   <Field
                     id="login-email"
                     label="CORREO ELECTRÓNICO"
                     type="email"
-                    name="Email"
+                    name="loginEmail"
+                    autoComplete="off"
                     icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffbe33"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7" stroke="#ffbe33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> <rect x="3" y="5" width="18" height="14" rx="2" stroke="#ffbe33" strokeWidth="2" strokeLinecap="round"></rect> </g></svg>}
                     placeholder="juan@correo.com"
                     value={loginForm.Email}
@@ -240,7 +274,8 @@ export default function Login() {
                     id="login-password"
                     label="CONTRASEÑA"
                     type="password"
-                    name="Password_hash"
+                    name="loginPassword"
+                    autoComplete="new-password"
                     icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M7 10.0288C7.47142 10 8.05259 10 8.8 10H15.2C15.9474 10 16.5286 10 17 10.0288M7 10.0288C6.41168 10.0647 5.99429 10.1455 5.63803 10.327C5.07354 10.6146 4.6146 11.0735 4.32698 11.638C4 12.2798 4 13.1198 4 14.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V14.8C20 13.1198 20 12.2798 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C18.0057 10.1455 17.5883 10.0647 17 10.0288M7 10.0288V8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V10.0288" stroke="#ffbe33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>}
                     placeholder="••••••••"
                     value={loginForm.Password_hash}
@@ -304,14 +339,17 @@ export default function Login() {
                   <p className="text-sm text-zinc-500 mt-1">Únete y empieza ahora</p>
                 </div>
 
-                <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
+                <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4" autoComplete="off">
+                  <input type="text" name="fakeusername2" autoComplete="off" className="hidden" />
+                  <input type="password" name="fakepassword2" autoComplete="new-password" className="hidden" />
                   <div className="flex gap-4">
                     <div className="flex-1">
                       <Field
                         id="nombre"
                         label="Nombre"
                         type="text"
-                        name="Nombre"
+                        name="registerNombre"
+                        autoComplete="off"
                         icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fillRule="evenodd" clipRule="evenodd" d="M12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4ZM14 8C14 6.9 13.1 6 12 6C10.9 6 10 6.9 10 8C10 9.1 10.9 10 12 10C13.1 10 14 9.1 14 8ZM18 18C17.8 17.29 14.7 16 12 16C9.31 16 6.23 17.28 6 18H18ZM4 18C4 15.34 9.33 14 12 14C14.67 14 20 15.34 20 18V20H4V18Z" fill="#ffbe33"></path> </g></svg>}
                         placeholder="Juan"
                         value={registerForm.Nombre}
@@ -324,7 +362,8 @@ export default function Login() {
                         id="apellido"
                         label="Apellido"
                         type="text"
-                        name="Apellido"
+                        name="registerApellido"
+                        autoComplete="off"
                         icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fillRule="evenodd" clipRule="evenodd" d="M12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4ZM14 8C14 6.9 13.1 6 12 6C10.9 6 10 6.9 10 8C10 9.1 10.9 10 12 10C13.1 10 14 9.1 14 8ZM18 18C17.8 17.29 14.7 16 12 16C9.31 16 6.23 17.28 6 18H18ZM4 18C4 15.34 9.33 14 12 14C14.67 14 20 15.34 20 18V20H4V18Z" fill="#ffbe33"></path> </g></svg>}
                         placeholder="García"
                         value={registerForm.Apellido}
@@ -338,7 +377,8 @@ export default function Login() {
                     id="reg-email"
                     label="Correo electrónico"
                     type="email"
-                    name="Email"
+                    name="registerEmail"
+                    autoComplete="off"
                     icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffbe33"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 7.00005L10.2 11.65C11.2667 12.45 12.7333 12.45 13.8 11.65L20 7" stroke="#ffbe33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> <rect x="3" y="5" width="18" height="14" rx="2" stroke="#ffbe33" strokeWidth="2" strokeLinecap="round"></rect> </g></svg>}
                     placeholder="tu@correo.com"
                     value={registerForm.Email}
@@ -349,7 +389,8 @@ export default function Login() {
                     id="reg-password"
                     label="Contraseña"
                     type="password"
-                    name="Password_hash"
+                    name="registerPassword"
+                    autoComplete="new-password"
                     icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M7 10.0288C7.47142 10 8.05259 10 8.8 10H15.2C15.9474 10 16.5286 10 17 10.0288M7 10.0288C6.41168 10.0647 5.99429 10.1455 5.63803 10.327C5.07354 10.6146 4.6146 11.0735 4.32698 11.638C4 12.2798 4 13.1198 4 14.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V14.8C20 13.1198 20 12.2798 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C18.0057 10.1455 17.5883 10.0647 17 10.0288M7 10.0288V8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V10.0288" stroke="#ffbe33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>}
                     placeholder="Mínimo 6 caracteres"
                     value={registerForm.Password_hash}

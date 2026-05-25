@@ -73,32 +73,8 @@ export default function Dashboard() {
     >
       {/* ───────────────── HEADER ───────────────── */}
       <header className="relative z-10 w-full border-b border-white/5 backdrop-blur-sm">
-        <section className="w-full flex items-center justify-between px-4 py-5 sm:px-6 lg:px-10">
+        <section className="w-full flex items-center justify-center px-4 py-5 sm:px-6 lg:px-10">
           
-          {/* Inicio */}
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-px hover:border-green-500/50 hover:bg-green-600/80 hover:shadow-[0_4px_12px_rgba(34,197,94,0.35)]"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-5.25H9V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z"
-              />
-            </svg>
-
-            <span className="hidden sm:inline">Inicio</span>
-          </button>
-
-          {/* Logo */}
           <div className="flex flex-col items-center">
             <h1 className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-3xl font-black tracking-tight text-transparent md:text-4xl">
               Ahorrapp
@@ -108,29 +84,6 @@ export default function Dashboard() {
               Dashboard
             </span>
           </div>
-
-          {/* Logout */}
-          <button
-            onClick={() => navigate('/login')}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-px hover:border-red-500/40 hover:bg-red-600/80 hover:shadow-[0_4px_12px_rgba(239,68,68,0.35)]"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-
-            <span className="hidden sm:inline">Cerrar Sesión</span>
-          </button>
         </section>
 
         {/* NAV */}

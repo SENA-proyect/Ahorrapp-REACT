@@ -71,7 +71,7 @@ export default function OlvidarContra() {
         {/* Footer */}
         <p className="text-center text-xs text-white/30">
           ¿Recordaste tu contraseña?{" "}
-          <a href="/Login">
+          <a href="/login">
             <span className="text-violet-400 font-medium cursor-pointer hover:text-violet-300 transition-colors">
               Iniciar sesión
             </span>
