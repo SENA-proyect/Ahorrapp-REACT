@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { exportarDatos } from '../api';
+import { exportarDatos, getHistorialExportaciones, eliminarExportacion } from '../api';
 
 const Exportar = () => {
   const navigate = useNavigate();
@@ -10,6 +10,8 @@ const Exportar = () => {
   const [fechaFin, setFechaFin] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [historial, setHistorial] = useState([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
 
   const tipos = useMemo(
     () => [
@@ -17,9 +19,9 @@ const Exportar = () => {
       { value: 'ingresos', label: 'Ingresos' },
       { value: 'movimientos', label: 'Movimientos' },
       { value: 'dependientes', label: 'Dependientes' },
-      { value: 'ahorros', label: 'Ahorros' },
-      { value: 'deudas', label: 'Deudas' },
-      { value: 'imprevistos', label: 'Imprevistos' },
+      // { value: 'ahorros', label: 'Ahorros' },
+      // { value: 'deudas', label: 'Deudas' },
+      // { value: 'imprevistos', label: 'Imprevistos' },
     ],
     []
   );
@@ -43,7 +45,10 @@ const Exportar = () => {
 
     try {
       setLoading(true);
-      await exportarDatos(payload, { onError: setError, onDone: () => {} });
+      await exportarDatos(payload, {
+        onError: setError,
+      });
+      await cargarHistorial();
     } catch (err) {
       setError(err?.message || 'Error al exportar');
     } finally {

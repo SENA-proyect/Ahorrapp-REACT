@@ -1,15 +1,22 @@
-DEPENDIENTES & GASTOS:
+
+
+
+
+
+EXPORTAR:
+Definir bien la estructura de como se veran los datos al momento de seleccionar el tipo de archivo
+
+
+
+====================================
+Pendientes que persisten a fecha de 24/05/2026
+====================================
+DEPENDIENTES & GASTOS (Listas desplegables):
 los estilos al desplegar la lista de opciones al agregar un dependiente estan mal configuradas 
 debido a que la lista sale en blanco + la tipografia que es de un color gris claro, no se ve bien
 
 CATEGORIAS:
 Hay un error al momento de deshabilitar una categoria
-
-GASTOS:
-Error al registrar el dependiente, no se guarda el valor asignado
-
-EXPORTAR:
-Definir bien la estructura de como se veran los datos al momento de seleccionar el tipo de archivo
 
 IA:
 Definir un prom adecuado para que deje de conservar el historial y deje de ser tan estupida
@@ -19,9 +26,6 @@ Conservar los valores asignado por el usuario, que no se pierdan al momento de r
 
 BOLSA DE VALORES:
 Agregar funcion de icono correspondiente al nuevo valor registrado
-
-AHORROS:
-Error al actualizar la fecha, no se re-asignan los valores nuevos, se conserva el viejo
 
 CATEGORIAS:
 Despues de desahbilitar una categoria que al momento de querer re-activarla se le agregue
@@ -46,3 +50,10 @@ del usuario previamente registrado
 AHORRAPP:
 Definir paleta de colores, tipografia y caracteristicas visuales a gusto personal, la version creada por 
 cada integrante sera discutida en grupo con el fin de definir diseños globales para el proyecto
+
+EXPORTAR.JSX:
+Como tal funciona pero no se ha definido "cargarHistorial" por lo que arroja un mensaje de error
+
+REPORTES:
+Darle un uso mas practico, no solo exportar literalmente la tabla de la base de datos
+con un formato distinto

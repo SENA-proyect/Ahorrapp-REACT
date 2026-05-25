@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middlewares/authMiddleware');
-const { exportarDatos } = require('../controllers/exportController');
+const { exportarDatos, obtenerExportaciones, eliminarExportacion } = require('../controllers/exportController');
 
-// POST /api/exportar
+router.get('/', verifyToken, obtenerExportaciones);
 router.post('/', verifyToken, exportarDatos);
+router.delete('/:id', verifyToken, eliminarExportacion);
 
 module.exports = router;

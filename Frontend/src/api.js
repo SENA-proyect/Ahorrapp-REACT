@@ -191,3 +191,40 @@ export const exportarDatos = async (payload, { onError, onDone } = {}) => {
     throw error;
   }
 };
+
+// ── Historial de Exportaciones ───────────────────────────────────────────────
+export const getHistorialExportaciones = async (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+
+  const response = await fetch(`${API_URL}/exportar?${query}`, {
+    headers: authHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
+    throw new Error(
+      errorData.error || "Error al obtener historial de exportaciones"
+    );
+  }
+
+  return response.json();
+};
+
+// ── Eliminar Exportación del Historial ───────────────────────────────────────
+export const eliminarExportacion = async (id) => {
+  const response = await fetch(`${API_URL}/exportar/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
+    throw new Error(
+      errorData.error || "Error al eliminar exportación"
+    );
+  }
+
+  return response.json();
+};
