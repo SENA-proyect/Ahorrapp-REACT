@@ -153,17 +153,21 @@ export default function Dashboard() {
           ))}
         </section>
 
-        {/* Sección inferior asimétrica */}
+        {/* Sección inferior - 2 columnas (asimétrico) */}
         <section className="mt-7 w-full">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-            {/* Columna principal: Bolsa */}
-            <div className="min-h-[400px]">
-              <BolsaWidget />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Columna principal: Bolsa (60-70%) */}
+            <div className="lg:col-span-7 xl:col-span-8 min-h-[400px]">
+              <div className="h-full">
+                <BolsaWidget />
+              </div>
             </div>
 
-            {/* Columna secundaria: Noticias */}
-            <div className="min-h-[400px]">
-              <NewsDashboard />
+            {/* Columna secundaria: Noticias (30-40%) */}
+            <div className="lg:col-span-5 xl:col-span-4 min-h-[400px]">
+              <div className="h-full overflow-y-auto max-h-[600px]">
+                <NewsDashboard />
+              </div>
             </div>
           </div>
         </section>
