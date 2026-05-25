@@ -15,7 +15,6 @@ const navItems = [
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
   { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
-  { href: '/Noticias', emoji: '📰', label: 'Noticias' },
 ]
 
 const usuario = JSON.parse(localStorage.getItem('usuario'))

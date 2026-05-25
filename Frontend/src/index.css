@@ -10,3 +10,37 @@
     padding: 0;
   }
 }
+
+/* Utilities for NewsDashboard */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.news-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.filter-btn {
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  transform: scale(1.05);
+}
+
+.filter-btn.active {
+  background-color: #FACC15; /* amarillo */
+  color: #000;
+  font-weight: 600;
+}
+

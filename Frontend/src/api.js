@@ -236,6 +236,28 @@ export const getHistorialExportaciones = async (params = {}) => {
   return response.json();
 };
 
+// ── Noticias ────────────────────────────────────────────────────────────────
+export const getNoticiasEconomicas = async ({ categoria = 'economia', pagina = 1 } = {}) => {
+  const token = localStorage.getItem('token');
+  const url = `${API_URL}/noticias?categoria=${encodeURIComponent(categoria)}&pagina=${encodeURIComponent(pagina)}`;
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error al obtener noticias');
+  }
+
+  return res.json();
+};
+
+
 export const eliminarExportacion = async (id) => {
   const token = localStorage.getItem('token');
   const response = await fetch(`${API_URL}/exportar/${id}`, {

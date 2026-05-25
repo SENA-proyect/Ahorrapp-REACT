@@ -1,5 +1,7 @@
-import { useNavigate } from 'react-router-dom'
+  import { useNavigate } from 'react-router-dom'
 import BolsaWidget from './BolsaWidget'
+import NewsDashboard from './NewsDashboard.jsx'
+
 
 const navItems = [
   { href: '/ModulosIngresos',      emoji: '💰', label: 'Ingresos' },
@@ -10,7 +12,6 @@ const navItems = [
   { href: '/ModulosDependientes',  emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias',    emoji: '🧩', label: 'Categorias' },
   { href: '/movimientos/nuevo',    emoji: '➕', label: 'Nuevo Movimiento' },
-  { href: '/Noticias',             emoji: '📰', label: 'Noticias' },
   { href: '/exportar',             emoji: '📤', label: 'Exportar' },
 ]
 
@@ -204,26 +205,11 @@ export default function Dashboard() {
           <BolsaWidget />
         </section>
 
-        {/* Resumen */}
-        <section className="mt-7 grid gap-5 lg:grid-cols-2">
-          {[0, 1].map(i => (
-            <article
-              key={i}
-              className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-lg shadow-2xl"
-            >
-              <h3 className="mb-4 text-2xl font-black text-amber-400">
-                Resumen General
-              </h3>
-
-              <p className="leading-relaxed text-zinc-300">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Quisquam, atque praesentium mollitia illo recusandae velit
-                dolorum saepe doloremque debitis accusamus voluptatum cum quos
-                impedit deserunt in suscipit dolor. Rerum, soluta.
-              </p>
-            </article>
-          ))}
+        {/* Últimas Noticias */}
+        <section className="mt-7">
+          <NewsDashboard />
         </section>
+
       </main>
 
       {/* ───────────────── FOOTER ───────────────── */}
