@@ -17,10 +17,6 @@ USE `SEproyectoNA`;
 -- 5. Aplicamos los privilegios
 FLUSH PRIVILEGES;
 
--- NOTA: En caso de error usar el siguiente comando en el editor de MySQL 
--- SET GLOBAL log_bin_trust_function_creators = 1;
--- ELIMINAR EN PRODUCCION, solo es seguro durante el desarrollo.
-
 -- ========================================================================
 --     TABLA: usuarios
 -- =========================================================================
@@ -79,16 +75,8 @@ CREATE TABLE IF NOT EXISTS DEPENDIENTES (
     -- Validación al final
     CONSTRAINT chk_peso_rango CHECK (Peso_economico BETWEEN 1 AND 5),
     
-    -- Relación
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
-
- 
--- NOTA: Peso_economico es un valor relativo del 1 al 5 que indica cuánto "pesa"
---       este dependiente en el cálculo de distribución del ingreso.
---       Ejemplo: usuario principal = 5, pareja = 3, hijo = 1.
---       El backend calcula: porcentaje = peso_dependiente / suma_total_pesos * 100
---       Esto permite distribución proporcional sin hardcodear porcentajes en la BD.
 
 
 -- ========================================================================
@@ -132,8 +120,7 @@ CREATE TABLE IF NOT EXISTS AHORROS (
     CONSTRAINT chk_monto CHECK (Monto >= 0),
     CONSTRAINT chk_acumulado CHECK (Monto_acumulado >= 0),
     CONSTRAINT chk_fechas CHECK (Fecha_meta IS NULL OR Fecha_meta >= Fecha_registro),
-    
-    -- Relaciones
+
     FOREIGN KEY (ID_entrada) REFERENCES ENTRADA(ID_entrada) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_categoria) REFERENCES CATEGORIAS(ID_categoria) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
@@ -155,11 +142,9 @@ CREATE TABLE IF NOT EXISTS INGRESOS (
     -- Restricción de validación movida al final
     CONSTRAINT chk_monto_ingreso CHECK (Monto >= 0),
     
-    -- Relaciones
     FOREIGN KEY (ID_entrada) REFERENCES ENTRADA(ID_entrada) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_categoria) REFERENCES CATEGORIAS(ID_categoria) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
-
 
 -- ========================================================================
 --    SALIDA: Gastos, Imprevistos & Deudas
@@ -182,7 +167,6 @@ CREATE TABLE IF NOT EXISTS GASTOS (
     -- Validación movida al final
     CONSTRAINT chk_monto_gasto CHECK (Monto >= 0),
     
-    -- Relaciones
     FOREIGN KEY (ID_salida) REFERENCES SALIDA(ID_salida) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_categoria) REFERENCES CATEGORIAS(ID_categoria) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (ID_dependientes) REFERENCES DEPENDIENTES(ID_dependientes) ON DELETE SET NULL ON UPDATE CASCADE
@@ -199,8 +183,7 @@ CREATE TABLE IF NOT EXISTS IMPREVISTOS (
     
     -- Validación movida al final
     CONSTRAINT chk_monto_imprevisto CHECK (Monto >= 0),
-    
-    -- Relaciones
+
     FOREIGN KEY (ID_salida) REFERENCES SALIDA(ID_salida) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_categoria) REFERENCES CATEGORIAS(ID_categoria) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (ID_dependientes) REFERENCES DEPENDIENTES(ID_dependientes) ON DELETE SET NULL ON UPDATE CASCADE
@@ -226,69 +209,11 @@ CREATE TABLE IF NOT EXISTS DEUDAS (
     CONSTRAINT chk_cuotas_pagadas CHECK (Cuotas_pagadas >= 0),
     CONSTRAINT chk_fechas_deuda CHECK (Fecha_fin IS NULL OR Fecha_fin >= Fecha_inicio),
     CONSTRAINT chk_logica_cuotas CHECK (Cuotas_total IS NULL OR Cuotas_pagadas <= Cuotas_total),
-    
-    -- Relaciones
+
     FOREIGN KEY (ID_salida) REFERENCES SALIDA(ID_salida) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_categoria) REFERENCES CATEGORIAS(ID_categoria) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-
--- NOTA: Si Cuotas_total IS NULL, la deuda no es en cuotas (pago único).
---       Progreso = (Cuotas_pagadas / Cuotas_total) * 100
-
-
-
-
--- ========================================================================
---  TABLA: presupuestos  
--- ========================================================================
-
-CREATE TABLE IF NOT EXISTS PRESUPUESTOS (
-    ID_presupuesto INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del presupuesto',
-    ID_usuario INT NOT NULL UNIQUE COMMENT 'Usuario al que pertenece el presupuesto',
-    Dia_corte TINYINT NOT NULL DEFAULT 1 COMMENT 'Día de corte (1-28)',
-    
-    Porcentaje_gastos DECIMAL(5,2) NOT NULL DEFAULT 40.00,
-    Porcentaje_deudas DECIMAL(5,2) NOT NULL DEFAULT 20.00,
-    Porcentaje_imprevistos DECIMAL(5,2) NOT NULL DEFAULT 15.00,
-    Porcentaje_ahorros DECIMAL(5,2) NOT NULL DEFAULT 10.00,
-    Porcentaje_emergencia DECIMAL(5,2) NOT NULL DEFAULT 15.00,
-    
-    Fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    -- Validaciones compatibles
-    CONSTRAINT chk_dia_corte CHECK (Dia_corte BETWEEN 1 AND 28),
-    
-    -- Relación
-    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS PERIODOS_PRESUPUESTO (
-    ID_periodo INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del período',
-    ID_presupuesto INT NOT NULL COMMENT 'Presupuesto al que corresponde',
-    ID_usuario INT NOT NULL COMMENT 'Usuario al que corresponde',
-    Fecha_inicio DATE NOT NULL COMMENT 'Fecha de inicio del período',
-    Fecha_fin DATE NOT NULL COMMENT 'Fecha de fin del período',
-    Ingreso_total DECIMAL(15,2) NOT NULL COMMENT 'Ingreso total calculado',
-    Monto_gastos DECIMAL(15,2) NOT NULL COMMENT 'Destinado a gastos',
-    Monto_deudas DECIMAL(15,2) NOT NULL COMMENT 'Destinado a deudas',
-    Monto_imprevistos DECIMAL(15,2) NOT NULL COMMENT 'Destinado a imprevistos',
-    Monto_ahorros DECIMAL(15,2) NOT NULL COMMENT 'Destinado a ahorros',
-    Monto_emergencia DECIMAL(15,2) NOT NULL COMMENT 'Destinado a emergencia',
-    
-    -- Validaciones (CHECKs) al final para evitar error 1064
-    CONSTRAINT chk_periodo_fechas CHECK (Fecha_fin > Fecha_inicio),
-    CONSTRAINT chk_ingreso_pos CHECK (Ingreso_total >= 0),
-    CONSTRAINT chk_gastos_pos CHECK (Monto_gastos >= 0),
-    CONSTRAINT chk_deudas_pos CHECK (Monto_deudas >= 0),
-    CONSTRAINT chk_imprevistos_pos CHECK (Monto_imprevistos >= 0),
-    CONSTRAINT chk_ahorros_pos CHECK (Monto_ahorros >= 0),
-    CONSTRAINT chk_emergencia_pos CHECK (Monto_emergencia >= 0),
-    
-    -- Relaciones
-    FOREIGN KEY (ID_presupuesto) REFERENCES PRESUPUESTOS(ID_presupuesto) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
 
 -- ========================================================================
 --     TABLA: historial
@@ -318,3 +243,73 @@ CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_historial) REFERENCES HISTORIAL(ID_historial) ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB;
+
+-- ========================================================================
+--  TABLA: presupuestos  
+-- ========================================================================
+
+CREATE TABLE IF NOT EXISTS PRESUPUESTOS (
+    ID_presupuesto INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del presupuesto',
+    ID_usuario INT NOT NULL COMMENT 'Usuario al que pertenece el presupuesto',
+    Nombre VARCHAR(80) NOT NULL DEFAULT 'Mi presupuesto' COMMENT 'Nombre descriptivo del perfil',
+    Descripcion VARCHAR(255) DEFAULT NULL COMMENT 'Descripción opcional del perfil',
+    Activo BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si este perfil es el activo del usuario',
+    Dia_corte TINYINT NOT NULL DEFAULT 1 COMMENT 'Día de corte (1-28)',
+    
+    Porcentaje_gastos DECIMAL(5,2) NOT NULL DEFAULT 40.00,
+    Porcentaje_deudas DECIMAL(5,2) NOT NULL DEFAULT 20.00,
+    Porcentaje_imprevistos DECIMAL(5,2) NOT NULL DEFAULT 15.00,
+    Porcentaje_ahorros DECIMAL(5,2) NOT NULL DEFAULT 10.00,
+    Porcentaje_emergencia DECIMAL(5,2) NOT NULL DEFAULT 15.00,
+    
+    Fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- Validaciones compatibles
+    CONSTRAINT chk_dia_corte CHECK (Dia_corte BETWEEN 1 AND 28),
+    
+    -- Relación
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS PERIODOS_PRESUPUESTO (
+    ID_periodo INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del período',
+    ID_presupuesto INT NOT NULL COMMENT 'Presupuesto al que corresponde',
+    ID_usuario INT NOT NULL COMMENT 'Usuario al que corresponde',
+    Fecha_inicio DATE NOT NULL COMMENT 'Fecha de inicio del período',
+    Fecha_fin DATE NOT NULL COMMENT 'Fecha de fin del período',
+    Ingreso_estimado DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Ingreso que el usuario estimó al abrir el período',
+    Ingreso_real DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Suma real de INGRESOS registrados en el período',
+    Saldo_anterior DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Sobrante del período anterior acumulado a favor',
+    Estado ENUM('abierto','cerrado') NOT NULL DEFAULT 'abierto' COMMENT 'Estado del período',
+    Monto_gastos DECIMAL(15,2) NOT NULL COMMENT 'Destinado a gastos',
+    Monto_deudas DECIMAL(15,2) NOT NULL COMMENT 'Destinado a deudas',
+    Monto_imprevistos DECIMAL(15,2) NOT NULL COMMENT 'Destinado a imprevistos',
+    Monto_ahorros DECIMAL(15,2) NOT NULL COMMENT 'Destinado a ahorros',
+    Monto_emergencia DECIMAL(15,2) NOT NULL COMMENT 'Destinado a emergencia',
+    
+    -- Validaciones (CHECKs) al final para evitar error 1064
+    CONSTRAINT chk_periodo_fechas CHECK (Fecha_fin > Fecha_inicio),
+    CONSTRAINT chk_ingreso_estimado_pos CHECK (Ingreso_estimado >= 0),
+    CONSTRAINT chk_ingreso_real_pos CHECK (Ingreso_real >= 0),
+    CONSTRAINT chk_saldo_anterior_pos CHECK (Saldo_anterior >= 0),
+    CONSTRAINT chk_gastos_pos CHECK (Monto_gastos >= 0),
+    CONSTRAINT chk_deudas_pos CHECK (Monto_deudas >= 0),
+    CONSTRAINT chk_imprevistos_pos CHECK (Monto_imprevistos >= 0),
+    CONSTRAINT chk_ahorros_pos CHECK (Monto_ahorros >= 0),
+    CONSTRAINT chk_emergencia_pos CHECK (Monto_emergencia >= 0),
+    
+    FOREIGN KEY (ID_presupuesto) REFERENCES PRESUPUESTOS(ID_presupuesto) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+
+-- 1c. Validar que los porcentajes sumen exactamente 100
+--     (Se hace desde el backend; aquí dejo la constraint como referencia)
+-- ALTER TABLE PRESUPUESTOS
+--     ADD CONSTRAINT chk_porcentajes_suma
+--     CHECK (
+--         Porcentaje_gastos + Porcentaje_deudas + Porcentaje_imprevistos
+--         + Porcentaje_ahorros + Porcentaje_emergencia = 100.00
+--     );
+-- NOTA: MySQL evalúa CHECKs por fila pero no entre columnas de forma confiable
+--       en todas las versiones. Por lo tanto se manejara esta validación en el backend.
