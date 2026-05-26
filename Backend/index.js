@@ -32,6 +32,8 @@ app.use("/api/noticias", noticiasRoutes);
 app.use("/api/bolsa", bolsaRoutes);
 app.use("/api/exportar", exportRoutes);
 
+
+
 // Ruta de prueba
 app.get("/", (req, res) => {
   res.json({ ok: true, mensaje: "Servidor AhorrApp corriendo" });

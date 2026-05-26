@@ -256,3 +256,20 @@ export const getGastos = async () => {
     movimiento.Tipo === 'Gasto'
   )
 }
+
+export const getUsuariosPanelAdmin = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/auth/PanelAdmin`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener total de usuarios");
+  }
+
+  return response.json(); 
+}

@@ -211,6 +211,23 @@ const deleteUsuario = async (req, res) => {
     return handleServerError(res, error, "Error al eliminar usuario");
   }
 };
+// ── GetUsuariosPanelAdmin/PanelAdmin/:id ────────────────────────────────────────────────
+const getUsuariosPanelAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query (
+      "SELECT COUNT(*) AS totalUsuarios FROM usuarios"
+    );
+    res.json({
+      totalUsuarios: rows.length > 0 ? rows[0].totalUsuarios : 0,
+    })
+  } catch (error){
+    console.error('Error al contar usuarios:', error);
+    res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener usuarios'
+    });
+  }
+};
 
 module.exports = {
   register,
@@ -218,4 +235,5 @@ module.exports = {
   getUsuarios,
   updateUsuario,
   deleteUsuario,
+  getUsuariosPanelAdmin
 };
