@@ -100,7 +100,7 @@ const Deudas = () => {
   }
 
   // Clases reutilizables para inputs y labels del modal
-  const inputModal = "w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/[0.07] text-[#f4f4f5] text-sm outline-none mt-1.5"
+  const inputModal = "w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/10 text-[#f4f4f5] text-sm outline-none mt-1.5"
   const labelModal = "block text-[0.72rem] font-bold text-[#a1a1aa] uppercase tracking-widest mt-3.5"
 
   return (

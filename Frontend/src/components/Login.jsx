@@ -130,93 +130,22 @@ export default function Login() {
 
   return (
     <>
-      {/*
-        SECCIÓN PRINCIPAL
-        ─────────────────
-        Antes: nada especial, solo centraba el contenido.
-        Ahora:  "py-8" agrega padding vertical para que en móvil
-                la tarjeta no quede pegada al borde superior/inferior.
-      */}
+
       <section className="w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-800 via-zinc-950 to-amber-900 py-8">
-
-        {/*
-          TARJETA PRINCIPAL
-          ─────────────────
-          Antes:  "flex items-center" → los dos lados siempre en FILA.
-                  "w-[1000px] h-[580px]" → tamaños fijos que se desbordan en móvil.
-
-          Ahora:
-          • "flex-col"         → en móvil, apilamos los lados en COLUMNA (formulario arriba, branding abajo).
-          • "lg:flex-row"      → en pantallas grandes (≥1024px), volvemos a FILA, como el diseño original.
-          • "w-full"           → ocupa todo el ancho disponible en móvil.
-          • "max-w-[1000px]"   → pero nunca más de 1000px (para respetar el diseño original en escritorio).
-          • "mx-4"             → margen horizontal de 1rem en móvil para que no toque los bordes.
-          • "h-auto"           → la altura se adapta al contenido en móvil.
-          • "lg:h-[580px]"     → en escritorio vuelve a la altura fija original.
-          • "rounded-3xl shadow-2xl overflow-hidden" → sin cambios.
-        */}
         <div
           className="flex flex-col lg:flex-row items-center bg-gradient-to-br from-[#050F24] to-[#152E5E] w-full max-w-[1000px] mx-4 h-auto lg:h-[580px] rounded-3xl shadow-2xl overflow-hidden"
           style={{ border: "1px solid #27272a" }}
         >
-
-          {/* ── LADO IZQUIERDO: formularios ──────────────────────────── */}
-          {/*
-            Antes:  "w-[520px] h-[500px]" → fijos, solo funcionaban en escritorio.
-
-            Ahora:
-            • "w-full"          → en móvil ocupa todo el ancho de la tarjeta.
-            • "lg:w-[520px]"    → en escritorio vuelve al ancho fijo original.
-            • "px-6"            → padding horizontal más pequeño en móvil.
-            • "lg:px-10"        → en escritorio vuelve al padding original.
-            • "py-8"            → padding vertical en móvil para que el contenido respire.
-            • "lg:py-0"         → en escritorio lo quitamos (la altura fija ya lo controla).
-            • "h-auto"          → altura automática en móvil.
-            • "lg:h-[500px]"    → en escritorio vuelve a la altura fija.
-            • "overflow-hidden" → sigue ocultando el formulario que no está visible.
-          */}
           <div className="overflow-hidden w-full lg:w-[520px] h-auto lg:h-[500px] px-6 lg:px-10 py-8 lg:py-0">
 
-            {/*
-              SLIDER de formularios
-              ──────────────────────
-              Este div se mueve hacia arriba cuando isRegister === true,
-              para mostrar el formulario de registro.
-
-              Antes:  "-translate-y-[500px]" → funcionaba porque h-[500px] era fijo.
-              Ahora:  En móvil no usamos el efecto de slider (altura variable).
-                      En escritorio sí lo usamos con "lg:-translate-y-[500px]".
-
-              • "lg:flex-col"              → en escritorio apila login y registro en columna para el efecto slider.
-              • "flex-col"                 → en móvil también en columna pero sin transform.
-              • La clase condicional ahora solo aplica el translate en "lg:".
-            */}
             <div
               className={`flex flex-col transition-transform duration-700 ease-in-out ${
                 isRegister ? "lg:-translate-y-[500px]" : "translate-y-0"
               }`}
             >
-
-              {/* ── FORMULARIO DE LOGIN ──────────────────────── */}
-              {/*
-                Antes:  "h-[500px]" fijo.
-                Ahora:
-                • "h-auto"        → en móvil la altura se adapta al contenido.
-                • "lg:h-[500px]"  → en escritorio vuelve a la altura fija del slider.
-
-                El formulario de registro se oculta en móvil cuando no está activo
-                usando "hidden" e "isRegister" para controlar cuál se muestra.
-                En escritorio, ambos existen en el DOM (el slider los controla).
-              */}
               <div className={`h-auto lg:h-[500px] flex flex-col justify-center gap-5 ${isRegister ? "hidden lg:flex" : "flex"}`}>
                 <div className="mb-5">
                   <p className="text-amber-400 text-sm mb-4 tracking-widest">ACCESO SEGURO</p>
-                  {/*
-                    Antes:  "text-4xl" siempre.
-                    Ahora:
-                    • "text-3xl"      → un poco más pequeño en móvil para que quepa bien.
-                    • "lg:text-4xl"   → en escritorio vuelve al tamaño original.
-                  */}
                   <div className="text-3xl lg:text-4xl font-bold text-white flex gap-2 mb-1">
                     <p className="text-white">Bienvenido </p>
                     <p className="text-amber-400">de vuelta.</p>
@@ -285,15 +214,6 @@ export default function Login() {
                   </button>
                 </p>
               </div>
-
-              {/* ── FORMULARIO DE REGISTRO ───────────────────── */}
-              {/*
-                Mismo principio que el login:
-                • "h-auto lg:h-[500px]"          → altura flexible en móvil, fija en escritorio.
-                • "hidden lg:flex" / "flex"       → en móvil solo mostramos el formulario activo.
-                  Si isRegister es true  → mostramos este (flex).
-                  Si isRegister es false → lo ocultamos (hidden), EXCEPTO en lg donde el slider lo controla.
-              */}
               <div className={`h-auto lg:h-[500px] flex flex-col justify-center gap-4 ${isRegister ? "flex" : "hidden lg:flex"}`}>
                 <div className="mb-1">
                   <p className="text-amber-400 text-sm mb-4 tracking-widest">CREA TU CUENTA</p>
@@ -389,7 +309,6 @@ export default function Login() {
               </div>
 
             </div>
-            {/* fin slider */}
           </div>
           <div
             className="hidden lg:flex relative flex-col items-center justify-center w-full lg:w-[520px] h-[250px] lg:h-[580px] bg-gradient-to-br from-blue-950 via-zinc-900 to-amber-950 overflow-hidden"

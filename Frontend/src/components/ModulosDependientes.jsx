@@ -8,7 +8,7 @@ const usuario = JSON.parse(localStorage.getItem('usuario'))
 const PESO_LABELS = { 1: 'Muy bajo', 2: 'Bajo', 3: 'Medio', 4: 'Alto', 5: 'Muy alto' }
 
 // Clases reutilizables para el modal
-const inputModal = "w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/[0.07] text-[#f4f4f5] text-sm outline-none mt-1.5"
+const inputModal = "w-full px-3.5 py-2.5 rounded-xl border border-white/15 text-[#f4f4f5] bg-black/60 text-sm outline-none mt-1.5 hover:border-[#fbbf24]"
 const labelModal = "block text-[0.72rem] font-bold text-[#a1a1aa] uppercase tracking-widest mt-3.5"
 
 const Dependientes = () => {
