@@ -3,7 +3,7 @@ npm install express cors nodemon axios pdfkit
 
 FRONTEND:
 
-npm install framer-motion
+npm install framer-motion recharts
 
 npm install -D tailwindcss @tailwindcss/postcss postcss autoprefixer axios
 

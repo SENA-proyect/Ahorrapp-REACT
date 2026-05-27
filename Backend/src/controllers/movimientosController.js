@@ -40,49 +40,48 @@ const getMovimientos = async (req, res) => {
 
 
 const crearMovimiento = async (req, res) => {
+  // 1. Validaciones tempranas antes de abrir la conexión a la BD
+  const { tipo_flujo, subtipo_modulo, datos } = req.body;
+
+  if (!datos?.monto) {
+    return res.status(400).json({ ok: false, mensaje: "El campo monto es requerido" });
+  }
+
+  // Normalización básica (evita pasar strings vacíos a mysql)
+  datos.monto = datos.monto === '' || datos.monto === undefined ? null : Number(datos.monto);
+  datos.id_categoria = datos.id_categoria === '' ? null : datos.id_categoria;
+  datos.id_dependiente = datos.id_dependiente === '' ? null : datos.id_dependiente;
+  datos.fecha_registro = datos.fecha_registro === '' ? null : datos.fecha_registro;
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('crearMovimiento body:', { tipo_flujo, subtipo_modulo, datos });
+  }
+
+  if (!["Entrada", "Salida"].includes(tipo_flujo)) {
+    return res.status(400).json({ ok: false, mensaje: "tipo_flujo inválido" });
+  }
+
+  const entradas = ["Ahorro", "Ingreso"];
+  const salidas  = ["Gasto", "Deuda", "Imprevisto"];
+
+  if (tipo_flujo === "Entrada" && !entradas.includes(subtipo_modulo)) {
+    return res.status(400).json({ ok: false, mensaje: "Subtipo inválido para Entrada" });
+  }
+
+  if (tipo_flujo === "Salida" && !salidas.includes(subtipo_modulo)) {
+    return res.status(400).json({ ok: false, mensaje: "Subtipo inválido para Salida" });
+  }
+
+  // 2. Apertura de conexión e inicio de la transacción
   const connection = await pool.getConnection();
 
   try {
     const ID_usuario = req.usuario.id;
-
-    const { tipo_flujo, subtipo_modulo, datos } = req.body;
-
-    if (!datos?.monto) {
-      return res.status(400).json({ ok: false, mensaje: "El campo monto es requerido" });
-    }
-
-    // Normalización básica (evita pasar strings vacíos a mysql)
-    datos.monto = datos.monto === '' || datos.monto === undefined ? null : Number(datos.monto);
-    datos.id_categoria = datos.id_categoria === '' ? null : datos.id_categoria;
-    datos.id_dependiente = datos.id_dependiente === '' ? null : datos.id_dependiente;
-    datos.fecha_registro = datos.fecha_registro === '' ? null : datos.fecha_registro;
-
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('crearMovimiento body:', { tipo_flujo, subtipo_modulo, datos });
-    }
-
-    // Validar coherencia entre tipo_flujo y subtipo_modulo
-    if (!["Entrada", "Salida"].includes(tipo_flujo)) {
-    return res.status(400).json({ ok: false, mensaje: "tipo_flujo inválido" });
-    }
-
-    const entradas = ["Ahorro", "Ingreso"];
-    const salidas  = ["Gasto", "Deuda", "Imprevisto"];
-
-    if (tipo_flujo === "Entrada" && !entradas.includes(subtipo_modulo)) {
-      return res.status(400).json({ ok: false, mensaje: "Subtipo inválido para Entrada" });
-    }
-
-    if (tipo_flujo === "Salida" && !salidas.includes(subtipo_modulo)) {
-      return res.status(400).json({ ok: false, mensaje: "Subtipo inválido para Salida" });
-    }
-
     await connection.beginTransaction();
 
     // 1. Insertar en MOVIMIENTOS
     const [movimiento] = await connection.query(
-      `INSERT INTO MOVIMIENTOS (ID_usuario, Tipo_Flujo, Subtipo_Modulo)
-       VALUES (?, ?, ?)`,
+      `INSERT INTO MOVIMIENTOS (ID_usuario, Tipo_Flujo, Subtipo_Modulo) VALUES (?, ?, ?)`,
       [ID_usuario, tipo_flujo, subtipo_modulo]
     );
     const ID_movimiento = movimiento.insertId;
@@ -155,7 +154,13 @@ const crearMovimiento = async (req, res) => {
       }
     }
 
+    // 3. Confirmar la transacción
     await connection.commit();
+
+    // 4. Ejecutar la actualización POST-COMMIT usando el pool (fuera de la transacción de forma segura)
+    if (subtipo_modulo === "Ingreso") {
+      await actualizarIngresoReal(ID_usuario);
+    }
 
     return res.status(201).json({
       ok: true,
@@ -165,13 +170,15 @@ const crearMovimiento = async (req, res) => {
     });
 
   } catch (error) {
-    await connection.rollback();
+    // Evita llamar a rollback si la conexión falló antes de iniciar la transacción
+    if (connection) await connection.rollback();
     console.error("Error en crearMovimiento:", error);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor", detalle: error.message });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 };
+
 
 // <==&&==·········· INGRESOS ··········==&&==>
 
