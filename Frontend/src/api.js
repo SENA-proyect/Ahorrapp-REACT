@@ -39,20 +39,27 @@ export const getMovimientos = async () => {
 
 // ── Dashboard (una sola llamada) ──────────────────────────────────────────────
 export const getDashboardData = async () => {
-  const movimientos = await getMovimientos();
-
-  const sumar = (tipo) =>
-    movimientos
-      .filter((m) => (m.tipo ?? m.Tipo ?? "").toLowerCase() === tipo)
-      .reduce((acc, m) => acc + Number(m.monto ?? m.Monto ?? 0), 0);
-
-  const totalIngresos = sumar("ingreso");
-  const totalGastos = sumar("gasto");
-  const totalAhorros = sumar("ahorro");
-  const balance = totalIngresos - totalGastos;
-
-  return { totalIngresos, totalGastos, totalAhorros, balance };
+  const data = await fetchJSON(`${API_URL}/dashboard/resumen`);
+  return {
+    totalIngresos: data.totalIngresos ?? 0,
+    totalGastos:   data.totalGastos   ?? 0,
+    totalAhorros:  data.totalAhorros  ?? 0,
+    balance:       data.balance       ?? 0,
+    periodo:       data.periodo       ?? null,
+    sin_periodo:   data.sin_periodo   ?? true,
+  };
 };
+ 
+export const getPresupuestoVsEjecutado = async () => {
+  const data = await fetchJSON(`${API_URL}/dashboard/presupuesto-vs-ejecutado`);
+  return data.data ?? [];
+};
+ 
+export const getFlujoPorSemana = async () => {
+  const data = await fetchJSON(`${API_URL}/dashboard/flujo-semanal`);
+  return data.data ?? [];
+};
+ 
 
 // ── Dependientes ──────────────────────────────────────────────────────────────
 export const getDependientes = async () => {
@@ -87,6 +94,61 @@ export const deshabilitarCategoria = (id) =>
 
 export const habilitarCategoria = (id) =>
   fetchJSON(`${API_URL}/categorias/${id}/habilitar`, { method: "PATCH" });
+
+// ── Presupuestos ──────────────────────────────────────────────────────────────
+export const getPerfilesPrespuesto = () =>
+  fetchJSON(`${API_URL}/presupuestos`);
+ 
+export const crearPerfil = (datos) =>
+  fetchJSON(`${API_URL}/presupuestos`, {
+    method: "POST",
+    body: JSON.stringify(datos),
+  });
+ 
+export const editarPerfil = (id, datos) =>
+  fetchJSON(`${API_URL}/presupuestos/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(datos),
+  });
+ 
+export const eliminarPerfil = (id) =>
+  fetchJSON(`${API_URL}/presupuestos/${id}`, { method: "DELETE" });
+ 
+export const activarPerfil = (id) =>
+  fetchJSON(`${API_URL}/presupuestos/${id}/activar`, { method: "PUT" });
+ 
+// ── Períodos ──────────────────────────────────────────────────────────────────
+export const getPeriodoActivo = () =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/activo`);
+ 
+export const abrirPeriodo = (ingreso_estimado) =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/abrir`, {
+    method: "POST",
+    body: JSON.stringify({ ingreso_estimado }),
+  });
+ 
+export const cerrarPeriodo = () =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/cerrar`, { method: "PUT" });
+ 
+export const ajustarIngresoPeriodo = (ingreso_estimado) =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/ajustar-ingreso`, {
+    method: "PATCH",
+    body: JSON.stringify({ ingreso_estimado }),
+  });
+ 
+// ── Movimientos extra ─────────────────────────────────────────────────────────
+export const abonarDeuda = (id, cuotas = 1) =>
+  fetchJSON(`${API_URL}/movimientos/deudas/${id}/abonar`, {
+    method: "PATCH",
+    body: JSON.stringify({ cuotas }),
+  });
+ 
+export const abonarAhorro = (id, monto) =>
+  fetchJSON(`${API_URL}/movimientos/ahorros/${id}/abonar`, {
+    method: "PATCH",
+    body: JSON.stringify({ monto }),
+  });
+ 
 
 // ── Resumen financiero (para el Asistente) ────────────────────────────────────
 export const getResumenFinancieroBreve = async () => {

@@ -1,7 +1,49 @@
 import { useState, useEffect, useMemo } from 'react'
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  AreaChart, Area,
+} from 'recharts'
 import HeaderModulos from './HeaderModulos'
 import BolsaWidget from './BolsaWidget'
-import { getDashboardData } from '../api'
+import { getDashboardData, getPresupuestoVsEjecutado, getFlujoPorSemana } from '../api'
+
+// ── Tooltip personalizado para la gráfica de barras ──────────
+const TooltipPresupuesto = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-[#0f172a] border border-white/10 rounded-xl px-4 py-3 shadow-xl text-xs">
+      <p className="text-amber-400 font-bold mb-2">{label}</p>
+      {payload.map((p) => (
+        <p key={p.name} style={{ color: p.color }} className="mb-0.5">
+          {p.name}: <span className="text-white font-semibold">${Number(p.value).toLocaleString('es-CO')}</span>
+        </p>
+      ))}
+    </div>
+  )
+}
+
+// ── Tooltip personalizado para la gráfica de área ────────────
+const TooltipFlujo = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-[#0f172a] border border-white/10 rounded-xl px-4 py-3 shadow-xl text-xs">
+      <p className="text-zinc-400 font-semibold mb-2">{label}</p>
+      {payload.map((p) => (
+        <p key={p.name} style={{ color: p.color }} className="mb-0.5">
+          {p.name}: <span className="text-white font-semibold">${Number(p.value).toLocaleString('es-CO')}</span>
+        </p>
+      ))}
+    </div>
+  )
+}
+
+// ── Estado vacío compartido ───────────────────────────────────
+const SinPeriodo = ({ mensaje }) => (
+  <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
+    <span className="text-3xl opacity-40">📊</span>
+    <p className="text-zinc-400 text-sm">{mensaje}</p>
+  </div>
+)
 
 export default function Dashboard() {
   const usuario = useMemo(() => {
@@ -17,12 +59,28 @@ export default function Dashboard() {
     totalGastos: 0,
     totalAhorros: 0,
     balance: 0,
+    periodo: null,
+    sin_periodo: true,
   })
+  const [presupuestoData, setPresupuestoData] = useState([])
+  const [flujoData, setFlujoData]             = useState([])
+  const [loadingPresupuesto, setLoadingPresupuesto] = useState(true)
+  const [loadingFlujo, setLoadingFlujo]             = useState(true)
 
   useEffect(() => {
     getDashboardData()
       .then(setTotales)
-      .catch((err) => console.error('Error cargando dashboard:', err))
+      .catch((err) => console.error('Error cargando resumen:', err))
+
+    getPresupuestoVsEjecutado()
+      .then(setPresupuestoData)
+      .catch((err) => console.error('Error cargando presupuesto:', err))
+      .finally(() => setLoadingPresupuesto(false))
+
+    getFlujoPorSemana()
+      .then(setFlujoData)
+      .catch((err) => console.error('Error cargando flujo:', err))
+      .finally(() => setLoadingFlujo(false))
   }, [])
 
   const statCards = useMemo(() => [
@@ -30,7 +88,7 @@ export default function Dashboard() {
       id: 'ingresos',
       label: 'Ingresos',
       value: `$${totales.totalIngresos.toLocaleString('es-CO')}`,
-      sub: '+12% vs. mes anterior',
+      sub: totales.periodo ? `Período: ${totales.periodo.fecha_inicio}` : 'Histórico total',
       emoji: '💰',
       color: 'text-emerald-400',
       gradient: 'radial-gradient(ellipse at left, rgba(34,197,94,0.527), rgba(16,185,129,0.05))',
@@ -39,7 +97,7 @@ export default function Dashboard() {
       id: 'gastos',
       label: 'Gastos',
       value: `$${totales.totalGastos.toLocaleString('es-CO')}`,
-      sub: '−5% vs. mes anterior',
+      sub: totales.periodo ? `Período activo` : 'Histórico total',
       emoji: '💸',
       color: 'text-red-400',
       gradient: 'radial-gradient(ellipse at left, rgba(239,68,68,0.527), rgba(220,38,38,0.05))',
@@ -48,7 +106,7 @@ export default function Dashboard() {
       id: 'ahorros',
       label: 'Ahorros',
       value: `$${totales.totalAhorros.toLocaleString('es-CO')}`,
-      sub: 'Meta: $1,500 / mes',
+      sub: totales.periodo ? `Período activo` : 'Histórico total',
       emoji: '🎯',
       color: 'text-amber-400',
       gradient: 'radial-gradient(ellipse at left, rgba(245,158,11,0.527), rgba(249,115,22,0.05))',
@@ -57,7 +115,7 @@ export default function Dashboard() {
       id: 'balance',
       label: 'Balance',
       value: `$${totales.balance.toLocaleString('es-CO')}`,
-      sub: 'Disponible este mes',
+      sub: 'Disponible este período',
       emoji: '💜',
       color: 'text-violet-400',
       gradient: 'radial-gradient(ellipse at left, rgba(168,85,247,0.527), rgba(147,51,234,0.05))',
@@ -113,21 +171,109 @@ export default function Dashboard() {
           <BolsaWidget />
         </section>
 
-        {[0, 1].map((i) => (
-          <section
-            key={i}
-            className="w-full bg-white/5 backdrop-blur-lg rounded-2xl px-4 py-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col items-center justify-center text-center"
-          >
-            <h2 className="text-2xl sm:text-3xl mb-3 sm:mb-4 font-bold text-amber-400">
-              Resumen General
+        {/* ── Gráfica 1: Presupuestado vs Ejecutado ── */}
+        <section className="w-full bg-white/5 backdrop-blur-lg rounded-2xl px-4 py-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col gap-4">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-amber-400">
+              Presupuesto vs Ejecutado
             </h2>
-            <p className="text-sm sm:text-lg text-zinc-300 leading-relaxed max-w-4xl">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, atque praesentium
-              mollitia illo recusandae velit dolorum saepe doloremque debitis accusamus voluptatum
-              cum quos impedit deserunt in suscipit dolor. Rerum, soluta.
+            <p className="text-xs text-zinc-400 mt-0.5">
+              {totales.periodo
+                ? `Período: ${totales.periodo.fecha_inicio} → ${totales.periodo.fecha_fin}`
+                : 'Comparación del período activo'}
             </p>
-          </section>
-        ))}
+          </div>
+
+          {loadingPresupuesto ? (
+            <div className="flex items-center justify-center py-10">
+              <span className="text-zinc-500 text-sm animate-pulse">Cargando...</span>
+            </div>
+          ) : presupuestoData.length === 0 ? (
+            <SinPeriodo mensaje="Abre un período de presupuesto para ver esta gráfica." />
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={presupuestoData} barCategoryGap="30%" barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis
+                  dataKey="categoria"
+                  tick={{ fill: '#a1a1aa', fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: '#a1a1aa', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip content={<TooltipPresupuesto />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                <Legend
+                  wrapperStyle={{ fontSize: 12, color: '#a1a1aa', paddingTop: 12 }}
+                />
+                <Bar dataKey="presupuestado" name="Presupuestado" fill="rgba(245,158,11,0.7)"  radius={[4, 4, 0, 0]} />
+                <Bar dataKey="ejecutado"     name="Ejecutado"     fill="rgba(239,68,68,0.75)"  radius={[4, 4, 0, 0]} />
+                <Bar dataKey="disponible"    name="Disponible"    fill="rgba(99,102,241,0.6)"  radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </section>
+
+        {/* ── Gráfica 2: Flujo semanal ── */}
+        <section className="w-full bg-white/5 backdrop-blur-lg rounded-2xl px-4 py-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col gap-4">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-amber-400">
+              Flujo Semanal
+            </h2>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Ingresos vs gastos semana a semana en el período activo
+            </p>
+          </div>
+
+          {loadingFlujo ? (
+            <div className="flex items-center justify-center py-10">
+              <span className="text-zinc-500 text-sm animate-pulse">Cargando...</span>
+            </div>
+          ) : flujoData.length === 0 ? (
+            <SinPeriodo mensaje="Abre un período de presupuesto para ver esta gráfica." />
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={flujoData}>
+                <defs>
+                  <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#34d399" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#34d399" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="gradGastos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#f87171" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#f87171" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="gradBalance" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#a78bfa" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#a78bfa" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis
+                  dataKey="semana"
+                  tick={{ fill: '#a1a1aa', fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: '#a1a1aa', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip content={<TooltipFlujo />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: '#a1a1aa', paddingTop: 12 }} />
+                <Area type="monotone" dataKey="ingresos" name="Ingresos" stroke="#34d399" strokeWidth={2} fill="url(#gradIngresos)" />
+                <Area type="monotone" dataKey="gastos"   name="Gastos"   stroke="#f87171" strokeWidth={2} fill="url(#gradGastos)" />
+                <Area type="monotone" dataKey="balance"  name="Balance"  stroke="#a78bfa" strokeWidth={2} fill="url(#gradBalance)" strokeDasharray="4 3" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </section>
       </main>
 
       <footer className="w-full px-4 py-6 text-center text-zinc-400 text-[0.7rem] font-mono">
