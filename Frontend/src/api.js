@@ -296,3 +296,68 @@ export const resendVerificationCode = async (data) => {
     return { ok: false, mensaje: "Error de conexión" };
   }
 };
+
+// ── Categorías por Módulo (NUEVO) ─────────────────────────────────────────────
+
+export const getGastosPorCategoria = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/gastos`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getIngresosPorCategoria = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/ingresos`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getAhorrosPorCategoria = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/ahorros`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getImprevistosPorCategoria = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/imprevistos`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getDeudasPorCategoria = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/deudas`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+// ── Admin Panel (NUEVO) ────────────────────────────────────────────────────────
+
+export const getUsuariosPanelAdmin = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.json();
+};
+
+export const getDependientesPanelAdmin = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/auth/dependientes/PanelAdmin`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.json();
+};
