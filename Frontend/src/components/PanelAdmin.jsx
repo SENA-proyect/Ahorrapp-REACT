@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getUsuariosPanelAdmin } from '../api.js';
-
+import { getUsuariosPanelAdmin, getDependientesPanelAdmin } from '../api.js';
 
 export default function PanelAdmin() {
   const [usuarios, setUsuarios] = useState({ totalUsuarios: 0 });
+  const [dependientes, setDependientes] = useState({ totalDependientes: 0 });
 
   useEffect(() => {
     const cargarUsuarios = async () => {
@@ -17,6 +17,19 @@ export default function PanelAdmin() {
     };
 
     cargarUsuarios();
+  }, []);
+
+  useEffect(() => {
+    const cargarDependientes = async () => {
+      try {
+        const data = await getDependientesPanelAdmin();
+        setDependientes(data);
+      } catch (error) {
+        console.error('Error al obtener dependientes:', error);
+      }
+    }
+
+    cargarDependientes();
   }, []);
 
   return (
@@ -119,16 +132,16 @@ export default function PanelAdmin() {
 
           <section className='bg-gradient-to-br from-green-950 to-blue-900 border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
             <h1 className='text-white font-bold text-xl text-center'>Dependientes</h1>
-            <p className='text-white text-center mt-5'>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis,
-              officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem.
-              Recusandae voluptatem nisi amet saepe, in quaerat officiis.
+            <p className='text-white text-center mt-10 text-6xl font-bold'>
+              {dependientes.totalDependientes}
+            </p>
+
+            <p className='text-gray-300 text-center mt-4'>
+              Dependientes registrados
             </p>
           </section>
         </section>
       </main>
-
-      <footer className='p-5'></footer>
     </div>
   );
 }

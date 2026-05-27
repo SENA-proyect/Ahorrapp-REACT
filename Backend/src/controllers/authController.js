@@ -229,11 +229,31 @@ const getUsuariosPanelAdmin = async (req, res) => {
   }
 };
 
+const getDependientesPanelAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query (
+      "SELECT COUNT(*) AS totalDependientes FROM dependientes"
+    )
+    res.json ({
+      totalDependientes: rows.length > 0 ? rows [0].totalDependientes : 0,
+    })
+  } catch (error){
+    console.error('Error al contar dependientes:', error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener dependientes'
+    });
+  }
+};
+
+
 module.exports = {
   register,
   login,
   getUsuarios,
   updateUsuario,
   deleteUsuario,
-  getUsuariosPanelAdmin
+  getUsuariosPanelAdmin,
+  getDependientesPanelAdmin
 };

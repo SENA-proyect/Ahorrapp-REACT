@@ -24,7 +24,7 @@ const getCategorias = async (req, res) => {
 
     return res.status(200).json({ ok: true, categorias: rows });
 
-  } catch (error) {
+  } catch (error) { 
     console.error("Error en getCategorias:", error.message);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
