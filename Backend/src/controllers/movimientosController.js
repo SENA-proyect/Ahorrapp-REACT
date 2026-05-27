@@ -48,7 +48,17 @@ const crearMovimiento = async (req, res) => {
     const { tipo_flujo, subtipo_modulo, datos } = req.body;
 
     if (!datos?.monto) {
-    return res.status(400).json({ ok: false, mensaje: "El campo monto es requerido" });
+      return res.status(400).json({ ok: false, mensaje: "El campo monto es requerido" });
+    }
+
+    // Normalización básica (evita pasar strings vacíos a mysql)
+    datos.monto = datos.monto === '' || datos.monto === undefined ? null : Number(datos.monto);
+    datos.id_categoria = datos.id_categoria === '' ? null : datos.id_categoria;
+    datos.id_dependiente = datos.id_dependiente === '' ? null : datos.id_dependiente;
+    datos.fecha_registro = datos.fecha_registro === '' ? null : datos.fecha_registro;
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('crearMovimiento body:', { tipo_flujo, subtipo_modulo, datos });
     }
 
     // Validar coherencia entre tipo_flujo y subtipo_modulo
@@ -118,7 +128,7 @@ const crearMovimiento = async (req, res) => {
         const { monto, descripcion, fecha_registro, id_categoria } = datos;
         const id_dependiente = datos.id_dependiente || datos.id_dependientes || null;
         const [result] = await connection.query(
-          `INSERT INTO GASTOS (ID_salida, ID_categoria, Monto, Descripcion, Fecha_registro, ID_dependiente)
+          `INSERT INTO GASTOS (ID_salida, ID_categoria, Monto, Descripcion, Fecha_registro, ID_dependientes)
            VALUES (?, ?, ?, ?, ?, ?)`,
           [ID_salida, id_categoria || null, monto, descripcion || null, fecha_registro || null, id_dependiente]
         );
@@ -128,7 +138,7 @@ const crearMovimiento = async (req, res) => {
         const { monto, causa, fecha_registro, id_categoria } = datos;
         const id_dependiente = datos.id_dependiente || datos.id_dependientes || null;
         const [result] = await connection.query(
-          `INSERT INTO IMPREVISTOS (ID_salida, ID_categoria, Monto, Causa, Fecha_registro, ID_dependiente)
+          `INSERT INTO IMPREVISTOS (ID_salida, ID_categoria, Monto, Causa, Fecha_registro, ID_dependientes)
            VALUES (?, ?, ?, ?, ?, ?)`,
           [ID_salida, id_categoria || null, monto, causa || null, fecha_registro || null, id_dependiente]
         );
@@ -156,8 +166,8 @@ const crearMovimiento = async (req, res) => {
 
   } catch (error) {
     await connection.rollback();
-    console.error("Error en crearMovimiento:", error.message);
-    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+    console.error("Error en crearMovimiento:", error);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor", detalle: error.message });
   } finally {
     connection.release();
   }
@@ -279,7 +289,8 @@ const getAhorros = async (req, res) => {
 const updateAhorros = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const { monto, monto_acumulado, descripcion, meta, fecha_meta } = req.body;
+  const { monto, descripcion, meta, fecha_meta } = req.body;
+  const monto_acumulado = req.body.monto_acumulado !== undefined ? req.body.monto_acumulado : req.body.acumulado;
 
   try {
     const [rows] = await pool.query(
@@ -353,7 +364,7 @@ const getGastos = async (req, res) => {
         g.Descripcion AS descripcion,
         g.Fecha_registro AS fecha,
         g.ID_categoria,    
-        g.ID_dependiente AS ID_dependientes,  
+        g.ID_dependientes AS ID_dependientes,  
         c.Nombre AS categoria,
         d.Nombre AS dependiente
 
@@ -361,7 +372,7 @@ const getGastos = async (req, res) => {
        INNER JOIN SALIDA s       ON g.ID_salida      = s.ID_salida
        INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
        LEFT  JOIN CATEGORIAS c   ON g.ID_categoria   = c.ID_categoria
-       LEFT  JOIN DEPENDIENTES d ON g.ID_dependiente = d.ID_dependientes
+       LEFT  JOIN DEPENDIENTES d ON g.ID_dependientes = d.ID_dependientes
        WHERE m.ID_usuario = ?
        ORDER BY g.Fecha_registro DESC`,
       [ID_usuario]
@@ -369,7 +380,7 @@ const getGastos = async (req, res) => {
     res.status(200).json(rows);
   } catch (error) {
     console.error("Error en getGastos:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor", detalle: error.message });
   }
 };
 
@@ -382,7 +393,7 @@ const updateGastos = async (req, res) => {
     try {
     const [rows] = await pool.query(
         `UPDATE GASTOS    
-            SET Monto = ?, Descripcion = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependiente = ?
+            SET Monto = ?, Descripcion = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependientes = ?
             WHERE ID_gastos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
         [monto, descripcion, fecha_registro, id_categoria, id_dependiente, id, ID_usuario]
     );
@@ -440,14 +451,14 @@ const getImprevistos = async (req, res) => {
       `SELECT i.ID_imprevistos AS id, i.Monto AS monto, i.Causa AS causa,
               i.Fecha_registro AS fecha,
               i.ID_categoria,    
-              i.ID_dependiente AS ID_dependientes, 
+              i.ID_dependientes AS ID_dependientes, 
               c.Nombre AS categoria,
               d.Nombre AS dependiente
        FROM IMPREVISTOS i
        INNER JOIN SALIDA s       ON i.ID_salida      = s.ID_salida
        INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
        LEFT  JOIN CATEGORIAS c   ON i.ID_categoria   = c.ID_categoria
-       LEFT  JOIN DEPENDIENTES d ON i.ID_dependiente = d.ID_dependientes
+       LEFT  JOIN DEPENDIENTES d ON i.ID_dependientes = d.ID_dependientes
        WHERE m.ID_usuario = ?
        ORDER BY i.Fecha_registro DESC`,
       [ID_usuario]
@@ -475,7 +486,7 @@ const updateImprevistos = async (req, res) => {
            i.Causa = ?, 
            i.Fecha_registro = ?, 
            i.ID_categoria = ?, 
-           i.ID_dependiente = ?
+           i.ID_dependientes = ?
        WHERE i.ID_imprevistos = ? AND m.ID_usuario = ?`,
       [
         monto, 

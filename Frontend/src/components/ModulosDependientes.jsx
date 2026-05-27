@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import HeaderModulos from './HeaderModulos'
+import { useTheme } from '../hooks/useTheme'
 
 const navItems = [
   { href: '/Dashboard',           emoji: '📊', label: 'Dashboard' },
@@ -14,25 +15,20 @@ const navItems = [
   { href: '/movimientos/nuevo',   emoji: '➕', label: 'Nuevo Movimiento' },
 ]
 
-const usuario = JSON.parse(localStorage.getItem('usuario'))
-
 const PESO_LABELS = { 1: 'Muy bajo', 2: 'Bajo', 3: 'Medio', 4: 'Alto', 5: 'Muy alto' }
 
-const bgPage = { minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', color: 'white', overflowX: 'hidden', background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }
-const modalOverlay = { position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)', padding: '16px' }
-const modalBox = { width: '100%', maxWidth: '460px', borderRadius: '20px', padding: '28px', background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 24px 60px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }
-const inputModal = { width: '100%', padding: '9px 14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)', color: '#f4f4f5', fontSize: '0.88rem', outline: 'none', marginTop: '6px' }
-const labelModal = { fontSize: '0.72rem', fontWeight: '700', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '14px', display: 'block' }
-
 const Dependientes = () => {
-  const navigate  = useNavigate()
-  const location  = useLocation()
-  const token     = localStorage.getItem('token')
-
-  const [dependientes,  setDependientes]  = useState([])
-  const [mostrarModal,  setMostrarModal]  = useState(false)
-  const [editandoId,    setEditandoId]    = useState(null)
-  const [formDatos,     setFormDatos]     = useState({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' })
+  const navigate = useNavigate()
+  const { isDarkMode } = useTheme() // ✅ Hook centralizado
+  const token = localStorage.getItem('token')
+  const usuario = JSON.parse(localStorage.getItem('usuario'))
+  
+  const [dependientes, setDependientes] = useState([])
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [editandoId, setEditandoId] = useState(null)
+  const [formDatos, setFormDatos] = useState({ 
+    Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' 
+  })
 
   useEffect(() => {
     fetch('/api/dependientes', { headers: { Authorization: `Bearer ${token}` } })
@@ -41,17 +37,31 @@ const Dependientes = () => {
       .catch(err => console.error('Error cargando dependientes:', err))
   }, [])
 
-  const handleChange = e => setFormDatos(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  const handleChange = e => 
+    setFormDatos(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
   const handleSubmit = async e => {
     e.preventDefault()
-    const payload = { ...formDatos, Peso_economico: parseInt(formDatos.Peso_economico), Fecha_nacimiento: formDatos.Fecha_nacimiento || null }
+    const payload = { 
+      ...formDatos, 
+      Peso_economico: parseInt(formDatos.Peso_economico), 
+      Fecha_nacimiento: formDatos.Fecha_nacimiento || null 
+    }
+
     if (editandoId) {
-      const res = await fetch(`/api/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+      const res = await fetch(`/api/dependientes/${editandoId}`, { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, 
+        body: JSON.stringify(payload) 
+      })
       if (res.ok) setDependientes(dependientes.map(d => d.ID_dependientes === editandoId ? { ...payload, ID_dependientes: editandoId } : d))
       else { const data = await res.json(); alert(data.error || 'Error al actualizar') }
     } else {
-      const res = await fetch('/api/dependientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+      const res = await fetch('/api/dependientes', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, 
+        body: JSON.stringify(payload) 
+      })
       const data = await res.json()
       if (res.ok) setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
       else alert(data.error || 'Error al guardar')
@@ -60,112 +70,226 @@ const Dependientes = () => {
   }
 
   const handleEditar = d => {
-    setFormDatos({ Nombre: d.Nombre, Relacion: d.Relacion, Ocupacion: d.Ocupacion || '', Fecha_nacimiento: d.Fecha_nacimiento ? d.Fecha_nacimiento.split('T')[0] : '', Peso_economico: String(d.Peso_economico ?? '3') })
+    setFormDatos({ 
+      Nombre: d.Nombre, Relacion: d.Relacion, Ocupacion: d.Ocupacion || '', 
+      Fecha_nacimiento: d.Fecha_nacimiento ? d.Fecha_nacimiento.split('T')[0] : '', 
+      Peso_economico: String(d.Peso_economico ?? '3') 
+    })
     setEditandoId(d.ID_dependientes)
     setMostrarModal(true)
   }
 
   const handleEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
-    const res = await fetch(`/api/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+    const res = await fetch(`/api/dependientes/${id}`, { 
+      method: 'DELETE', 
+      headers: { Authorization: `Bearer ${token}` } 
+    })
     if (res.ok) setDependientes(dependientes.filter(d => d.ID_dependientes !== id))
     else alert('Error al eliminar el dependiente')
   }
 
-  const abrirModal = () => { setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }); setEditandoId(null); setMostrarModal(true) }
-  const cerrarModal = () => { setMostrarModal(false); setEditandoId(null); setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }) }
+  const abrirModal = () => { 
+    setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' })
+    setEditandoId(null)
+    setMostrarModal(true) 
+  }
+  
+  const cerrarModal = () => { 
+    setMostrarModal(false)
+    setEditandoId(null)
+    setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }) 
+  }
 
-  const pesoColor = p => { if (p <= 1) return '#34d399'; if (p <= 2) return '#60a5fa'; if (p <= 3) return '#fbbf24'; if (p <= 4) return '#fb923c'; return '#f87171' }
+  // 🎨 Helper para badge de peso económico adaptativo
+  const getPesoBadgeClass = (peso) => {
+    const base = 'inline-flex items-center px-3 py-1 mt-2 rounded-full text-xs font-bold border transition-colors '
+    if (peso <= 1) return isDarkMode ? base + 'bg-emerald-400/15 text-emerald-400 border-emerald-400/30' : base + 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    if (peso <= 2) return isDarkMode ? base + 'bg-blue-400/15 text-blue-400 border-blue-400/30' : base + 'bg-blue-50 text-blue-700 border-blue-200'
+    if (peso <= 3) return isDarkMode ? base + 'bg-amber-400/15 text-amber-400 border-amber-400/30' : base + 'bg-amber-50 text-amber-700 border-amber-200'
+    if (peso <= 4) return isDarkMode ? base + 'bg-orange-400/15 text-orange-400 border-orange-400/30' : base + 'bg-orange-50 text-orange-700 border-orange-200'
+    return isDarkMode ? base + 'bg-red-400/15 text-red-400 border-red-400/30' : base + 'bg-red-50 text-red-700 border-red-200'
+  }
+
+  // 🎨 Clases condicionales reutilizables
+  const inputClass = `w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 transition-colors ${
+    isDarkMode 
+      ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-indigo-400/60 focus:ring-indigo-400/20' 
+      : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-indigo-400 focus:ring-indigo-200'
+  }`
+
+  const labelClass = `block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`
+
+  const optionStyle = isDarkMode
+    ? { backgroundColor: '#1e293b', color: '#f1f5f9' }
+    : { backgroundColor: '#ffffff', color: '#111827' }
 
   return (
-    <div style={bgPage}>
-      {/* HEADER */}
-      <HeaderModulos section='dependientes'/>
+    <div 
+      className={`min-h-screen w-full overflow-x-hidden transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+      style={{
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
+      <HeaderModulos section="dependientes" />
+      <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
-      <hr style={{ margin: '4px 0', border: 'none', height: '1px', background: 'linear-gradient(to right, transparent, #fbbf24, transparent)' }} />
-
-      {/* MAIN */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '32px', gap: '24px' }}>
+      <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-6 px-4 py-8">
+        {/* BIENVENIDA */}
         <div>
-          <p style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>Bienvenido de vuelta</p>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white' }}>{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
+          <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Bienvenido de vuelta</p>
+          <h2 className={`text-xl font-extrabold sm:text-2xl ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {usuario?.nombre || localStorage.getItem('nombre') || localStorage.getItem('usuario_nombre') || 'Usuario'} <span>👋</span>
+          </h2>
         </div>
 
-        {/* Stat + botón */}
-        <article style={{ padding: '24px 32px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.10)', background: 'radial-gradient(ellipse at left, rgba(99,102,241,0.35), rgba(79,70,229,0.04))', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* CARD TOTAL */}
+        <article className={`flex flex-col justify-between gap-4 rounded-2xl border px-6 py-6 shadow-lg sm:flex-row sm:items-center transition-colors duration-300 ${
+          isDarkMode ? 'border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(99,102,241,0.35),rgba(79,70,229,0.04))] shadow-white/10' 
+                     : 'border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 shadow-indigo-100'
+        }`}>
           <div>
-            <p style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#818cf8', marginBottom: '4px' }}>👩‍👧‍👦 Total Dependientes</p>
-            <p style={{ fontSize: '2rem', fontWeight: '900', color: 'white' }}>{dependientes.length}</p>
+            <p className={`mb-1 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>
+              👩‍👧‍👦 Total Dependientes
+            </p>
+            <p className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {dependientes.length}
+            </p>
           </div>
-          <button onClick={abrirModal} className="px-5 py-2.5 rounded-xl font-bold text-sm cursor-pointer border-none hover:-translate-y-px transition-all duration-300" style={{ background: 'linear-gradient(135deg, #818cf8, #6366f1)', color: 'white' }}>
+          <button 
+            onClick={abrirModal} 
+            className="w-full rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px hover:shadow-lg sm:w-auto"
+          >
             ➕ Agregar Dependiente
           </button>
         </article>
 
-        {/* Cards */}
-        <section style={{ width: '100%', borderRadius: '16px', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 8px 32px rgba(0,0,0,0.35)', padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#fbbf24' }}>📋 Módulo de Dependientes</h3>
+        {/* CARDS GRID */}
+        <section className={`overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-lg p-5 transition-colors duration-300 ${
+          isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-white/80'
+        }`}>
+          <div className={`flex items-center justify-between border-b pb-4 mb-5 ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
+            <h3 className={`text-base font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+              📋 Módulo de Dependientes
+            </h3>
           </div>
+
           {dependientes.length === 0 ? (
-            <p style={{ color: '#71717a', fontStyle: 'italic', fontSize: '0.88rem' }}>No hay dependientes registrados. Agrega tu primer dependiente para comenzar.</p>
+            <p className={`py-5 text-sm italic ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+              No hay dependientes registrados. Agrega tu primer dependiente para comenzar.
+            </p>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '16px' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {dependientes.map(dep => (
-                <div key={dep.ID_dependientes} style={{ borderRadius: '14px', padding: '18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', transition: 'transform 0.18s, box-shadow 0.18s' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)' }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
-                    <p style={{ fontSize: '1rem', fontWeight: '800', color: '#f4f4f5' }}>{dep.Nombre}</p>
-                    <p style={{ fontSize: '0.78rem', color: '#a1a1aa' }}>{dep.Relacion} {dep.Ocupacion ? `· ${dep.Ocupacion}` : ''}</p>
-                    {dep.Fecha_nacimiento && <p style={{ fontSize: '0.72rem', color: '#71717a' }}>Nac: {dep.Fecha_nacimiento.split('T')[0]}</p>}
-                    <span style={{ display: 'inline-block', marginTop: '4px', padding: '3px 10px', borderRadius: '999px', fontSize: '0.7rem', fontWeight: '700', background: `${pesoColor(dep.Peso_economico)}22`, color: pesoColor(dep.Peso_economico), border: `1px solid ${pesoColor(dep.Peso_economico)}44` }}>
+                <article
+                  key={dep.ID_dependientes}
+                  className={`rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                    isDarkMode ? 'border-white/10 bg-white/[0.05]' : 'border-gray-200 bg-gray-50'
+                  }`}
+                >
+                  <div className="flex flex-col gap-2 mb-4">
+                    <p className={`text-lg font-extrabold ${isDarkMode ? 'text-zinc-100' : 'text-gray-900'}`}>
+                      {dep.Nombre}
+                    </p>
+                    <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
+                      {dep.Relacion} {dep.Ocupacion ? `· ${dep.Ocupacion}` : ''}
+                    </p>
+                    {dep.Fecha_nacimiento && (
+                      <p className={`text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+                        Nac: {dep.Fecha_nacimiento.split('T')[0]}
+                      </p>
+                    )}
+                    <span className={getPesoBadgeClass(dep.Peso_economico)}>
                       Peso económico: {PESO_LABELS[dep.Peso_economico] ?? 'N/A'}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => handleEditar(dep)} style={{ flex: 1, padding: '7px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', border: '1px solid rgba(129,140,248,0.5)', background: 'rgba(129,140,248,0.10)', color: '#818cf8', transition: 'all 0.15s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(129,140,248,0.22)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(129,140,248,0.10)'}>Editar</button>
-                    <button onClick={() => handleEliminar(dep.ID_dependientes)} style={{ flex: 1, padding: '7px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', border: '1px solid rgba(248,113,113,0.5)', background: 'rgba(248,113,113,0.10)', color: '#f87171', transition: 'all 0.15s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.22)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(248,113,113,0.10)'}>Eliminar</button>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button 
+                      onClick={() => handleEditar(dep)} 
+                      className={`rounded-lg border px-3 py-2 text-sm font-bold transition-colors ${
+                        isDarkMode ? 'border-indigo-400/50 bg-indigo-400/10 text-indigo-400 hover:bg-indigo-400/20' 
+                                   : 'border-indigo-500 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                      }`}
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      onClick={() => handleEliminar(dep.ID_dependientes)} 
+                      className={`rounded-lg border px-3 py-2 text-sm font-bold transition-colors ${
+                        isDarkMode ? 'border-red-400/50 bg-red-400/10 text-red-400 hover:bg-red-400/20' 
+                                   : 'border-red-500 bg-red-50 text-red-700 hover:bg-red-100'
+                      }`}
+                    >
+                      Eliminar
+                    </button>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
         </section>
       </main>
 
-      <footer style={{ width: '100%', padding: '24px', textAlign: 'center', color: '#3f3f46', fontSize: '0.7rem', fontFamily: 'monospace' }}>
-        <p>© <strong style={{ color: '#fbbf24' }}>2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
+      <footer className={`w-full px-4 py-6 text-center font-mono text-[0.7rem] ${isDarkMode ? 'text-zinc-600' : 'text-gray-500'}`}>
+        <p>© <strong className="text-amber-400">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
       </footer>
 
       {/* MODAL */}
       {mostrarModal && (
-        <div style={modalOverlay}>
-          <div style={modalBox}>
-            <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#fbbf24', marginBottom: '16px' }}>{editandoId ? '✏️ Editar Dependiente' : '➕ Agregar Dependiente'}</h4>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={labelModal}>Nombre *</label>
-              <input style={inputModal} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required placeholder="Nombre del dependiente" />
-              <label style={labelModal}>Relación *</label>
-              <select style={inputModal} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required>
-                <option value="">Selecciona una relación</option>
-                {['Hijo','Hija','Hermano','Hermana','Padre','Madre','Abuelo','Abuela','Otro'].map(r => <option key={r} value={r}>{r}</option>)}
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+          <div className={`w-full max-w-[460px] rounded-2xl border p-6 shadow-2xl transition-colors ${
+            isDarkMode ? 'border-white/10 bg-slate-950/95' : 'border-gray-200 bg-white'
+          }`}>
+            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+              {editandoId ? '✏️ Editar Dependiente' : '➕ Agregar Dependiente'}
+            </h4>
+            
+            <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+              <label className={labelClass}>Nombre *</label>
+              <input className={inputClass} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required placeholder="Nombre del dependiente" />
+
+              <label className={labelClass}>Relación *</label>
+              <select className={inputClass} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required>
+                <option value="" style={optionStyle}>Selecciona una relación</option>
+                {['Hijo','Hija','Hermano','Hermana','Padre','Madre','Abuelo','Abuela','Otro'].map(r => 
+                  <option key={r} value={r} style={optionStyle}>{r}</option>
+                )}
               </select>
-              <label style={labelModal}>Ocupación</label>
-              <input style={inputModal} type="text" name="Ocupacion" value={formDatos.Ocupacion} onChange={handleChange} placeholder="Ocupación del dependiente" />
-              <label style={labelModal}>Fecha de Nacimiento *</label>
-              <input style={inputModal} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required />
-              <label style={labelModal}>Peso Económico</label>
-              <select style={inputModal} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange}>
-                <option value="1">1 - Muy bajo</option>
-                <option value="2">2 - Bajo</option>
-                <option value="3">3 - Medio</option>
-                <option value="4">4 - Alto</option>
-                <option value="5">5 - Muy alto</option>
+
+              <label className={labelClass}>Ocupación</label>
+              <input className={inputClass} type="text" name="Ocupacion" value={formDatos.Ocupacion} onChange={handleChange} placeholder="Ocupación del dependiente" />
+
+              <label className={labelClass}>Fecha de Nacimiento *</label>
+              <input className={inputClass} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required />
+
+              <label className={labelClass}>Peso Económico</label>
+              <select className={inputClass} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange}>
+                <option value="1" style={optionStyle}>1 - Muy bajo</option>
+                <option value="2" style={optionStyle}>2 - Bajo</option>
+                <option value="3" style={optionStyle}>3 - Medio</option>
+                <option value="4" style={optionStyle}>4 - Alto</option>
+                <option value="5" style={optionStyle}>5 - Muy alto</option>
               </select>
-              <div style={{ marginTop: '24px', display: 'flex', gap: '10px' }}>
-                <button type="submit" style={{ flex: 1, padding: '10px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', border: 'none', background: 'linear-gradient(135deg, #818cf8, #6366f1)', color: 'white' }}>Guardar</button>
-                <button type="button" onClick={cerrarModal} style={{ flex: 1, padding: '10px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', background: 'transparent', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.15)' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Cancelar</button>
+
+              <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button 
+                  type="button" 
+                  onClick={cerrarModal} 
+                  className={`w-full rounded-xl border px-5 py-2.5 text-sm font-bold transition-colors sm:w-auto ${
+                    isDarkMode ? 'border-white/15 text-zinc-400 hover:bg-white/10' : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="w-full rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 px-5 py-2.5 text-sm font-bold text-slate-900 sm:w-auto"
+                >
+                  Guardar
+                </button>
               </div>
             </form>
           </div>

@@ -104,7 +104,14 @@ export default function ConfirmarCodigo() {
 
     // El body original tenía las clases de fondo directamente.
     // En React lo ponemos en un div contenedor que ocupa toda la pantalla.
-    <div className="w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-800 via-zinc-950 to-amber-900">
+    <div 
+      className="w-screen min-h-screen flex items-center justify-center"
+      style={{
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
 
       <main className="flex items-center justify-center px-4">
 

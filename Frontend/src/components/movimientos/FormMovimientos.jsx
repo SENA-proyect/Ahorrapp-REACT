@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTheme } from '../../hooks/useTheme'
 import FormIngreso    from './FormIngreso'
 import FormAhorro     from './FormAhorro'
 import FormGasto      from './FormGasto'
@@ -13,6 +14,7 @@ const OPCIONES = {
 
 export default function FormMovimiento() {
   const navigate = useNavigate()
+  const { isDarkMode } = useTheme()
   const [searchParams] = useSearchParams()
   const tipoInicial = searchParams.get('tipo')
   const subtipoInicial = searchParams.get('subtipo')
@@ -40,8 +42,19 @@ export default function FormMovimiento() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-10 flex items-center justify-center">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-xl border border-slate-200">
+    <div 
+      className={`min-h-screen px-4 py-10 flex items-center justify-center ${isDarkMode ? 'text-white' : 'text-slate-800'}`}
+      style={{
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
+      <div className={`w-full max-w-2xl rounded-2xl p-8 shadow-xl border transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-white/[0.08] border-white/10' 
+          : 'bg-white border-slate-200'
+      }`}>
 
         <h2 className="text-3xl font-bold text-slate-800 mb-8 text-center">
           Nuevo movimiento

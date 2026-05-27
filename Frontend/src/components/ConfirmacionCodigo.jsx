@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import { useTheme } from "../hooks/useTheme";
+import RestablecerContra from "./IngresoNuevaContrasena";
 
 export default function CodigoRecu() {
+  const { isDarkMode } = useTheme()
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [countdown, setCountdown] = useState(30);
   const [canResend, setCanResend] = useState(false);
@@ -63,7 +66,14 @@ export default function CodigoRecu() {
   if (verified) return <RestablecerContra />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#080b14] relative overflow-hidden px-4">
+    <div 
+      className="min-h-screen flex items-center justify-center relative overflow-hidden px-4"
+      style={{
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
 
       {/* Ambient glows */}
       <div className="absolute -top-24 -right-16 w-96 h-96 bg-violet-700/20 rounded-full blur-3xl pointer-events-none" />

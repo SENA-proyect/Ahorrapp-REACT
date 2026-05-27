@@ -2,26 +2,15 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../api'
 import HeaderModulos from './HeaderModulos'
+import { useTheme } from '../hooks/useTheme'
 
 const API = 'http://localhost:3000/api/movimientos'
 
-const navItems = [
-  { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
-  { href: '/ModulosIngresos', emoji: '💰', label: 'Ingresos' },
-  { href: '/ModulosGastos', emoji: '💸', label: 'Gastos' },
-  { href: '/ModuloAhorros', emoji: '🎯', label: 'Ahorrar' },
-  { href: '/ModuloImprevistos', emoji: '🛡️', label: 'Imprevistos' },
-  { href: '/ModuloDeudas', emoji: '💳', label: 'Deudas' },
-  { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
-  { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
-  { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
-]
-
-const usuario = JSON.parse(localStorage.getItem('usuario'))
-
 export default function ModuloIngresos() {
   const navigate = useNavigate()
-
+  const { isDarkMode } = useTheme()
+  const usuario = JSON.parse(localStorage.getItem('usuario'))
+  
   const [ingresos, setIngresos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [modalEditar, setModalEditar] = useState(null)
@@ -30,12 +19,10 @@ export default function ModuloIngresos() {
   const [eliminando, setEliminando] = useState(false)
   const [errorModal, setErrorModal] = useState(null)
   const [categorias, setCategorias] = useState([])
-  const [menuOpen, setMenuOpen] = useState(false)
 
   const cargarIngresos = () => {
     setCargando(true)
     const token = localStorage.getItem('token')
-
     fetch(`${API}/ingresos`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(data => {
@@ -76,12 +63,10 @@ export default function ModuloIngresos() {
 
   const guardarEdicion = async () => {
     setErrorModal(null)
-
     if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0) {
       setErrorModal('El monto debe ser un número mayor a 0')
       return
     }
-
     setGuardando(true)
     const token = localStorage.getItem('token')
 
@@ -119,13 +104,11 @@ export default function ModuloIngresos() {
   const confirmarEliminar = async () => {
     setEliminando(true)
     const token = localStorage.getItem('token')
-
     try {
       const res = await fetch(`${API}/ingresos/${confirmarId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
-
       if (res.ok) {
         setConfirmarId(null)
         cargarIngresos()
@@ -137,92 +120,110 @@ export default function ModuloIngresos() {
     }
   }
 
-  const navButtonClass = isActive =>
-    isActive
-      ? 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-bold text-amber-300 bg-amber-400/20 border border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.4)] transition-all'
-      : 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-semibold text-white bg-white/10 border border-white/5 hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)] transition-all'
-
-  const inputClass =
-    'mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20'
-
-  const labelClass =
-    'mt-4 block text-xs font-bold uppercase tracking-wider text-zinc-400'
-
   const formatFecha = fecha =>
     fecha ? new Date(fecha).toLocaleDateString('es-CO') : '—'
 
+  // Estilos condicionales
   return (
-    <div className="min-h-screen w-full overflow-x-hidden text-white [background:radial-gradient(ellipse_at_30%_20%,#1e3a5f_10%,#0f172a_60%,#1a0f2e_100%)]">
-
+    <div 
+      className={`min-h-screen w-full overflow-x-hidden transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+      style={{
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
       <HeaderModulos section="Ingresos" />
-
       <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
       <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6 md:gap-6 md:p-8">
+        {/* BIENVENIDA */}
         <div>
-          <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
-          <h2 className="break-words text-xl font-extrabold text-white sm:text-2xl">
+          <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Bienvenido de vuelta</p>
+          <h2 className={`break-words text-xl font-extrabold sm:text-2xl ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             {usuario?.nombre || 'Usuario'} <span>👋</span>
           </h2>
         </div>
 
-        <article className="flex flex-col justify-between gap-4 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(34,197,94,0.35),rgba(16,185,129,0.04))] px-5 py-5 shadow-[0_2px_8px_rgba(255,255,255,0.1)] sm:flex-row sm:items-center sm:px-8 sm:py-6">
+        {/* CARD TOTAL */}
+        <article className={`flex flex-col justify-between gap-4 rounded-2xl border px-5 py-5 shadow-lg sm:flex-row sm:items-center sm:px-8 sm:py-6 transition-colors duration-300 ${
+          isDarkMode
+            ? 'border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(34,197,94,0.35),rgba(16,185,129,0.04))] shadow-white/10'
+            : 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 shadow-emerald-100'
+        }`}>
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-wider text-emerald-400">
+            <p className={`mb-1 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
               💰 Total Ingresos
             </p>
-            <p className="break-words text-3xl font-black text-white">
+            <p className={`break-words text-3xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               ${total.toLocaleString('es-CO')}
             </p>
           </div>
 
           <button
             onClick={() => navigate('/movimientos/nuevo')}
-            className="w-full rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px sm:w-auto"
+            className="w-full rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px hover:shadow-lg sm:w-auto"
           >
             ➕ Agregar ingreso
           </button>
         </article>
 
-        <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl backdrop-blur-lg">
-          <div className="flex flex-col gap-1 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
-            <h3 className="text-base font-extrabold text-amber-400">
+        {/* SECCIÓN DE INGRESOS */}
+        <section className={`overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-lg transition-colors duration-300 ${
+          isDarkMode
+            ? 'border-white/10 bg-white/[0.04]'
+            : 'border-gray-200 bg-white/80'
+        }`}>
+          {/* HEADER DE LA SECCIÓN */}
+          <div className={`flex flex-col gap-1 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5 transition-colors ${
+            isDarkMode ? 'border-white/10' : 'border-gray-200'
+          }`}>
+            <h3 className={`text-base font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
               📋 Módulo de Ingresos
             </h3>
-            <span className="text-xs text-zinc-500">
+            <span className={`text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
               {ingresos.length} registro{ingresos.length !== 1 ? 's' : ''}
             </span>
           </div>
 
+          {/* CONTENIDO */}
           <div className="p-4 sm:p-5">
             {cargando ? (
-              <p className="py-5 text-sm italic text-zinc-500">⏳ Cargando...</p>
+              <p className={`py-5 text-sm italic ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>⏳ Cargando...</p>
             ) : ingresos.length === 0 ? (
-              <p className="py-5 text-sm italic text-zinc-500">
+              <p className={`py-5 text-sm italic ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
                 No hay ingresos registrados. Agrega tu primer ingreso para comenzar.
               </p>
             ) : (
               <>
+                {/* VISTA MÓVIL */}
                 <div className="grid gap-3 md:hidden">
                   {ingresos.map(i => (
-                    <article key={i.id} className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+                    <article
+                      key={i.id}
+                      className={`rounded-2xl border p-4 transition-colors ${
+                        isDarkMode
+                          ? 'border-white/10 bg-white/[0.05]'
+                          : 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                          <p className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
                             {formatFecha(i.fecha)}
                           </p>
-                          <h4 className="mt-1 break-words text-sm font-bold text-zinc-100">
+                          <h4 className={`mt-1 break-words text-sm font-bold ${isDarkMode ? 'text-zinc-100' : 'text-gray-900'}`}>
                             {i.fuente || 'Sin fuente'}
                           </h4>
-                          <p className="mt-1 break-words text-sm text-zinc-400">
+                          <p className={`mt-1 break-words text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
                             {i.descripcion || 'Sin descripción'}
                           </p>
-                          <p className="mt-2 text-xs text-zinc-500">
+                          <p className={`mt-2 text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
                             Categoría: {i.categoria || '—'}
                           </p>
                         </div>
 
-                        <p className="shrink-0 text-right text-base font-black text-emerald-400">
+                        <p className={`shrink-0 text-right text-base font-black ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
                           ${Number(i.monto).toLocaleString('es-CO')}
                         </p>
                       </div>
@@ -230,13 +231,21 @@ export default function ModuloIngresos() {
                       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <button
                           onClick={() => abrirEditar(i)}
-                          className="rounded-lg border border-emerald-400/50 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-400"
+                          className={`rounded-lg border px-4 py-2 text-sm font-bold transition-colors ${
+                            isDarkMode
+                              ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20'
+                              : 'border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                          }`}
                         >
                           Editar
                         </button>
                         <button
                           onClick={() => setConfirmarId(i.id)}
-                          className="rounded-lg border border-red-400/50 bg-red-400/10 px-4 py-2 text-sm font-bold text-red-400"
+                          className={`rounded-lg border px-4 py-2 text-sm font-bold transition-colors ${
+                            isDarkMode
+                              ? 'border-red-400/50 bg-red-400/10 text-red-400 hover:bg-red-400/20'
+                              : 'border-red-500 bg-red-50 text-red-700 hover:bg-red-100'
+                          }`}
                         >
                           Eliminar
                         </button>
@@ -245,12 +254,18 @@ export default function ModuloIngresos() {
                   ))}
                 </div>
 
+                {/* VISTA ESCRITORIO */}
                 <div className="hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[900px] border-collapse text-left">
                     <thead>
-                      <tr className="border-b border-white/10">
+                      <tr className={`border-b ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
                         {['Fecha', 'Fuente', 'Categoría', 'Descripción', 'Monto', 'Acciones'].map(col => (
-                          <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                          <th
+                            key={col}
+                            className={`px-4 py-3 text-xs font-bold uppercase tracking-wider ${
+                              isDarkMode ? 'text-zinc-500' : 'text-gray-500'
+                            }`}
+                          >
                             {col}
                           </th>
                         ))}
@@ -258,25 +273,40 @@ export default function ModuloIngresos() {
                     </thead>
                     <tbody>
                       {ingresos.map(i => (
-                        <tr key={i.id} className="border-b border-white/5 transition-colors hover:bg-white/[0.04]">
-                          <td className="px-4 py-3 text-sm text-zinc-300">{formatFecha(i.fecha)}</td>
-                          <td className="px-4 py-3 text-sm text-zinc-300">{i.fuente || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-zinc-300">{i.categoria || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-zinc-300">{i.descripcion || '—'}</td>
-                          <td className="px-4 py-3 text-sm font-extrabold text-emerald-400">
+                        <tr
+                          key={i.id}
+                          className={`border-b transition-colors ${
+                            isDarkMode
+                              ? 'border-white/5 hover:bg-white/[0.04]'
+                              : 'border-gray-100 hover:bg-gray-50'
+                          }`}
+                        >
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{formatFecha(i.fecha)}</td>
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{i.fuente || '—'}</td>
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{i.categoria || '—'}</td>
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{i.descripcion || '—'}</td>
+                          <td className={`px-4 py-3 text-sm font-extrabold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
                             ${Number(i.monto).toLocaleString('es-CO')}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
                               <button
                                 onClick={() => abrirEditar(i)}
-                                className="rounded-lg border border-emerald-400/50 bg-emerald-400/10 px-4 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-400/20"
+                                className={`rounded-lg border px-4 py-1.5 text-xs font-bold transition-colors ${
+                                  isDarkMode
+                                    ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20'
+                                    : 'border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                }`}
                               >
                                 Editar
                               </button>
                               <button
                                 onClick={() => setConfirmarId(i.id)}
-                                className="rounded-lg border border-red-400/50 bg-red-400/10 px-4 py-1.5 text-xs font-bold text-red-400 hover:bg-red-400/20"
+                                className={`rounded-lg border px-4 py-1.5 text-xs font-bold transition-colors ${
+                                  isDarkMode
+                                    ? 'border-red-400/50 bg-red-400/10 text-red-400 hover:bg-red-400/20'
+                                    : 'border-red-500 bg-red-50 text-red-700 hover:bg-red-100'
+                                }`}
                               >
                                 Eliminar
                               </button>
@@ -293,19 +323,28 @@ export default function ModuloIngresos() {
         </section>
       </main>
 
-      <footer className="w-full px-4 py-6 text-center font-mono text-[0.7rem] text-zinc-600">
+      <footer className={`w-full px-4 py-6 text-center font-mono text-[0.7rem] ${isDarkMode ? 'text-zinc-600' : 'text-gray-500'}`}>
         <p>© <strong className="text-amber-400">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
       </footer>
 
+      {/* MODAL EDITAR */}
       {modalEditar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
-          <div className="w-full max-w-[460px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
-            <h4 className="text-lg font-extrabold text-amber-400">✏️ Editar Ingreso</h4>
-            <p className="mt-1 text-xs text-zinc-500">Modifica los campos que necesites y guarda.</p>
+          <div className={`w-full max-w-[460px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${
+            isDarkMode
+              ? 'border-white/10 bg-slate-950/95'
+              : 'border-gray-200 bg-white'
+          }`}>
+            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>✏️ Editar Ingreso</h4>
+            <p className={`mt-1 text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>Modifica los campos que necesites y guarda.</p>
 
-            <label className={labelClass}>Monto *</label>
+            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Monto *</label>
             <input
-              className={inputClass}
+              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
+                isDarkMode
+                  ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-amber-400/20'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-amber-400 focus:ring-amber-200'
+              }`}
               type="number"
               name="monto"
               min="0"
@@ -314,9 +353,13 @@ export default function ModuloIngresos() {
               onChange={handleEditarChange}
             />
 
-            <label className={labelClass}>Categoría</label>
+            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Categoría</label>
             <select
-              className={inputClass}
+              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
+                isDarkMode
+                  ? 'border-white/15 bg-white/10 text-zinc-100 focus:border-amber-400/60 focus:ring-amber-400/20'
+                  : 'border-gray-300 bg-white text-gray-900 focus:border-amber-400 focus:ring-amber-200'
+              }`}
               name="id_categoria"
               value={modalEditar.id_categoria || ''}
               onChange={handleEditarChange}
@@ -327,9 +370,13 @@ export default function ModuloIngresos() {
               ))}
             </select>
 
-            <label className={labelClass}>Fuente</label>
+            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Fuente</label>
             <input
-              className={inputClass}
+              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
+                isDarkMode
+                  ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-amber-400/20'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-amber-400 focus:ring-amber-200'
+              }`}
               type="text"
               name="fuente"
               placeholder="Ej: Salario, Freelance..."
@@ -337,9 +384,13 @@ export default function ModuloIngresos() {
               onChange={handleEditarChange}
             />
 
-            <label className={labelClass}>Descripción</label>
+            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Descripción</label>
             <input
-              className={inputClass}
+              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
+                isDarkMode
+                  ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-amber-400/20'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-amber-400 focus:ring-amber-200'
+              }`}
               type="text"
               name="descripcion"
               placeholder="Descripción opcional"
@@ -347,9 +398,13 @@ export default function ModuloIngresos() {
               onChange={handleEditarChange}
             />
 
-            <label className={labelClass}>Fecha</label>
+            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Fecha</label>
             <input
-              className={inputClass}
+              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
+                isDarkMode
+                  ? 'border-white/15 bg-white/10 text-zinc-100 focus:border-amber-400/60 focus:ring-amber-400/20'
+                  : 'border-gray-300 bg-white text-gray-900 focus:border-amber-400 focus:ring-amber-200'
+              }`}
               type="date"
               name="fecha_registro"
               value={modalEditar.fecha_registro}
@@ -357,7 +412,11 @@ export default function ModuloIngresos() {
             />
 
             {errorModal && (
-              <p className="mt-4 rounded-xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm font-semibold text-red-400">
+              <p className={`mt-4 rounded-xl border px-4 py-3 text-sm font-semibold ${
+                isDarkMode
+                  ? 'border-red-400/40 bg-red-400/10 text-red-400'
+                  : 'border-red-300 bg-red-50 text-red-700'
+              }`}>
                 {errorModal}
               </p>
             )}
@@ -365,7 +424,11 @@ export default function ModuloIngresos() {
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={() => setModalEditar(null)}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
+                className={`rounded-xl border px-5 py-2.5 text-sm font-bold transition-colors ${
+                  isDarkMode
+                    ? 'border-white/15 bg-transparent text-zinc-400 hover:bg-white/10'
+                    : 'border-gray-300 bg-transparent text-gray-600 hover:bg-gray-100'
+                }`}
               >
                 Cancelar
               </button>
@@ -381,16 +444,25 @@ export default function ModuloIngresos() {
         </div>
       )}
 
+      {/* MODAL CONFIRMAR ELIMINAR */}
       {confirmarId && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
-          <div className="w-full max-w-[380px] rounded-2xl border border-red-400/30 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
-            <h4 className="text-lg font-extrabold text-red-400">🗑️ ¿Eliminar ingreso?</h4>
-            <p className="mt-2 text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
+          <div className={`w-full max-w-[380px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${
+            isDarkMode
+              ? 'border-red-400/30 bg-slate-950/95'
+              : 'border-red-200 bg-white'
+          }`}>
+            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>🗑️ ¿Eliminar ingreso?</h4>
+            <p className={`mt-2 text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Esta acción no se puede deshacer.</p>
 
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={() => setConfirmarId(null)}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
+                className={`rounded-xl border px-5 py-2.5 text-sm font-bold transition-colors ${
+                  isDarkMode
+                    ? 'border-white/15 bg-transparent text-zinc-400 hover:bg-white/10'
+                    : 'border-gray-300 bg-transparent text-gray-600 hover:bg-gray-100'
+                }`}
               >
                 Cancelar
               </button>

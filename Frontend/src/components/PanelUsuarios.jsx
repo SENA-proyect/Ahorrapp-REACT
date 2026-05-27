@@ -1,7 +1,9 @@
 
 import { useState, useEffect } from 'react';
+import { useTheme } from '../hooks/useTheme';
 
 export default function PanelUsuarios() {
+  const { isDarkMode } = useTheme()
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -126,7 +128,14 @@ export default function PanelUsuarios() {
   if (cargando) return <p>Cargando...</p>;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }}>
+    <div 
+      style={{
+        minHeight: '100vh',
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
       <div className="inf-container">
         <h2>Usuarios Registrados</h2>
 

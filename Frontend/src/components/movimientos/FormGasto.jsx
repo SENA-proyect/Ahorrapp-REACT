@@ -4,16 +4,16 @@ import { getCategorias } from '../../api'
 
 export default function FormGasto({ tipoFlujo, subtipo }) {
   const navigate = useNavigate()
-  const [categorias,   setCategorias]   = useState([])
+  const [categorias, setCategorias] = useState([])
   const [dependientes, setDependientes] = useState([])
-  const [cargando,     setCargando]     = useState(false)
-  const [error,        setError]        = useState(null)
-
+  const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState(null)
+  
   const [form, setForm] = useState({
-    monto:          '',
-    descripcion:    '',
+    monto: '',
+    descripcion: '',
     fecha_registro: '',
-    id_categoria:   '',
+    id_categoria: '',
     id_dependiente: '',
   })
 
@@ -21,7 +21,7 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
     getCategorias()
       .then(data => { if (Array.isArray(data)) setCategorias(data) })
       .catch(() => {})
-
+    
     const token = localStorage.getItem('token')
     fetch('http://localhost:3000/api/dependientes', {
       headers: { Authorization: `Bearer ${token}` },
@@ -38,7 +38,7 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
-
+    
     if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0) {
       setError('El monto debe ser un número mayor a 0')
       return
@@ -48,6 +48,11 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
 
     try {
       const token = localStorage.getItem('token')
+      
+      // Limpiar valores vacíos o con solo espacios
+      const categoriaLimpia = form.id_categoria.trim() === '' ? null : form.id_categoria
+      const dependienteLimpio = form.id_dependiente.trim() === '' ? null : form.id_dependiente
+      
       const res = await fetch('http://localhost:3000/api/movimientos', {
         method: 'POST',
         headers: {
@@ -61,20 +66,22 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
             monto:          Number(form.monto),
             descripcion:    form.descripcion    || null,
             fecha_registro: form.fecha_registro || null,
-            id_categoria:   form.id_categoria   || null,
-            id_dependiente: form.id_dependiente || null,
+            id_categoria:   categoriaLimpia ? Number(categoriaLimpia) : null,
+            id_dependiente: dependienteLimpio ? Number(dependienteLimpio) : null,
           },
         }),
       })
 
       const data = await res.json()
+      console.log('Respuesta del servidor:', data)
 
       if (data.ok) {
         navigate('/ModulosGastos')
       } else {
-        setError(data.mensaje)
+        setError(data.mensaje || 'Error al registrar')
       }
-    } catch (_) {
+    } catch (err) {
+      console.error('Error:', err)
       setError('Error al conectar con el servidor')
     } finally {
       setCargando(false)
@@ -86,7 +93,7 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <h3 className="text-xl font-bold text-amber-700">Datos del gasto</h3>
-
+      
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-slate-700">Monto *</label>
         <input
@@ -125,15 +132,13 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
           onChange={handleChange}
         >
           <option value="">Ninguno (Gasto propio)</option>
-            {dependientes.map((dep, index) => (
-              <option 
-                key={dep.ID_dependientes || `dep-${index}`} 
-                value={dep.ID_dependientes}
-              >
-                {dep.Nombre}
-              </option>
-
-            
+          {dependientes.map((dep, index) => (
+            <option 
+              key={dep.ID_dependientes || `dep-${index}`} 
+              value={dep.ID_dependientes}
+            >
+              {dep.Nombre}
+            </option>
           ))}
         </select>
       </div>

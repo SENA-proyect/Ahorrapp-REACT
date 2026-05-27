@@ -1,22 +1,31 @@
 @import "tailwindcss";
 
+/* ✅ Habilitar modo oscuro por clase en Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   * {
     box-sizing: border-box;
   }
-
   body {
     margin: 0;
     padding: 0;
+    /* Fondo base para modo claro */
+    background-color: #f8f9fb;
+    color: #111827;
+  }
+  /* Fondo base para modo oscuro */
+  html.dark body {
+background-color: #050a1b;
+    color: #ffffff;
   }
 }
 
-/* Utilities for NewsDashboard */
+/* Utilities para NewsDashboard */
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -24,7 +33,6 @@
 .news-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .news-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -33,14 +41,11 @@
 .filter-btn {
   transition: all 0.3s ease;
 }
-
 .filter-btn:hover {
   transform: scale(1.05);
 }
-
 .filter-btn.active {
-  background-color: #FACC15; /* amarillo */
+  background-color: #FACC15;
   color: #000;
   font-weight: 600;
 }
-

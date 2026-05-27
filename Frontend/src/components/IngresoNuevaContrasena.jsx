@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTheme } from "../hooks/useTheme";
 
 export default function RestablecerContra() {
+  const { isDarkMode } = useTheme()
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [newPass, setNewPass] = useState("");
@@ -22,7 +24,14 @@ export default function RestablecerContra() {
   const strengthWidth = ["w-0", "w-1/3", "w-2/3", "w-full"][strength];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#080b14] relative overflow-hidden px-4">
+    <div 
+      className="min-h-screen flex items-center justify-center relative overflow-hidden px-4"
+      style={{
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
 
       {/* Ambient glows */}
       <div className="absolute -top-32 -left-24 w-96 h-96 bg-violet-700/20 rounded-full blur-3xl pointer-events-none" />

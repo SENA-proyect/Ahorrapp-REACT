@@ -1,10 +1,20 @@
 // src/components/PanelDependientes.jsx
 import { Link } from 'react-router-dom'
+import { useTheme } from '../hooks/useTheme'
 
 
 export default function PanelDependientes({ dependientes = [] }) {
+  const { isDarkMode } = useTheme()
+  
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }} >
+    <div 
+      style={{
+        minHeight: '100vh',
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+      }}
+    >
 
       <div className="inf-container">
         <h2>Dependientes</h2>

@@ -1,6 +1,7 @@
 const API_URL = "http://localhost:3000/api";
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
+
 export const registerUser = async (datos) => {
   // datos viene con { nombre, apellido, correo, password }
   const response = await fetch(`${API_URL}/auth/register`, {
@@ -11,21 +12,20 @@ export const registerUser = async (datos) => {
   return response.json();
 };
 
-
 export const loginUser = async (datos) => {
-  // datos viene con { correo, password }
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(datos),
-  });
-  return response.json();
+  // datos viene con { correo, password }
+  const response = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(datos),
+  });
+  return response.json();
 };
 
 // ── Dependientes ────────────────────────────────────────────────────────────────
+
 export const getDependientes = async () => {
   const token = localStorage.getItem('token');
-  
   try {
     const res = await fetch('http://localhost:3000/api/dependientes', {
       method: 'GET',
@@ -34,12 +34,10 @@ export const getDependientes = async () => {
         'Authorization': `Bearer ${token}`
       }
     });
-
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(errorData.error || 'Error al obtener dependientes');
     }
-
     return await res.json(); // Esto devuelve el array de dependientes
   } catch (error) {
     console.error("Error en API getDependientes:", error);
@@ -47,80 +45,77 @@ export const getDependientes = async () => {
   }
 };
 
-
 // ── Categorías ────────────────────────────────────────────────────────────────
+
 export const getCategorias = async () => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await response.json();
-  return data.categorias ?? [];
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json();
+  return data.categorias ?? [];
 };
 
 export const crearCategoria = async (datos) => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(datos),
-  });
-  return response.json();
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(datos),
+  });
+  return response.json();
 };
 
 export const editarCategoria = async (id, datos) => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(datos),
-  });
-  return response.json();
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(datos),
+  });
+  return response.json();
 };
 
 export const deshabilitarCategoria = async (id) => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/${id}/deshabilitar`, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.json();
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/${id}/deshabilitar`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.json();
 };
 
 export const habilitarCategoria = async (id) => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/${id}/habilitar`, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.json();
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/categorias/${id}/habilitar`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.json();
 };
 
 // ── Movimientos y Finanzas (Para el Asistente) ────────────────────────────────
+
 export const getMovimientos = async () => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/movimientos`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  
   if (!response.ok) return []; // Si hay error 404 o 500, devolvemos array vacío
-
   const data = await response.json();
   // Esto asegura que siempre devuelva un array para que .filter() no falle
   return Array.isArray(data) ? data : (data.movimientos || []);
 };
 
-
 export const getResumenFinancieroBreve = async () => {
   try {
     const movimientos = await getMovimientos();
-    
     const deudas = movimientos.filter(m => m.tipo === 'deuda' || m.tipo_movimiento === 'deuda');
     const ahorros = movimientos.filter(m => m.tipo === 'ahorro' || m.tipo_movimiento === 'ahorro');
     const ingresosTotales = movimientos
@@ -134,7 +129,7 @@ export const getResumenFinancieroBreve = async () => {
     contextoTextual += `- Ingresos totales de este mes: $${ingresosTotales}\n`;
     contextoTextual += `- Gastos totales de este mes: $${gastosTotales}\n`;
     contextoTextual += `- Balance actual: $${ingresosTotales - gastosTotales}\n`;
-    
+
     contextoTextual += `\nDEUDAS ACTIVAS:\n`;
     if (deudas.length === 0) contextoTextual += "  Sin deudas registradas.\n";
     deudas.forEach(d => {
@@ -155,9 +150,9 @@ export const getResumenFinancieroBreve = async () => {
 };
 
 // ── Exportar Datos ──────────────────────────────────────────────────────────
+
 export const exportarDatos = async (payload, { onError, onDone } = {}) => {
   const token = localStorage.getItem("token");
-  
   try {
     const response = await fetch(`${API_URL}/exportar`, {
       method: "POST",
@@ -167,7 +162,6 @@ export const exportarDatos = async (payload, { onError, onDone } = {}) => {
       },
       body: JSON.stringify(payload),
     });
-
     if (!response.ok) {
       const errorData = await response.json();
       const error = new Error(errorData.error || "Error al exportar datos");
@@ -181,13 +175,13 @@ export const exportarDatos = async (payload, { onError, onDone } = {}) => {
 
     let filename = `reporte_financiero.${payload.formato}`;
     if (contentDisposition) {
-      const match = contentDisposition.match(/filename\"?=\"?([^;\"]+)/i);
+      const match = contentDisposition.match(/filename\="?=?"([^;"]+)/i);
       if (match && match[1]) filename = match[1].trim();
     }
 
     const blob = await response.blob();
 
-    // Si por error el backend devolvió JSON/HTML, evita “descargas” corruptas.
+    // Si por error el backend devolvió JSON/HTML, evita "descargas" corruptas.
     if (!contentType.includes('application/pdf') && !contentType.includes('text/csv') && payload.formato !== 'json') {
       const text = await blob.text().catch(() => '');
       try {
@@ -211,9 +205,7 @@ export const exportarDatos = async (payload, { onError, onDone } = {}) => {
       document.body.removeChild(a);
     }, 0);
 
-
     if (onDone) onDone();
-    
   } catch (error) {
     console.error("Error en exportarDatos:", error);
     if (onError) onError(error.message);
@@ -237,10 +229,10 @@ export const getHistorialExportaciones = async (params = {}) => {
 };
 
 // ── Noticias ────────────────────────────────────────────────────────────────
+
 export const getNoticiasEconomicas = async ({ categoria = 'economia', pagina = 1 } = {}) => {
   const token = localStorage.getItem('token');
   const url = `${API_URL}/noticias?categoria=${encodeURIComponent(categoria)}&pagina=${encodeURIComponent(pagina)}`;
-
   const res = await fetch(url, {
     method: 'GET',
     headers: {
@@ -248,15 +240,12 @@ export const getNoticiasEconomicas = async ({ categoria = 'economia', pagina = 1
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
-
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Error al obtener noticias');
   }
-
   return res.json();
 };
-
 
 export const eliminarExportacion = async (id) => {
   const token = localStorage.getItem('token');
@@ -271,4 +260,39 @@ export const eliminarExportacion = async (id) => {
     throw new Error(errorData.error || 'Error al eliminar exportación');
   }
   return response.json();
+};
+
+// ── Verificación de Email (NUEVO) ─────────────────────────────────────────────
+
+// 1. Función para verificar el código
+export const verifyEmailCode = async (data) => {
+  try {
+    // NOTA: La ruta incluye "/auth" para coincidir con tu backend
+    const response = await fetch(`${API_URL}/auth/verify-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.email, code: data.code }),
+    });
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error verificando código:", error);
+    return { ok: false, mensaje: "Error de conexión" };
+  }
+};
+
+// 2. Función para reenviar el código
+export const resendVerificationCode = async (data) => {
+  try {
+    // NOTA: La ruta incluye "/auth" para coincidir con tu backend
+    const response = await fetch(`${API_URL}/auth/resend-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.email }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error reenviando código:", error);
+    return { ok: false, mensaje: "Error de conexión" };
+  }
 };
