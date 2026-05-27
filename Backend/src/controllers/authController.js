@@ -334,6 +334,40 @@ const deleteUsuario = async (req, res) => {
   }
 };
 
+const getUsuariosPanelAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT COUNT(*) AS totalUsuarios FROM USUARIOS"
+    );
+    res.json({
+      totalUsuarios: rows.length > 0 ? rows[0].totalUsuarios : 0,
+    });
+  } catch (error) {
+    console.error('Error al contar usuarios:', error);
+    res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener usuarios'
+    });
+  }
+};
+
+const getDependientesPanelAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT COUNT(*) AS totalDependientes FROM DEPENDIENTES"
+    );
+    res.json({
+      totalDependientes: rows.length > 0 ? rows[0].totalDependientes : 0,
+    });
+  } catch (error) {
+    console.error('Error al contar dependientes:', error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener dependientes'
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
@@ -342,4 +376,6 @@ module.exports = {
   getUsuarios,
   updateUsuario,
   deleteUsuario,
+  getUsuariosPanelAdmin,
+  getDependientesPanelAdmin,
 };

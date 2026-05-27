@@ -7,7 +7,9 @@ const {
   updateUsuario, 
   deleteUsuario,
   verifyEmail,
-  resendCode
+  resendCode,
+  getUsuariosPanelAdmin,
+  getDependientesPanelAdmin
 } = require("../controllers/authController");
 const { verifyToken } = require("../middlewares/authMiddleware");
 
@@ -21,5 +23,7 @@ router.post("/resend-code", resendCode);
 router.get("/PanelUsuarios", verifyToken, getUsuarios);
 router.put("/PanelUsuarios/:id", verifyToken, updateUsuario);
 router.delete("/PanelUsuarios/:id", verifyToken, deleteUsuario);
+router.get("/usuarios/PanelAdmin", verifyToken, getUsuariosPanelAdmin);
+router.get("/dependientes/PanelAdmin", verifyToken, getDependientesPanelAdmin);
 
 module.exports = router;
