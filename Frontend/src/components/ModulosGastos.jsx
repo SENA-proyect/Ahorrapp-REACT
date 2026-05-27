@@ -1,437 +1,252 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getCategorias, getDependientes } from '../api'
 import HeaderModulos from './HeaderModulos'
 
 const API = 'http://localhost:3000/api/movimientos'
 
+const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
+const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
 
-const usuario = JSON.parse(localStorage.getItem('usuario'))
+const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
+const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
 
-const Gastos = () => {
+export default function ModulosGastos() {
   const navigate = useNavigate()
-  const location = useLocation()
+  const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
 
-  const [gastos,       setGastos]       = useState([])
-  const [cargando,     setCargando]     = useState(true)
-  const [modalEditar,  setModalEditar]  = useState(null)
-  const [confirmarId,  setConfirmarId]  = useState(null)
-  const [guardando,    setGuardando]    = useState(false)
-  const [eliminando,   setEliminando]   = useState(false)
-  const [errorModal,   setErrorModal]   = useState(null)
-  const [categorias,   setCategorias]   = useState([])
-  const [dependientes, setDependientes] = useState([])
+  const [gastos,      setGastos]      = useState([])
+  const [cargando,    setCargando]    = useState(true)
+  const [categorias,  setCategorias]  = useState([])
+  const [dependientes,setDependientes]= useState([])
+  const [modalEditar, setModalEditar] = useState(null)
+  const [confirmarId, setConfirmarId] = useState(null)
+  const [guardando,   setGuardando]   = useState(false)
+  const [eliminando,  setEliminando]  = useState(false)
+  const [errorModal,  setErrorModal]  = useState(null)
 
-  const cargarGastos = () => {
+  const cargar = () => {
     setCargando(true)
     const token = localStorage.getItem('token')
     fetch(`${API}/gastos`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setGastos(data) })
+      .then(d => { if (Array.isArray(d)) setGastos(d) })
       .catch(() => {})
       .finally(() => setCargando(false))
   }
 
   useEffect(() => {
-    getCategorias().then(data => { if (Array.isArray(data)) setCategorias(data) }).catch(() => {})
+    cargar()
+    getCategorias().then(d => { if (Array.isArray(d)) setCategorias(d) }).catch(() => {})
+    getDependientes().then(d => { if (Array.isArray(d)) setDependientes(d) }).catch(() => {})
   }, [])
 
-  useEffect(() => {
-    getDependientes().then(data => { if (Array.isArray(data)) setDependientes(data) }).catch(() => {})
-  }, [])
-
-  useEffect(() => { cargarGastos() }, [])
-
-  const total = gastos.reduce((acc, g) => acc + Number(g.monto), 0)
+  const total = useMemo(() => gastos.reduce((a, g) => a + Number(g.monto || 0), 0), [gastos])
 
   const abrirEditar = (g) => {
     setErrorModal(null)
     setModalEditar({
-      id: g.id,
-      monto: String(g.monto),
-      id_categoria: g.ID_categoria || '',
-      id_dependientes: g.ID_dependientes || '',
+      id: g.id, monto: String(g.monto),
       descripcion: g.descripcion || '',
-      fecha: g.fecha ? g.fecha.slice(0, 10) : '',
+      fecha_registro: g.fecha ? g.fecha.slice(0, 10) : '',
+      id_categoria: g.id_categoria || '',
+      id_dependientes: g.id_dependientes || '',
     })
   }
 
-  const handleEditarChange = (e) =>
-    setModalEditar(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  const handleChange = (e) => setModalEditar(p => ({ ...p, [e.target.name]: e.target.value }))
 
-  const guardarEdicion = async () => {
+  const guardar = async () => {
     setErrorModal(null)
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0) {
-      setErrorModal('El monto debe ser un número mayor a 0')
-      return
-    }
+    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0)
+      return setErrorModal('El monto debe ser mayor a 0')
     setGuardando(true)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API}/gastos/${modalEditar.id}`, {
+      const res  = await fetch(`${API}/gastos/${modalEditar.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           monto: Number(modalEditar.monto),
           descripcion: modalEditar.descripcion || null,
-          fecha_registro: modalEditar.fecha || null,
+          fecha_registro: modalEditar.fecha_registro || null,
           id_categoria: modalEditar.id_categoria || null,
           id_dependientes: modalEditar.id_dependientes || null,
         }),
       })
       const data = await res.json()
-      if (res.ok) { setModalEditar(null); cargarGastos() }
+      if (res.ok) { setModalEditar(null); cargar() }
       else setErrorModal(data.mensaje || 'Error al guardar')
-    } catch {
-      setErrorModal('Error al conectar con el servidor')
-    } finally {
-      setGuardando(false)
-    }
+    } catch { setErrorModal('Error al conectar con el servidor') }
+    finally { setGuardando(false) }
   }
 
-  const confirmarEliminar = async () => {
+  const eliminar = async () => {
     setEliminando(true)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API}/gastos/${confirmarId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) { setConfirmarId(null); cargarGastos() }
+      const res = await fetch(`${API}/gastos/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      if (res.ok) { setConfirmarId(null); cargar() }
     } catch {}
     finally { setEliminando(false) }
   }
 
+  const nombreDep = (id) => {
+    if (!id) return null
+    const dep = dependientes.find(d => String(d.ID_dependientes) === String(id))
+    return dep?.Nombre || null
+  }
+
   return (
-    <div
-      className="min-h-screen w-full flex flex-col text-white overflow-x-hidden"
-      style={{ background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }}
-    >
+    <div className="min-h-screen w-full flex flex-col text-white overflow-x-hidden"
+      style={{ background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }}>
 
-      {/* HEADER — componente externo, sin cambios */}
       <HeaderModulos section="Gastos" />
+      <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
-      {/* SEPARADOR — línea horizontal decorativa */}
-      {/* my-1 → margin top y bottom de 4px   border-none → sin borde por defecto de <hr> */}
-      {/* El degradado lineal también va en style inline */}
-      <hr
-        className="my-1 border-none h-px"
-        style={{ background: 'linear-gradient(to right, transparent, #fbbf24, transparent)' }}
-      />
+      <main className="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-4 py-5 sm:px-6 sm:py-6 md:p-8 gap-6">
 
-      {/* ─── MAIN ───────────────────────────────────────────────────────────────
-          flex-1         → flex: 1  (ocupa todo el espacio vertical sobrante)
-          flex flex-col  → columna
-          w-full         → ancho completo
-          max-w-[1400px] → maxWidth 1400px (valor arbitrario con corchetes)
-          mx-auto        → margin izquierdo y derecho: auto  (centrado horizontal)
-          p-8            → padding: 32px (8 * 4px = 32px en escala Tailwind)
-          gap-6          → gap: 24px entre hijos del flex
-      */}
-      <main className="flex-1 flex flex-col w-full max-w-[1400px] mx-auto p-8 gap-6">
-
-        {/* Saludo */}
         <div>
-          {/* text-sm → 0.875rem  text-zinc-400 → color grisáceo */}
           <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
-          {/* text-2xl → 1.5rem   font-extrabold → fontWeight 800 */}
-          <h2 className="text-2xl font-extrabold text-white">
-            {usuario?.nombre || 'Usuario'} <span>👋</span>
-          </h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
         </div>
 
-        {/* ─── TARJETA ESTADÍSTICA ──────────────────────────────────────────────
-            p-6 px-8      → padding vertical 24px, horizontal 32px
-            rounded-2xl   → borderRadius 16px
-            border        → aplica el borde (necesita border-color también)
-            border-white/10 → border color blanco con 10% opacidad
-            flex items-center justify-between → fila, centrado vertical, extremos
-            El fondo degradado va en style inline (Tailwind no tiene radial arbitrario fácil)
-        */}
-        <article
-          className="p-6 px-8 rounded-2xl border border-white/10 flex items-center justify-between"
-          style={{ background: 'radial-gradient(ellipse at left, rgba(239,68,68,0.35), rgba(220,38,38,0.04))' }}
-        >
+        {/* Stat card */}
+        <article className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 sm:px-8 py-5 sm:py-6 rounded-2xl border border-white/10"
+          style={{ background: 'radial-gradient(ellipse at left, rgba(239,68,68,0.35), rgba(220,38,38,0.04))' }}>
           <div>
-            {/* text-xs        → 0.75rem
-                font-bold      → fontWeight 700
-                uppercase      → textTransform uppercase
-                tracking-widest → letterSpacing 0.08em (aprox)
-                text-red-400   → color #f87171
-                mb-1           → marginBottom 4px */}
-            <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">
-              💸 Total Gastos
-            </p>
-            {/* text-4xl → 2.25rem (aprox 2rem original)  font-black → 900 */}
-            <p className="text-4xl font-black text-white">
-              ${total.toLocaleString('es-CO')}
-            </p>
+            <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">💸 Total Gastos</p>
+            <p className="text-3xl sm:text-4xl font-black text-white">{fmt(total)}</p>
+            <p className="text-xs text-zinc-500 mt-1">{gastos.length} registro{gastos.length !== 1 ? 's' : ''} en total</p>
           </div>
-
-          {/* BOTÓN "Registrar Gasto"
-              px-5 py-2.5   → padding horizontal 20px, vertical 10px
-              rounded-xl    → borderRadius 12px
-              font-bold     → 700
-              text-sm       → 0.875rem
-              cursor-pointer
-              border-none   → sin borde
-              hover:-translate-y-px → sube 1px al hacer hover
-              transition-all duration-300 → transición suave en todas las propiedades
-              El degradado de fondo va inline */}
-          <button
-            onClick={() => navigate('/movimientos/nuevo')}
-            className="px-5 py-2.5 rounded-xl font-bold text-sm cursor-pointer border-none hover:-translate-y-px transition-all duration-300 text-white"
-            style={{ background: 'linear-gradient(135deg, #f87171, #ef4444)' }}
-          >
-            ➕ Registrar Gasto
+          <button onClick={() => navigate('/movimientos/nuevo')}
+            className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-sm text-white transition-all duration-300 hover:-translate-y-px"
+            style={{ background: 'linear-gradient(135deg, #f87171, #ef4444)' }}>
+            ➕ Agregar Gasto
           </button>
         </article>
 
-        {/* ─── SECCIÓN TABLA ────────────────────────────────────────────────────
-            rounded-2xl         → 16px
-            bg-white/[0.04]     → fondo blanco al 4% de opacidad
-            backdrop-blur-2xl   → desenfoque de fondo intenso (aprox blur(16px))
-            border border-white/10
-            shadow-[0_8px_32px_rgba(0,0,0,0.35)] → sombra personalizada con corchetes
-            overflow-hidden     → recorta el contenido desbordado (para el border-radius)
-        */}
-        <section className="w-full rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.35)] overflow-hidden">
+        {/* Tabla */}
+        <section className="w-full rounded-2xl border border-white/10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
+          style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)' }}>
 
-          {/* Encabezado de la sección */}
-          {/* px-7 py-5 → padding horizontal 28px, vertical 20px
-              border-b border-white/[0.08] → línea inferior con 8% opacidad
-              flex items-center justify-between */}
-          <div className="px-7 py-5 border-b border-white/[0.08] flex items-center justify-between">
+          <div className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b border-white/[0.08]">
             <h3 className="text-base font-extrabold text-amber-400">📋 Módulo de Gastos</h3>
-            {/* text-xs text-zinc-600 → texto pequeño y muy gris */}
-            <span className="text-xs text-zinc-600">
-              {gastos.length} registro{gastos.length !== 1 ? 's' : ''}
-            </span>
+            <span className="text-xs text-zinc-600">{gastos.length} registro{gastos.length !== 1 ? 's' : ''}</span>
           </div>
 
-          {/* Área de la tabla con scroll horizontal en móvil */}
-          {/* overflow-x-auto → permite scroll horizontal si la tabla no cabe
-              px-2 pb-4       → pequeño padding */}
-          <div className="overflow-x-auto px-2 pb-4">
+          <div className="p-4 sm:p-5">
             {cargando ? (
-              <p className="text-zinc-500 italic p-6 text-sm">⏳ Cargando...</p>
+              <p className="py-8 text-center text-sm italic text-zinc-500 animate-pulse">⏳ Cargando gastos...</p>
             ) : gastos.length === 0 ? (
-              <p className="text-zinc-500 italic p-6 text-sm">
-                No has registrado gastos. Mantén tus cuentas claras agregando tus consumos.
-              </p>
+              <div className="py-12 flex flex-col items-center gap-3 text-center">
+                <span className="text-4xl opacity-30">💸</span>
+                <p className="text-zinc-400 text-sm">No hay gastos registrados aún.</p>
+                <button onClick={() => navigate('/movimientos/nuevo')}
+                  className="mt-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #f87171, #ef4444)' }}>
+                  Registrar primer gasto
+                </button>
+              </div>
             ) : (
-              /* border-collapse → colapsa los bordes de celdas adyacentes
-                 text-left       → alineación de texto a la izquierda por defecto */
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  {/* border-b border-white/[0.08] → línea bajo el encabezado */}
-                  <tr className="border-b border-white/[0.08]">
-                    {['Fecha', 'Categoría', 'Descripción', 'Dependiente', 'Monto', 'Acciones'].map(col => (
-                      /* px-4 py-3         → padding de celda
-                         text-xs font-bold  → pequeño y negrita
-                         text-zinc-500      → gris medio
-                         uppercase tracking-[0.07em] → mayúsculas con espaciado */
-                      <th key={col} className="px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-[0.07em]">
-                        {col}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
+              <>
+                {/* Mobile cards */}
+                <div className="flex flex-col gap-3 md:hidden">
                   {gastos.map(g => (
-                    /* group  → permite que los hijos usen "group-hover:" para reaccionar al hover del padre
-                       border-b border-white/[0.05] → línea entre filas muy sutil
-                       hover:bg-white/[0.04]        → fondo tenue al pasar el mouse
-                       transition-colors             → transición suave del color de fondo */
-                    <tr
-                      key={g.id}
-                      className="border-b border-white/[0.05] hover:bg-white/[0.04] transition-colors"
-                    >
-                      {/* text-sm text-zinc-300 → texto legible pero no tan brillante */}
-                      <td className="px-4 py-3 text-sm text-zinc-300">
-                        {g.fecha ? new Date(g.fecha).toLocaleDateString('es-CO') : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-zinc-300">{g.categoria || '—'}</td>
-                      <td className="px-4 py-3 text-sm text-zinc-300">{g.descripcion || '—'}</td>
-                      <td className="px-4 py-3 text-sm text-zinc-300">{g.dependiente || '—'}</td>
-                      {/* font-extrabold text-red-400 → monto resaltado en rojo */}
-                      <td className="px-4 py-3 text-sm font-extrabold text-red-400">
-                        ${Number(g.monto).toLocaleString('es-CO')}
-                      </td>
-                      <td className="px-4 py-3">
-                        {/* flex gap-2 → botones en fila con espacio entre ellos */}
-                        <div className="flex gap-2">
-                          {/* BOTÓN EDITAR
-                              px-3.5 py-1   → padding cómodo
-                              rounded-lg    → 8px
-                              text-xs font-bold
-                              border border-amber-400/50  → borde amarillo al 50%
-                              bg-amber-400/10             → fondo amarillo al 10%
-                              text-amber-400
-                              hover:bg-amber-400/20       → fondo más intenso al hover
-                              transition-colors cursor-pointer */}
-                          <button
-                            onClick={() => abrirEditar(g)}
-                            className="px-3.5 py-1 rounded-lg text-xs font-bold border border-amber-400/50 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors cursor-pointer"
-                          >
-                            Editar
-                          </button>
-                          {/* BOTÓN ELIMINAR — mismo patrón pero en rojo */}
-                          <button
-                            onClick={() => setConfirmarId(g.id)}
-                            className="px-3.5 py-1 rounded-lg text-xs font-bold border border-red-400/50 bg-red-400/10 text-red-400 hover:bg-red-400/20 transition-colors cursor-pointer"
-                          >
-                            Eliminar
-                          </button>
+                    <article key={g.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-white truncate">{g.descripcion || 'Sin descripción'}</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">{fmtFecha(g.fecha)}</p>
+                          {g.categoria && <p className="text-xs text-zinc-500 mt-1">📂 {g.categoria}</p>}
+                          {nombreDep(g.id_dependientes) && (
+                            <p className="text-xs text-blue-400 mt-1">👤 {nombreDep(g.id_dependientes)}</p>
+                          )}
                         </div>
-                      </td>
-                    </tr>
+                        <p className="shrink-0 text-base font-black text-red-400">{fmt(g.monto)}</p>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button onClick={() => abrirEditar(g)} className="rounded-lg border border-blue-400/50 bg-blue-400/10 py-2 text-xs font-bold text-blue-400 hover:bg-blue-400/20 transition-colors">Editar</button>
+                        <button onClick={() => setConfirmarId(g.id)} className="rounded-lg border border-red-400/50 bg-red-400/10 py-2 text-xs font-bold text-red-400 hover:bg-red-400/20 transition-colors">Eliminar</button>
+                      </div>
+                    </article>
                   ))}
-                </tbody>
-              </table>
+                </div>
+
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full min-w-[850px] border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        {['Fecha', 'Descripción', 'Categoría', 'Dependiente', 'Monto', 'Acciones'].map(col => (
+                          <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">{col}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {gastos.map(g => (
+                        <tr key={g.id} className="border-b border-white/5 hover:bg-white/[0.04] transition-colors">
+                          <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(g.fecha)}</td>
+                          <td className="px-4 py-3 text-sm text-zinc-300 max-w-[200px] truncate">{g.descripcion || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-zinc-300">{g.categoria || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-blue-400">{nombreDep(g.id_dependientes) || '—'}</td>
+                          <td className="px-4 py-3 text-sm font-extrabold text-red-400">{fmt(g.monto)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <button onClick={() => abrirEditar(g)} className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-blue-400/50 bg-blue-400/10 text-blue-400 hover:bg-blue-400/20 transition-colors">Editar</button>
+                              <button onClick={() => setConfirmarId(g.id)} className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-red-400/50 bg-red-400/10 text-red-400 hover:bg-red-400/20 transition-colors">Eliminar</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </section>
       </main>
 
-      {/* FOOTER */}
-      {/* w-full p-6 text-center → centrado y con relleno
-          text-zinc-700 text-[0.7rem] font-mono → muy gris, muy pequeño, monoespaciado */}
-      <footer className="w-full p-6 text-center text-zinc-700 text-[0.7rem] font-mono">
+      <footer className="w-full px-4 py-6 text-center font-mono text-[0.7rem] text-zinc-600">
         <p>© <strong className="text-amber-400">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
       </footer>
 
-      {/* ════════════════════════════════════════════════════════════════════════
-          MODAL EDITAR
-          ════════════════════════════════════════════════════════════════════════
-          fixed inset-0   → position:fixed + top/right/bottom/left = 0  (cubre toda la pantalla)
-          z-[1000]        → zIndex alto para estar sobre todo
-          flex items-center justify-center → centra el cuadro del modal
-          bg-black/65     → fondo negro al 65% de opacidad
-          backdrop-blur-md → desenfoque del fondo
-          p-4             → padding por si la pantalla es pequeña
-      */}
+      {/* Modal Editar */}
       {modalEditar && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/65 backdrop-blur-md p-4">
-          {/* CUADRO DEL MODAL
-              w-full max-w-[460px]  → ocupa todo el ancho pero no más de 460px
-              rounded-[20px]        → borderRadius 20px
-              p-7                   → padding 28px
-              border border-white/[0.12]
-              shadow-[0_24px_60px_rgba(0,0,0,0.6)] → sombra profunda
-              max-h-[90vh] overflow-y-auto → si el modal es muy alto, scroll interno
-              El fondo se deja inline porque es un rgba muy específico */}
-          <div
-            className="w-full max-w-[460px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
-            style={{ background: 'rgba(15,23,42,0.92)' }}
-          >
-            <h4 className="text-lg font-extrabold text-amber-400 mb-1">✏️ Editar Gasto</h4>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <div className="w-full max-w-[460px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
+            style={{ background: 'rgba(15,23,42,0.95)' }}>
+            <h4 className="text-lg font-extrabold text-red-400 mb-1">✏️ Editar Gasto</h4>
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
-            {/* ── CAMPOS DEL FORMULARIO ──
-                Cada label usa las mismas clases:
-                  block         → display block (ocupa su propia línea)
-                  text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400
-                  mt-3.5        → marginTop 14px
-                Cada input/select usa:
-                  w-full        → ancho total
-                  px-3.5 py-2.5 → padding interno
-                  rounded-[10px]
-                  border border-white/[0.15]
-                  bg-white/[0.07]
-                  text-zinc-100 text-sm
-                  outline-none  → sin borde azul de foco por defecto
-                  mt-1.5        → pequeño espacio bajo el label
-            */}
+            <label className={labelCls}>Monto *</label>
+            <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
 
-            <label className="block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400 mt-3.5">
-              Monto *
-            </label>
-            <input
-              className="w-full px-3.5 py-2.5 rounded-[10px] border border-white/[0.15] bg-white/[0.07] text-zinc-100 text-sm outline-none mt-1.5"
-              type="number" name="monto" min="0" step="0.01"
-              value={modalEditar.monto} onChange={handleEditarChange}
-            />
+            <label className={labelCls}>Descripción</label>
+            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
-            <label className="block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400 mt-3.5">
-              Descripción
-            </label>
-            <input
-              className="w-full px-3.5 py-2.5 rounded-[10px] border border-white/[0.15] bg-white/[0.07] text-zinc-100 text-sm outline-none mt-1.5"
-              type="text" name="descripcion" placeholder="Descripción opcional"
-              value={modalEditar.descripcion} onChange={handleEditarChange}
-            />
-
-            <label className="block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400 mt-3.5">
-              Fecha
-            </label>
-            <input
-              className="w-full px-3.5 py-2.5 rounded-[10px] border border-white/[0.15] bg-white/[0.07] text-zinc-100 text-sm outline-none mt-1.5"
-              type="date" name="fecha"
-              value={modalEditar.fecha} onChange={handleEditarChange}
-            />
-
-            <label className="block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400 mt-3.5">
-              Categoría
-            </label>
-            <select
-              className="w-full px-3.5 py-2.5 rounded-[10px] border border-white/[0.15] bg-white/[0.07] text-zinc-100 text-sm outline-none mt-1.5"
-              name="id_categoria" value={modalEditar.id_categoria || ''} onChange={handleEditarChange}
-            >
+            <label className={labelCls}>Categoría</label>
+            <select className={inputCls} name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
               <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-              ))}
+              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
 
-            <label className="block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400 mt-3.5">
-              Dependiente
-            </label>
-            <select
-              className="w-full px-3.5 py-2.5 rounded-[10px] border border-white/[0.15] bg-white/[0.07] text-zinc-100 text-sm outline-none mt-1.5"
-              name="id_dependientes" value={modalEditar.id_dependientes || ''} onChange={handleEditarChange}
-            >
-              <option value="">Sin dependiente</option>
-              {dependientes.map(d => (
-                <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>
-              ))}
+            <label className={labelCls}>Dependiente</label>
+            <select className={inputCls} name="id_dependientes" value={modalEditar.id_dependientes} onChange={handleChange}>
+              <option value="">Ninguno (gasto propio)</option>
+              {dependientes.map(d => <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>)}
             </select>
 
-            {/* MENSAJE DE ERROR
-                mt-3 p-[10px_14px] → margin top + padding asimétrico con valores arbitrarios
-                rounded-[10px]
-                bg-red-400/[0.12]   → fondo rojo muy transparente
-                border border-red-400/35
-                text-red-400 text-[0.8rem] font-semibold */}
-            {errorModal && (
-              <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">
-                {errorModal}
-              </p>
-            )}
+            <label className={labelCls}>Fecha</label>
+            <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />
 
-            {/* BOTONES DEL MODAL
-                mt-6 flex justify-end gap-2.5 */}
+            {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
+
             <div className="mt-6 flex justify-end gap-2.5">
-              {/* CANCELAR
-                  px-5 py-2.5 rounded-[10px] text-sm font-bold cursor-pointer
-                  bg-transparent text-zinc-400
-                  border border-white/[0.15]
-                  hover:bg-white/[0.07] transition-colors */}
-              <button
-                onClick={() => setModalEditar(null)}
-                className="px-5 py-2.5 rounded-[10px] text-sm font-bold cursor-pointer bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors"
-              >
-                Cancelar
-              </button>
-              {/* GUARDAR
-                  disabled:opacity-50 disabled:cursor-not-allowed → estilos cuando está deshabilitado
-                  El degradado va inline */}
-              <button
-                onClick={guardarEdicion}
-                disabled={guardando}
-                className="px-5 py-2.5 rounded-[10px] text-sm font-bold border-none text-[#0f172a] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-opacity"
-                style={{ background: guardando ? 'rgba(251,191,36,0.4)' : 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}
-              >
+              <button onClick={() => setModalEditar(null)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
+              <button onClick={guardar} disabled={guardando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                style={{ background: guardando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)' }}>
                 {guardando ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
@@ -439,32 +254,17 @@ const Gastos = () => {
         </div>
       )}
 
-      {/* ════════════════════════════════════════════════════════════════════════
-          MODAL ELIMINAR — mismo patrón de overlay que el modal de editar
-          Solo cambia el maxWidth (380px) y el color del borde (rojo)
-      */}
+      {/* Modal Eliminar */}
       {confirmarId && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/65 backdrop-blur-md p-4">
-          <div
-            className="w-full max-w-[380px] rounded-[20px] p-7 border border-red-400/25 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
-            style={{ background: 'rgba(15,23,42,0.92)' }}
-          >
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <div className="w-full max-w-[380px] rounded-[20px] p-7 border border-red-400/25 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
+            style={{ background: 'rgba(15,23,42,0.95)' }}>
             <h4 className="text-lg font-extrabold text-red-400 mb-2">🗑️ ¿Eliminar gasto?</h4>
             <p className="text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
-
             <div className="mt-6 flex justify-end gap-2.5">
-              <button
-                onClick={() => setConfirmarId(null)}
-                className="px-5 py-2.5 rounded-[10px] text-sm font-bold cursor-pointer bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmarEliminar}
-                disabled={eliminando}
-                className="px-5 py-2.5 rounded-[10px] text-sm font-bold border-none text-white disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-opacity"
-                style={{ background: eliminando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)' }}
-              >
+              <button onClick={() => setConfirmarId(null)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
+              <button onClick={eliminar} disabled={eliminando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                style={{ background: eliminando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)' }}>
                 {eliminando ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
@@ -474,5 +274,3 @@ const Gastos = () => {
     </div>
   )
 }
-
-export default Gastos

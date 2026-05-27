@@ -1,20 +1,15 @@
-// ============================================================
-//  AhorrApp — presupuestosController.js
-//  CRUD de perfiles de presupuesto + apertura/cierre de períodos
-//  Stack: Node.js / Express / MySQL2 (promise API)
-// ============================================================
-
 const db = require('../config/db'); 
 
 // ─────────────────────────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Dado un ingreso base y los porcentajes del perfil,
- * calcula los montos destinados a cada categoría.
- * El Saldo_anterior se suma al ingreso base antes de distribuir.
- */
+// *******************************************************************
+//  Dado un ingreso base y los porcentajes del perfil,
+//  calcula los montos destinados a cada categoría.
+//  El Saldo_anterior se suma al ingreso base antes de distribuir.
+// *******************************************************************
+
 function calcularMontos(ingresoBase, saldoAnterior, perfil) {
     const total = Number(ingresoBase) + Number(saldoAnterior);
     return {
@@ -28,12 +23,12 @@ function calcularMontos(ingresoBase, saldoAnterior, perfil) {
     };
 }
 
-/**
- * Calcula la fecha de fin de un período dado su fecha de inicio
- * y el Dia_corte del perfil.
- * Ej: inicio = 2025-03-15, dia_corte = 15 → fin = 2025-04-14
- */
-function calcularFechaFin(fechaInicio, diaCorte) {
+
+//  Calcula la fecha de fin de un período dado su fecha de inicio
+//  y el Dia_corte del perfil.
+//  Ej: inicio = 2025-03-15, dia_corte = 15 → fin = 2025-04-14
+
+ function calcularFechaFin(fechaInicio, diaCorte) {
     const inicio = new Date(fechaInicio);
     let anio  = inicio.getFullYear();
     let mes   = inicio.getMonth() + 1; // siguiente mes
@@ -54,10 +49,10 @@ function calcularFechaFin(fechaInicio, diaCorte) {
 //  PERFILES DE PRESUPUESTO — CRUD
 // ─────────────────────────────────────────────────────────────
 
-/**
- * GET /presupuestos
- * Lista todos los perfiles del usuario autenticado.
- */
+
+//   GET /presupuestos
+//  Lista todos los perfiles del usuario autenticado.
+
 const listarPerfiles = async (req, res) => {
     try {
         const [perfiles] = await db.query(
@@ -77,10 +72,10 @@ const listarPerfiles = async (req, res) => {
     }
 };
 
-/**
- * GET /presupuestos/:id
- * Devuelve un perfil específico (solo si pertenece al usuario).
- */
+
+//  * GET /presupuestos/:id
+//  * Devuelve un perfil específico (solo si pertenece al usuario).
+
 const obtenerPerfil = async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -95,11 +90,11 @@ const obtenerPerfil = async (req, res) => {
     }
 };
 
-/**
- * POST /presupuestos
- * Crea un nuevo perfil de presupuesto.
- * Valida que los porcentajes sumen exactamente 100.
- */
+
+//   POST /presupuestos
+//   Crea un nuevo perfil de presupuesto.
+//   Valida que los porcentajes sumen exactamente 100.
+
 const crearPerfil = async (req, res) => {
     const {
         Nombre = 'Mi presupuesto',
@@ -150,11 +145,11 @@ const crearPerfil = async (req, res) => {
     }
 };
 
-/**
- * PUT /presupuestos/:id
- * Edita un perfil existente.
- * No se puede editar un perfil con un período abierto.
- */
+
+//   PUT /presupuestos/:id
+//   Edita un perfil existente.
+//   No se puede editar un perfil con un período abierto.
+
 const editarPerfil = async (req, res) => {
     const { id } = req.params;
 
@@ -230,11 +225,11 @@ const editarPerfil = async (req, res) => {
     }
 };
 
-/**
- * DELETE /presupuestos/:id
- * Elimina un perfil. No se puede eliminar si tiene períodos asociados
- * o si es el perfil activo.
- */
+
+//   DELETE /presupuestos/:id
+//   Elimina un perfil. No se puede eliminar si tiene períodos asociados
+//   o si es el perfil activo.
+
 const eliminarPerfil = async (req, res) => {
     const { id } = req.params;
 
@@ -266,12 +261,11 @@ const eliminarPerfil = async (req, res) => {
     }
 };
 
-/**
- * PUT /presupuestos/:id/activar
- * Activa un perfil y desactiva todos los demás del usuario.
- * Solo se puede activar un perfil si no hay un período abierto
- * en el perfil que estaba activo anteriormente.
- */
+
+//   PUT /presupuestos/:id/activar
+// Activa un perfil y desactiva todos los demás del usuario.
+// Solo se puede activar un perfil si no hay un período abierto en el perfil que estaba activo anteriormente.
+
 const activarPerfil = async (req, res) => {
     const { id } = req.params;
     const ID_usuario = req.user.ID_usuario;

@@ -12,6 +12,7 @@ const navItems = [
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
   { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
   { href: '/Noticias', emoji: '📰', label: 'Noticias' },
+  { href: '/Exportar', emoji: '📈', label: 'Reportes' },
 ]
 
 export default function HeaderModulos({ section = 'Dashboard' }) {
