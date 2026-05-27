@@ -1,272 +1,189 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../api'
 import HeaderModulos from './HeaderModulos'
 
 const API = 'http://localhost:3000/api/movimientos'
 
+const fmt    = (n)   => `$${Number(n).toLocaleString('es-CO')}`
+const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
 
-const usuario = JSON.parse(localStorage.getItem('usuario'))
+const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20'
+const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
 
 export default function ModuloIngresos() {
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const usuario   = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
 
-  const [ingresos, setIngresos] = useState([])
-  const [cargando, setCargando] = useState(true)
+  const [ingresos,    setIngresos]    = useState([])
+  const [cargando,    setCargando]    = useState(true)
+  const [categorias,  setCategorias]  = useState([])
   const [modalEditar, setModalEditar] = useState(null)
   const [confirmarId, setConfirmarId] = useState(null)
-  const [guardando, setGuardando] = useState(false)
-  const [eliminando, setEliminando] = useState(false)
-  const [errorModal, setErrorModal] = useState(null)
-  const [categorias, setCategorias] = useState([])
-  const cargarIngresos = () => {
+  const [guardando,   setGuardando]   = useState(false)
+  const [eliminando,  setEliminando]  = useState(false)
+  const [errorModal,  setErrorModal]  = useState(null)
+
+  const cargar = () => {
     setCargando(true)
     const token = localStorage.getItem('token')
-
     fetch(`${API}/ingresos`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data)) setIngresos(data)
-      })
+      .then(d => { if (Array.isArray(d)) setIngresos(d) })
       .catch(() => {})
       .finally(() => setCargando(false))
   }
 
   useEffect(() => {
-    getCategorias()
-      .then(data => {
-        if (Array.isArray(data)) setCategorias(data)
-      })
-      .catch(err => console.error('Error cargando categorías:', err))
+    cargar()
+    getCategorias().then(d => { if (Array.isArray(d)) setCategorias(d) }).catch(() => {})
   }, [])
 
-  useEffect(() => {
-    cargarIngresos()
-  }, [])
+  const total = useMemo(() => ingresos.reduce((a, i) => a + Number(i.monto || 0), 0), [ingresos])
 
-  const total = ingresos.reduce((acc, i) => acc + Number(i.monto || 0), 0)
-
-  const abrirEditar = i => {
+  const abrirEditar = (i) => {
     setErrorModal(null)
     setModalEditar({
-      id: i.id,
-      monto: String(i.monto),
-      id_categoria: i.id_categoria || '',
-      fuente: i.fuente || '',
-      descripcion: i.descripcion || '',
+      id: i.id, monto: String(i.monto),
+      fuente: i.fuente || '', descripcion: i.descripcion || '',
       fecha_registro: i.fecha ? i.fecha.slice(0, 10) : '',
+      id_categoria: i.id_categoria || '',
     })
   }
 
-  const handleEditarChange = e =>
-    setModalEditar(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  const handleChange = (e) => setModalEditar(p => ({ ...p, [e.target.name]: e.target.value }))
 
-  const guardarEdicion = async () => {
+  const guardar = async () => {
     setErrorModal(null)
-
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0) {
-      setErrorModal('El monto debe ser un número mayor a 0')
-      return
-    }
-
+    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0)
+      return setErrorModal('El monto debe ser mayor a 0')
     setGuardando(true)
     const token = localStorage.getItem('token')
-
     try {
-      const res = await fetch(`${API}/ingresos/${modalEditar.id}`, {
+      const res  = await fetch(`${API}/ingresos/${modalEditar.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           monto: Number(modalEditar.monto),
-          id_categoria: modalEditar.id_categoria || null,
           fuente: modalEditar.fuente || null,
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
+          id_categoria: modalEditar.id_categoria || null,
         }),
       })
-
       const data = await res.json()
-
-      if (res.ok) {
-        setModalEditar(null)
-        cargarIngresos()
-      } else {
-        setErrorModal(data.mensaje || 'Error al guardar')
-      }
-    } catch {
-      setErrorModal('Error al conectar con el servidor')
-    } finally {
-      setGuardando(false)
-    }
+      if (res.ok) { setModalEditar(null); cargar() }
+      else setErrorModal(data.mensaje || 'Error al guardar')
+    } catch { setErrorModal('Error al conectar con el servidor') }
+    finally { setGuardando(false) }
   }
 
-  const confirmarEliminar = async () => {
+  const eliminar = async () => {
     setEliminando(true)
     const token = localStorage.getItem('token')
-
     try {
-      const res = await fetch(`${API}/ingresos/${confirmarId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (res.ok) {
-        setConfirmarId(null)
-        cargarIngresos()
-      }
-    } catch {
-      // silencioso
-    } finally {
-      setEliminando(false)
-    }
+      const res = await fetch(`${API}/ingresos/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      if (res.ok) { setConfirmarId(null); cargar() }
+    } catch {}
+    finally { setEliminando(false) }
   }
 
-  const navButtonClass = isActive =>
-    isActive
-      ? 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-bold text-amber-300 bg-amber-400/20 border border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.4)] transition-all'
-      : 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-semibold text-white bg-white/10 border border-white/5 hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)] transition-all'
-
-  const inputClass =
-    'mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20'
-
-  const labelClass =
-    'mt-4 block text-xs font-bold uppercase tracking-wider text-zinc-400'
-
-  const formatFecha = fecha =>
-    fecha ? new Date(fecha).toLocaleDateString('es-CO') : '—'
-
   return (
-    <div className="min-h-screen w-full overflow-x-hidden text-white [background:radial-gradient(ellipse_at_30%_20%,#1e3a5f_10%,#0f172a_60%,#1a0f2e_100%)]">
+    <div className="min-h-screen w-full flex flex-col text-white overflow-x-hidden"
+      style={{ background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }}>
 
       <HeaderModulos section="Ingresos" />
-
       <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
-      <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6 md:gap-6 md:p-8">
+      <main className="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-4 py-5 sm:px-6 sm:py-6 md:p-8 gap-6">
+
         <div>
           <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
-          <h2 className="break-words text-xl font-extrabold text-white sm:text-2xl">
-            {usuario?.nombre || 'Usuario'} <span>👋</span>
-          </h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
         </div>
 
-        <article className="flex flex-col justify-between gap-4 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(34,197,94,0.35),rgba(16,185,129,0.04))] px-5 py-5 shadow-[0_2px_8px_rgba(255,255,255,0.1)] sm:flex-row sm:items-center sm:px-8 sm:py-6">
+        {/* Stat card */}
+        <article className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 sm:px-8 py-5 sm:py-6 rounded-2xl border border-white/10"
+          style={{ background: 'radial-gradient(ellipse at left, rgba(34,197,94,0.35), rgba(16,185,129,0.04))' }}>
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-wider text-emerald-400">
-              💰 Total Ingresos
-            </p>
-            <p className="break-words text-3xl font-black text-white">
-              ${total.toLocaleString('es-CO')}
-            </p>
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">💰 Total Ingresos</p>
+            <p className="text-3xl sm:text-4xl font-black text-white">{fmt(total)}</p>
+            <p className="text-xs text-zinc-500 mt-1">{ingresos.length} registro{ingresos.length !== 1 ? 's' : ''} en total</p>
           </div>
-
-          <button
-            onClick={() => navigate('/movimientos/nuevo')}
-            className="w-full rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px sm:w-auto"
-          >
-            ➕ Agregar ingreso
+          <button onClick={() => navigate('/movimientos/nuevo')}
+            className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-sm text-slate-900 transition-all duration-300 hover:-translate-y-px"
+            style={{ background: 'linear-gradient(135deg, #34d399, #10b981)' }}>
+            ➕ Agregar Ingreso
           </button>
         </article>
 
-        <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl backdrop-blur-lg">
-          <div className="flex flex-col gap-1 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
-            <h3 className="text-base font-extrabold text-amber-400">
-              📋 Módulo de Ingresos
-            </h3>
-            <span className="text-xs text-zinc-500">
-              {ingresos.length} registro{ingresos.length !== 1 ? 's' : ''}
-            </span>
+        {/* Tabla */}
+        <section className="w-full rounded-2xl border border-white/10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
+          style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)' }}>
+
+          <div className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b border-white/[0.08]">
+            <h3 className="text-base font-extrabold text-amber-400">📋 Módulo de Ingresos</h3>
+            <span className="text-xs text-zinc-600">{ingresos.length} registro{ingresos.length !== 1 ? 's' : ''}</span>
           </div>
 
           <div className="p-4 sm:p-5">
             {cargando ? (
-              <p className="py-5 text-sm italic text-zinc-500">⏳ Cargando...</p>
+              <p className="py-8 text-center text-sm italic text-zinc-500 animate-pulse">⏳ Cargando ingresos...</p>
             ) : ingresos.length === 0 ? (
-              <p className="py-5 text-sm italic text-zinc-500">
-                No hay ingresos registrados. Agrega tu primer ingreso para comenzar.
-              </p>
+              <div className="py-12 flex flex-col items-center gap-3 text-center">
+                <span className="text-4xl opacity-30">💰</span>
+                <p className="text-zinc-400 text-sm">No hay ingresos registrados aún.</p>
+                <button onClick={() => navigate('/movimientos/nuevo')}
+                  className="mt-2 px-5 py-2.5 rounded-xl text-sm font-bold text-slate-900"
+                  style={{ background: 'linear-gradient(135deg, #34d399, #10b981)' }}>
+                  Registrar primer ingreso
+                </button>
+              </div>
             ) : (
               <>
-                <div className="grid gap-3 md:hidden">
+                {/* Mobile cards */}
+                <div className="flex flex-col gap-3 md:hidden">
                   {ingresos.map(i => (
-                    <article key={i.id} className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+                    <article key={i.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                            {formatFecha(i.fecha)}
-                          </p>
-                          <h4 className="mt-1 break-words text-sm font-bold text-zinc-100">
-                            {i.fuente || 'Sin fuente'}
-                          </h4>
-                          <p className="mt-1 break-words text-sm text-zinc-400">
-                            {i.descripcion || 'Sin descripción'}
-                          </p>
-                          <p className="mt-2 text-xs text-zinc-500">
-                            Categoría: {i.categoria || '—'}
-                          </p>
+                          <p className="font-bold text-white truncate">{i.fuente || 'Sin fuente'}</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">{fmtFecha(i.fecha)}</p>
+                          {i.descripcion && <p className="text-xs text-zinc-400 mt-1 truncate">{i.descripcion}</p>}
+                          {i.categoria && <p className="text-xs text-zinc-500 mt-1">📂 {i.categoria}</p>}
                         </div>
-
-                        <p className="shrink-0 text-right text-base font-black text-emerald-400">
-                          ${Number(i.monto).toLocaleString('es-CO')}
-                        </p>
+                        <p className="shrink-0 text-base font-black text-emerald-400">{fmt(i.monto)}</p>
                       </div>
-
-                      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        <button
-                          onClick={() => abrirEditar(i)}
-                          className="rounded-lg border border-emerald-400/50 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-400"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => setConfirmarId(i.id)}
-                          className="rounded-lg border border-red-400/50 bg-red-400/10 px-4 py-2 text-sm font-bold text-red-400"
-                        >
-                          Eliminar
-                        </button>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button onClick={() => abrirEditar(i)} className="rounded-lg border border-emerald-400/50 bg-emerald-400/10 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-400/20 transition-colors">Editar</button>
+                        <button onClick={() => setConfirmarId(i.id)} className="rounded-lg border border-red-400/50 bg-red-400/10 py-2 text-xs font-bold text-red-400 hover:bg-red-400/20 transition-colors">Eliminar</button>
                       </div>
                     </article>
                   ))}
                 </div>
 
-                <div className="hidden overflow-x-auto md:block">
-                  <table className="w-full min-w-[900px] border-collapse text-left">
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full min-w-[750px] border-collapse text-left">
                     <thead>
                       <tr className="border-b border-white/10">
                         {['Fecha', 'Fuente', 'Categoría', 'Descripción', 'Monto', 'Acciones'].map(col => (
-                          <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                            {col}
-                          </th>
+                          <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">{col}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {ingresos.map(i => (
-                        <tr key={i.id} className="border-b border-white/5 transition-colors hover:bg-white/[0.04]">
-                          <td className="px-4 py-3 text-sm text-zinc-300">{formatFecha(i.fecha)}</td>
+                        <tr key={i.id} className="border-b border-white/5 hover:bg-white/[0.04] transition-colors">
+                          <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(i.fecha)}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300">{i.fuente || '—'}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300">{i.categoria || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-zinc-300">{i.descripcion || '—'}</td>
-                          <td className="px-4 py-3 text-sm font-extrabold text-emerald-400">
-                            ${Number(i.monto).toLocaleString('es-CO')}
-                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-300 max-w-[200px] truncate">{i.descripcion || '—'}</td>
+                          <td className="px-4 py-3 text-sm font-extrabold text-emerald-400">{fmt(i.monto)}</td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
-                              <button
-                                onClick={() => abrirEditar(i)}
-                                className="rounded-lg border border-emerald-400/50 bg-emerald-400/10 px-4 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-400/20"
-                              >
-                                Editar
-                              </button>
-                              <button
-                                onClick={() => setConfirmarId(i.id)}
-                                className="rounded-lg border border-red-400/50 bg-red-400/10 px-4 py-1.5 text-xs font-bold text-red-400 hover:bg-red-400/20"
-                              >
-                                Eliminar
-                              </button>
+                              <button onClick={() => abrirEditar(i)} className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-emerald-400/50 bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20 transition-colors">Editar</button>
+                              <button onClick={() => setConfirmarId(i.id)} className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-red-400/50 bg-red-400/10 text-red-400 hover:bg-red-400/20 transition-colors">Eliminar</button>
                             </div>
                           </td>
                         </tr>
@@ -284,83 +201,38 @@ export default function ModuloIngresos() {
         <p>© <strong className="text-amber-400">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
       </footer>
 
+      {/* Modal Editar */}
       {modalEditar && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
-          <div className="w-full max-w-[460px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
-            <h4 className="text-lg font-extrabold text-amber-400">✏️ Editar Ingreso</h4>
-            <p className="mt-1 text-xs text-zinc-500">Modifica los campos que necesites y guarda.</p>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <div className="w-full max-w-[460px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
+            style={{ background: 'rgba(15,23,42,0.95)' }}>
+            <h4 className="text-lg font-extrabold text-emerald-400 mb-1">✏️ Editar Ingreso</h4>
+            <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
-            <label className={labelClass}>Monto *</label>
-            <input
-              className={inputClass}
-              type="number"
-              name="monto"
-              min="0"
-              step="0.01"
-              value={modalEditar.monto}
-              onChange={handleEditarChange}
-            />
+            <label className={labelCls}>Monto *</label>
+            <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
 
-            <label className={labelClass}>Categoría</label>
-            <select
-              className={inputClass}
-              name="id_categoria"
-              value={modalEditar.id_categoria || ''}
-              onChange={handleEditarChange}
-            >
+            <label className={labelCls}>Fuente</label>
+            <input className={inputCls} type="text" name="fuente" placeholder="Ej: Salario, Freelance..." value={modalEditar.fuente} onChange={handleChange} />
+
+            <label className={labelCls}>Categoría</label>
+            <select className={inputCls} name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
               <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1 || c.activa === true).map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-              ))}
+              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
 
-            <label className={labelClass}>Fuente</label>
-            <input
-              className={inputClass}
-              type="text"
-              name="fuente"
-              placeholder="Ej: Salario, Freelance..."
-              value={modalEditar.fuente}
-              onChange={handleEditarChange}
-            />
+            <label className={labelCls}>Descripción</label>
+            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
-            <label className={labelClass}>Descripción</label>
-            <input
-              className={inputClass}
-              type="text"
-              name="descripcion"
-              placeholder="Descripción opcional"
-              value={modalEditar.descripcion}
-              onChange={handleEditarChange}
-            />
+            <label className={labelCls}>Fecha</label>
+            <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />
 
-            <label className={labelClass}>Fecha</label>
-            <input
-              className={inputClass}
-              type="date"
-              name="fecha_registro"
-              value={modalEditar.fecha_registro}
-              onChange={handleEditarChange}
-            />
+            {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
 
-            {errorModal && (
-              <p className="mt-4 rounded-xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm font-semibold text-red-400">
-                {errorModal}
-              </p>
-            )}
-
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                onClick={() => setModalEditar(null)}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={guardarEdicion}
-                disabled={guardando}
-                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-              >
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button onClick={() => setModalEditar(null)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
+              <button onClick={guardar} disabled={guardando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                style={{ background: guardando ? 'rgba(52,211,153,0.4)' : 'linear-gradient(135deg, #34d399, #10b981)' }}>
                 {guardando ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
@@ -368,24 +240,17 @@ export default function ModuloIngresos() {
         </div>
       )}
 
+      {/* Modal Eliminar */}
       {confirmarId && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
-          <div className="w-full max-w-[380px] rounded-2xl border border-red-400/30 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
-            <h4 className="text-lg font-extrabold text-red-400">🗑️ ¿Eliminar ingreso?</h4>
-            <p className="mt-2 text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
-
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                onClick={() => setConfirmarId(null)}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmarEliminar}
-                disabled={eliminando}
-                className="rounded-xl bg-gradient-to-br from-red-400 to-red-600 px-5 py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
-              >
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <div className="w-full max-w-[380px] rounded-[20px] p-7 border border-red-400/25 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
+            style={{ background: 'rgba(15,23,42,0.95)' }}>
+            <h4 className="text-lg font-extrabold text-red-400 mb-2">🗑️ ¿Eliminar ingreso?</h4>
+            <p className="text-sm text-zinc-400">Esta acción no se puede deshacer.</p>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button onClick={() => setConfirmarId(null)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
+              <button onClick={eliminar} disabled={eliminando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                style={{ background: eliminando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)' }}>
                 {eliminando ? 'Eliminando...' : 'Eliminar'}
               </button>
             </div>
