@@ -3,7 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../hooks/useTheme'
 import HeaderModulos from './HeaderModulos'
 import {
-  getCategorias,
+  getGastosPorCategoria,
+  getIngresosPorCategoria,
+  getAhorrosPorCategoria,
+  getImprevistosPorCategoria,
+  getDeudasPorCategoria,
   crearCategoria,
   editarCategoria,
   deshabilitarCategoria,
@@ -42,11 +46,34 @@ export default function ModuloCategorias() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    getCategorias()
-      .then(data => {
-        if (Array.isArray(data)) setCategorias(data)
+    Promise.all([
+      getGastosPorCategoria(),
+      getIngresosPorCategoria(),
+      getAhorrosPorCategoria(),
+      getImprevistosPorCategoria(),
+      getDeudasPorCategoria(),
+    ]).then(([gastos, ingresos, ahorros, imprevistos, deudas]) => {
+      if (!Array.isArray(gastos)) return
+
+      const combinadas = gastos.map(cat => {
+        const ing = ingresos.find(c => c.id === cat.id)
+        const aho = ahorros.find(c => c.id === cat.id)
+        const imp = imprevistos.find(c => c.id === cat.id)
+        const deu = deudas.find(c => c.id === cat.id)
+
+        return {
+          ...cat,
+          total_movimientos:
+            Number(cat.total_gastos || 0) +
+            Number(ing?.total_ingresos || 0) +
+            Number(aho?.total_ahorros || 0) +
+            Number(imp?.total_imprevistos || 0) +
+            Number(deu?.total_deudas || 0),
+        }
       })
-      .catch(() => {})
+
+      setCategorias(combinadas)
+    }).catch(() => {})
   }, [])
 
   const activas = categorias.filter(c => c.activa == 1 || c.activa === true)
@@ -72,6 +99,7 @@ export default function ModuloCategorias() {
           activa: true,
           sistema: false,
           es_global: false,
+          total_movimientos: 0,
         },
       ])
       setFormNombre('')
@@ -143,6 +171,13 @@ export default function ModuloCategorias() {
 
   const labelClass = `mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`
 
+  const formatMoney = value =>
+    new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      maximumFractionDigits: 0,
+    }).format(Number(value || 0))
+
   const closeModal = () => {
     setModalAgregar(false)
     setModalEditar(false)
@@ -185,7 +220,6 @@ export default function ModuloCategorias() {
             </p>
             <p className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{activas.length}</p>
           </div>
-
           <button
             onClick={() => setModalAgregar(true)}
             className="w-full rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px hover:shadow-lg sm:w-auto"
@@ -219,6 +253,12 @@ export default function ModuloCategorias() {
                         <div className="min-w-0">
                           <h4 className={`break-words text-sm font-bold ${isDarkMode ? 'text-zinc-100' : 'text-gray-900'}`}>{cat.nombre}</h4>
                           <p className={`mt-1 break-words text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>{cat.descripcion || 'Sin descripción'}</p>
+                          <div className={`mt-3 rounded-xl border px-3 py-2 text-xs transition-colors ${
+                            isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-gray-50'
+                          }`}>
+                            <p className={`${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>Total movimientos</p>
+                            <p className={`font-bold ${isDarkMode ? 'text-amber-300' : 'text-blue-600'}`}>{formatMoney(cat.total_movimientos)}</p>
+                          </div>
                         </div>
                         <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[0.68rem] font-bold ${
                           cat.es_global
@@ -228,7 +268,6 @@ export default function ModuloCategorias() {
                           {cat.es_global ? 'Sistema' : 'Personal'}
                         </span>
                       </div>
-
                       {!esSistema(cat) && (
                         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                           <button
@@ -236,7 +275,7 @@ export default function ModuloCategorias() {
                             className={`rounded-lg border px-4 py-2 text-sm font-bold transition-colors ${
                               isDarkMode
                                 ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20'
-                                : 'border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                    : 'border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                             }`}
                           >
                             Editar
@@ -262,7 +301,7 @@ export default function ModuloCategorias() {
                   <table className="w-full min-w-[760px] border-collapse text-left">
                     <thead>
                       <tr className={`border-b ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
-                        {['Nombre', 'Descripción', 'Tipo', 'Acciones'].map(col => (
+                        {['Nombre', 'Descripción', 'Tipo', 'Total movimientos', 'Acciones'].map(col => (
                           <th key={col} className={`px-4 py-3 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
                             {col}
                           </th>
@@ -282,6 +321,9 @@ export default function ModuloCategorias() {
                             }`}>
                               {cat.es_global ? 'Sistema' : 'Personalizada'}
                             </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm font-bold text-amber-300">
+                            {formatMoney(cat.total_movimientos)}
                           </td>
                           <td className="px-4 py-3">
                             {!esSistema(cat) && (
@@ -403,7 +445,7 @@ export default function ModuloCategorias() {
       {modalEditar && categoriaEdit && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
           <div className={`w-full max-w-[420px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${isDarkMode ? 'border-white/10 bg-slate-950/95' : 'border-gray-200 bg-white'}`}>
-            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>️ Editar Categoría</h4>
+            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>✏️ Editar Categoría</h4>
 
             <label className={labelClass}>Nombre *</label>
             <input className={inputClass} type="text" value={categoriaEdit.nombre} onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))} />
