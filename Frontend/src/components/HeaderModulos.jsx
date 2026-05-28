@@ -10,7 +10,7 @@ const navItems = [
   { href: '/ModuloDeudas', emoji: '💳', label: 'Deudas' },
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
-  { href: '/movimientos/nuevo', emoji: '➕', label: 'Nuevo Movimiento' },
+  { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
   { href: '/Noticias', emoji: '📰', label: 'Noticias' },
   { href: '/Exportar', emoji: '📈', label: 'Reportes' },
 ]

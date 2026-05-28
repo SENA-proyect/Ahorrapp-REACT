@@ -264,6 +264,7 @@ const getAhorros = async (req, res) => {
       `SELECT a.ID_ahorros AS id, a.Monto AS monto, a.Monto_acumulado AS monto_acumulado,
               a.Descripcion AS descripcion, a.Meta AS meta,
               a.Fecha_registro AS fecha, a.Fecha_meta AS fecha_meta,
+              a.ID_categoria,
               c.Nombre AS categoria
        FROM AHORROS a
        INNER JOIN ENTRADA e     ON a.ID_entrada    = e.ID_entrada
@@ -284,14 +285,14 @@ const getAhorros = async (req, res) => {
 const updateAhorros = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const { monto, monto_acumulado, descripcion, meta, fecha_meta } = req.body;
+  const { monto, monto_acumulado, descripcion, meta, fecha_registro, fecha_meta, id_categoria } = req.body;
 
   try {
     const [rows] = await pool.query(
       `UPDATE AHORROS
-       SET Monto = ?, Monto_acumulado = ?, Descripcion = ?, Meta = ?, Fecha_meta = ?
+       SET Monto = ?, Monto_acumulado = ?, Descripcion = ?, Meta = ?, Fecha_registro = ?, Fecha_meta = ?, ID_categoria = ?
        WHERE ID_ahorros = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-      [monto, monto_acumulado, descripcion, meta, fecha_meta, id, ID_usuario]
+      [monto, monto_acumulado, descripcion, meta, fecha_registro || null, fecha_meta || null, id_categoria || null, id, ID_usuario]
     );
 
     if (rows.affectedRows === 0) {

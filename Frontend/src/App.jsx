@@ -24,6 +24,8 @@ import FormMovimiento from './components/movimientos/FormMovimientos.jsx'
 import Asistente from './components/Asistente/Asistente';
 import Noticias from "./components/Noticias";
 import Export from "./components/exportar.jsx"
+import ModulosPresupuestos from './components/ModulosPresupuestos.jsx'
+import Modalnuevomovimiento from './components/Modalnuevomovimiento.jsx'
 
 
 
@@ -55,6 +57,8 @@ function App() {
       <Route path="/movimientos/nuevo" element={<FormMovimiento />} /> 
       <Route path="/noticias" element={<Noticias />} />
       <Route path="/exportar" element={<Export />} />
+      <Route path="/ModulosPresupuestos" element={<ModulosPresupuestos />} />
+      <Route path="/movimientos/nuevo" element={<Modalnuevomovimiento />} />
 
      </Routes>
      <Asistente />

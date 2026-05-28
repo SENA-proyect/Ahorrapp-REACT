@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias, abonarDeuda } from '../api'
+import ModalNuevoMovimiento from './ModalNuevoMovimiento'
 import HeaderModulos from './HeaderModulos'
 
 const API = 'http://localhost:3000/api/movimientos'
@@ -17,6 +18,7 @@ export default function ModuloDeudas() {
 
   const [deudas,      setDeudas]      = useState([])
   const [cargando,    setCargando]    = useState(true)
+  const [modalNuevo,  setModalNuevo]  = useState(false)
   const [categorias,  setCategorias]  = useState([])
   const [modalEditar, setModalEditar] = useState(null)
   const [modalAbonar, setModalAbonar] = useState(null)
@@ -154,7 +156,7 @@ export default function ModuloDeudas() {
               )}
             </div>
           </div>
-          <button onClick={() => navigate('/movimientos/nuevo')}
+          <button onClick={() => setModalNuevo(true)}
             className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-sm text-white transition-all duration-300 hover:-translate-y-px"
             style={{ background: 'linear-gradient(135deg, #c084fc, #a855f7)' }}>
             ➕ Nueva Deuda
@@ -177,7 +179,7 @@ export default function ModuloDeudas() {
               <div className="py-12 flex flex-col items-center gap-3 text-center">
                 <span className="text-4xl opacity-30">💳</span>
                 <p className="text-zinc-400 text-sm">No hay deudas registradas aún.</p>
-                <button onClick={() => navigate('/movimientos/nuevo')}
+                <button onClick={() => setModalNuevo(true)}
                   className="mt-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
                   style={{ background: 'linear-gradient(135deg, #c084fc, #a855f7)' }}>
                   Registrar primera deuda
@@ -353,6 +355,14 @@ export default function ModuloDeudas() {
             </div>
           </div>
         </div>
+      )}
+
+      {modalNuevo && (
+        <ModalNuevoMovimiento
+          subtipo="Deuda"
+          onCerrar={() => setModalNuevo(false)}
+          onGuardado={() => cargar()}
+        />
       )}
     </div>
   )

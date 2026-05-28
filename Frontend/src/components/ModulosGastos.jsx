@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias, getDependientes } from '../api'
+import ModalNuevoMovimiento from './ModalNuevoMovimiento'
 import HeaderModulos from './HeaderModulos'
 
 const API = 'http://localhost:3000/api/movimientos'
@@ -17,6 +18,7 @@ export default function ModulosGastos() {
 
   const [gastos,      setGastos]      = useState([])
   const [cargando,    setCargando]    = useState(true)
+  const [modalNuevo,  setModalNuevo]  = useState(false)
   const [categorias,  setCategorias]  = useState([])
   const [dependientes,setDependientes]= useState([])
   const [modalEditar, setModalEditar] = useState(null)
@@ -119,7 +121,7 @@ export default function ModulosGastos() {
             <p className="text-3xl sm:text-4xl font-black text-white">{fmt(total)}</p>
             <p className="text-xs text-zinc-500 mt-1">{gastos.length} registro{gastos.length !== 1 ? 's' : ''} en total</p>
           </div>
-          <button onClick={() => navigate('/movimientos/nuevo')}
+          <button onClick={() => setModalNuevo(true)}
             className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-sm text-white transition-all duration-300 hover:-translate-y-px"
             style={{ background: 'linear-gradient(135deg, #f87171, #ef4444)' }}>
             ➕ Agregar Gasto
@@ -142,7 +144,7 @@ export default function ModulosGastos() {
               <div className="py-12 flex flex-col items-center gap-3 text-center">
                 <span className="text-4xl opacity-30">💸</span>
                 <p className="text-zinc-400 text-sm">No hay gastos registrados aún.</p>
-                <button onClick={() => navigate('/movimientos/nuevo')}
+                <button onClick={() => setModalNuevo(true)}
                   className="mt-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
                   style={{ background: 'linear-gradient(135deg, #f87171, #ef4444)' }}>
                   Registrar primer gasto
@@ -270,6 +272,14 @@ export default function ModulosGastos() {
             </div>
           </div>
         </div>
+      )}
+
+      {modalNuevo && (
+        <ModalNuevoMovimiento
+          subtipo="Gasto"
+          onCerrar={() => setModalNuevo(false)}
+          onGuardado={() => cargar()}
+        />
       )}
     </div>
   )

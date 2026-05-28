@@ -57,3 +57,28 @@ Como tal funciona pero no se ha definido "cargarHistorial" por lo que arroja un 
 REPORTES:
 Darle un uso mas practico, no solo exportar literalmente la tabla de la base de datos
 con un formato distinto
+
+====================================
+Pendientes que persisten a fecha de 27/05/2026
+====================================
+MODULO AHORRO:
+Error al momento de abonar al ahorro
+
+MODULO INGRESO:
+Error al registrar un nuevo ingreso 
+La categoria no se guarda al momento de editar un ingreso
+
+MODULO IMPREVISTOS:
+Error con los dependientes al registrar un imprevisto
+
+MODULO DEUDA:
+Error al abonar a la deuda
+
+MODULO GASTO:
+Error con la categoria y el dependiente
+
+MODULOS FINANCIEROS:
+Error al registrar el dependiente y al editar un dato ya existente el apartado de categorias no se guarda
+
+MODULO PRESUPUESTO:
+No guarda la informacion, arroja error 404

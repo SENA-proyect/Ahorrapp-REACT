@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ModalNuevoMovimiento from './ModalNuevoMovimiento'
 import { getCategorias } from '../api'
 import HeaderModulos from './HeaderModulos'
 
@@ -17,6 +18,7 @@ export default function ModuloIngresos() {
 
   const [ingresos,    setIngresos]    = useState([])
   const [cargando,    setCargando]    = useState(true)
+  const [modalNuevo,  setModalNuevo]  = useState(false)
   const [categorias,  setCategorias]  = useState([])
   const [modalEditar, setModalEditar] = useState(null)
   const [confirmarId, setConfirmarId] = useState(null)
@@ -110,7 +112,7 @@ export default function ModuloIngresos() {
             <p className="text-3xl sm:text-4xl font-black text-white">{fmt(total)}</p>
             <p className="text-xs text-zinc-500 mt-1">{ingresos.length} registro{ingresos.length !== 1 ? 's' : ''} en total</p>
           </div>
-          <button onClick={() => navigate('/movimientos/nuevo')}
+          <button onClick={() => setModalNuevo(true)}
             className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-sm text-slate-900 transition-all duration-300 hover:-translate-y-px"
             style={{ background: 'linear-gradient(135deg, #34d399, #10b981)' }}>
             ➕ Agregar Ingreso
@@ -133,7 +135,7 @@ export default function ModuloIngresos() {
               <div className="py-12 flex flex-col items-center gap-3 text-center">
                 <span className="text-4xl opacity-30">💰</span>
                 <p className="text-zinc-400 text-sm">No hay ingresos registrados aún.</p>
-                <button onClick={() => navigate('/movimientos/nuevo')}
+                <button onClick={() => setModalNuevo(true)}
                   className="mt-2 px-5 py-2.5 rounded-xl text-sm font-bold text-slate-900"
                   style={{ background: 'linear-gradient(135deg, #34d399, #10b981)' }}>
                   Registrar primer ingreso
@@ -256,6 +258,14 @@ export default function ModuloIngresos() {
             </div>
           </div>
         </div>
+      )}
+
+      {modalNuevo && (
+        <ModalNuevoMovimiento
+          subtipo="Ingreso"
+          onCerrar={() => setModalNuevo(false)}
+          onGuardado={() => cargar()}
+        />
       )}
     </div>
   )
