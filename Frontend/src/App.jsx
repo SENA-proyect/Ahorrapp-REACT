@@ -23,6 +23,7 @@ import VMIDependientes from './components/VM_I-Dependientes.jsx'
 import FormMovimiento from './components/movimientos/FormMovimientos.jsx'
 import Asistente from './components/Asistente/Asistente'
 import Export from './components/exportar.jsx'
+import Configuracion from './components/Configuracion.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import { useTheme } from './hooks/useTheme'
 
@@ -71,6 +72,7 @@ function AppContent() {
           <Route path='/VM_I-Dependientes' element={<VMIDependientes />} />
           <Route path="/movimientos/nuevo" element={<FormMovimiento />} />
           <Route path="/exportar" element={<Export />} />
+          <Route path="/configuracion" element={<Configuracion />} />
         </Routes>
       </div>
 

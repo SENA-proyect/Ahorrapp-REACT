@@ -27,19 +27,38 @@ export default function Sidebar() {
     }
   })
 
+  // Escuchar cambios en localStorage (cuando se actualiza la foto desde Configuración)
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const stored = window.localStorage.getItem('usuario')
-    try {
-      setUser(stored ? JSON.parse(stored) : null)
-    } catch {
-      setUser(null)
+    const syncUser = () => {
+      try {
+        const stored = window.localStorage.getItem('usuario')
+        setUser(stored ? JSON.parse(stored) : null)
+      } catch {
+        setUser(null)
+      }
+    }
+
+    // Sincronizar al abrir/cerrar sidebar
+    syncUser()
+
+    // Escuchar cambios de storage desde otras pestañas
+    window.addEventListener('storage', syncUser)
+
+    // Escuchar un evento custom para sincronizar en la misma pestaña
+    window.addEventListener('usuario-updated', syncUser)
+
+    return () => {
+      window.removeEventListener('storage', syncUser)
+      window.removeEventListener('usuario-updated', syncUser)
     }
   }, [open])
 
-  const profileName = user?.nombre || user?.name || 'Invitado'
+  const profileName = user?.nombre || user?.Nombre || user?.name || 'Invitado'
   const profileEmail = user?.Email || user?.email || 'usuario@dominio.com'
-  const profileAvatar = user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=10b981&color=fff`
+  const profilePhoto = user?.foto
+    ? `http://localhost:3000${user.foto}`
+    : null
+  const profileAvatar = profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=10b981&color=fff`
   
   const notifications = [
     { id: 1, text: 'Presupuesto excedido', read: false },
@@ -243,6 +262,105 @@ export default function Sidebar() {
                       />
                     </svg>
                     <span className="hidden sm:inline">Exportar</span>
+                  </motion.button>
+                </div>
+
+                {/* Sección de Herramientas */}
+                <div className="mt-6 space-y-2">
+                  <motion.p variants={itemVariants} className={`mb-2 text-xs font-semibold uppercase tracking-wider ${
+                    isDarkMode ? 'text-zinc-500' : 'text-gray-400'
+                  }`}>
+                    Herramientas
+                  </motion.p>
+
+                  <motion.button
+                    variants={itemVariants}
+                    type="button"
+                    onClick={() => {
+                      navigate('/reportes')
+                      setOpen(false)
+                    }}
+                    className={`flex w-full items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-bold transition-all duration-300 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(59,130,246,0.35)] ${
+                      isDarkMode
+                        ? 'border-white/10 bg-white/5 text-white hover:border-blue-500/50 hover:bg-blue-600/80'
+                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700'
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
+                    <span className="hidden sm:inline">Reportes / Estadísticas</span>
+                  </motion.button>
+
+                  <motion.button
+                    variants={itemVariants}
+                    type="button"
+                    onClick={() => {
+                      navigate('/historial')
+                      setOpen(false)
+                    }}
+                    className={`flex w-full items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-bold transition-all duration-300 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(168,85,247,0.35)] ${
+                      isDarkMode
+                        ? 'border-white/10 bg-white/5 text-white hover:border-purple-500/50 hover:bg-purple-600/80'
+                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700'
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span className="hidden sm:inline">Historial</span>
+                  </motion.button>
+
+                  <motion.button
+                    variants={itemVariants}
+                    type="button"
+                    onClick={() => {
+                      navigate('/soporte')
+                      setOpen(false)
+                    }}
+                    className={`flex w-full items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-bold transition-all duration-300 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(34,197,94,0.35)] ${
+                      isDarkMode
+                        ? 'border-white/10 bg-white/5 text-white hover:border-green-500/50 hover:bg-green-600/80'
+                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-green-500 hover:bg-green-50 hover:text-green-700'
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                    <span className="hidden sm:inline">Soporte / Ayuda</span>
                   </motion.button>
                 </div>
 

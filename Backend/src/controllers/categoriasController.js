@@ -170,10 +170,11 @@ const getImprevistosPorCategoria = async (req, res) => {
         imp.ID_imprevistos AS id,
         imp.ID_categoria AS id_categoria,
         imp.Monto AS monto,
-        imp.Descripcion AS descripcion,
+        imp.Causa AS descripcion,
         imp.Fecha_registro AS fecha
        FROM IMPREVISTOS imp
-       INNER JOIN MOVIMIENTOS m ON imp.ID_movimiento = m.ID_movimiento
+       INNER JOIN SALIDA s ON imp.ID_salida = s.ID_salida
+       INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
        WHERE m.ID_usuario = ?
        ORDER BY imp.Fecha_registro DESC, imp.ID_imprevistos DESC`,
       [id_usuario]
@@ -228,11 +229,12 @@ const getDeudasPorCategoria = async (req, res) => {
         d.ID_categoria AS id_categoria,
         d.Monto AS monto,
         d.Descripcion AS descripcion,
-        d.Fecha_registro AS fecha
+        d.Fecha_inicio AS fecha
        FROM DEUDAS d
-       INNER JOIN MOVIMIENTOS m ON d.ID_movimiento = m.ID_movimiento
+       INNER JOIN SALIDA s ON d.ID_salida = s.ID_salida
+       INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
        WHERE m.ID_usuario = ?
-       ORDER BY d.Fecha_registro DESC, d.ID_deudas DESC`,
+       ORDER BY d.Fecha_inicio DESC, d.ID_deudas DESC`,
       [id_usuario]
     );
 
@@ -287,7 +289,8 @@ const getAhorrosPorCategoria = async (req, res) => {
         a.Descripcion AS descripcion,
         a.Fecha_registro AS fecha
        FROM AHORROS a
-       INNER JOIN MOVIMIENTOS m ON a.ID_movimiento = m.ID_movimiento
+       INNER JOIN ENTRADA e ON a.ID_entrada = e.ID_entrada
+       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
        WHERE m.ID_usuario = ?
        ORDER BY a.Fecha_registro DESC, a.ID_ahorros DESC`,
       [id_usuario]

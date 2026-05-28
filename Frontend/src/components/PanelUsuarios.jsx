@@ -17,7 +17,7 @@ export default function PanelUsuarios() {
     getUsuarios();
   }, []);
 
-  const getUsuarios = async () => {
+  async function getUsuarios() {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3000/api/auth/PanelUsuarios', {

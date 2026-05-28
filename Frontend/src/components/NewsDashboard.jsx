@@ -58,8 +58,9 @@ export default function NewsDashboard() {
         if (!isMounted) return
         setError(e?.message || 'Error al cargar noticias')
       } finally {
-        if (!isMounted) return
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
     fetchNoticias()
@@ -92,8 +93,8 @@ export default function NewsDashboard() {
     }
   }, [noticias, loading])
 
-  const scrollLeft = () => containerRef.current?.scrollBy({ left: -320, behavior: 'smooth' })
-  const scrollRight = () => containerRef.current?.scrollBy({ left: 320, behavior: 'smooth' })
+  const handleScrollLeft = () => containerRef.current?.scrollBy({ left: -320, behavior: 'smooth' })
+  const handleScrollRight = () => containerRef.current?.scrollBy({ left: 320, behavior: 'smooth' })
 
   // Animaciones
   const containerVariants = {
@@ -271,7 +272,7 @@ export default function NewsDashboard() {
             <div className="relative group">
               <motion.button
                 type="button"
-                onClick={scrollLeft}
+                onClick={handleScrollLeft}
                 aria-label="Anterior"
                 variants={scrollButtonVariants}
                 initial="hidden"
@@ -365,7 +366,7 @@ export default function NewsDashboard() {
 
               <motion.button
                 type="button"
-                onClick={scrollRight}
+                onClick={handleScrollRight}
                 aria-label="Siguiente"
                 variants={scrollButtonVariants}
                 initial="hidden"

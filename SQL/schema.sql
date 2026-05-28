@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     Password_hash VARCHAR(255) NOT NULL COMMENT 'Hash de la contraseña del usuario',
     Email VARCHAR(255) NOT NULL UNIQUE COMMENT 'Correo electrónico principal',
     Activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el usuario está activo o inactivo',
+    foto_perfil VARCHAR(500) DEFAULT NULL COMMENT 'Ruta de la foto de perfil del usuario',
     Fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario'
 ) ENGINE=InnoDB;
 

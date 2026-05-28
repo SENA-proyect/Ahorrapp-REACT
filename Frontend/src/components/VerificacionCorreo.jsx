@@ -107,9 +107,7 @@ export default function ConfirmarCodigo() {
     <div 
       className="w-screen min-h-screen flex items-center justify-center"
       style={{
-        background: isDarkMode
-          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
-          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+        background: 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
       }}
     >
 

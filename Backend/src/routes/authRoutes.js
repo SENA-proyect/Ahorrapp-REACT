@@ -9,7 +9,8 @@ const {
   verifyEmail,
   resendCode,
   getUsuariosPanelAdmin,
-  getDependientesPanelAdmin
+  getDependientesPanelAdmin,
+  changePassword
 } = require("../controllers/authController");
 const { verifyToken } = require("../middlewares/authMiddleware");
 
@@ -20,6 +21,7 @@ router.post("/verify-email", verifyEmail);
 router.post("/resend-code", resendCode);
 
 // Rutas de administración de usuarios (protegidas)
+router.put("/change-password", verifyToken, changePassword);
 router.get("/PanelUsuarios", verifyToken, getUsuarios);
 router.put("/PanelUsuarios/:id", verifyToken, updateUsuario);
 router.delete("/PanelUsuarios/:id", verifyToken, deleteUsuario);

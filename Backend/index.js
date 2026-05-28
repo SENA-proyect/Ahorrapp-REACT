@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const authRoutes = require("./src/routes/authRoutes");
@@ -11,6 +12,7 @@ const noticiasRoutes = require("./src/routes/noticiasRoutes");
 const bolsaRoutes = require('./src/routes/alphaVantageRoutes');
 const exportarRoutes = require('./src/routes/exportar');
 const exportRoutes = require("./src/routes/exportRoutes");
+const configuracionesRoutes = require("./src/routes/configuracionesRoutes");
 
 const app = express();
 
@@ -21,6 +23,9 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
+
+// Servir archivos estáticos (para uploads)
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 // Rutas
 app.use("/api/auth", authRoutes);
@@ -33,6 +38,7 @@ app.use('/api', bolsaRoutes);
 app.use("/api/bolsa", bolsaRoutes);
 app.use('/api/exportar', exportarRoutes);
 app.use("/api/exportarRoutes", exportRoutes);
+app.use("/api/configuraciones", configuracionesRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

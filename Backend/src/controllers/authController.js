@@ -368,6 +368,43 @@ const getDependientesPanelAdmin = async (req, res) => {
   }
 };
 
+// ── PUT /change-password ─────────────────────────────────────────────────────
+const changePassword = async (req, res) => {
+  const { id } = req.usuario; // Extraído por el middleware verifyToken
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ ok: false, mensaje: "Debes proveer la contraseña actual y la nueva" });
+  }
+
+  try {
+    const [users] = await pool.query(
+      "SELECT Password_hash FROM USUARIOS WHERE ID_usuario = ?",
+      [id]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ ok: false, mensaje: "Usuario no encontrado" });
+    }
+
+    const passwordValida = await bcrypt.compare(currentPassword, users[0].Password_hash);
+    if (!passwordValida) {
+      return res.status(401).json({ ok: false, mensaje: "La contraseña actual es incorrecta" });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    
+    await pool.query(
+      "UPDATE USUARIOS SET Password_hash = ? WHERE ID_usuario = ?",
+      [newPasswordHash, id]
+    );
+
+    return res.status(200).json({ ok: true, mensaje: "Contraseña actualizada correctamente" });
+  } catch (error) {
+    return handleServerError(res, error, "Error al cambiar contraseña");
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
@@ -378,4 +415,5 @@ module.exports = {
   deleteUsuario,
   getUsuariosPanelAdmin,
   getDependientesPanelAdmin,
+  changePassword,
 };
