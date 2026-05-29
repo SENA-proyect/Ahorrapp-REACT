@@ -19,7 +19,10 @@ const {
   updateDeudas,
   deleteDeudas,
   getMovimientos,
+  abonarDeuda,
+  abonarAhorro,
 } = require("../controllers/movimientosController");
+
 
 router.post("/",          verifyToken, crearMovimiento);
 router.get("/", verifyToken, getMovimientos); 
@@ -28,6 +31,8 @@ router.get("/ahorros",    verifyToken, getAhorros);
 router.get("/gastos",     verifyToken, getGastos);
 router.get("/imprevistos",verifyToken, getImprevistos);
 router.get("/deudas",     verifyToken, getDeudas);
+router.patch("/deudas/:id/abonar",  verifyToken, abonarDeuda);
+router.patch("/ahorros/:id/abonar", verifyToken, abonarAhorro);
 router.put("/ingresos/:id", verifyToken, updateIngresos);
 router.put("/ahorros/:id",  verifyToken, updateAhorros);
 router.put("/gastos/:id",   verifyToken, updateGastos);

@@ -1,11 +1,12 @@
-const db = require('../config/db'); 
+// const db = require('../db/connection'); 
+const pool = require("../db/connection");
 
 // ─────────────────────────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────────────────────────
 
 // *******************************************************************
-//  Dado un ingreso base y los porcentajes del perfil,
+//  Dado un ingreso base y los porcentajes del perfil,  
 //  calcula los montos destinados a cada categoría.
 //  El Saldo_anterior se suma al ingreso base antes de distribuir.
 // *******************************************************************
@@ -28,21 +29,28 @@ function calcularMontos(ingresoBase, saldoAnterior, perfil) {
 //  y el Dia_corte del perfil.
 //  Ej: inicio = 2025-03-15, dia_corte = 15 → fin = 2025-04-14
 
- function calcularFechaFin(fechaInicio, diaCorte) {
-    const inicio = new Date(fechaInicio);
-    let anio  = inicio.getFullYear();
-    let mes   = inicio.getMonth() + 1; // siguiente mes
+function calcularFechaFin(fechaInicio, diaCorte) {
+  const inicio = new Date(fechaInicio);
+  
+  // Mes siguiente al de inicio
+  let anio = inicio.getFullYear();
+  let mes  = inicio.getMonth() + 2; // +2 porque getMonth() es 0-based y queremos el siguiente
+  
+  if (mes > 12) { mes = 1; anio++; }
 
-    if (mes > 12) { mes = 1; anio++; }
+  // Día de corte en el mes siguiente, ajustado al máximo del mes
+  const maxDia = new Date(anio, mes, 0).getDate();
+  const dia    = Math.min(diaCorte, maxDia);
 
-    // Último día del mes siguiente para evitar desbordamiento (ej. feb)
-    const maxDia = new Date(anio, mes, 0).getDate();
-    const dia    = Math.min(diaCorte, maxDia);
+  // Fecha fin = día antes del corte del mes siguiente
+  const fin = new Date(anio, mes - 1, dia - 1);
 
-    // La fecha de fin es el día ANTES del corte del siguiente ciclo
-    const fin = new Date(anio, mes - 1, dia);
-    fin.setDate(fin.getDate() - 1);
-    return fin.toISOString().split('T')[0];
+  // Garantizar que fin > inicio
+  if (fin <= inicio) {
+    fin.setMonth(fin.getMonth() + 1);
+  }
+
+  return fin.toISOString().split('T')[0];
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -55,7 +63,7 @@ function calcularMontos(ingresoBase, saldoAnterior, perfil) {
 
 const listarPerfiles = async (req, res) => {
     try {
-        const [perfiles] = await db.query(
+        const [perfiles] = await pool.query(
             `SELECT ID_presupuesto, Nombre, Descripcion, Activo,
                     Dia_corte,
                     Porcentaje_gastos, Porcentaje_deudas,
@@ -64,7 +72,7 @@ const listarPerfiles = async (req, res) => {
              FROM   PRESUPUESTOS
              WHERE  ID_usuario = ?
              ORDER  BY Activo DESC, Fecha_actualizacion DESC`,
-            [req.user.ID_usuario]
+            [req.usuario.id]
         );
         res.json({ ok: true, data: perfiles });
     } catch (err) {
@@ -78,10 +86,10 @@ const listarPerfiles = async (req, res) => {
 
 const obtenerPerfil = async (req, res) => {
     try {
-        const [rows] = await db.query(
+        const [rows] = await pool.query(
             `SELECT * FROM PRESUPUESTOS
              WHERE ID_presupuesto = ? AND ID_usuario = ?`,
-            [req.params.id, req.user.ID_usuario]
+            [req.params.id, req.usuario.id]
         );
         if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado' });
         res.json({ ok: true, data: rows[0] });
@@ -127,14 +135,14 @@ const crearPerfil = async (req, res) => {
     }
 
     try {
-        const [result] = await db.query(
+        const [result] = await pool.query(
             `INSERT INTO PRESUPUESTOS
              (ID_usuario, Nombre, Descripcion, Activo, Dia_corte,
               Porcentaje_gastos, Porcentaje_deudas, Porcentaje_imprevistos,
               Porcentaje_ahorros, Porcentaje_emergencia)
              VALUES (?, ?, ?, FALSE, ?, ?, ?, ?, ?, ?)`,
             [
-                req.user.ID_usuario, Nombre, Descripcion, Dia_corte,
+                req.usuario.id, Nombre, Descripcion, Dia_corte,
                 Porcentaje_gastos, Porcentaje_deudas, Porcentaje_imprevistos,
                 Porcentaje_ahorros, Porcentaje_emergencia
             ]
@@ -154,14 +162,14 @@ const editarPerfil = async (req, res) => {
     const { id } = req.params;
 
     // Verificar que el perfil pertenece al usuario
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
         `SELECT ID_presupuesto FROM PRESUPUESTOS WHERE ID_presupuesto = ? AND ID_usuario = ?`,
-        [id, req.user.ID_usuario]
+        [id, req.usuario.id]
     );
     if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado' });
 
     // Bloquear edición si hay un período abierto asociado a este perfil
-    const [periodos] = await db.query(
+    const [periodos] = await pool.query(
         `SELECT ID_periodo FROM PERIODOS_PRESUPUESTO
          WHERE ID_presupuesto = ? AND Estado = 'abierto'`,
         [id]
@@ -200,7 +208,7 @@ const editarPerfil = async (req, res) => {
     }
 
     try {
-        await db.query(
+        await pool.query(
             `UPDATE PRESUPUESTOS
              SET Nombre                = COALESCE(?, Nombre),
                  Descripcion           = COALESCE(?, Descripcion),
@@ -233,16 +241,16 @@ const editarPerfil = async (req, res) => {
 const eliminarPerfil = async (req, res) => {
     const { id } = req.params;
 
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
         `SELECT Activo FROM PRESUPUESTOS WHERE ID_presupuesto = ? AND ID_usuario = ?`,
-        [id, req.user.ID_usuario]
+        [id, req.usuario.id]
     );
     if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado' });
     if (rows[0].Activo) {
         return res.status(409).json({ ok: false, mensaje: 'No puedes eliminar el perfil activo' });
     }
 
-    const [periodos] = await db.query(
+    const [periodos] = await pool.query(
         `SELECT COUNT(*) AS total FROM PERIODOS_PRESUPUESTO WHERE ID_presupuesto = ?`,
         [id]
     );
@@ -254,7 +262,7 @@ const eliminarPerfil = async (req, res) => {
     }
 
     try {
-        await db.query(`DELETE FROM PRESUPUESTOS WHERE ID_presupuesto = ?`, [id]);
+        await pool.query(`DELETE FROM PRESUPUESTOS WHERE ID_presupuesto = ?`, [id]);
         res.json({ ok: true, mensaje: 'Perfil eliminado' });
     } catch (err) {
         res.status(500).json({ ok: false, mensaje: 'Error al eliminar perfil', error: err.message });
@@ -268,16 +276,16 @@ const eliminarPerfil = async (req, res) => {
 
 const activarPerfil = async (req, res) => {
     const { id } = req.params;
-    const ID_usuario = req.user.ID_usuario;
+    const ID_usuario = req.usuario.id;
 
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
         `SELECT ID_presupuesto FROM PRESUPUESTOS WHERE ID_presupuesto = ? AND ID_usuario = ?`,
         [id, ID_usuario]
     );
     if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado' });
 
     // Si hay un período abierto en otro perfil, no se puede cambiar
-    const [periodoAbierto] = await db.query(
+    const [periodoAbierto] = await pool.query(
         `SELECT pp.ID_periodo FROM PERIODOS_PRESUPUESTO pp
          JOIN   PRESUPUESTOS p ON pp.ID_presupuesto = p.ID_presupuesto
          WHERE  p.ID_usuario = ? AND pp.Estado = 'abierto'`,
@@ -290,7 +298,7 @@ const activarPerfil = async (req, res) => {
         });
     }
 
-    const conn = await db.getConnection();
+    const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
         await conn.query(
@@ -329,14 +337,14 @@ const activarPerfil = async (req, res) => {
  */
 const abrirPeriodo = async (req, res) => {
     const { ingreso_estimado } = req.body;
-    const ID_usuario = req.user.ID_usuario;
+    const ID_usuario = req.usuario.id;
 
     if (ingreso_estimado === undefined || Number(ingreso_estimado) < 0) {
         return res.status(400).json({ ok: false, mensaje: 'ingreso_estimado es requerido y debe ser >= 0' });
     }
 
     // 1. Perfil activo
-    const [perfiles] = await db.query(
+    const [perfiles] = await pool.query(
         `SELECT * FROM PRESUPUESTOS WHERE ID_usuario = ? AND Activo = TRUE`,
         [ID_usuario]
     );
@@ -346,7 +354,7 @@ const abrirPeriodo = async (req, res) => {
     const perfil = perfiles[0];
 
     // 2. Verificar que no haya período abierto
-    const [abiertos] = await db.query(
+    const [abiertos] = await pool.query(
         `SELECT ID_periodo FROM PERIODOS_PRESUPUESTO
          WHERE ID_usuario = ? AND Estado = 'abierto'`,
         [ID_usuario]
@@ -356,7 +364,7 @@ const abrirPeriodo = async (req, res) => {
     }
 
     // 3. Saldo sobrante del último período cerrado
-    const [ultimos] = await db.query(
+    const [ultimos] = await pool.query(
         `SELECT (Ingreso_estimado + Saldo_anterior
                  - Monto_gastos - Monto_deudas
                  - Monto_imprevistos - Monto_ahorros - Monto_emergencia) AS saldo_sobrante
@@ -377,7 +385,7 @@ const abrirPeriodo = async (req, res) => {
 
     // 5. Insertar período
     try {
-        const [result] = await db.query(
+        const [result] = await pool.query(
             `INSERT INTO PERIODOS_PRESUPUESTO
              (ID_presupuesto, ID_usuario, Fecha_inicio, Fecha_fin, Estado,
               Ingreso_estimado, Ingreso_real, Saldo_anterior,
@@ -405,8 +413,9 @@ const abrirPeriodo = async (req, res) => {
                 ...montos
             }
         });
-    } catch (err) {
-        res.status(500).json({ ok: false, mensaje: 'Error al abrir período', error: err.message });
+    } catch (error) {
+    console.error("Error en abrirPeriodo:", error.message, error.stack);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
     }
 };
 
@@ -416,9 +425,9 @@ const abrirPeriodo = async (req, res) => {
  * Recalcula Ingreso_real sumando los INGRESOS reales del período.
  */
 const cerrarPeriodo = async (req, res) => {
-    const ID_usuario = req.user.ID_usuario;
+    const ID_usuario = req.usuario.id;
 
-    const [abiertos] = await db.query(
+    const [abiertos] = await pool.query(
         `SELECT * FROM PERIODOS_PRESUPUESTO
          WHERE ID_usuario = ? AND Estado = 'abierto'`,
         [ID_usuario]
@@ -429,7 +438,7 @@ const cerrarPeriodo = async (req, res) => {
     const periodo = abiertos[0];
 
     // Sumar ingresos reales registrados en el período
-    const [ingresos] = await db.query(
+    const [ingresos] = await pool.query(
         `SELECT COALESCE(SUM(i.Monto), 0) AS total
          FROM   INGRESOS i
          JOIN   MOVIMIENTOS m ON i.ID_entrada = (
@@ -443,7 +452,7 @@ const cerrarPeriodo = async (req, res) => {
     const ingresoReal = Number(ingresos[0].total);
 
     try {
-        await db.query(
+        await pool.query(
             `UPDATE PERIODOS_PRESUPUESTO
              SET Estado = 'cerrado', Ingreso_real = ?
              WHERE ID_periodo = ?`,
@@ -475,18 +484,18 @@ const listarPeriodos = async (req, res) => {
     const offset = (pagina - 1) * limite;
 
     try {
-        const [periodos] = await db.query(
+        const [periodos] = await pool.query(
             `SELECT pp.*, p.Nombre AS Perfil_nombre
              FROM   PERIODOS_PRESUPUESTO pp
              JOIN   PRESUPUESTOS p ON pp.ID_presupuesto = p.ID_presupuesto
              WHERE  pp.ID_usuario = ?
              ORDER  BY pp.Fecha_inicio DESC
              LIMIT  ? OFFSET ?`,
-            [req.user.ID_usuario, limite, offset]
+            [req.usuario.id, limite, offset]
         );
-        const [[{ total }]] = await db.query(
+        const [[{ total }]] = await pool.query(
             `SELECT COUNT(*) AS total FROM PERIODOS_PRESUPUESTO WHERE ID_usuario = ?`,
-            [req.user.ID_usuario]
+            [req.usuario.id]
         );
         res.json({ ok: true, data: periodos, total, pagina, limite });
     } catch (err) {
@@ -500,41 +509,41 @@ const listarPeriodos = async (req, res) => {
  * el estado de ejecución de cada categoría en tiempo real.
  */
 const obtenerPeriodoActivo = async (req, res) => {
-    const ID_usuario = req.user.ID_usuario;
+    const ID_usuario = req.usuario.id;
 
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
         `SELECT pp.*, p.Nombre AS Perfil_nombre, p.Dia_corte
          FROM   PERIODOS_PRESUPUESTO pp
          JOIN   PRESUPUESTOS p ON pp.ID_presupuesto = p.ID_presupuesto
          WHERE  pp.ID_usuario = ? AND pp.Estado = 'abierto'`,
         [ID_usuario]
     );
-    if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'No hay período activo' });
+    if (!rows.length) return res.json({ ok: true, data: null });
     const periodo = rows[0];
 
     // Gastos reales acumulados en el período
-    const [gastosReal] = await db.query(
+    const [gastosReal] = await pool.query(
         `SELECT COALESCE(SUM(Monto), 0) AS total FROM GASTOS g
          JOIN SALIDA s ON g.ID_salida = s.ID_salida
          JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
          WHERE m.ID_usuario = ? AND g.Fecha_registro BETWEEN ? AND ?`,
         [ID_usuario, periodo.Fecha_inicio, periodo.Fecha_fin]
     );
-    const [deudasReal] = await db.query(
+    const [deudasReal] = await pool.query(
         `SELECT COALESCE(SUM(Monto), 0) AS total FROM DEUDAS d
          JOIN SALIDA s ON d.ID_salida = s.ID_salida
          JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
          WHERE m.ID_usuario = ? AND d.Fecha_inicio BETWEEN ? AND ?`,
         [ID_usuario, periodo.Fecha_inicio, periodo.Fecha_fin]
     );
-    const [imprevistosReal] = await db.query(
+    const [imprevistosReal] = await pool.query(
         `SELECT COALESCE(SUM(Monto), 0) AS total FROM IMPREVISTOS i
          JOIN SALIDA s ON i.ID_salida = s.ID_salida
          JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
          WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
         [ID_usuario, periodo.Fecha_inicio, periodo.Fecha_fin]
     );
-    const [ahorrosReal] = await db.query(
+    const [ahorrosReal] = await pool.query(
         `SELECT COALESCE(SUM(Monto), 0) AS total FROM AHORROS a
          JOIN ENTRADA e ON a.ID_entrada = e.ID_entrada
          JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
@@ -575,13 +584,13 @@ const obtenerPeriodoActivo = async (req, res) => {
  */
 const ajustarIngresoPeriodo = async (req, res) => {
     const { ingreso_estimado } = req.body;
-    const ID_usuario = req.user.ID_usuario;
+    const ID_usuario = req.usuario.id;
 
     if (ingreso_estimado === undefined || Number(ingreso_estimado) < 0) {
         return res.status(400).json({ ok: false, mensaje: 'ingreso_estimado debe ser >= 0' });
     }
 
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
         `SELECT pp.*, p.Porcentaje_gastos, p.Porcentaje_deudas,
                 p.Porcentaje_imprevistos, p.Porcentaje_ahorros, p.Porcentaje_emergencia
          FROM   PERIODOS_PRESUPUESTO pp
@@ -595,7 +604,7 @@ const ajustarIngresoPeriodo = async (req, res) => {
     const montos  = calcularMontos(ingreso_estimado, periodo.Saldo_anterior, periodo);
 
     try {
-        await db.query(
+        await pool.query(
             `UPDATE PERIODOS_PRESUPUESTO
              SET Ingreso_estimado   = ?,
                  Monto_gastos       = ?,

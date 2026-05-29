@@ -82,3 +82,18 @@ Error al registrar el dependiente y al editar un dato ya existente el apartado d
 
 MODULO PRESUPUESTO:
 No guarda la informacion, arroja error 404
+
+====================================
+Pendientes que persisten a fecha de 28/05/2026
+====================================
+GASTOS & IMPREVISTOS:
+Error al registrar dependiente
+
+DEUDAS:
+Mejorar el modulo financiero, tiene mas potencial
+
+PRESUPUESTOS:
+Conectarlo con el resto del sistema (ahora mismo es una vista propia reservada)
+
+GRAFICAS DEL DASHBOARD (Presupuesto vs ejecutado & Flujo semanal):
+Conectarlo a los modulos financieros para que sea actualice en tiempo real con respecto al "ejecutado"

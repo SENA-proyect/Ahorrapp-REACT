@@ -28,8 +28,14 @@ const getMovimientos = async (req, res) => {
       [ID_usuario]
     );
 
+    // 5. Consultar Imprevistos
+    const [imprevistos] = await pool.query(
+      "SELECT 'imprevisto' as tipo, Monto as monto, Causa as descripcion, Fecha_registro as fecha FROM IMPREVISTOS i JOIN SALIDA s ON i.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?",
+      [ID_usuario]
+    );
+
     // Unificar todo para la IA
-    const todosLosMovimientos = [...ingresos, ...gastos, ...deudas, ...ahorros];
+    const todosLosMovimientos = [...ingresos, ...gastos, ...deudas, ...ahorros, ...imprevistos];
 
     res.status(200).json(todosLosMovimientos);
   } catch (error) {
@@ -627,4 +633,144 @@ const deleteDeudas = async (req, res) => {
 };
 
 
-module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas,getMovimientos };
+// ─────────────────────────────────────────────────────────────
+//  HELPER: actualiza Ingreso_real del período activo
+//  Se llama internamente tras registrar un ingreso nuevo
+// ─────────────────────────────────────────────────────────────
+const actualizarIngresoReal = async (ID_usuario) => {
+  const [periodo] = await pool.query(
+    `SELECT ID_periodo, Fecha_inicio, Fecha_fin
+     FROM   PERIODOS_PRESUPUESTO
+     WHERE  ID_usuario = ? AND Estado = 'abierto'
+     LIMIT  1`,
+    [ID_usuario]
+  );
+  if (!periodo.length) return;
+
+  const { ID_periodo, Fecha_inicio, Fecha_fin } = periodo[0];
+
+  const [[{ total }]] = await pool.query(
+    `SELECT COALESCE(SUM(i.Monto), 0) AS total
+     FROM   INGRESOS i
+     JOIN   ENTRADA e     ON i.ID_entrada    = e.ID_entrada
+     JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
+     WHERE  m.ID_usuario     = ?
+       AND  i.Fecha_registro BETWEEN ? AND ?`,
+    [ID_usuario, Fecha_inicio, Fecha_fin]
+  );
+
+  await pool.query(
+    `UPDATE PERIODOS_PRESUPUESTO SET Ingreso_real = ? WHERE ID_periodo = ?`,
+    [total, ID_periodo]
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+//  PATCH /movimientos/deudas/:id/abonar
+//  Registra un pago de cuota(s) sobre una deuda existente.
+//  Body: { cuotas? }  (default: 1)
+// ─────────────────────────────────────────────────────────────
+const abonarDeuda = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id }     = req.params;
+  const cuotas     = parseInt(req.body.cuotas) || 1;
+
+  if (cuotas < 1)
+    return res.status(400).json({ ok: false, mensaje: "El número de cuotas debe ser >= 1" });
+
+  try {
+    const [[deuda]] = await pool.query(
+      `SELECT d.ID_deudas, d.Cuotas_total, d.Cuotas_pagadas, d.Estado
+       FROM   DEUDAS d
+       JOIN   SALIDA s      ON d.ID_salida     = s.ID_salida
+       JOIN   MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
+       WHERE  d.ID_deudas = ? AND m.ID_usuario = ?`,
+      [id, ID_usuario]
+    );
+
+    if (!deuda)
+      return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
+    if (deuda.Estado === "pagada")
+      return res.status(409).json({ ok: false, mensaje: "Esta deuda ya está pagada" });
+
+    const nuevasCuotas = deuda.Cuotas_pagadas + cuotas;
+
+    if (deuda.Cuotas_total !== null && nuevasCuotas > deuda.Cuotas_total)
+      return res.status(400).json({
+        ok: false,
+        mensaje: `Quedan ${deuda.Cuotas_total - deuda.Cuotas_pagadas} cuota(s) por pagar.`
+      });
+
+    const nuevoEstado = deuda.Cuotas_total !== null && nuevasCuotas >= deuda.Cuotas_total
+      ? "pagada" : "pendiente";
+
+    await pool.query(
+      `UPDATE DEUDAS SET Cuotas_pagadas = ?, Estado = ? WHERE ID_deudas = ?`,
+      [nuevasCuotas, nuevoEstado, id]
+    );
+
+    res.status(200).json({
+      ok: true,
+      mensaje: nuevoEstado === "pagada" ? "Deuda pagada completamente" : "Cuota registrada",
+      cuotas_pagadas: nuevasCuotas,
+      cuotas_total:   deuda.Cuotas_total,
+      estado:         nuevoEstado,
+    });
+  } catch (error) {
+    console.error("Error en abonarDeuda:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────
+//  PATCH /movimientos/ahorros/:id/abonar
+//  Abona un monto al Monto_acumulado de un ahorro existente.
+//  Body: { monto }
+// ─────────────────────────────────────────────────────────────
+const abonarAhorro = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { id }     = req.params;
+  const monto      = parseFloat(req.body.monto);
+
+  if (!monto || monto <= 0)
+    return res.status(400).json({ ok: false, mensaje: "El monto del abono debe ser mayor a 0" });
+
+  try {
+    const [[ahorro]] = await pool.query(
+      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Monto_acumulado
+       FROM   AHORROS a
+       JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
+       JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
+       WHERE  a.ID_ahorros = ? AND m.ID_usuario = ?`,
+      [id, ID_usuario]
+    );
+
+    if (!ahorro)
+      return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
+
+    const nuevoAcumulado = Math.min(
+      parseFloat(ahorro.Monto_acumulado) + monto,
+      parseFloat(ahorro.meta_monto)
+    );
+    const metaAlcanzada = nuevoAcumulado >= parseFloat(ahorro.meta_monto);
+
+    await pool.query(
+      `UPDATE AHORROS SET Monto_acumulado = ? WHERE ID_ahorros = ?`,
+      [nuevoAcumulado, id]
+    );
+
+    res.status(200).json({
+      ok:              true,
+      mensaje:         metaAlcanzada ? "Meta de ahorro alcanzada" : "Abono registrado",
+      monto_acumulado: nuevoAcumulado,
+      meta_monto:      ahorro.meta_monto,
+      progreso:        parseFloat(((nuevoAcumulado / ahorro.meta_monto) * 100).toFixed(2)),
+      meta_alcanzada:  metaAlcanzada,
+    });
+  } catch (error) {
+    console.error("Error en abonarAhorro:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas, getMovimientos, abonarDeuda, abonarAhorro };
