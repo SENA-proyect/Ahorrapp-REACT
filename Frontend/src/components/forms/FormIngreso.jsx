@@ -39,7 +39,7 @@ export default function FormIngreso({ tipoFlujo, subtipo }) {
 
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:3000/api/movimientos', {
+      const res = await fetch('/api/movimientos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

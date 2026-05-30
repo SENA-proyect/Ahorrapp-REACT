@@ -31,7 +31,7 @@ export default function BolsaWidget() {
   const [trm, setTrm] = useState(TRM_DEFAULT)
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/bolsa/trm/usd-cop')
+    fetch('/api/bolsa/trm/usd-cop')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.trm) setTrm(data.trm)
@@ -45,7 +45,7 @@ export default function BolsaWidget() {
       const nuevos = {}
       await Promise.all(
         lista.map(async (accion) => {
-          const res = await fetch(`http://localhost:3000/api/bolsa/${accion.symbol}`)
+          const res = await fetch(`/api/bolsa/${accion.symbol}`)
           const data = await res.json()
           if (!res.ok || data.ok === false) return
           nuevos[accion.symbol] = {
@@ -86,7 +86,7 @@ export default function BolsaWidget() {
     setBusqueda('')
 
     try {
-      const res = await fetch(`http://localhost:3000/api/bolsa/${sym}`)
+      const res = await fetch(`/api/bolsa/${sym}`)
       const data = await res.json()
       if (!res.ok || data.ok === false) {
         setError(data.mensaje || 'No se pudo consultar el símbolo')

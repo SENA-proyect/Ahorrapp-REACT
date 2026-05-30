@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
 import HeaderModulos from '../layout/HeaderModulos'
 import { useTheme } from '../../hooks/useTheme'
+import ingresosImg from '../../assets/Ingresos.png'
 
-const API = 'http://localhost:3000/api/movimientos'
+const API = '/api/movimientos'
 
 export default function ModuloIngresos() {
   const navigate = useNavigate()
   const { isDarkMode } = useTheme()
   const usuario = JSON.parse(localStorage.getItem('usuario'))
-  
   const [ingresos, setIngresos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [modalEditar, setModalEditar] = useState(null)
@@ -123,63 +123,144 @@ export default function ModuloIngresos() {
   const formatFecha = fecha =>
     fecha ? new Date(fecha).toLocaleDateString('es-CO') : '—'
 
-  // Estilos condicionales
+  const inputModal = `mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
+    isDarkMode
+      ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-emerald-400/60 focus:ring-emerald-400/20'
+      : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-emerald-400 focus:ring-emerald-200'
+  }`
+
+  const labelModal = `mt-4 block text-xs font-bold uppercase tracking-wider ${
+    isDarkMode ? 'text-zinc-400' : 'text-gray-600'
+  }`
+
   return (
-    <div 
-      className={`min-h-screen w-full overflow-x-hidden transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+    <div
+      className={`min-h-screen w-full overflow-x-hidden transition-colors duration-300 ${
+        isDarkMode ? 'text-white' : 'text-slate-900'
+      }`}
       style={{
         background: isDarkMode
-          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
-          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
+          ? 'radial-gradient(ellipse at 35% 18%, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.92) 55%, rgba(15,23,42,1) 100%)'
+          : '#ffffff',
       }}
     >
       <HeaderModulos section="Ingresos" />
-      <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+      <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
 
       <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6 md:gap-6 md:p-8">
         {/* BIENVENIDA */}
         <div>
-          <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Bienvenido de vuelta</p>
-          <h2 className={`break-words text-xl font-extrabold sm:text-2xl ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
+            Bienvenido de vuelta
+          </p>
+          <h2
+            className={`break-words text-xl font-extrabold sm:text-2xl ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}
+          >
             {usuario?.nombre || 'Usuario'} <span>👋</span>
           </h2>
         </div>
 
-        {/* CARD TOTAL */}
-        <article className={`flex flex-col justify-between gap-4 rounded-2xl border px-5 py-5 shadow-lg sm:flex-row sm:items-center sm:px-8 sm:py-6 transition-colors duration-300 ${
-          isDarkMode
-            ? 'border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(34,197,94,0.35),rgba(16,185,129,0.04))] shadow-white/10'
-            : 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 shadow-emerald-100'
-        }`}>
-          <div>
-            <p className={`mb-1 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
-              💰 Total Ingresos
-            </p>
-            <p className={`break-words text-3xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              ${total.toLocaleString('es-CO')}
-            </p>
+        {/* HERO INGRESOS */}
+        <article
+          className={`grid gap-6 overflow-hidden rounded-[2rem] border px-5 py-6 shadow-2xl transition-colors duration-300 sm:grid-cols-[1.7fr_1.3fr] sm:px-6 sm:py-7 ${
+            isDarkMode
+              ? 'border-emerald-400/20 bg-[#242f40] shadow-emerald-300/10'
+              : 'border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 shadow-emerald-200'
+          }`}
+        >
+          <div className="flex flex-col justify-between gap-6">
+            <div>
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
+                  isDarkMode ? 'bg-emerald-400/15 text-emerald-300' : 'bg-emerald-100 text-emerald-700'
+                }`}
+              >
+                Ingresos hoy
+              </span>
+              <h3
+                className={`mt-4 text-3xl font-extrabold leading-tight ${
+                  isDarkMode ? 'text-white' : 'text-slate-900'
+                }`}
+              >
+                Tu espacio para gestionar ingresos
+              </h3>
+              <p className={`mt-3 max-w-xl text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
+                Registra, organiza y sigue el crecimiento de tus ingresos con claridad. Este panel te
+                ayuda a mantener el control de cada fuente de dinero.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div
+                className={`rounded-3xl border px-4 py-4 ${
+                  isDarkMode ? 'border-emerald-300/20 bg-[#1f2b3e]/80' : 'border-gray-200 bg-white'
+                }`}
+              >
+                <p className={`text-xs uppercase tracking-wider ${isDarkMode ? 'text-emerald-200' : 'text-gray-500'}`}>
+                  Total ingresado
+                </p>
+                <p
+                  className={`mt-2 text-2xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}
+                >
+                  ${total.toLocaleString('es-CO')}
+                </p>
+              </div>
+              <div
+                className={`rounded-3xl border px-4 py-4 ${
+                  isDarkMode ? 'border-emerald-500/20 bg-emerald-400/10' : 'border-emerald-200 bg-emerald-50'
+                }`}
+              >
+                <p className={`text-xs uppercase tracking-wider ${isDarkMode ? 'text-emerald-200' : 'text-emerald-600'}`}>
+                  Registros activos
+                </p>
+                <p
+                  className={`mt-2 text-2xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}
+                >
+                  {ingresos.length}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate('/movimientos/nuevo')}
+              className="inline-flex w-full max-w-[240px] items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px hover:shadow-xl sm:w-auto"
+            >
+              ➕ Agregar ingreso nuevo
+            </button>
           </div>
 
-          <button
-            onClick={() => navigate('/movimientos/nuevo')}
-            className="w-full rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px hover:shadow-lg sm:w-auto"
+          <div
+            className={`relative flex h-full min-h-[280px] w-full items-center justify-center overflow-hidden rounded-[2rem] p-4 ${
+              isDarkMode ? 'bg-[#242f40]' : 'bg-emerald-100/70'
+            }`}
           >
-            ➕ Agregar ingreso
-          </button>
+            <div
+              className={`absolute inset-0 ${
+                isDarkMode
+                  ? 'bg-gradient-to-br from-transparent via-[#10a46c]/10 to-transparent'
+                  : 'bg-gradient-to-br from-transparent via-white/50 to-transparent'
+              }`}
+            />
+            <img src={ingresosImg} alt="Ilustración de ingresos" className="relative max-h-[320px] w-full object-contain" />
+          </div>
         </article>
 
         {/* SECCIÓN DE INGRESOS */}
-        <section className={`overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-lg transition-colors duration-300 ${
-          isDarkMode
-            ? 'border-white/10 bg-white/[0.04]'
-            : 'border-gray-200 bg-white/80'
-        }`}>
+        <section
+          className={`overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-lg transition-colors duration-300 ${
+            isDarkMode ? 'border-emerald-300/15 bg-[#242f40]/90' : 'border-gray-200 bg-white/80'
+          }`}
+        >
           {/* HEADER DE LA SECCIÓN */}
-          <div className={`flex flex-col gap-1 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5 transition-colors ${
-            isDarkMode ? 'border-white/10' : 'border-gray-200'
-          }`}>
-            <h3 className={`text-base font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
-              📋 Módulo de Ingresos
+          <div
+            className={`flex flex-col gap-1 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5 transition-colors ${
+              isDarkMode ? 'border-white/10' : 'border-gray-200'
+            }`}
+          >
+            <h3 className={`text-base font-extrabold ${isDarkMode ? 'text-emerald-300' : 'text-emerald-700'}`}>
+               Módulo de Ingresos
             </h3>
             <span className={`text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
               {ingresos.length} registro{ingresos.length !== 1 ? 's' : ''}
@@ -189,11 +270,22 @@ export default function ModuloIngresos() {
           {/* CONTENIDO */}
           <div className="p-4 sm:p-5">
             {cargando ? (
-              <p className={`py-5 text-sm italic ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>⏳ Cargando...</p>
+              <div className="flex items-center justify-center py-16">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+              </div>
             ) : ingresos.length === 0 ? (
-              <p className={`py-5 text-sm italic ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
-                No hay ingresos registrados. Agrega tu primer ingreso para comenzar.
-              </p>
+              <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <span className="text-4xl">💰</span>
+                <p className={`text-sm font-semibold ${isDarkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
+                  No hay ingresos registrados aún.
+                </p>
+                <button
+                  onClick={() => navigate('/movimientos/nuevo')}
+                  className="mt-2 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2 text-xs font-bold text-slate-900 transition-all hover:-translate-y-px hover:shadow-lg"
+                >
+                  ➕ Crear primer ingreso
+                </button>
+              </div>
             ) : (
               <>
                 {/* VISTA MÓVIL */}
@@ -202,33 +294,49 @@ export default function ModuloIngresos() {
                     <article
                       key={i.id}
                       className={`rounded-2xl border p-4 transition-colors ${
-                        isDarkMode
-                          ? 'border-white/10 bg-white/[0.05]'
-                          : 'border-gray-200 bg-gray-50'
+                        isDarkMode ? 'border-white/10 bg-white/[0.05]' : 'border-gray-200 bg-gray-50'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+                          <p
+                            className={`text-xs font-semibold uppercase tracking-wider ${
+                              isDarkMode ? 'text-zinc-500' : 'text-gray-500'
+                            }`}
+                          >
                             {formatFecha(i.fecha)}
                           </p>
-                          <h4 className={`mt-1 break-words text-sm font-bold ${isDarkMode ? 'text-zinc-100' : 'text-gray-900'}`}>
+                          <h4
+                            className={`mt-1 break-words text-sm font-bold ${
+                              isDarkMode ? 'text-zinc-100' : 'text-gray-900'
+                            }`}
+                          >
                             {i.fuente || 'Sin fuente'}
                           </h4>
-                          <p className={`mt-1 break-words text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
+                          <p
+                            className={`mt-1 break-words text-sm ${
+                              isDarkMode ? 'text-zinc-400' : 'text-gray-600'
+                            }`}
+                          >
                             {i.descripcion || 'Sin descripción'}
                           </p>
-                          <p className={`mt-2 text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+                          <p
+                            className={`mt-2 text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}
+                          >
                             Categoría: {i.categoria || '—'}
                           </p>
                         </div>
 
-                        <p className={`shrink-0 text-right text-base font-black ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                        <p
+                          className={`shrink-0 text-right text-base font-black ${
+                            isDarkMode ? 'text-emerald-400' : 'text-emerald-600'
+                          }`}
+                        >
                           ${Number(i.monto).toLocaleString('es-CO')}
                         </p>
                       </div>
 
-                      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <div className="mt-4 grid grid-cols-2 gap-2">
                         <button
                           onClick={() => abrirEditar(i)}
                           className={`rounded-lg border px-4 py-2 text-sm font-bold transition-colors ${
@@ -259,16 +367,18 @@ export default function ModuloIngresos() {
                   <table className="w-full min-w-[900px] border-collapse text-left">
                     <thead>
                       <tr className={`border-b ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}>
-                        {['Fecha', 'Fuente', 'Categoría', 'Descripción', 'Monto', 'Acciones'].map(col => (
-                          <th
-                            key={col}
-                            className={`px-4 py-3 text-xs font-bold uppercase tracking-wider ${
-                              isDarkMode ? 'text-zinc-500' : 'text-gray-500'
-                            }`}
-                          >
-                            {col}
-                          </th>
-                        ))}
+                        {['Fecha', 'Fuente', 'Categoría', 'Descripción', 'Monto', 'Acciones'].map(
+                          col => (
+                            <th
+                              key={col}
+                              className={`px-4 py-3 text-xs font-bold uppercase tracking-wider ${
+                                isDarkMode ? 'text-zinc-500' : 'text-gray-500'
+                              }`}
+                            >
+                              {col}
+                            </th>
+                          )
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -281,11 +391,23 @@ export default function ModuloIngresos() {
                               : 'border-gray-100 hover:bg-gray-50'
                           }`}
                         >
-                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{formatFecha(i.fecha)}</td>
-                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{i.fuente || '—'}</td>
-                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{i.categoria || '—'}</td>
-                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>{i.descripcion || '—'}</td>
-                          <td className={`px-4 py-3 text-sm font-extrabold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>
+                            {formatFecha(i.fecha)}
+                          </td>
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>
+                            {i.fuente || '—'}
+                          </td>
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>
+                            {i.categoria || '—'}
+                          </td>
+                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>
+                            {i.descripcion || '—'}
+                          </td>
+                          <td
+                            className={`px-4 py-3 text-sm font-extrabold ${
+                              isDarkMode ? 'text-emerald-400' : 'text-emerald-600'
+                            }`}
+                          >
                             ${Number(i.monto).toLocaleString('es-CO')}
                           </td>
                           <td className="px-4 py-3">
@@ -323,28 +445,34 @@ export default function ModuloIngresos() {
         </section>
       </main>
 
-      <footer className={`w-full px-4 py-6 text-center font-mono text-[0.7rem] ${isDarkMode ? 'text-zinc-600' : 'text-gray-500'}`}>
-        <p>© <strong className="text-amber-400">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
+      <footer
+        className={`w-full px-4 py-6 text-center font-mono text-[0.7rem] ${
+          isDarkMode ? 'text-zinc-600' : 'text-gray-500'
+        }`}
+      >
+        <p>
+          © <strong className="text-emerald-400">2026 Ahorrapp</strong>. Todos los derechos reservados.
+        </p>
       </footer>
 
       {/* MODAL EDITAR */}
       {modalEditar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
-          <div className={`w-full max-w-[460px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${
-            isDarkMode
-              ? 'border-white/10 bg-slate-950/95'
-              : 'border-gray-200 bg-white'
-          }`}>
-            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>✏️ Editar Ingreso</h4>
-            <p className={`mt-1 text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>Modifica los campos que necesites y guarda.</p>
+          <div
+            className={`w-full max-w-[460px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${
+              isDarkMode ? 'border-white/10 bg-slate-950/95' : 'border-gray-200 bg-white'
+            }`}
+          >
+            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+              ✏️ Editar Ingreso
+            </h4>
+            <p className={`mt-1 text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+              Modifica los campos que necesites y guarda.
+            </p>
 
-            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Monto *</label>
+            <label className={labelModal}>Monto *</label>
             <input
-              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
-                isDarkMode
-                  ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-amber-400/20'
-                  : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-amber-400 focus:ring-amber-200'
-              }`}
+              className={inputModal}
               type="number"
               name="monto"
               min="0"
@@ -353,30 +481,26 @@ export default function ModuloIngresos() {
               onChange={handleEditarChange}
             />
 
-            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Categoría</label>
+            <label className={labelModal}>Categoría</label>
             <select
-              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
-                isDarkMode
-                  ? 'border-white/15 bg-white/10 text-zinc-100 focus:border-amber-400/60 focus:ring-amber-400/20'
-                  : 'border-gray-300 bg-white text-gray-900 focus:border-amber-400 focus:ring-amber-200'
-              }`}
+              className={inputModal}
               name="id_categoria"
               value={modalEditar.id_categoria || ''}
               onChange={handleEditarChange}
             >
               <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1 || c.activa === true).map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-              ))}
+              {categorias
+                .filter(c => c.activa == 1 || c.activa === true)
+                .map(cat => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.nombre}
+                  </option>
+                ))}
             </select>
 
-            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Fuente</label>
+            <label className={labelModal}>Fuente</label>
             <input
-              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
-                isDarkMode
-                  ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-amber-400/20'
-                  : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-amber-400 focus:ring-amber-200'
-              }`}
+              className={inputModal}
               type="text"
               name="fuente"
               placeholder="Ej: Salario, Freelance..."
@@ -384,13 +508,9 @@ export default function ModuloIngresos() {
               onChange={handleEditarChange}
             />
 
-            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Descripción</label>
+            <label className={labelModal}>Descripción</label>
             <input
-              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
-                isDarkMode
-                  ? 'border-white/15 bg-white/10 text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-amber-400/20'
-                  : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-amber-400 focus:ring-amber-200'
-              }`}
+              className={inputModal}
               type="text"
               name="descripcion"
               placeholder="Descripción opcional"
@@ -398,13 +518,9 @@ export default function ModuloIngresos() {
               onChange={handleEditarChange}
             />
 
-            <label className={`mt-4 block text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Fecha</label>
+            <label className={labelModal}>Fecha</label>
             <input
-              className={`mt-2 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
-                isDarkMode
-                  ? 'border-white/15 bg-white/10 text-zinc-100 focus:border-amber-400/60 focus:ring-amber-400/20'
-                  : 'border-gray-300 bg-white text-gray-900 focus:border-amber-400 focus:ring-amber-200'
-              }`}
+              className={inputModal}
               type="date"
               name="fecha_registro"
               value={modalEditar.fecha_registro}
@@ -412,11 +528,13 @@ export default function ModuloIngresos() {
             />
 
             {errorModal && (
-              <p className={`mt-4 rounded-xl border px-4 py-3 text-sm font-semibold ${
-                isDarkMode
-                  ? 'border-red-400/40 bg-red-400/10 text-red-400'
-                  : 'border-red-300 bg-red-50 text-red-700'
-              }`}>
+              <p
+                className={`mt-4 rounded-xl border px-4 py-3 text-sm font-semibold ${
+                  isDarkMode
+                    ? 'border-red-400/40 bg-red-400/10 text-red-400'
+                    : 'border-red-300 bg-red-50 text-red-700'
+                }`}
+              >
                 {errorModal}
               </p>
             )}
@@ -447,13 +565,17 @@ export default function ModuloIngresos() {
       {/* MODAL CONFIRMAR ELIMINAR */}
       {confirmarId && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
-          <div className={`w-full max-w-[380px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${
-            isDarkMode
-              ? 'border-red-400/30 bg-slate-950/95'
-              : 'border-red-200 bg-white'
-          }`}>
-            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>🗑️ ¿Eliminar ingreso?</h4>
-            <p className={`mt-2 text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Esta acción no se puede deshacer.</p>
+          <div
+            className={`w-full max-w-[380px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${
+              isDarkMode ? 'border-red-400/30 bg-slate-950/95' : 'border-red-200 bg-white'
+            }`}
+          >
+            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>
+              🗑️ ¿Eliminar ingreso?
+            </h4>
+            <p className={`mt-2 text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
+              Esta acción no se puede deshacer.
+            </p>
 
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button

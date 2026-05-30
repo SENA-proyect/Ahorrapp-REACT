@@ -23,10 +23,10 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
       .catch(() => {})
     
     const token = localStorage.getItem('token')
-    fetch('http://localhost:3000/api/dependientes', {
+    fetch('/api/dependientes', {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(r => r.ok ? r.json() : [])
+      .then(r => (r.ok ? r.json() : []))
       .then(data => { if (Array.isArray(data)) setDependientes(data) })
       .catch(() => {})
   }, [])
@@ -48,12 +48,12 @@ export default function FormGasto({ tipoFlujo, subtipo }) {
 
     try {
       const token = localStorage.getItem('token')
-      
+
       // Limpiar valores vacíos o con solo espacios
       const categoriaLimpia = form.id_categoria.trim() === '' ? null : form.id_categoria
       const dependienteLimpio = form.id_dependiente.trim() === '' ? null : form.id_dependiente
-      
-      const res = await fetch('http://localhost:3000/api/movimientos', {
+
+      const res = await fetch('/api/movimientos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

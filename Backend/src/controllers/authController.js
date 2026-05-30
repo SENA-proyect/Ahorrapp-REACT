@@ -6,11 +6,13 @@ require("dotenv").config();
 
 // ── Helper de errores ────────────────────────────────────────────────────────
 const handleServerError = (res, error, msg) => {
-  console.error(`${msg}:`, error.message);
-  return res.status(500).json({
-    ok: false,
-    mensaje: msg,
-  });
+  console.error(`${msg}:`, error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: msg,
+      detalle: error?.message,
+      nombreError: error?.name,
+    });
 };
 
 // ── POST /register ───────────────────────────────────────────────────────────

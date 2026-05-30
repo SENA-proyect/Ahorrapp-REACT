@@ -23,10 +23,10 @@ export default function FormImprevisto({ tipoFlujo, subtipo }) {
       .catch(() => {})
 
     const token = localStorage.getItem('token')
-    fetch('http://localhost:3000/api/dependientes', {
+    fetch('/api/dependientes', {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(r => r.ok ? r.json() : [])
+      .then(r => (r.ok ? r.json() : []))
       .then(data => { if (Array.isArray(data)) setDependientes(data) })
       .catch(() => {})
   }, [])
@@ -48,7 +48,7 @@ export default function FormImprevisto({ tipoFlujo, subtipo }) {
 
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:3000/api/movimientos', {
+      const res = await fetch('/api/movimientos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,6 +68,7 @@ export default function FormImprevisto({ tipoFlujo, subtipo }) {
       })
 
       const data = await res.json()
+
 
       if (data.ok) {
         navigate('/ModuloImprevistos')

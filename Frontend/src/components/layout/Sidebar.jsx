@@ -55,9 +55,7 @@ export default function Sidebar() {
 
   const profileName = user?.nombre || user?.Nombre || user?.name || 'Invitado'
   const profileEmail = user?.Email || user?.email || 'usuario@dominio.com'
-  const profilePhoto = user?.foto
-    ? `http://localhost:3000${user.foto}`
-    : null
+  const profilePhoto = user?.foto || null
   const profileAvatar = profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=10b981&color=fff`
   
   const notifications = [

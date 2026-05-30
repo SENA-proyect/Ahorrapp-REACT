@@ -56,7 +56,7 @@ export default function Configuracion() {
           return;
         }
 
-        const res = await fetch('http://localhost:3000/api/configuraciones', {
+        const res = await fetch('/api/configuraciones', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -81,7 +81,7 @@ export default function Configuracion() {
 
           // Cargar foto de perfil si existe en la BD
           if (data.datos.fotoUrl) {
-            const fullUrl = `http://localhost:3000${data.datos.fotoUrl}`;
+            const fullUrl = data.datos.fotoUrl;
             setPhotoPreview(fullUrl);
           }
           
@@ -112,7 +112,7 @@ export default function Configuracion() {
       
       setMensaje({ tipo: 'info', texto: 'Guardando...' });
 
-      const res = await fetch('http://localhost:3000/api/configuraciones', {
+      const res = await fetch('/api/configuraciones', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export default function Configuracion() {
     setPasswordStatus(null);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3000/api/auth/change-password', {
+      const res = await fetch('/api/auth/change-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ export default function Configuracion() {
       const formDataObj = new FormData();
       formDataObj.append('photo', file);
 
-      const res = await fetch('http://localhost:3000/api/configuraciones/photo', {
+      const res = await fetch('/api/configuraciones/photo', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -254,7 +254,7 @@ export default function Configuracion() {
 
       if (data.ok) {
         // Actualizar preview con la URL completa del backend
-        const fullUrl = `http://localhost:3000${data.fotoUrl}`;
+        const fullUrl = data.fotoUrl;
         setPhotoPreview(fullUrl);
 
         setMensaje({ tipo: 'success', texto: 'Foto de perfil actualizada correctamente.' });

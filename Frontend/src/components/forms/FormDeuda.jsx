@@ -55,8 +55,8 @@ export default function FormDeuda({ tipoFlujo, subtipo }) {
     setCargando(true)
 
     try {
-      const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:3000/api/movimientos', {
+const token = localStorage.getItem('token')
+      const res = await fetch('/api/movimientos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
