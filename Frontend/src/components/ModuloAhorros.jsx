@@ -73,7 +73,7 @@ export default function ModuloAhorros() {
       meta: a.meta || '', descripcion: a.descripcion || '',
       fecha_registro: a.fecha ? a.fecha.slice(0, 10) : '',
       fecha_meta: a.fecha_meta ? a.fecha_meta.slice(0, 10) : '',
-      id_categoria: a.id_categoria || '',
+      id_categoria: a.ID_categoria || '',
     })
   }
 
@@ -104,7 +104,7 @@ export default function ModuloAhorros() {
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
           fecha_meta: modalEditar.fecha_meta || null,
-          id_categoria: modalEditar.id_categoria || null,
+          ID_categoria: modalEditar.ID_categoria || null,
         }),
       })
       const data = await res.json()

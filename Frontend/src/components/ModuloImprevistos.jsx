@@ -45,16 +45,16 @@ export default function ModuloImprevistos() {
 
   const total = useMemo(() => imprevistos.reduce((a, i) => a + Number(i.monto || 0), 0), [imprevistos])
 
-  const abrirEditar = (i) => {
-    setErrorModal(null)
-    setModalEditar({
-      id: i.id, monto: String(i.monto),
-      causa: i.causa || '',
-      fecha_registro: i.fecha ? i.fecha.slice(0, 10) : '',
-      id_categoria: i.id_categoria || '',
-      id_dependientes: i.id_dependientes || '',
-    })
-  }
+const abrirEditar = (i) => {
+  setErrorModal(null)
+  setModalEditar({
+    id: i.id, monto: String(i.monto),
+    causa: i.causa || '',
+    fecha_registro: i.fecha ? i.fecha.slice(0, 10) : '',
+    id_categoria: i.ID_categoria || '',
+    ID_dependientes: i.ID_dependientes || i.ID_dependientes || '',
+  })
+}
 
   const handleChange = (e) => setModalEditar(p => ({ ...p, [e.target.name]: e.target.value }))
 
@@ -72,8 +72,8 @@ export default function ModuloImprevistos() {
           monto: Number(modalEditar.monto),
           causa: modalEditar.causa || null,
           fecha_registro: modalEditar.fecha_registro || null,
-          id_categoria: modalEditar.id_categoria || null,
-          id_dependientes: modalEditar.id_dependientes || null,
+          ID_categoria: modalEditar.ID_categoria || null,
+          ID_dependientes: modalEditar.ID_dependientes || null,
         }),
       })
       const data = await res.json()
@@ -161,8 +161,8 @@ export default function ModuloImprevistos() {
                           <p className="font-bold text-white truncate">{i.causa || 'Sin causa registrada'}</p>
                           <p className="text-xs text-zinc-500 mt-0.5">{fmtFecha(i.fecha)}</p>
                           {i.categoria && <p className="text-xs text-zinc-500 mt-1">📂 {i.categoria}</p>}
-                          {nombreDep(i.id_dependientes) && (
-                            <p className="text-xs text-blue-400 mt-1">👤 {nombreDep(i.id_dependientes)}</p>
+                          {nombreDep(i.ID_dependientes) && (
+                            <p className="text-xs text-blue-400 mt-1">👤 {nombreDep(i.ID_dependientes)}</p>
                           )}
                         </div>
                         <p className="shrink-0 text-base font-black text-orange-400">{fmt(i.monto)}</p>
@@ -191,7 +191,7 @@ export default function ModuloImprevistos() {
                           <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(i.fecha)}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300 max-w-[200px] truncate">{i.causa || '—'}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300">{i.categoria || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-blue-400">{nombreDep(i.id_dependientes) || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-blue-400">{nombreDep(i.ID_dependientes) || '—'}</td>
                           <td className="px-4 py-3 text-sm font-extrabold text-orange-400">{fmt(i.monto)}</td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
@@ -229,13 +229,14 @@ export default function ModuloImprevistos() {
             <input className={inputCls} type="text" name="causa" placeholder="Ej: Reparación, Emergencia médica..." value={modalEditar.causa} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
+
             <select className={inputCls} name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
               <option value="">Sin categoría</option>
               {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
 
             <label className={labelCls}>Dependiente</label>
-            <select className={inputCls} name="id_dependientes" value={modalEditar.id_dependientes} onChange={handleChange}>
+            <select className={inputCls} name="ID_dependientes" value={modalEditar.ID_dependientes} onChange={handleChange}>
               <option value="">Ninguno (imprevisto propio)</option>
               {dependientes.map(d => <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>)}
             </select>

@@ -182,7 +182,7 @@ const getIngresos = async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT i.ID_ingresos AS id, i.Monto AS monto, i.Descripcion AS descripcion,
-              i.Fuente AS fuente, i.Fecha_registro AS fecha,
+              i.Fuente AS fuente, i.Fecha_registro AS fecha, i.ID_categoria,
               c.Nombre AS categoria
        FROM INGRESOS i
        INNER JOIN ENTRADA e     ON i.ID_entrada    = e.ID_entrada

@@ -49,7 +49,7 @@ export default function ModuloIngresos() {
       id: i.id, monto: String(i.monto),
       fuente: i.fuente || '', descripcion: i.descripcion || '',
       fecha_registro: i.fecha ? i.fecha.slice(0, 10) : '',
-      id_categoria: i.id_categoria || '',
+      id_categoria: i.ID_categoria || '',
     })
   }
 
@@ -70,7 +70,7 @@ export default function ModuloIngresos() {
           fuente: modalEditar.fuente || null,
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
-          id_categoria: modalEditar.id_categoria || null,
+          ID_categoria: modalEditar.ID_categoria || null,
         }),
       })
       const data = await res.json()

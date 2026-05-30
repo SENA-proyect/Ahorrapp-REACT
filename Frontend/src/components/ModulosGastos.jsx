@@ -51,8 +51,8 @@ export default function ModulosGastos() {
       id: g.id, monto: String(g.monto),
       descripcion: g.descripcion || '',
       fecha_registro: g.fecha ? g.fecha.slice(0, 10) : '',
-      id_categoria: g.id_categoria || '',
-      id_dependientes: g.id_dependientes || '',
+      id_categoria: g.ID_categoria || '',
+      ID_dependientes: g.ID_dependientes || '',
     })
   }
 
@@ -72,8 +72,8 @@ export default function ModulosGastos() {
           monto: Number(modalEditar.monto),
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
-          id_categoria: modalEditar.id_categoria || null,
-          id_dependientes: modalEditar.id_dependientes || null,
+          ID_categoria: modalEditar.ID_categoria || null,
+          ID_dependientes: modalEditar.ID_dependientes || null,
         }),
       })
       const data = await res.json()
@@ -161,8 +161,8 @@ export default function ModulosGastos() {
                           <p className="font-bold text-white truncate">{g.descripcion || 'Sin descripción'}</p>
                           <p className="text-xs text-zinc-500 mt-0.5">{fmtFecha(g.fecha)}</p>
                           {g.categoria && <p className="text-xs text-zinc-500 mt-1">📂 {g.categoria}</p>}
-                          {nombreDep(g.id_dependientes) && (
-                            <p className="text-xs text-blue-400 mt-1">👤 {nombreDep(g.id_dependientes)}</p>
+                          {nombreDep(g.ID_dependientes) && (
+                            <p className="text-xs text-blue-400 mt-1">👤 {nombreDep(g.ID_dependientes)}</p>
                           )}
                         </div>
                         <p className="shrink-0 text-base font-black text-red-400">{fmt(g.monto)}</p>
@@ -191,7 +191,7 @@ export default function ModulosGastos() {
                           <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(g.fecha)}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300 max-w-[200px] truncate">{g.descripcion || '—'}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300">{g.categoria || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-blue-400">{nombreDep(g.id_dependientes) || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-blue-400">{nombreDep(g.ID_dependientes) || '—'}</td>
                           <td className="px-4 py-3 text-sm font-extrabold text-red-400">{fmt(g.monto)}</td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
@@ -235,7 +235,7 @@ export default function ModulosGastos() {
             </select>
 
             <label className={labelCls}>Dependiente</label>
-            <select className={inputCls} name="id_dependientes" value={modalEditar.id_dependientes} onChange={handleChange}>
+            <select className={inputCls} name="ID_dependientes" value={modalEditar.ID_dependientes} onChange={handleChange}>
               <option value="">Ninguno (gasto propio)</option>
               {dependientes.map(d => <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>)}
             </select>
