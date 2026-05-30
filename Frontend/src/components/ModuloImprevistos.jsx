@@ -52,7 +52,7 @@ const abrirEditar = (i) => {
     causa: i.causa || '',
     fecha_registro: i.fecha ? i.fecha.slice(0, 10) : '',
     id_categoria: i.ID_categoria || '',
-    ID_dependientes: i.ID_dependientes || i.ID_dependientes || '',
+    ID_dependientes: i.ID_dependientes || '',
   })
 }
 
@@ -72,8 +72,8 @@ const abrirEditar = (i) => {
           monto: Number(modalEditar.monto),
           causa: modalEditar.causa || null,
           fecha_registro: modalEditar.fecha_registro || null,
-          ID_categoria: modalEditar.ID_categoria || null,
-          ID_dependientes: modalEditar.ID_dependientes || null,
+          id_categoria: modalEditar.id_categoria || null,
+          id_dependientes: modalEditar.ID_dependientes || null,
         }),
       })
       const data = await res.json()
@@ -240,6 +240,7 @@ const abrirEditar = (i) => {
               <option value="">Ninguno (imprevisto propio)</option>
               {dependientes.map(d => <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>)}
             </select>
+          
 
             <label className={labelCls}>Fecha</label>
             <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />

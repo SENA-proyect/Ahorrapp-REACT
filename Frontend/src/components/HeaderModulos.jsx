@@ -39,7 +39,7 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
 
           <div className="col-span-2 row-start-1 sm:col-span-1 sm:col-start-2 flex flex-col items-center gap-0.5 pointer-events-none">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500">
-              Ahorrapp
+              AhorrApp
             </h1>
             <span className="text-[0.6rem] sm:text-[0.65rem] text-zinc-500 font-semibold tracking-widest uppercase">
               {section}

@@ -72,8 +72,8 @@ export default function ModulosGastos() {
           monto: Number(modalEditar.monto),
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
-          ID_categoria: modalEditar.ID_categoria || null,
-          ID_dependientes: modalEditar.ID_dependientes || null,
+          id_categoria: modalEditar.id_categoria || null,
+          id_dependientes: modalEditar.ID_dependientes || null,
         }),
       })
       const data = await res.json()

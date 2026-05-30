@@ -70,7 +70,7 @@ export default function ModuloIngresos() {
           fuente: modalEditar.fuente || null,
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
-          ID_categoria: modalEditar.ID_categoria || null,
+          id_categoria: modalEditar.id_categoria || null,
         }),
       })
       const data = await res.json()

@@ -67,7 +67,9 @@ GASTOS, IMPREVISTOS:
 Error al registrar dependiente -> SOLUCIONADO
 
 TODOS LOS MODULOS FINANCIEROS (menos deudas):
-Error al editar la categoria
+Error al editar la categoria -> SOLUCIONADO
+
+Error al guardar categorias y dependientes al momento de actualizar un modulo
 
 DEUDAS:
 Mejorar el modulo financiero, tiene mas potencial
