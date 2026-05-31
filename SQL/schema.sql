@@ -105,6 +105,8 @@ CREATE TABLE IF NOT EXISTS ENTRADA (
     FOREIGN KEY (ID_movimiento) REFERENCES MOVIMIENTOS(ID_movimiento) ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB;
 
+
+
 CREATE TABLE IF NOT EXISTS AHORROS (
     ID_ahorros INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del ahorro',
     ID_entrada INT DEFAULT NULL COMMENT 'Tabla de entrada financiera asociada al ahorro',
@@ -128,6 +130,22 @@ CREATE TABLE IF NOT EXISTS AHORROS (
 
 -- NOTA: Monto_acumulado se actualiza desde el backend cada vez que se hace un abono al ahorro.
 --       Progreso = (Monto_acumulado / Monto) * 100
+
+-- ──  ABONOS_AHORRO ─────────────────────────────
+CREATE TABLE IF NOT EXISTS ABONOS_AHORRO (
+    ID_abono INT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del abono',
+    ID_ahorros INT NOT NULL COMMENT 'Ahorro al que pertenece el abono',
+    ID_usuario INT NOT NULL COMMENT 'Usuario que realizó el abono',
+    Monto DECIMAL(15,2) NOT NULL COMMENT 'Monto abonado en esta transacción',
+    Fecha_registro DATE NOT NULL DEFAULT (CURRENT_DATE) COMMENT 'Fecha en que se realizó el abono',
+    Nota VARCHAR(255) DEFAULT NULL COMMENT 'Nota opcional del abono',
+
+    CONSTRAINT chk_abono_monto CHECK (Monto > 0),
+
+    FOREIGN KEY (ID_ahorros) REFERENCES AHORROS(ID_ahorros) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS INGRESOS (

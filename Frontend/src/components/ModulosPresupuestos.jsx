@@ -35,7 +35,7 @@ const BarraEjecucion = ({ label, presupuestado, ejecutado, color }) => {
 }
 
 // Formulario de perfil (crear / editar)
-const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '1', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
+const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '28', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
 
 function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
   const [form, setForm] = useState(inicial || DEFAULTS)

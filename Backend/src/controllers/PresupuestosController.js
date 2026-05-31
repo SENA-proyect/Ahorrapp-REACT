@@ -10,6 +10,14 @@ const pool = require("../db/connection");
 //  calcula los montos destinados a cada categoría.
 //  El Saldo_anterior se suma al ingreso base antes de distribuir.
 // *******************************************************************
+// Agrega este helper al inicio del archivo junto a calcularMontos
+const toLocalDate = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 
 function calcularMontos(ingresoBase, saldoAnterior, perfil) {
     const total = Number(ingresoBase) + Number(saldoAnterior);
@@ -31,28 +39,25 @@ function calcularMontos(ingresoBase, saldoAnterior, perfil) {
 
 function calcularFechaFin(fechaInicio, diaCorte) {
   const inicio = new Date(fechaInicio);
-  
-  // Mes siguiente al de inicio
+
   let anio = inicio.getFullYear();
-  let mes  = inicio.getMonth() + 2; // +2 porque getMonth() es 0-based y queremos el siguiente
-  
+  let mes  = inicio.getMonth() + 2; // mes siguiente
+
   if (mes > 12) { mes = 1; anio++; }
 
-  // Día de corte en el mes siguiente, ajustado al máximo del mes
-  const maxDia = new Date(anio, mes, 0).getDate();
-  const dia    = Math.min(diaCorte, maxDia);
-
-  // Fecha fin = día antes del corte del mes siguiente
-  const fin = new Date(anio, mes - 1, dia - 1);
+  // Fecha fin = día anterior al corte en el mes siguiente
+  // Si corte es 1, fin es el último día del mes actual
+  // Si corte es 15, fin es el 14 del mes siguiente
+  const fin = new Date(anio, mes - 1, diaCorte);
+  fin.setDate(fin.getDate() - 1);
 
   // Garantizar que fin > inicio
   if (fin <= inicio) {
     fin.setMonth(fin.getMonth() + 1);
   }
 
-  return fin.toISOString().split('T')[0];
-}
-
+  return toLocalDate(fin);
+};
 // ─────────────────────────────────────────────────────────────
 //  PERFILES DE PRESUPUESTO — CRUD
 // ─────────────────────────────────────────────────────────────
@@ -379,9 +384,13 @@ const abrirPeriodo = async (req, res) => {
         : 0;
 
     // 4. Calcular montos
-    const fechaInicio = new Date().toISOString().split('T')[0];
+    const fechaInicio = toLocalDate(new Date());
     const fechaFin    = calcularFechaFin(fechaInicio, perfil.Dia_corte);
     const montos      = calcularMontos(ingreso_estimado, saldoAnterior, perfil);
+
+    console.log('Fecha inicio:', fechaInicio);
+    console.log('Fecha fin:', fechaFin);
+    console.log('Montos:', montos);
 
     // 5. Insertar período
     try {

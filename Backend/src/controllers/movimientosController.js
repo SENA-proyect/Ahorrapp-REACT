@@ -731,13 +731,18 @@ const abonarAhorro = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id }     = req.params;
   const monto      = parseFloat(req.body.monto);
+  const nota       = req.body.nota || null;
 
   if (!monto || monto <= 0)
     return res.status(400).json({ ok: false, mensaje: "El monto del abono debe ser mayor a 0" });
 
+  const connection = await pool.getConnection();
   try {
-    const [[ahorro]] = await pool.query(
-      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Monto_acumulado
+    await connection.beginTransaction();
+
+    // 1. Verificar propiedad del ahorro
+    const [[ahorro]] = await connection.query(
+      `SELECT a.ID_ahorros, a.Monto AS meta_monto
        FROM   AHORROS a
        JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
        JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
@@ -748,16 +753,31 @@ const abonarAhorro = async (req, res) => {
     if (!ahorro)
       return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
 
-    const nuevoAcumulado = Math.min(
-      parseFloat(ahorro.Monto_acumulado) + monto,
-      parseFloat(ahorro.meta_monto)
+    // 2. Insertar abono en ABONOS_AHORRO
+    await connection.query(
+      `INSERT INTO ABONOS_AHORRO (ID_ahorros, ID_usuario, Monto, Fecha_registro, Nota)
+       VALUES (?, ?, ?, CURRENT_DATE, ?)`,
+      [id, ID_usuario, monto, nota]
     );
-    const metaAlcanzada = nuevoAcumulado >= parseFloat(ahorro.meta_monto);
 
-    await pool.query(
+    // 3. Recalcular Monto_acumulado sumando todos los abonos
+    const [[{ total }]] = await connection.query(
+      `SELECT COALESCE(SUM(Monto), 0) AS total
+       FROM ABONOS_AHORRO
+       WHERE ID_ahorros = ?`,
+      [id]
+    );
+
+    // 4. Limitar al tope de la meta
+    const nuevoAcumulado = Math.min(Number(total), Number(ahorro.meta_monto));
+    const metaAlcanzada  = nuevoAcumulado >= Number(ahorro.meta_monto);
+
+    await connection.query(
       `UPDATE AHORROS SET Monto_acumulado = ? WHERE ID_ahorros = ?`,
       [nuevoAcumulado, id]
     );
+
+    await connection.commit();
 
     res.status(200).json({
       ok:              true,
@@ -768,8 +788,11 @@ const abonarAhorro = async (req, res) => {
       meta_alcanzada:  metaAlcanzada,
     });
   } catch (error) {
+    await connection.rollback();
     console.error("Error en abonarAhorro:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  } finally {
+    connection.release();
   }
 };
 
