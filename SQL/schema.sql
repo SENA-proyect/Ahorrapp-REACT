@@ -31,6 +31,14 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     Fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario'
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS Rol (
+    ID_rol INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del rol',
+    ID_usuario INT NOT NULL COMMENT 'Usuario al que pertenece el rol',
+    Nombre VARCHAR(50) NOT NULL UNIQUE COMMENT 'Nombre del rol (e.g., Administrador, Usuario)',
+    Descripcion VARCHAR(255) COMMENT 'Descripción del rol y sus permisos asociados',
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
 -- ========================================================================
 --     TABLA: categorias
 -- =========================================================================
