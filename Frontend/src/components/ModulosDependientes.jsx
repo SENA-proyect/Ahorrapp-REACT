@@ -34,13 +34,25 @@ const Dependientes = () => {
     e.preventDefault()
     const payload = { ...formDatos, Peso_economico: parseInt(formDatos.Peso_economico), Fecha_nacimiento: formDatos.Fecha_nacimiento || null }
     if (editandoId) {
-      const res = await fetch(`/api/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+      const res = await fetch(`/api/dependientes/${editandoId}`, { 
+        method: 'PUT', 
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` }, 
+        body: JSON.stringify(payload) })
       if (res.ok) setDependientes(dependientes.map(d => d.ID_dependientes === editandoId ? { ...payload, ID_dependientes: editandoId } : d))
-      else { const data = await res.json(); alert(data.error || 'Error al actualizar') }
+      else { const data = await res.json(); 
+        alert(data.error || 'Error al actualizar') }
     } else {
-      const res = await fetch('/api/dependientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+      const res = await fetch('/api/dependientes', 
+        { method: 'POST', 
+          headers: { 'Content-Type': 'application/json', 
+            Authorization: `Bearer ${token}` }, 
+          body: JSON.stringify(payload) })
       const data = await res.json()
-      if (res.ok) setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
+      if (res.ok) setDependientes([...dependientes, 
+        { ...payload, 
+          ID_dependientes: data.id }])
       else alert(data.error || 'Error al guardar')
     }
     cerrarModal()
@@ -54,7 +66,9 @@ const Dependientes = () => {
 
   const handleEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
-    const res = await fetch(`/api/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+    const res = await fetch(`/api/dependientes/${id}`, { 
+      method: 'DELETE', 
+      headers: { Authorization: `Bearer ${token}` } })
     if (res.ok) setDependientes(dependientes.filter(d => d.ID_dependientes !== id))
     else alert('Error al eliminar el dependiente')
   }

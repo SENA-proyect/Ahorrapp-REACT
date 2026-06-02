@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { register, login, getUsuarios, updateUsuario, deleteUsuario } = require("../controllers/authController");
 const { verifyToken } = require("../middlewares/authMiddleware");
-const { getUsuariosPanelAdmin, getDependientesPanelAdmin } = require("../controllers/authController");
+const { getUsuariosPanelAdmin, getDependientesPanelAdmin, getTodosDependientesAdmin } = require("../controllers/authController");
 
 
 router.post("/register",              register);
@@ -12,4 +12,5 @@ router.put("/PanelUsuarios/:id",      verifyToken, updateUsuario);
 router.delete("/PanelUsuarios/:id",   verifyToken, deleteUsuario);
 router.get("/usuarios/PanelAdmin",    verifyToken, getUsuariosPanelAdmin);
 router.get("/dependientes/PanelAdmin", verifyToken, getDependientesPanelAdmin);
+router.get("/PanelDependientes", verifyToken, getTodosDependientesAdmin);
 module.exports = router;

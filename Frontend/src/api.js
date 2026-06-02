@@ -1,4 +1,5 @@
 const API_URL = "http://localhost:3000/api"; 
+const { getDependientes } = require('../controllers/authController') 
 
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
@@ -290,3 +291,23 @@ export const getDependientesPanelAdmin = async () => {
 
   return response.json(); 
 }
+
+// Todos los dependientes para admin
+export const getTodosDependientesAdmin = async () => {
+  const token = localStorage.getItem('token');
+
+  const res = await fetch(`${API_URL}/auth/PanelDependientes`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('Error al obtener todos los dependientes');
+  }
+
+  const data = await res.json();
+
+  return data.dependientes ?? data;
+};

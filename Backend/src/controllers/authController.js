@@ -247,6 +247,23 @@ const getDependientesPanelAdmin = async (req, res) => {
   }
 };
 
+const getTodosDependientesAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query (
+      "SELECT * FROM dependientes"
+    )
+    res.json ({
+      totalDependientes: rows.length > 0 ? rows [0].totalDependientes : 0,
+    })
+  } catch (error){
+    console.error('Error al obtener dependientes:', error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener dependientes'
+    });
+  }
+};
 
 module.exports = {
   register,
@@ -255,5 +272,6 @@ module.exports = {
   updateUsuario,
   deleteUsuario,
   getUsuariosPanelAdmin,
-  getDependientesPanelAdmin
+  getDependientesPanelAdmin, 
+  getTodosDependientesAdmin,
 };
