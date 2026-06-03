@@ -1,6 +1,4 @@
 const API_URL = "http://localhost:3000/api"; 
-const { getDependientes } = require('../controllers/authController') 
-
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 export const registerUser = async (datos) => {
@@ -26,7 +24,6 @@ export const loginUser = async (datos) => {
 // ── Dependientes ────────────────────────────────────────────────────────────────
 export const getDependientes = async () => {
   const token = localStorage.getItem('token');
-  
   try {
     const res = await fetch('http://localhost:3000/api/dependientes', {
       method: 'GET',

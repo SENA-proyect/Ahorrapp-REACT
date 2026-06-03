@@ -249,13 +249,30 @@ const getDependientesPanelAdmin = async (req, res) => {
 
 const getTodosDependientesAdmin = async (req, res) => {
   try {
-    const [rows] = await pool.query (
-      "SELECT * FROM dependientes"
-    )
-    res.json ({
-      totalDependientes: rows.length > 0 ? rows [0].totalDependientes : 0,
-    })
-  } catch (error){
+    console.log('Entró a PanelDependientes');
+
+    const [rows] = await pool.query(`
+      SELECT
+        D.ID_dependientes,
+        D.Nombre,
+        D.Relacion,
+        D.Ocupacion,
+        D.Fecha_nacimiento,
+        D.ID_usuario,
+        U.Nombre AS usuario_nombre
+      FROM DEPENDIENTES D
+      INNER JOIN USUARIOS U ON D.ID_usuario = U.ID_usuario
+      ORDER BY U.Nombre, D.Nombre
+    `);
+
+    console.log('Dependientes encontrados:', rows);
+
+    return res.json({
+      ok: true,
+      dependientes: rows,
+    });
+
+  } catch (error) {
     console.error('Error al obtener dependientes:', error);
 
     return res.status(500).json({
@@ -264,6 +281,7 @@ const getTodosDependientesAdmin = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   register,
