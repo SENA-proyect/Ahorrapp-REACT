@@ -24,19 +24,24 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     ID_usuario  INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del usuario',
     Nombre VARCHAR(100) NOT NULL COMMENT 'Nombre del usuario',
     Apellido VARCHAR(100) COMMENT 'Apellido del usuario',
-    Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
+    -- Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
     Password_hash VARCHAR(255) NOT NULL COMMENT 'Hash de la contraseña del usuario',
     Email VARCHAR(255) NOT NULL UNIQUE COMMENT 'Correo electrónico principal',
     Activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el usuario está activo o inactivo',
     Fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario'
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS Rol (
+CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
+    ID_usuario INT NOT NULL COMMENT 'ID del usuario',
+    ID_rol INT NOT NULL COMMENT 'ID del rol',
+    PRIMARY KEY (ID_usuario, ID_rol),
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_rol) REFERENCES ROL(ID_rol) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS ROL (
     ID_rol INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del rol',
-    ID_usuario INT NOT NULL COMMENT 'Usuario al que pertenece el rol',
-    Nombre VARCHAR(50) NOT NULL UNIQUE COMMENT 'Nombre del rol (e.g., Administrador, Usuario)',
-    Descripcion VARCHAR(255) COMMENT 'Descripción del rol y sus permisos asociados',
-    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+    Cargo VARCHAR(50) NOT NULL COMMENT 'Nombre del rol (e.g., Administrador, Usuario, superusuario)',
 ) ENGINE=InnoDB;
 
 -- ========================================================================
