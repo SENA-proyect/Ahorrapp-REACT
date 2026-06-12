@@ -290,3 +290,30 @@ export const eliminarExportacion = async (id) => {
 
   return response.json();
 };
+
+// ── Ingresos / Gastos ─────────────────────────────────────────────────────────
+export const getIngresos = async () => {
+  const movimientos = await getMovimientos();
+  return movimientos.filter(m =>
+    (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "ingreso"
+  );
+};
+
+export const getGastos = async () => {
+  const movimientos = await getMovimientos();
+  return movimientos.filter(m =>
+    (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "gasto"
+  );
+};
+
+// ── Panel Admin ───────────────────────────────────────────────────────────────
+export const getUsuariosPanelAdmin = async () =>
+  fetchJSON(`${API_URL}/auth/usuarios/PanelAdmin`);
+
+export const getDependientesPanelAdmin = async () =>
+  fetchJSON(`${API_URL}/auth/dependientes/PanelAdmin`);
+
+export const getTodosDependientesAdmin = async () => {
+  const data = await fetchJSON(`${API_URL}/auth/PanelDependientes`);
+  return data.dependientes ?? data;
+};

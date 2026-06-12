@@ -211,6 +211,77 @@ const deleteUsuario = async (req, res) => {
     return handleServerError(res, error, "Error al eliminar usuario");
   }
 };
+// ── GetUsuariosPanelAdmin/PanelAdmin/:id ────────────────────────────────────────────────
+const getUsuariosPanelAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query (
+      "SELECT COUNT(*) AS totalUsuarios FROM usuarios"
+    );
+    res.json({
+      totalUsuarios: rows.length > 0 ? rows[0].totalUsuarios : 0,
+    })
+  } catch (error){
+    console.error('Error al contar usuarios:', error);
+    res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener usuarios'
+    });
+  }
+};
+
+const getDependientesPanelAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query (
+      "SELECT COUNT(*) AS totalDependientes FROM dependientes"
+    )
+    res.json ({
+      totalDependientes: rows.length > 0 ? rows [0].totalDependientes : 0,
+    })
+  } catch (error){
+    console.error('Error al contar dependientes:', error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener dependientes'
+    });
+  }
+};
+
+const getTodosDependientesAdmin = async (req, res) => {
+  try {
+    console.log('Entró a PanelDependientes');
+
+    const [rows] = await pool.query(`
+      SELECT
+        D.ID_dependientes,
+        D.Nombre,
+        D.Relacion,
+        D.Ocupacion,
+        D.Fecha_nacimiento,
+        D.ID_usuario,
+        U.Nombre AS usuario_nombre
+      FROM DEPENDIENTES D
+      INNER JOIN USUARIOS U ON D.ID_usuario = U.ID_usuario
+      ORDER BY U.Nombre, D.Nombre
+    `);
+
+    console.log('Dependientes encontrados:', rows);
+
+    return res.json({
+      ok: true,
+      dependientes: rows,
+    });
+
+  } catch (error) {
+    console.error('Error al obtener dependientes:', error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener dependientes'
+    });
+  }
+};
+
 
 module.exports = {
   register,
@@ -218,4 +289,7 @@ module.exports = {
   getUsuarios,
   updateUsuario,
   deleteUsuario,
+  getUsuariosPanelAdmin,
+  getDependientesPanelAdmin, 
+  getTodosDependientesAdmin,
 };

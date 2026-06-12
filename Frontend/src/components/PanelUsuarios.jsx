@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function PanelUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -23,7 +24,7 @@ export default function PanelUsuarios() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      
+
       if (data.ok) {
         setUsuarios(data.usuarios);
       } else {
@@ -123,54 +124,52 @@ export default function PanelUsuarios() {
   };
 
   if (cargando) return <p>Cargando...</p>;
-
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a, #0d1a0d)' }}>
-      <div className="inf-container">
-        <h2>Usuarios Registrados</h2>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1133a1ff, #97720cff)' }}>
+      
+      {/* HEADER */}
+      <header>
+        <div className="flex p-5 bg-black/10">
+        <button className="bg-blue-700 rounded-lg p-3 text-white w-auto transition-all duration-300">
+            <Link to="/PanelAdmin">
+              ← Volver al Panel Admin
+            </Link>
+          </button>
+          <h2 className="text-center text-white font-bold text-4xl flex justify-center m-auto">Usuarios Registrados</h2>
+          {error && <p className="error">{error}</p>}
+        </div>
+      </header>
 
-        {error && <p className="error">{error}</p>}
-
-        <div className="inf-listas">
+      {/* MAIN */}
+      <main>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-center m-10">
           {usuarios.length === 0 ? (
             <p>No hay usuarios registrados.</p>
           ) : (
             usuarios.map((usuario) => (
-              <div className="general-card" key={usuario.ID_usuario}>
-                <p><strong>ID:</strong> {usuario.ID_usuario}</p>
-                <p><strong>Nombre:</strong> {usuario.Nombre}</p>
-                <p><strong>Apellido:</strong> {usuario.Apellido || 'No asignado'}</p>
-                <p><strong>Email:</strong> {usuario.Email}</p>
-                <p><strong>Rol:</strong>{' '}
+              <div className="bg-white/20 backdrop-blur-md border-2 border-blue-300 flex flex-col rounded-xl m-5 p-10 text-white" key={usuario.ID_usuario}>
+                <p className='whitespace-nowrap'><strong>ID:</strong> {usuario.ID_usuario}</p>
+                <p className='whitespace-nowrap'><strong>Nombre:</strong> {usuario.Nombre}</p>
+                <p className='whitespace-nowrap'><strong>Apellido:</strong> {usuario.Apellido || 'No asignado'}</p>
+                <p className='whitespace-nowrap'><strong>Email:</strong> {usuario.Email}</p>
+                <p className='whitespace-nowrap'><strong>Rol:</strong>{' '}
                   {usuario.Rol === 'Administrador'
                     ? <span className="badge-admin">Administrador</span>
                     : <span className="badge-user">Usuario</span>
                   }
                 </p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px' }}>
+                <div className="flex justify-center flex-row gap-3 mt-5">
                   <button
                     onClick={() => handleEditar(usuario)}
-                    style={{
-                      backgroundColor: '#00000000',
-                      color: 'white',
-                      padding: '8px 16px',
-                      border: 'solid 1px green',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
+                    className='bg-green-500 border-green-600 rounded-lg text-white font-bold text-lg p-3 m-3 cursor-pointer
+                    hover:bg-green-800 scale-[1.02] transition-all duration-300'
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleBorrar(usuario.ID_usuario)}
-                    style={{
-                      backgroundColor: '#00000000',
-                      color: 'white',
-                      padding: '8px 16px',
-                      border: 'solid 1px red',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
+                    className='bg-red-500 border-red-600 rounded-lg text-white font-bold text-lg p-3 m-3 cursor-pointer
+                    hover:bg-red-800 scale-[1.02] transition-all duration-300'
                   >
                     Borrar
                   </button>
@@ -179,7 +178,10 @@ export default function PanelUsuarios() {
             ))
           )}
         </div>
-      </div>
+      </main>
+
+      {/* FOOTER */}
+      <footer className="p-5"></footer>
 
       {/* MODAL */}
       {modalAbierto && (
@@ -196,95 +198,62 @@ export default function PanelUsuarios() {
           zIndex: 1000
         }} onClick={() => setModalAbierto(false)}>
           <div style={{
-            backgroundColor: '#1a1a1a',
-            borderRadius: '8px',
+            backgroundColor: '#1133a1ff',
+            borderRadius: '10px',
             padding: '20px',
             minWidth: '400px',
-            border: '1px solid #333'
+            border: '1px solid #333',
+            color: '#999'
           }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ color: '#fff', margin: 0 }}>Editar Usuario</h2>
+            <div className='flex justify-between items-center mb-2'>
+              <h2 className='text-white font-bold text-2xl'>Editar Usuario</h2>
               <button
                 onClick={() => setModalAbierto(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '28px',
-                  cursor: 'pointer',
-                  color: '#999'
-                }}
+                className='bg-none border-none text-2xl text-red cursor-pointer'
               >
                 ×
               </button>
             </div>
 
-            {error && <div style={{ backgroundColor: '#c62828', color: '#fff', padding: '10px', borderRadius: '4px', marginBottom: '15px' }}>{error}</div>}
+            {error && <div className='bg-red-800 text-white font-bold text-center rounded-lg mb-5'> {error} </div>}
 
             <form onSubmit={handleGuardarCambios}>
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#fff', fontWeight: '600' }}>Nombre</label>
+              <div className='mb-[15px]'>
+                <label className='block mb-[8px] text-white font-bold'>Nombre</label>
                 <input
                   type="text"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #444',
-                    borderRadius: '4px',
-                    backgroundColor: '#2a2a2a',
-                    color: '#fff'
-                  }}
+                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
                 />
               </div>
 
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#fff', fontWeight: '600' }}>Apellido</label>
+              <div className='mb-[15px]'>
+                <label className='block mb-[8px] text-white font-bold'>Apellido</label>
                 <input
                   type="text"
                   value={apellido}
                   onChange={(e) => setApellido(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #444',
-                    borderRadius: '4px',
-                    backgroundColor: '#2a2a2a',
-                    color: '#fff'
-                  }}
+                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
                 />
               </div>
 
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#fff', fontWeight: '600' }}>Email</label>
+              <div className='mb-[15px]'>
+                <label className='block mb-[8px] text-white font-bold'>Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #444',
-                    borderRadius: '4px',
-                    backgroundColor: '#2a2a2a',
-                    color: '#fff'
-                  }}
+                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
                 />
               </div>
 
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#fff', fontWeight: '600' }}>Rol</label>
+              <div className='mb-[15px]'>
+                <label className='block mb-[8px] text-white font-bold'>Rol</label>
                 <select
                   value={rol}
                   onChange={(e) => setRol(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #444',
-                    borderRadius: '4px',
-                    backgroundColor: '#2a2a2a',
-                    color: '#fff'
-                  }}
+                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
                 >
                   <option value="usuario">Usuario</option>
                   <option value="moderador">Moderador</option>
@@ -292,33 +261,20 @@ export default function PanelUsuarios() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <div className='flex gap-5 justify-end mt-10'>
                 <button
                   type="submit"
                   disabled={cargandoModal}
-                  style={{
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
+                  className='bg-green-600 hover:bg-green-700 border-green-800 rounded-lg text-white 
+                  font-bold text-md p-3 cursor-pointer transition-all duration-300'
                 >
                   {cargandoModal ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setModalAbierto(false)}
-                  style={{
-                    backgroundColor: '#999',
-                    color: 'white',
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
+                  className='bg-red-700 hover:bg-red-800 border-red-800 rounded-lg text-white 
+                  font-bold text-md p-3 cursor-pointer transition-all duration-300'>
                   Cancelar
                 </button>
               </div>
