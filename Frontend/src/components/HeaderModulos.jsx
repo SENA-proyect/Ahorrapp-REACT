@@ -24,6 +24,11 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
       ? 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-bold text-amber-300 bg-amber-400/20 border border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.4)] transition-all'
       : 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-semibold text-white bg-white/10 border border-white/5 hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)] transition-all'
 
+  const handleLogout = () => { 
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.replace('/login');
+  }
   return (
     <header className="relative z-10 w-full flex flex-col items-center pt-4 sm:pt-5">
       <section className="w-full max-w-[1400px] flex flex-col gap-4 px-4 sm:px-6 md:px-10 mb-4 sm:mb-6">
@@ -46,10 +51,11 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
           </div>
 
           <button
-            onClick={() => navigate('/login')}
+            onClick={handleLogout}
             className="justify-self-end flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-bold rounded-xl sm:rounded-2xl border border-white/10 bg-transparent text-white transition-all duration-300 hover:bg-red-600 hover:border-red-500/40 hover:-translate-y-px hover:shadow-[0_4px_10px_rgba(228,33,33,0.4)]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            
             <span className="hidden sm:inline">Cerrar Sesión</span>
             <span className="sm:hidden">Salir</span>
           </button>

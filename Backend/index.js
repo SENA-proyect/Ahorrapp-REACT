@@ -15,7 +15,7 @@ const app = express();
 
 // Middlewares globales
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://localhost:5173",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -43,5 +43,5 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en https://localhost:${PORT}`);
 });

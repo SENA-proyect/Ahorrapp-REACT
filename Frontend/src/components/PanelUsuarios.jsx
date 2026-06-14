@@ -123,137 +123,191 @@ export default function PanelUsuarios() {
     }
   };
 
-  if (cargando) return <p>Cargando...</p>;
+  // Helper para iniciales del avatar, ej: "Maria Rodriguez" -> "MR"
+  const getIniciales = (nombre, apellido) => {
+    const inicialNombre = nombre ? nombre.charAt(0) : '';
+    const inicialApellido = apellido ? apellido.charAt(0) : '';
+    return `${inicialNombre}${inicialApellido}`.toUpperCase();
+  };
+
+  if (cargando) {
+    return (
+      <div className="min-h-screen bg-[#080c18] flex items-center justify-center">
+        <p className="text-[#9aa6c4] text-sm">Cargando...</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1133a1ff, #97720cff)' }}>
-      
+    <div className="min-h-screen bg-[#080c18]">
+
       {/* HEADER */}
-      <header>
-        <div className="flex p-5 bg-black/10">
-        <button className="bg-blue-700 rounded-lg p-3 text-white w-auto transition-all duration-300">
-            <Link to="/PanelAdmin">
-              ← Volver al Panel Admin
-            </Link>
+      <header className="flex items-center gap-4 p-6 border-b border-[#1c2942]">
+        <Link to="/PanelAdmin">
+          <button className="flex items-center gap-2 bg-[#0d1526] border border-[#1c2942] text-[#9aa6c4] hover:text-[#e0b855] hover:border-[#e0b855]/40 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Volver al panel
           </button>
-          <h2 className="text-center text-white font-bold text-4xl flex justify-center m-auto">Usuarios Registrados</h2>
-          {error && <p className="error">{error}</p>}
+        </Link>
+
+        <div>
+          <h1 className="text-xl font-semibold text-[#f4f1e8]">Usuarios registrados</h1>
+          <p className="text-sm text-[#7d8aa8] mt-1">{usuarios.length} cuentas activas</p>
         </div>
+
+        {error && (
+          <p className="ml-auto text-sm text-red-300 bg-red-900/20 border border-red-900/40 rounded-lg px-3 py-1.5">
+            {error}
+          </p>
+        )}
       </header>
 
       {/* MAIN */}
-      <main>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-center m-10">
-          {usuarios.length === 0 ? (
-            <p>No hay usuarios registrados.</p>
-          ) : (
-            usuarios.map((usuario) => (
-              <div className="bg-white/20 backdrop-blur-md border-2 border-blue-300 flex flex-col rounded-xl m-5 p-10 text-white" key={usuario.ID_usuario}>
-                <p className='whitespace-nowrap'><strong>ID:</strong> {usuario.ID_usuario}</p>
-                <p className='whitespace-nowrap'><strong>Nombre:</strong> {usuario.Nombre}</p>
-                <p className='whitespace-nowrap'><strong>Apellido:</strong> {usuario.Apellido || 'No asignado'}</p>
-                <p className='whitespace-nowrap'><strong>Email:</strong> {usuario.Email}</p>
-                <p className='whitespace-nowrap'><strong>Rol:</strong>{' '}
-                  {usuario.Rol === 'Administrador'
-                    ? <span className="badge-admin">Administrador</span>
-                    : <span className="badge-user">Usuario</span>
-                  }
-                </p>
-                <div className="flex justify-center flex-row gap-3 mt-5">
+      <main className="p-6">
+        {usuarios.length === 0 ? (
+          <p className="text-[#9aa6c4] text-sm">No hay usuarios registrados.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {usuarios.map((usuario) => (
+              <div
+                key={usuario.ID_usuario}
+                className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-4"
+              >
+                {/* Encabezado de la card: avatar, nombre, badge de rol */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
+                        usuario.Rol === 'Administrador'
+                          ? 'bg-[#e0b855]/10 text-[#e0b855]'
+                          : 'bg-[#85b7eb]/10 text-[#85b7eb]'
+                      }`}
+                    >
+                      {getIniciales(usuario.Nombre, usuario.Apellido)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-[#f4f1e8]">
+                        {usuario.Nombre} {usuario.Apellido || ''}
+                      </p>
+                      <p className="text-xs text-[#7d8aa8]">ID {usuario.ID_usuario}</p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`text-xs font-medium px-2.5 py-1 rounded-md ${
+                      usuario.Rol === 'Administrador'
+                        ? 'bg-[#e0b855]/10 text-[#e0b855]'
+                        : 'bg-[#85b7eb]/10 text-[#85b7eb]'
+                    }`}
+                  >
+                    {usuario.Rol === 'Administrador' ? 'Administrador' : 'Usuario'}
+                  </span>
+                </div>
+
+                {/* Email */}
+                <div className="border-t border-[#1c2942] pt-3 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#7d8aa8]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="m22 6-10 7L2 6" />
+                  </svg>
+                  <span className="text-sm text-[#9aa6c4] truncate">{usuario.Email}</span>
+                </div>
+
+                {/* Acciones */}
+                <div className="flex gap-2">
                   <button
                     onClick={() => handleEditar(usuario)}
-                    className='bg-green-500 border-green-600 rounded-lg text-white font-bold text-lg p-3 m-3 cursor-pointer
-                    hover:bg-green-800 scale-[1.02] transition-all duration-300'
+                    className="flex-1 flex items-center justify-center gap-2 border border-[#1c2942] text-[#9aa6c4] hover:text-[#e0b855] hover:border-[#e0b855]/40 rounded-lg py-2 text-sm font-medium transition-colors duration-200"
                   >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
                     Editar
                   </button>
                   <button
                     onClick={() => handleBorrar(usuario.ID_usuario)}
-                    className='bg-red-500 border-red-600 rounded-lg text-white font-bold text-lg p-3 m-3 cursor-pointer
-                    hover:bg-red-800 scale-[1.02] transition-all duration-300'
+                    className="flex-1 flex items-center justify-center gap-2 border border-red-900/40 text-red-300 hover:bg-red-900/20 rounded-lg py-2 text-sm font-medium transition-colors duration-200"
                   >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
                     Borrar
                   </button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
-
-      {/* FOOTER */}
-      <footer className="p-5"></footer>
 
       {/* MODAL */}
       {modalAbierto && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }} onClick={() => setModalAbierto(false)}>
-          <div style={{
-            backgroundColor: '#1133a1ff',
-            borderRadius: '10px',
-            padding: '20px',
-            minWidth: '400px',
-            border: '1px solid #333',
-            color: '#999'
-          }} onClick={(e) => e.stopPropagation()}>
-            <div className='flex justify-between items-center mb-2'>
-              <h2 className='text-white font-bold text-2xl'>Editar Usuario</h2>
+        <div
+          className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4"
+          onClick={() => setModalAbierto(false)}
+        >
+          <div
+            className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-[#f4f1e8]">Editar usuario</h2>
               <button
                 onClick={() => setModalAbierto(false)}
-                className='bg-none border-none text-2xl text-red cursor-pointer'
+                className="text-[#7d8aa8] hover:text-[#f4f1e8] text-2xl leading-none transition-colors duration-200"
               >
                 ×
               </button>
             </div>
 
-            {error && <div className='bg-red-800 text-white font-bold text-center rounded-lg mb-5'> {error} </div>}
+            {error && (
+              <div className="bg-red-900/20 border border-red-900/40 text-red-300 text-sm font-medium text-center rounded-lg py-2 mb-4">
+                {error}
+              </div>
+            )}
 
-            <form onSubmit={handleGuardarCambios}>
-              <div className='mb-[15px]'>
-                <label className='block mb-[8px] text-white font-bold'>Nombre</label>
+            <form onSubmit={handleGuardarCambios} className="flex flex-col gap-4">
+              <div>
+                <label className="block mb-1.5 text-sm font-medium text-[#9aa6c4]">Nombre</label>
                 <input
                   type="text"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
+                  className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 />
               </div>
 
-              <div className='mb-[15px]'>
-                <label className='block mb-[8px] text-white font-bold'>Apellido</label>
+              <div>
+                <label className="block mb-1.5 text-sm font-medium text-[#9aa6c4]">Apellido</label>
                 <input
                   type="text"
                   value={apellido}
                   onChange={(e) => setApellido(e.target.value)}
-                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
+                  className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 />
               </div>
 
-              <div className='mb-[15px]'>
-                <label className='block mb-[8px] text-white font-bold'>Email</label>
+              <div>
+                <label className="block mb-1.5 text-sm font-medium text-[#9aa6c4]">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
+                  className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 />
               </div>
 
-              <div className='mb-[15px]'>
-                <label className='block mb-[8px] text-white font-bold'>Rol</label>
+              <div>
+                <label className="block mb-1.5 text-sm font-medium text-[#9aa6c4]">Rol</label>
                 <select
                   value={rol}
                   onChange={(e) => setRol(e.target.value)}
-                  className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
+                  className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 >
                   <option value="usuario">Usuario</option>
                   <option value="moderador">Moderador</option>
@@ -261,21 +315,20 @@ export default function PanelUsuarios() {
                 </select>
               </div>
 
-              <div className='flex gap-5 justify-end mt-10'>
-                <button
-                  type="submit"
-                  disabled={cargandoModal}
-                  className='bg-green-600 hover:bg-green-700 border-green-800 rounded-lg text-white 
-                  font-bold text-md p-3 cursor-pointer transition-all duration-300'
-                >
-                  {cargandoModal ? 'Guardando...' : 'Guardar Cambios'}
-                </button>
+              <div className="flex gap-3 justify-end mt-2">
                 <button
                   type="button"
                   onClick={() => setModalAbierto(false)}
-                  className='bg-red-700 hover:bg-red-800 border-red-800 rounded-lg text-white 
-                  font-bold text-md p-3 cursor-pointer transition-all duration-300'>
+                  className="border border-[#1c2942] text-[#9aa6c4] hover:text-[#f4f1e8] rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200"
+                >
                   Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={cargandoModal}
+                  className="bg-[#e0b855] hover:bg-[#c9a84c] text-[#0d1526] rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 disabled:opacity-60"
+                >
+                  {cargandoModal ? 'Guardando...' : 'Guardar cambios'}
                 </button>
               </div>
             </form>
