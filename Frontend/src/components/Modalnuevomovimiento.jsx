@@ -67,7 +67,19 @@ const validar = (subtipo, form) => {
 }
 
 export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) {
-  const cfg   = CONFIG[subtipo]
+  const cfg = CONFIG[subtipo]
+  if (!cfg) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-6 max-w-md mx-4 text-center">
+          <p className="text-red-600 font-bold mb-4">Tipo de movimiento no válido: {subtipo}</p>
+          <button onClick={onCerrar} className="bg-gray-500 text-white px-4 py-2 rounded-lg">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    )
+  }
   const color = COLORES[cfg.color]
   const inputCls = mkInput(color.ring)
 
