@@ -60,6 +60,12 @@ export default function PanelAdmin() {
     ) },
   ];
 
+  const handleLogout = () => { 
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.replace('/login');
+  }
+
   return (
     <div className="min-h-screen bg-[#080c18] flex">
 
@@ -85,7 +91,7 @@ export default function PanelAdmin() {
         </nav>
 
         <div className="border-t border-[#1c2942] pt-4">
-          <button className="w-full p-2.5 rounded-lg text-sm font-medium text-red-300 border border-red-900/40 hover:bg-red-900/20 transition-colors duration-200 flex items-center justify-center gap-2">
+          <button onClick={handleLogout} className="w-full p-2.5 rounded-lg text-sm font-medium text-red-300 border border-red-900/40 hover:bg-red-900/20 transition-colors duration-200 flex items-center justify-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />

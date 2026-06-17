@@ -10,7 +10,6 @@ export default function PanelUsuarios() {
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState('');
-  const [rol, setRol] = useState('usuario');
   const [cargandoModal, setCargandoModal] = useState(false);
 
   useEffect(() => {
@@ -19,20 +18,34 @@ export default function PanelUsuarios() {
 
   const getUsuarios = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/auth/PanelUsuarios', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const token = localStorage.getItem("token");
+  
+      // 1. IMPORTANTE: Cambiado a https:// para que no te salte error de Fetch
+      const response = await fetch(
+        "http://localhost:3000/api/auth/PanelUsuarios",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      console.log("Status:", response.status);
+  
+      // 2. CORRECCIÓN AQUÍ: Usamos response.json() en lugar de response.text()
       const data = await response.json();
-
-      if (data.ok) {
-        setUsuarios(data.usuarios);
+      console.log("Respuesta JSON:", data);
+  
+      // 3. Llenamos el estado con el array que viene dentro de la propiedad '.usuarios'
+      if (data.ok && data.usuarios) {
+        setUsuarios(data.usuarios); 
       } else {
-        setError(data.mensaje);
+        setError(data.mensaje || "Error al procesar los usuarios");
       }
+  
     } catch (err) {
-      setError('Error al obtener usuarios');
       console.error(err);
+      setError("Error al obtener usuarios");
     } finally {
       setCargando(false);
     }
@@ -43,7 +56,6 @@ export default function PanelUsuarios() {
     setNombre(usuario.Nombre);
     setApellido(usuario.Apellido);
     setEmail(usuario.Email);
-    setRol(usuario.Rol);
     setModalAbierto(true);
   };
 
@@ -71,8 +83,7 @@ export default function PanelUsuarios() {
           body: JSON.stringify({
             Nombre: nombre,
             Apellido: apellido,
-            Email: email,
-            Rol: rol
+            Email: email
           })
         }
       );
@@ -82,7 +93,7 @@ export default function PanelUsuarios() {
       if (data.ok) {
         setUsuarios(usuarios.map(u =>
           u.ID_usuario === usuarioSeleccionado.ID_usuario
-            ? { ...u, Nombre: nombre, Apellido: apellido, Email: email, Rol: rol }
+            ? { ...u, Nombre: nombre, Apellido: apellido, Email: email }
             : u
         ));
         setModalAbierto(false);
@@ -167,83 +178,98 @@ export default function PanelUsuarios() {
 
       {/* MAIN */}
       <main className="p-6">
-        {usuarios.length === 0 ? (
-          <p className="text-[#9aa6c4] text-sm">No hay usuarios registrados.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {usuarios.map((usuario) => (
-              <div
-                key={usuario.ID_usuario}
-                className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-4"
-              >
-                {/* Encabezado de la card: avatar, nombre, badge de rol */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
-                        usuario.Rol === 'Administrador'
-                          ? 'bg-[#e0b855]/10 text-[#e0b855]'
-                          : 'bg-[#85b7eb]/10 text-[#85b7eb]'
-                      }`}
-                    >
-                      {getIniciales(usuario.Nombre, usuario.Apellido)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-[#f4f1e8]">
-                        {usuario.Nombre} {usuario.Apellido || ''}
-                      </p>
-                      <p className="text-xs text-[#7d8aa8]">ID {usuario.ID_usuario}</p>
-                    </div>
-                  </div>
+  {usuarios.length === 0 ? (
+    <p className="text-[#9aa6c4] text-sm">
+      No hay usuarios registrados.
+    </p>
+  ) : (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {usuarios.map((usuario) => (
+        <div
+          key={usuario.ID_usuario}
+          className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-4"
+        >
+          {/* Encabezado */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium bg-[#85b7eb]/10 text-[#85b7eb]">
+              {getIniciales(usuario.Nombre, usuario.Apellido)}
+            </div>
 
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-md ${
-                      usuario.Rol === 'Administrador'
-                        ? 'bg-[#e0b855]/10 text-[#e0b855]'
-                        : 'bg-[#85b7eb]/10 text-[#85b7eb]'
-                    }`}
-                  >
-                    {usuario.Rol === 'Administrador' ? 'Administrador' : 'Usuario'}
-                  </span>
-                </div>
-
-                {/* Email */}
-                <div className="border-t border-[#1c2942] pt-3 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-[#7d8aa8]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                    <path d="m22 6-10 7L2 6" />
-                  </svg>
-                  <span className="text-sm text-[#9aa6c4] truncate">{usuario.Email}</span>
-                </div>
-
-                {/* Acciones */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEditar(usuario)}
-                    className="flex-1 flex items-center justify-center gap-2 border border-[#1c2942] text-[#9aa6c4] hover:text-[#e0b855] hover:border-[#e0b855]/40 rounded-lg py-2 text-sm font-medium transition-colors duration-200"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleBorrar(usuario.ID_usuario)}
-                    className="flex-1 flex items-center justify-center gap-2 border border-red-900/40 text-red-300 hover:bg-red-900/20 rounded-lg py-2 text-sm font-medium transition-colors duration-200"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                    Borrar
-                  </button>
-                </div>
-              </div>
-            ))}
+            <div>
+              <p className="text-sm font-medium text-[#f4f1e8]">
+                {usuario.Nombre} {usuario.Apellido || ""}
+              </p>
+              <p className="text-xs text-[#7d8aa8']">
+                ID {usuario.ID_usuario}
+              </p>
+            </div>
           </div>
-        )}
-      </main>
+
+          {/* Email */}
+          <div className="border-t border-[#1c2942] pt-3 flex items-center gap-2">
+            <svg
+              className="w-4 h-4 text-[#7d8aa8]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              viewBox="0 0 24 24"
+            >
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 6-10 7L2 6" />
+            </svg>
+
+            <span className="text-sm text-[#9aa6c4] truncate">
+              {usuario.Email}
+            </span>
+          </div>
+
+          {/* Acciones */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleEditar(usuario)}
+              className="flex-1 flex items-center justify-center gap-2 border border-[#1c2942] text-[#9aa6c4] hover:text-[#e0b855] hover:border-[#e0b855]/40 rounded-lg py-2 text-sm font-medium transition-colors duration-200"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              Editar
+            </button>
+
+            <button
+              onClick={() => handleBorrar(usuario.ID_usuario)}
+              className="flex-1 flex items-center justify-center gap-2 border border-red-900/40 text-red-300 hover:bg-red-900/20 rounded-lg py-2 text-sm font-medium transition-colors duration-200"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              Borrar
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</main>
 
       {/* MODAL */}
       {modalAbierto && (
@@ -300,19 +326,6 @@ export default function PanelUsuarios() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 />
-              </div>
-
-              <div>
-                <label className="block mb-1.5 text-sm font-medium text-[#9aa6c4]">Rol</label>
-                <select
-                  value={rol}
-                  onChange={(e) => setRol(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
-                >
-                  <option value="usuario">Usuario</option>
-                  <option value="moderador">Moderador</option>
-                  <option value="admin">Admin</option>
-                </select>
               </div>
 
               <div className="flex gap-3 justify-end mt-2">

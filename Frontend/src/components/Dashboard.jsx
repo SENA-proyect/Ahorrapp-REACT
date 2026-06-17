@@ -3,10 +3,13 @@ import HeaderModulos from './HeaderModulos'
 import BolsaWidget from './BolsaWidget'
 import { getIngresos } from '../api'
 import { getGastos } from '../api'
+import { useAuth } from './AuthContext'
 
 const usuario = JSON.parse(localStorage.getItem('usuario'))
 
 export default function Dashboard() {
+
+  const { user } = useAuth();
 
   const [ingresos, setIngresos] = useState([]);
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
+import { useAuth } from "./AuthContext";
 
 // ── Mini-componente reutilizable para cada campo del formulario ────────────
 function Field({ id, label, type, placeholder, name, value, onChange, icon, className }) {
@@ -31,6 +32,7 @@ function Field({ id, label, type, placeholder, name, value, onChange, icon, clas
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
@@ -71,6 +73,7 @@ export default function Login() {
       if (respuesta.ok) {
         localStorage.setItem("token", respuesta.token);
         localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
+        login(respuesta.usuario);
         navigate("/Dashboard");
       } else {
         setError(respuesta.mensaje || "Error al iniciar sesión");
@@ -131,11 +134,19 @@ export default function Login() {
   return (
     <>
 
-      <section className="w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-800 via-zinc-950 to-amber-900 py-8">
+      <section className="relative w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-800 via-zinc-950 to-amber-900 py-8">
+      <button
+        onClick={() => navigate("/")}
+        className="group absolute top-6 left-6 z-10 flex items-center gap-2 rounded-full border border-zinc-700/60 bg-zinc-900/40 px-4 py-2 text-sm font-medium text-zinc-400 backdrop-blur-sm transition-colors duration-200 hover:border-amber-400/40 hover:text-amber-400"
+      >
+        <span className="transition-transform duration-200 group-hover:-translate-x-1">←</span>
+        Volver al inicio
+      </button>
         <div
           className="flex flex-col lg:flex-row items-center bg-gradient-to-br from-[#050F24] to-[#152E5E] w-full max-w-[1000px] mx-4 h-auto lg:h-[580px] rounded-3xl shadow-2xl overflow-hidden"
           style={{ border: "1px solid #27272a" }}
         >
+
           <div className="overflow-hidden w-full lg:w-[520px] h-auto lg:h-[500px] px-6 lg:px-10 py-8 lg:py-0">
 
             <div

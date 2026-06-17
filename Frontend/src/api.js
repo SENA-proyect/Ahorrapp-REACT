@@ -256,8 +256,7 @@ export const getGastos = async () => {
 }
 
 export const getUsuariosPanelAdmin = async () => {
-  const token = localStorage.getItem("token");
-
+  const token = localStorage.getItem("token");z
   const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {
     method: "GET",
     headers: {

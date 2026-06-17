@@ -86,10 +86,22 @@ const login = async (req, res) => {
       });
     }
 
+    // Trae los roles del usuario uniendo la tabla puente con la tabla de roles
+    const [rolesRows] = await pool.query(
+      `SELECT r.Cargo
+       FROM usuarios_roles ur
+       INNER JOIN rol r ON ur.ID_rol = r.ID_rol
+       WHERE ur.ID_usuario = ?`,
+      [usuario.ID_usuario]
+    );
+
+    // Pasamos todo a minúscula para que coincida con lo que espera el frontend
+    const roles = rolesRows.map((fila) => fila.Cargo.toLowerCase());
+
     const token = jwt.sign(
       {
         id: usuario.ID_usuario,
-        rol: usuario.Rol,
+        roles,
       },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
@@ -104,7 +116,7 @@ const login = async (req, res) => {
         nombre: usuario.Nombre,
         apellido: usuario.Apellido,
         email: usuario.Email,
-        rol: usuario.Rol,
+        roles,
       },
     });
 
@@ -117,7 +129,7 @@ const login = async (req, res) => {
 const getUsuarios = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT ID_usuario, Nombre, Apellido, Email, Rol, Activo
+      SELECT ID_usuario, Nombre, Apellido, Email, Activo
       FROM USUARIOS
       WHERE Activo = TRUE
     `);
