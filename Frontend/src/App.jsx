@@ -25,7 +25,7 @@ import Configuracion from './components/pages/Configuracion.jsx'
 import Sidebar from './components/layout/Sidebar.jsx'
 import { useTheme } from './hooks/useTheme'
 import Noticias from "./components/pages/Noticias.jsx"
-import ModulosPresupuestos from './components/ModulosPresupuestos.jsx'
+import ModulosPresupuestos from './components/modulos/ModulosPresupuestos.jsx'
 import Modalnuevomovimiento from './components/Modalnuevomovimiento.jsx'
 
 function AppContent() {

@@ -4,8 +4,8 @@ import {
   getPerfilesPrespuesto, activarPerfil, eliminarPerfil,
   getPeriodoActivo, abrirPeriodo, cerrarPeriodo, ajustarIngresoPeriodo,
   crearPerfil, editarPerfil,
-} from '../api'
-import HeaderModulos from './HeaderModulos'
+} from '../../api'
+import HeaderModulos from '../HeaderModulos'
 
 const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
 const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
