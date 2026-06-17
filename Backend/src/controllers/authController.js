@@ -335,6 +335,7 @@ const deleteUsuario = async (req, res) => {
     return handleServerError(res, error, "Error al eliminar usuario");
   }
 };
+// ── GetUsuariosPanelAdmin/PanelAdmin ───────────────────────────────────────────
 
 const getUsuariosPanelAdmin = async (req, res) => {
   try {
@@ -349,6 +350,34 @@ const getUsuariosPanelAdmin = async (req, res) => {
     res.status(500).json({
       ok: false,
       mensaje: 'Error al obtener usuarios'
+    });
+  }
+};
+
+const getTodosDependientesAdmin = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT
+        D.ID_dependientes,
+        D.Nombre,
+        D.Relacion,
+        D.Ocupacion,
+        D.Fecha_nacimiento,
+        D.ID_usuario,
+        U.Nombre AS usuario_nombre
+      FROM DEPENDIENTES D
+      INNER JOIN USUARIOS U ON D.ID_usuario = U.ID_usuario
+      ORDER BY U.Nombre, D.Nombre
+    `);
+    return res.json({
+      ok: true,
+      dependientes: rows,
+    });
+  } catch (error) {
+    console.error('Error al obtener dependientes:', error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener dependientes'
     });
   }
 };
@@ -417,5 +446,6 @@ module.exports = {
   deleteUsuario,
   getUsuariosPanelAdmin,
   getDependientesPanelAdmin,
+  getTodosDependientesAdmin,
   changePassword,
 };

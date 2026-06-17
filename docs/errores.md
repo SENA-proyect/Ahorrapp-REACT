@@ -7,3 +7,8 @@ En caso de tener errores con el xampp
 6- De la carpeta "data-V" traer el archivo "ibdata1" y la carpeta de la DB que creamos (en este caso la de "seproyectona") y copiarla en "data"
 7- volver a ejecutar mysql
 8- en la carpeta raiz de mysql (Servidor:127.0.0.1) y en el editor de phpmyadmin, dirigirse a la tabla de sql y poner el siguiente script "REPAIR TABLE mysql.db;"
+
+En caso de que el archivo INDICE de MySQL este corrupo y no funcione el comando para reparar las tablas:
+1- Desactivar Xampp
+2- Abrir CMD y dirigirse a la ubicacion raiz "cd C:\xampp\mysql\data\mysql"
+3- Ejecutar el siguiente comando "myisamchk -r -v -f db.MYI"

@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import "../styles/noticias.css"
-
 
 export default function Noticias() {
   const navigate = useNavigate();

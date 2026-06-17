@@ -24,12 +24,25 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     ID_usuario  INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del usuario',
     Nombre VARCHAR(100) NOT NULL COMMENT 'Nombre del usuario',
     Apellido VARCHAR(100) COMMENT 'Apellido del usuario',
-    Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
+    -- Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
     Password_hash VARCHAR(255) NOT NULL COMMENT 'Hash de la contraseña del usuario',
     Email VARCHAR(255) NOT NULL UNIQUE COMMENT 'Correo electrónico principal',
     Activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el usuario está activo o inactivo',
     foto_perfil VARCHAR(500) DEFAULT NULL COMMENT 'Ruta de la foto de perfil del usuario',
     Fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario'
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS ROL (
+    ID_rol INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del rol',
+    Cargo VARCHAR(50) NOT NULL COMMENT 'Nombre del rol (e.g., Administrador, Usuario, superusuario)'
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
+    ID_usuario INT NOT NULL COMMENT 'ID del usuario',
+    ID_rol INT NOT NULL COMMENT 'ID del rol',
+    PRIMARY KEY (ID_usuario, ID_rol),
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_rol) REFERENCES ROL(ID_rol) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 -- ========================================================================
@@ -106,6 +119,8 @@ CREATE TABLE IF NOT EXISTS ENTRADA (
     FOREIGN KEY (ID_movimiento) REFERENCES MOVIMIENTOS(ID_movimiento) ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB;
 
+
+
 CREATE TABLE IF NOT EXISTS AHORROS (
     ID_ahorros INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del ahorro',
     ID_entrada INT DEFAULT NULL COMMENT 'Tabla de entrada financiera asociada al ahorro',
@@ -129,6 +144,22 @@ CREATE TABLE IF NOT EXISTS AHORROS (
 
 -- NOTA: Monto_acumulado se actualiza desde el backend cada vez que se hace un abono al ahorro.
 --       Progreso = (Monto_acumulado / Monto) * 100
+
+-- ──  ABONOS_AHORRO ─────────────────────────────
+CREATE TABLE IF NOT EXISTS ABONOS_AHORRO (
+    ID_abono INT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del abono',
+    ID_ahorros INT NOT NULL COMMENT 'Ahorro al que pertenece el abono',
+    ID_usuario INT NOT NULL COMMENT 'Usuario que realizó el abono',
+    Monto DECIMAL(15,2) NOT NULL COMMENT 'Monto abonado en esta transacción',
+    Fecha_registro DATE NOT NULL DEFAULT (CURRENT_DATE) COMMENT 'Fecha en que se realizó el abono',
+    Nota VARCHAR(255) DEFAULT NULL COMMENT 'Nota opcional del abono',
+
+    CONSTRAINT chk_abono_monto CHECK (Monto > 0),
+
+    FOREIGN KEY (ID_ahorros) REFERENCES AHORROS(ID_ahorros) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS INGRESOS (

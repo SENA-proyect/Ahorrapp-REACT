@@ -1,13 +1,3 @@
-
-
-
-
-
-EXPORTAR:
-Definir bien la estructura de como se veran los datos al momento de seleccionar el tipo de archivo
-
-
-
 ====================================
 Pendientes que persisten a fecha de 24/05/2026
 ====================================
@@ -53,7 +43,39 @@ cada integrante sera discutida en grupo con el fin de definir diseños globales 
 
 EXPORTAR.JSX:
 Como tal funciona pero no se ha definido "cargarHistorial" por lo que arroja un mensaje de error
+Definir bien la estructura de como se veran los datos al momento de seleccionar el tipo de archivo
 
 REPORTES:
 Darle un uso mas practico, no solo exportar literalmente la tabla de la base de datos
 con un formato distinto
+
+====================================
+Pendientes que persisten a fecha de 27/05/2026
+====================================
+MODULO AHORRO: Error al momento de abonar al ahorro -> SOLUCIONADO
+
+MODULO INGRESO:Error al registrar un nuevo ingreso -> SOLUCIONADO
+
+MODULO DEUDA:Error al abonar a la deuda -> SOLUCIONADO
+
+MODULO PRESUPUESTO:No guarda la informacion, arroja error 404 -> SOLUCIONADO
+
+====================================
+Pendientes que persisten a fecha de 28/05/2026
+====================================
+GASTOS, IMPREVISTOS:
+Error al registrar dependiente -> SOLUCIONADO
+
+TODOS LOS MODULOS FINANCIEROS (menos deudas):
+Error al editar la categoria -> SOLUCIONADO
+
+Error al guardar categorias y dependientes al momento de actualizar un modulo -> SOLUCIONADO
+
+DEUDAS:
+Mejorar el modulo financiero, tiene mas potencial
+
+PRESUPUESTOS:
+Conectarlo con el resto del sistema (ahora mismo es una vista propia reservada)
+
+GRAFICAS DEL DASHBOARD (Presupuesto vs ejecutado & Flujo semanal):
+Conectarlo a los modulos financieros para que sea actualice en tiempo real con respecto al "ejecutado"

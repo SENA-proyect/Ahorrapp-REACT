@@ -2,7 +2,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Index from './components/pages/Index.jsx'
 import Login from './components/auth/Login.jsx'
-// import Registrar from './components/Registrar.jsx'
 import Dashboard from './components/pages/Dashboard.jsx'
 import ModuloAhorros from './components/modulos/ModuloAhorros.jsx'
 import ModuloDeudas from './components/modulos/ModuloDeudas.jsx'
@@ -18,7 +17,6 @@ import PanelHistorial from './components/panels/PanelHistorial.jsx'
 import PanelMovimientos from './components/panels/PanelMovimientos.jsx'
 import PanelUsuarios from './components/panels/PanelUsuarios.jsx'
 import VerificacionCorreo from './components/auth/VerificacionCorreo.jsx'
-// import VistaEmail from './components/VistaEmail.jsx'
 import VMIDependientes from './components/vistas/VM_I-Dependientes.jsx'
 import FormMovimiento from './components/forms/FormMovimientos.jsx'
 import Asistente from './components/widgets/Asistente/Asistente'
@@ -26,8 +24,9 @@ import Export from './components/widgets/Exportar.jsx'
 import Configuracion from './components/pages/Configuracion.jsx'
 import Sidebar from './components/layout/Sidebar.jsx'
 import { useTheme } from './hooks/useTheme'
-
-
+import Noticias from "./components/pages/Noticias.jsx"
+import ModulosPresupuestos from './components/ModulosPresupuestos.jsx'
+import Modalnuevomovimiento from './components/Modalnuevomovimiento.jsx'
 
 function AppContent() {
   const location = useLocation()
@@ -50,7 +49,6 @@ function AppContent() {
       <div className={`${showSidebar ? 'pt-16 md:pt-0' : ''}`}>
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* <Route path="/Registrar" element={<Registrar />} /> */}
           <Route path="/login" element={<Login />} caseSensitive={false} />
           <Route path="/registro" element={<Login />} caseSensitive={false} />
           <Route path="/Dashboard" element={<Dashboard />} />
@@ -68,11 +66,12 @@ function AppContent() {
           <Route path="/PanelMovimientos" element={<PanelMovimientos />} />
           <Route path="/PanelUsuarios" element={<PanelUsuarios />} />
           <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
-          {/* <Route path="/VistaEmail" element={<VistaEmail />} /> */}
           <Route path='/VM_I-Dependientes' element={<VMIDependientes />} />
-          <Route path="/movimientos/nuevo" element={<FormMovimiento />} />
+          <Route path="/movimientos/nuevo" element={<Modalnuevomovimiento />} />
           <Route path="/exportar" element={<Export />} />
           <Route path="/configuracion" element={<Configuracion />} />
+          <Route path="/noticias" element={<Noticias />} />
+          <Route path="/ModulosPresupuestos" element={<ModulosPresupuestos />} />
         </Routes>
       </div>
 

@@ -269,7 +269,7 @@ export const eliminarExportacion = async (id) => {
   return response.json();
 };
 
-// ── Verificación de Email (NUEVO) ─────────────────────────────────────────────
+// ── Verificación de Email ─────────────────────────────────────────────────────
 
 export const verifyEmailCode = async (data) => {
   try {
@@ -299,68 +299,76 @@ export const resendVerificationCode = async (data) => {
   }
 };
 
-// ── Categorías por Módulo (NUEVO) ─────────────────────────────────────────────
+// ── Categorías por Módulo ─────────────────────────────────────────────────────
 
-export const getGastosPorCategoria = async () => {
+const fetchCategorias = async (url) => {
   const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/gastos`, {
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const data = await response.json();
   return data.categorias ?? [];
 };
 
-export const getIngresosPorCategoria = async () => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/ingresos`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await response.json();
-  return data.categorias ?? [];
-};
+export const getGastosPorCategoria = () => fetchCategorias(`${API_URL}/categorias/gastos`);
+export const getIngresosPorCategoria = () => fetchCategorias(`${API_URL}/categorias/ingresos`);
+export const getAhorrosPorCategoria = () => fetchCategorias(`${API_URL}/categorias/ahorros`);
+export const getImprevistosPorCategoria = () => fetchCategorias(`${API_URL}/categorias/imprevistos`);
+export const getDeudasPorCategoria = () => fetchCategorias(`${API_URL}/categorias/deudas`);
 
-export const getAhorrosPorCategoria = async () => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/ahorros`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await response.json();
-  return data.categorias ?? [];
-};
+// ── Admin Panel ───────────────────────────────────────────────────────────────
 
-export const getImprevistosPorCategoria = async () => {
+const authFetch = async (url) => {
   const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/imprevistos`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await response.json();
-  return data.categorias ?? [];
-};
-
-export const getDeudasPorCategoria = async () => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/categorias/deudas`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await response.json();
-  return data.categorias ?? [];
-};
-
-// ── Admin Panel (NUEVO) ────────────────────────────────────────────────────────
-
-export const getUsuariosPanelAdmin = async () => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.json();
 };
 
-export const getDependientesPanelAdmin = async () => {
+export const getUsuariosPanelAdmin = () => authFetch(`${API_URL}/auth/usuarios/PanelAdmin`);
+export const getDependientesPanelAdmin = () => authFetch(`${API_URL}/auth/dependientes/PanelAdmin`);
+export const getTodosDependientesAdmin = async () => {
+  const data = await authFetch(`${API_URL}/auth/PanelDependientes`);
+  return data.dependientes ?? data;
+};
+
+// ── Ingresos / Gastos ─────────────────────────────────────────────────────────
+export const getIngresos = async () => {
+  const movimientos = await getMovimientos();
+  return movimientos.filter(m =>
+    (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "ingreso"
+  );
+};
+
+export const getGastos = async () => {
+  const movimientos = await getMovimientos();
+  return movimientos.filter(m =>
+    (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "gasto"
+  );
+};
+
+// ── Presupuestos ──────────────────────────────────────────────────────────────
+
+const presupuestoFetch = async (url, options = {}) => {
   const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/auth/dependientes/PanelAdmin`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
   });
   return response.json();
 };
 
+export const getPerfilesPrespuesto = () => presupuestoFetch(`${API_URL}/presupuestos`);
+export const activarPerfil = (id) => presupuestoFetch(`${API_URL}/presupuestos/${id}/activar`, { method: "PUT" });
+export const eliminarPerfil = (id) => presupuestoFetch(`${API_URL}/presupuestos/${id}`, { method: "DELETE" });
+export const getPeriodoActivo = () => presupuestoFetch(`${API_URL}/presupuestos/periodos/activo`);
+export const abrirPeriodo = (datos) => presupuestoFetch(`${API_URL}/presupuestos/periodos/abrir`, { method: "POST", body: JSON.stringify(datos) });
+export const cerrarPeriodo = (datos) => presupuestoFetch(`${API_URL}/presupuestos/periodos/cerrar`, { method: "PUT", body: JSON.stringify(datos) });
+export const ajustarIngresoPeriodo = (datos) => presupuestoFetch(`${API_URL}/presupuestos/periodos/ajustar-ingreso`, { method: "PATCH", body: JSON.stringify(datos) });
+export const crearPerfil = (datos) => presupuestoFetch(`${API_URL}/presupuestos`, { method: "POST", body: JSON.stringify(datos) });
+export const editarPerfil = (id, datos) => presupuestoFetch(`${API_URL}/presupuestos/${id}`, { method: "PUT", body: JSON.stringify(datos) });

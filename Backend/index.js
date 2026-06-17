@@ -13,24 +13,23 @@ const bolsaRoutes = require('./src/routes/alphaVantageRoutes');
 const exportarRoutes = require('./src/routes/exportar');
 const exportRoutes = require("./src/routes/exportRoutes");
 const configuracionesRoutes = require("./src/routes/configuracionesRoutes");
+const PresupuestosRoutes = require('./src/routes/PresupuestosRoutes');
+const dashboardRoutes = require('./src/routes/dashboardRoutes');
 
 const app = express();
 
-// Middlewares globales
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://trilogy-parted-fastness.ngrok-free.dev" // ← ngrok
+    "https://trilogy-parted-fastness.ngrok-free.dev"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
 
-// Servir archivos estáticos (para uploads)
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
-// Rutas
 app.use("/api/auth", authRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/dependientes", dependientesRoutes);
@@ -42,13 +41,13 @@ app.use("/api/bolsa", bolsaRoutes);
 app.use('/api/exportar', exportarRoutes);
 app.use("/api/exportarRoutes", exportRoutes);
 app.use("/api/configuraciones", configuracionesRoutes);
+app.use('/api/presupuestos', PresupuestosRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
-// Ruta de prueba
 app.get("/", (req, res) => {
   res.json({ ok: true, mensaje: "Servidor AhorrApp corriendo" });
 });
 
-// Iniciar servidor
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
