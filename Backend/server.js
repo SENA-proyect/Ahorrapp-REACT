@@ -9,7 +9,7 @@ const opciones = {
 };
 
 https.createServer(opciones, app).listen(443, () => {
-    console.log('✅HTTPS Server running on port 443');
+    console.log('HTTPS Server running on port 443');
 });
 
 
@@ -18,5 +18,5 @@ http.createServer((req, res) => {
         { Location: 'https://' + req.headers.host + req.url });
     res.end();
 }).listen(80, () => {
-    console.log('🔄HTTP Server running on port 80');
+    console.log('HTTP Server running on port 80');
 } );
