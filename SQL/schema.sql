@@ -31,18 +31,18 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     Fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario'
 ) ENGINE=InnoDB;
 
--- CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
---     ID_usuario INT NOT NULL COMMENT 'ID del usuario',
---     ID_rol INT NOT NULL COMMENT 'ID del rol',
---     PRIMARY KEY (ID_usuario, ID_rol),
---     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
---     FOREIGN KEY (ID_rol) REFERENCES ROL(ID_rol) ON DELETE CASCADE ON UPDATE CASCADE
--- ) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS ROL (
+    ID_rol INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del rol',
+    Cargo VARCHAR(50) NOT NULL COMMENT 'Nombre del rol (e.g., Administrador, Usuario, superusuario)'
+) ENGINE=InnoDB;
 
--- CREATE TABLE IF NOT EXISTS ROL (
---     ID_rol INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del rol',
---     Cargo VARCHAR(50) NOT NULL COMMENT 'Nombre del rol (e.g., Administrador, Usuario, superusuario)',
--- ) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
+    ID_usuario INT NOT NULL COMMENT 'ID del usuario',
+    ID_rol INT NOT NULL COMMENT 'ID del rol',
+    PRIMARY KEY (ID_usuario, ID_rol),
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_rol) REFERENCES ROL(ID_rol) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- ========================================================================
 --     TABLA: categorias
