@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import HeaderModulos from './HeaderModulos'
+// activar SOLO si se utilizan mas adelante
+// import { useNavigate, useLocation } from 'react-router-dom'
 
 import {
   getCategorias,
@@ -7,6 +9,11 @@ import {
   editarCategoria,
   deshabilitarCategoria,
   habilitarCategoria,
+  getGastosPorCategoria,
+  getIngresosPorCategoria,
+  getAhorrosPorCategoria,
+  getImprevistosPorCategoria,
+  getDeudasPorCategoria,
 } from '../api'
 
 
@@ -14,20 +21,61 @@ const usuario = JSON.parse(localStorage.getItem('usuario'))
 
 export default function ModuloCategorias() {
 
+  // activas SOLO si se usan mas adelante
+  // const navigate = useNavigate()
+  // const location = useLocation()
+
   const [categorias, setCategorias] = useState([])
   const [modalAgregar, setModalAgregar] = useState(false)
   const [modalEditar, setModalEditar] = useState(false)
   const [categoriaEdit, setCategoriaEdit] = useState(null)
   const [formNombre, setFormNombre] = useState('')
   const [formDesc, setFormDesc] = useState('')
+// agregado pero no revizado, verificar funcionalidad
+  const [menuOpen, setMenuOpen] = useState(false)
 
+  // desactivado con el fin de realizar pruebas
+  // useEffect(() => {
+  //   getCategorias()
+  //     .then(data => {
+  //       if (Array.isArray(data)) setCategorias(data)
+  //     })
+  //     .catch(() => {})
+  // }, [])
+
+  // remplaza la funcion anteriormente comentada, en caso de error realizar pruebas
   useEffect(() => {
-    getCategorias()
-      .then(data => {
-        if (Array.isArray(data)) setCategorias(data)
+  Promise.all([
+    getGastosPorCategoria(),
+    getIngresosPorCategoria(),
+    getAhorrosPorCategoria(),
+    getImprevistosPorCategoria(),
+    getDeudasPorCategoria(),
+  ])
+    .then(([gastos, ingresos, ahorros, imprevistos, deudas]) => {
+      if (!Array.isArray(gastos)) return
+
+      const combinadas = gastos.map(cat => {
+        const ing = ingresos.find(c => c.id === cat.id)
+        const aho = ahorros.find(c => c.id === cat.id)
+        const imp = imprevistos.find(c => c.id === cat.id)
+        const deu = deudas.find(c => c.id === cat.id)
+
+        return {
+          ...cat,
+          total_movimientos:
+            Number(cat.total_gastos || 0) +
+            Number(ing?.total_ingresos || 0) +
+            Number(aho?.total_ahorros || 0) +
+            Number(imp?.total_imprevistos || 0) +
+            Number(deu?.total_deudas || 0),
+        }
       })
-      .catch(() => {})
-  }, [])
+
+      setCategorias(combinadas)
+    })
+    .catch(() => {})
+}, [])
 
   const activas = categorias.filter(c => c.activa == 1 || c.activa === true)
   const inactivas = categorias.filter(c => c.activa == 0 || c.activa === false)
@@ -54,6 +102,7 @@ export default function ModuloCategorias() {
           activa: true,
           sistema: false,
           es_global: false,
+          total_movimientos: 0,
         },
       ])
       setFormNombre('')
@@ -124,6 +173,13 @@ export default function ModuloCategorias() {
   const labelClass =
     'mt-4 block text-xs font-bold uppercase tracking-wider text-zinc-400'
 
+  const formatMoney = value =>
+    new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      maximumFractionDigits: 0,
+    }).format(Number(value || 0))
+
   const closeModal = () => {
     setModalAgregar(false)
     setModalEditar(false)
@@ -188,6 +244,15 @@ export default function ModuloCategorias() {
                           <p className="mt-1 break-words text-sm text-zinc-400">
                             {cat.descripcion || 'Sin descripción'}
                           </p>
+
+                          {/* funcion nueva agregada, realizar pruebasy solo es valida si anteriormente se definio el useEffect "total_movimientos" */}
+                          <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs">
+                            <p className="text-zinc-500">Total movimientos</p>
+                            <p className="font-bold text-amber-300">
+                              {formatMoney(cat.total_movimientos)}
+                            </p>
+                          </div>
+
                         </div>
 
                         <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[0.68rem] font-bold ${
@@ -219,11 +284,12 @@ export default function ModuloCategorias() {
                   ))}
                 </div>
 
+                {/* TABLA DESKTOP */}
                 <div className="hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[760px] border-collapse text-left">
                     <thead>
                       <tr className="border-b border-white/10">
-                        {['Nombre', 'Descripción', 'Tipo', 'Acciones'].map(col => (
+                        {['Nombre', 'Descripción', 'Tipo', 'Total movimientos', 'Acciones'].map(col => (
                           <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
                             {col}
                           </th>
@@ -243,6 +309,9 @@ export default function ModuloCategorias() {
                             }`}>
                               {cat.es_global ? 'Sistema' : 'Personalizada'}
                             </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm font-bold text-amber-300">
+                            {formatMoney(cat.total_movimientos)}
                           </td>
                           <td className="px-4 py-3">
                             {!esSistema(cat) && (

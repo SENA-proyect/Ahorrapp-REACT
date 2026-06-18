@@ -77,6 +77,51 @@ export const getCategorias = async () => {
   return data.categorias ?? [];
 };
 
+export const getGastosPorCategoria = async () => {
+  const response = await fetch(`${API_URL}/categorias/gastos`, {
+    headers: authHeaders(),
+  });
+
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getIngresosPorCategoria = async () => {
+  const response = await fetch(`${API_URL}/categorias/ingresos`, {
+    headers: authHeaders(),
+  });
+
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getAhorrosPorCategoria = async () => {
+  const response = await fetch(`${API_URL}/categorias/ahorros`, {
+    headers: authHeaders(),
+  });
+
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getImprevistosPorCategoria = async () => {
+  const response = await fetch(`${API_URL}/categorias/imprevistos`, {
+    headers: authHeaders(),
+  });
+
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
+export const getDeudasPorCategoria = async () => {
+  const response = await fetch(`${API_URL}/categorias/deudas`, {
+    headers: authHeaders(),
+  });
+
+  const data = await response.json();
+  return data.categorias ?? [];
+};
+
 export const crearCategoria = (datos) =>
   fetchJSON(`${API_URL}/categorias`, {
     method: "POST",
