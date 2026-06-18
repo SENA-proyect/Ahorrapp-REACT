@@ -255,12 +255,7 @@ export default function ModuloPresupuestos() {
   })
 
   return (
-    <div className={`min-h-screen w-full flex flex-col overflow-x-hidden transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}
-      style={{
-        background: isDarkMode
-          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
-          : '#f8f9fb'
-      }}>
+    <div className={`min-h-screen w-full flex flex-col overflow-x-hidden transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
 
       <HeaderModulos section="Presupuestos" />
       <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />

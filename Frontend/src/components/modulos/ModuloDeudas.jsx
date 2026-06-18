@@ -200,16 +200,9 @@ export default function ModuloDeudas() {
     : 'bg-emerald-50 text-emerald-700 border-emerald-200'
 
   return (
-    <div
-      className={`min-h-screen w-full overflow-x-hidden transition-colors duration-300 ${
-        isDarkMode ? 'text-white' : 'text-slate-900'
-      }`}
-      style={{
-        background: isDarkMode
-          ? 'radial-gradient(ellipse at 35% 18%, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.92) 55%, rgba(15,23,42,1) 100%)'
-          : '#ffffff',
-      }}
-    >
+    <div className={`min-h-screen w-full overflow-x-hidden transition-colors duration-300 ${
+      isDarkMode ? 'text-white' : 'text-slate-900'
+    }`}>
       <HeaderModulos section="Deudas" />
       <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-violet-400 to-transparent" />
 

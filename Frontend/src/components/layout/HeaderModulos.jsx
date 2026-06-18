@@ -36,18 +36,12 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
       : `${baseClass} text-gray-700 bg-gray-100 border border-gray-300 hover:-translate-y-px hover:bg-gray-200 hover:shadow-[0_4px_12px_rgba(59,130,246,0.15)]`
   }
 
-  // Definimos los fondos exactamente como están en Dashboard.jsx
-  const headerBackground = isDarkMode
-    ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
-    : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)'
-
   return (
     <header
-      // Mantenemos el backdrop-blur para que se vea moderno, pero aplicamos el fondo exacto
-      className={`relative z-10 w-full flex flex-col items-center pt-4 sm:pt-5 transition-colors duration-300 backdrop-blur-md border-b ${
-        isDarkMode ? 'border-white/10' : 'border-gray-200'
+      className={`relative z-10 w-full flex flex-col items-center pt-4 sm:pt-5 transition-colors duration-300 ${
+        isDarkMode ? 'text-white' : 'text-gray-900'
       }`}
-      style={{ background: headerBackground }}
+      style={{ background: 'transparent' }}
     >
       <section className="w-full max-w-[1400px] px-4 sm:px-6 md:px-10 mb-4 sm:mb-6">
         <div className="flex w-full items-center justify-between">

@@ -38,12 +38,6 @@ function AppContent() {
   return (
     <div 
       className={`min-h-screen transition-colors duration-300 ${showSidebar ? 'text-white' : 'text-slate-950'}`}
-      style={showSidebar ? {
-        background: isDarkMode
-          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
-          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
-      } : undefined}
     >
       {showSidebar && <Sidebar />}
 

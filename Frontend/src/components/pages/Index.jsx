@@ -22,15 +22,7 @@ export default function Index() {
   ]
   
   return (
-    <div
-      className="relative min-h-screen w-full overflow-x-hidden transition-colors duration-300"
-      style={{
-        background: isDarkMode
-          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
-          : 'linear-gradient(135deg, #f8f9fb 0%, #f0f3f9 100%)',
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
-      }}
-    >
+    <div className="relative min-h-screen w-full overflow-x-hidden transition-colors duration-300">
       {/* Background glows — solo en modo oscuro */}
       {isDarkMode && (
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -42,9 +34,7 @@ export default function Index() {
       )}
       
       {/* ───────────────── HEADER ───────────────── */}
-      <header className={`relative z-10 w-full border-b backdrop-blur-sm sticky top-0 transition-colors duration-300 ${
-        isDarkMode ? 'border-white/5' : 'border-gray-200'
-      }`}>
+      <header className={`relative z-10 w-full backdrop-blur-sm sticky top-0 transition-colors duration-300 bg-transparent`}>
         <section className="w-full flex items-center justify-between px-6 py-5 md:px-12">
           
           {/* Logo — mismo estilo que el Dashboard */}
