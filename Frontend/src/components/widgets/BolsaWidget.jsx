@@ -189,7 +189,7 @@ export default function BolsaWidget() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className={`w-full rounded-2xl border p-6 shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-colors duration-300 ${
+      className={`h-full w-full rounded-2xl border p-6 shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-colors duration-300 ${
         isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-white/70'
       }`}
     >
@@ -301,6 +301,17 @@ export default function BolsaWidget() {
       </div>
 
       {/* GRID DE ACCIONES */}
+      {!cargando && accionesConDatos.length === 0 && !error && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={`mt-5 rounded-xl border px-4 py-3 text-sm ${
+            isDarkMode ? 'border-amber-300/20 bg-amber-300/10 text-amber-200' : 'border-yellow-300 bg-yellow-50 text-yellow-700'
+          }`}
+        >
+          No se pudieron cargar las cotizaciones. Verificá que la clave de API de Finnhub esté configurada en el servidor (<code>.env → FINNHUB_API_KEY</code>).
+        </motion.p>
+      )}
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {accionesConDatos.map((accion, idx) => {
           const d = datos[accion.symbol]

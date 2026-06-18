@@ -5,28 +5,33 @@ import {
   getPeriodoActivo, abrirPeriodo, cerrarPeriodo, ajustarIngresoPeriodo,
   crearPerfil, editarPerfil,
 } from '../../api'
-import HeaderModulos from '../HeaderModulos'
+import HeaderModulos from '../layout/HeaderModulos'
+import { useTheme } from '../../hooks/useTheme'
 
 const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
 const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
 
-const inputCls  = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20'
-const labelCls  = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
+const inputCls  = (dark) => `mt-1.5 w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 ${
+  dark
+    ? 'border-white/15 bg-white/[0.07] text-zinc-100'
+    : 'border-gray-300 bg-white text-gray-900'
+}`
+const labelCls  = (dark) => `mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] ${dark ? 'text-zinc-400' : 'text-gray-600'}`
 
 // Barra visual de ejecución por categoría
-const BarraEjecucion = ({ label, presupuestado, ejecutado, color }) => {
+const BarraEjecucion = ({ label, presupuestado, ejecutado, color, isDarkMode }) => {
   if (!presupuestado) return null
   const pct = Math.min(100, (ejecutado / presupuestado) * 100)
   const excede = ejecutado > presupuestado
   return (
     <div className="mb-3">
       <div className="flex justify-between text-[0.72rem] mb-1">
-        <span className="text-zinc-400 font-semibold">{label}</span>
-        <span className={excede ? 'text-red-400 font-bold' : 'text-zinc-400'}>
+        <span className={`font-semibold ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>{label}</span>
+        <span className={excede ? 'text-red-400 font-bold' : isDarkMode ? 'text-zinc-400' : 'text-gray-600'}>
           {fmt(ejecutado)} / {fmt(presupuestado)}
         </span>
       </div>
-      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+      <div className={`w-full h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'}`}>
         <div className="h-full rounded-full transition-all duration-500"
           style={{ width: `${pct}%`, background: excede ? 'linear-gradient(90deg,#f87171,#ef4444)' : color }} />
       </div>
@@ -37,7 +42,7 @@ const BarraEjecucion = ({ label, presupuestado, ejecutado, color }) => {
 // Formulario de perfil (crear / editar)
 const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '28', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
 
-function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
+function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error, isDarkMode }) {
   const [form, setForm] = useState(inicial || DEFAULTS)
 
   const suma = ['gastos', 'deudas', 'imprevistos', 'ahorros', 'emergencia']
@@ -47,16 +52,16 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
 
   return (
     <div className="flex flex-col gap-1">
-      <label className={labelCls}>Nombre del perfil *</label>
-      <input className={inputCls} type="text" name="nombre" placeholder="Ej: Perfil austero, Normal..." value={form.nombre} onChange={handleChange} />
+      <label className={labelCls(isDarkMode)}>Nombre del perfil *</label>
+      <input className={inputCls(isDarkMode)} type="text" name="nombre" placeholder="Ej: Perfil austero, Normal..." value={form.nombre} onChange={handleChange} />
 
-      <label className={labelCls}>Descripción</label>
-      <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
+      <label className={labelCls(isDarkMode)}>Descripción</label>
+      <input className={inputCls(isDarkMode)} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
 
-      <label className={labelCls}>Día de corte (1–28)</label>
-      <input className={inputCls} type="number" name="dia_corte" min="1" max="28" value={form.dia_corte} onChange={handleChange} />
+      <label className={labelCls(isDarkMode)}>Día de corte (1–28)</label>
+      <input className={inputCls(isDarkMode)} type="number" name="dia_corte" min="1" max="28" value={form.dia_corte} onChange={handleChange} />
 
-      <p className={`${labelCls} mb-2`}>Distribución del presupuesto (%)</p>
+      <p className={`${labelCls(isDarkMode)} mb-2`}>Distribución del presupuesto (%)</p>
 
       {[
         { key: 'gastos',      label: 'Gastos',      color: 'text-red-400'    },
@@ -73,7 +78,11 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
             value={form[key]} onChange={handleChange}
           />
           <input
-            className="w-16 rounded-lg border border-white/15 bg-white/[0.07] px-2 py-1.5 text-sm text-center text-zinc-100 outline-none focus:border-amber-400/60"
+            className={`w-16 rounded-lg border px-2 py-1.5 text-sm text-center outline-none focus:border-amber-400/60 ${
+              isDarkMode
+                ? 'border-white/15 bg-white/[0.07] text-zinc-100'
+                : 'border-gray-300 bg-white text-gray-900'
+            }`}
             type="number" name={key} min="0" max="100" step="1"
             value={form[key]} onChange={handleChange}
           />
@@ -92,9 +101,13 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
       {error && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{error}</p>}
 
       <div className="mt-6 flex justify-end gap-2.5">
-        <button onClick={onCancelar} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
+        <button onClick={onCancelar} className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+          isDarkMode
+            ? 'bg-transparent text-zinc-400 border-white/[0.15] hover:bg-white/[0.07]'
+            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'
+        }`}>Cancelar</button>
         <button onClick={() => onGuardar(form)} disabled={cargando || Math.abs(suma - 100) > 0.01}
-          className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-[#0f172a] disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+          className="px-5 py-2.5 rounded-xl text-sm font-bold text-[#0f172a] disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
           style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}>
           {cargando ? 'Guardando...' : 'Guardar perfil'}
         </button>
@@ -105,6 +118,7 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
 
 export default function ModuloPresupuestos() {
   const navigate = useNavigate()
+  const { isDarkMode } = useTheme()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
 
   const [perfiles,      setPerfiles]      = useState([])
@@ -241,8 +255,12 @@ export default function ModuloPresupuestos() {
   })
 
   return (
-    <div className="min-h-screen w-full flex flex-col text-white overflow-x-hidden"
-      style={{ background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }}>
+    <div className={`min-h-screen w-full flex flex-col overflow-x-hidden transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}
+      style={{
+        background: isDarkMode
+          ? 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)'
+          : '#f8f9fb'
+      }}>
 
       <HeaderModulos section="Presupuestos" />
       <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
@@ -250,22 +268,26 @@ export default function ModuloPresupuestos() {
       <main className="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-4 py-5 sm:px-6 sm:py-6 md:p-8 gap-6">
 
         <div>
-          <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
+          <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Bienvenido de vuelta</p>
+          <h2 className={`text-xl sm:text-2xl font-extrabold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
         </div>
 
         {/* ── Período activo ── */}
         {periodo ? (
-          <section className="rounded-2xl border border-amber-400/30 p-5 sm:p-7 flex flex-col gap-4"
-            style={{ background: 'radial-gradient(ellipse at top left, rgba(245,158,11,0.18), rgba(15,23,42,0.6))' }}>
+          <section className={`rounded-2xl border p-5 sm:p-7 flex flex-col gap-4 ${isDarkMode ? 'border-amber-400/30' : 'border-amber-300'}`}
+            style={{
+              background: isDarkMode
+                ? 'radial-gradient(ellipse at top left, rgba(245,158,11,0.18), rgba(15,23,42,0.6))'
+                : 'radial-gradient(ellipse at top left, rgba(251,191,36,0.1), rgba(255,255,255,0.5))'
+            }}>
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-bold uppercase tracking-widest text-amber-400">📅 Período activo</span>
                   <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-emerald-400/15 text-emerald-400 border border-emerald-400/30">Abierto</span>
                 </div>
-                <p className="text-white font-bold">{periodo.perfil_nombre}</p>
-                <p className="text-xs text-zinc-400 mt-0.5">{fmtFecha(periodo.Fecha_inicio)} → {fmtFecha(periodo.Fecha_fin)}</p>
+                <p className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{periodo.perfil_nombre}</p>
+                <p className={`text-xs mt-0.5 ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>{fmtFecha(periodo.Fecha_inicio)} → {fmtFecha(periodo.Fecha_fin)}</p>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <button onClick={() => { setIngresoInput(String(periodo.Ingreso_estimado)); setErrorModal(null); setModalAjustar(true) }}
@@ -288,35 +310,35 @@ export default function ModuloPresupuestos() {
                 { key: 'Monto_ahorros',     label: 'Ahorros',     color: '#fbbf24' },
                 { key: 'Monto_emergencia',  label: 'Emergencia',  color: '#60a5fa' },
               ].map(({ key, label, color }) => (
-                <div key={key} className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                <div key={key} className={`rounded-xl border px-4 py-3 ${isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-white'}`}>
                   <p className="text-[0.72rem] font-bold uppercase tracking-wider mb-1" style={{ color }}>{label}</p>
-                  <p className="text-lg font-black text-white">{fmt(periodo[key] ?? 0)}</p>
+                  <p className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{fmt(periodo[key] ?? 0)}</p>
                 </div>
               ))}
-              <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                <p className="text-[0.72rem] font-bold uppercase tracking-wider text-zinc-400 mb-1">Saldo anterior</p>
-                <p className="text-lg font-black text-white">{fmt(periodo.Saldo_anterior ?? 0)}</p>
+              <div className={`rounded-xl border px-4 py-3 ${isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-white'}`}>
+                <p className={`text-[0.72rem] font-bold uppercase tracking-wider mb-1 ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Saldo anterior</p>
+                <p className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{fmt(periodo.Saldo_anterior ?? 0)}</p>
               </div>
             </div>
 
             {/* Ingreso estimado vs real */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                <p className="text-[0.72rem] font-bold uppercase tracking-wider text-zinc-400 mb-1">Ingreso estimado</p>
+              <div className={`rounded-xl border px-4 py-3 ${isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-white'}`}>
+                <p className={`text-[0.72rem] font-bold uppercase tracking-wider mb-1 ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Ingreso estimado</p>
                 <p className="text-xl font-black text-amber-400">{fmt(periodo.Ingreso_estimado ?? 0)}</p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                <p className="text-[0.72rem] font-bold uppercase tracking-wider text-zinc-400 mb-1">Ingreso real</p>
+              <div className={`rounded-xl border px-4 py-3 ${isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-white'}`}>
+                <p className={`text-[0.72rem] font-bold uppercase tracking-wider mb-1 ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Ingreso real</p>
                 <p className="text-xl font-black text-emerald-400">{fmt(periodo.Ingreso_real ?? 0)}</p>
               </div>
             </div>
           </section>
         ) : (
-          <section className="rounded-2xl border border-white/10 p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-            style={{ background: 'rgba(255,255,255,0.04)' }}>
+          <section className={`rounded-2xl border p-6 flex flex-col sm:flex-row items-center justify-between gap-4 ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}
+            style={{ background: isDarkMode ? 'rgba(255,255,255,0.04)' : '#ffffff' }}>
             <div>
               <p className="text-amber-400 font-bold">Sin período activo</p>
-              <p className="text-sm text-zinc-400 mt-0.5">Activa un perfil y abre un período para empezar a registrar movimientos contra tu presupuesto.</p>
+              <p className={`text-sm mt-0.5 ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Activa un perfil y abre un período para empezar a registrar movimientos contra tu presupuesto.</p>
             </div>
             {perfilActivo && (
               <button onClick={() => { setIngresoInput(''); setErrorModal(null); setModalAbrirPer(true) }}
@@ -329,10 +351,13 @@ export default function ModuloPresupuestos() {
         )}
 
         {/* ── Lista de perfiles ── */}
-        <section className="w-full rounded-2xl border border-white/10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
-          style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)' }}>
+        <section className={`w-full rounded-2xl border overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.35)] ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}
+          style={{
+            background: isDarkMode ? 'rgba(255,255,255,0.04)' : '#ffffff',
+            backdropFilter: 'blur(16px)'
+          }}>
 
-          <div className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b border-white/[0.08]">
+          <div className={`flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b ${isDarkMode ? 'border-white/[0.08]' : 'border-gray-200'}`}>
             <h3 className="text-base font-extrabold text-amber-400">📋 Perfiles de presupuesto</h3>
             <button onClick={() => { setErrorModal(null); setModalCrear(true) }}
               className="px-4 py-2 rounded-xl text-xs font-bold text-[#0f172a] transition-all hover:-translate-y-px"
@@ -343,12 +368,12 @@ export default function ModuloPresupuestos() {
 
           <div className="p-4 sm:p-5">
             {cargando ? (
-              <p className="py-8 text-center text-sm italic text-zinc-500 animate-pulse">⏳ Cargando perfiles...</p>
+              <p className={`py-8 text-center text-sm italic animate-pulse ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>⏳ Cargando perfiles...</p>
             ) : perfiles.length === 0 ? (
               <div className="py-12 flex flex-col items-center gap-3 text-center">
                 <span className="text-4xl opacity-30">📊</span>
-                <p className="text-zinc-400 text-sm">No tienes perfiles de presupuesto.</p>
-                <p className="text-zinc-500 text-xs max-w-xs">Crea un perfil con tu distribución ideal y úsalo para gestionar tus períodos.</p>
+                <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>No tienes perfiles de presupuesto.</p>
+                <p className={`text-xs max-w-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>Crea un perfil con tu distribución ideal y úsalo para gestionar tus períodos.</p>
                 <button onClick={() => { setErrorModal(null); setModalCrear(true) }}
                   className="mt-2 px-5 py-2.5 rounded-xl text-sm font-bold text-[#0f172a]"
                   style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}>
@@ -359,15 +384,21 @@ export default function ModuloPresupuestos() {
               <div className="flex flex-col gap-3">
                 {perfiles.map(p => (
                   <article key={p.ID_presupuesto}
-                    className={`rounded-xl border p-4 sm:p-5 transition-colors ${p.Activo ? 'border-amber-400/40 bg-amber-400/[0.06]' : 'border-white/10 bg-white/[0.03]'}`}>
+                    className={`rounded-xl border p-4 sm:p-5 transition-colors ${
+                      p.Activo
+                        ? 'border-amber-400/40 bg-amber-400/[0.06]'
+                        : isDarkMode
+                          ? 'border-white/10 bg-white/[0.03]'
+                          : 'border-gray-200 bg-white'
+                    }`}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-bold text-white">{p.Nombre}</p>
+                          <p className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.Nombre}</p>
                           {p.Activo && <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-amber-400/20 text-amber-400 border border-amber-400/40">Activo</span>}
                         </div>
-                        {p.Descripcion && <p className="text-xs text-zinc-500 mt-0.5 truncate">{p.Descripcion}</p>}
-                        <p className="text-xs text-zinc-500 mt-1">Corte día {p.Dia_corte} — G:{p.Porcentaje_gastos}% D:{p.Porcentaje_deudas}% I:{p.Porcentaje_imprevistos}% A:{p.Porcentaje_ahorros}% E:{p.Porcentaje_emergencia}%</p>
+                        {p.Descripcion && <p className={`text-xs mt-0.5 truncate ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>{p.Descripcion}</p>}
+                        <p className={`text-xs mt-1 ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>Corte día {p.Dia_corte} — G:{p.Porcentaje_gastos}% D:{p.Porcentaje_deudas}% I:{p.Porcentaje_imprevistos}% A:{p.Porcentaje_ahorros}% E:{p.Porcentaje_emergencia}%</p>
                       </div>
                       <div className="flex gap-2 flex-wrap shrink-0">
                         {!p.Activo && (
@@ -402,18 +433,20 @@ export default function ModuloPresupuestos() {
         </section>
       </main>
 
-      <footer className="w-full px-4 py-6 text-center font-mono text-[0.7rem] text-zinc-600">
+      <footer className={`w-full px-4 py-6 text-center font-mono text-[0.7rem] ${isDarkMode ? 'text-zinc-600' : 'text-gray-500'}`}>
         <p>© <strong className="text-amber-400">2026 Ahorrapp</strong>. Todos los derechos reservados.</p>
       </footer>
 
       {/* Modal Crear */}
       {modalCrear && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <div className="w-full max-w-[500px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
-            style={{ background: 'rgba(15,23,42,0.97)' }}>
+          <div className={`w-full max-w-[500px] rounded-[20px] p-7 border shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto ${
+            isDarkMode ? 'border-white/[0.12]' : 'border-gray-200'
+          }`}
+            style={{ background: isDarkMode ? 'rgba(15,23,42,0.97)' : '#ffffff' }}>
             <h4 className="text-lg font-extrabold text-amber-400 mb-1">✨ Nuevo perfil de presupuesto</h4>
-            <p className="text-xs text-zinc-500 mb-2">Define cómo quieres distribuir tu ingreso mensual.</p>
-            <FormPerfil onGuardar={handleCrear} onCancelar={() => setModalCrear(false)} cargando={guardando} error={errorModal} />
+            <p className={`text-xs mb-2 ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>Define cómo quieres distribuir tu ingreso mensual.</p>
+            <FormPerfil onGuardar={handleCrear} onCancelar={() => setModalCrear(false)} cargando={guardando} error={errorModal} isDarkMode={isDarkMode} />
           </div>
         </div>
       )}
@@ -421,11 +454,13 @@ export default function ModuloPresupuestos() {
       {/* Modal Editar */}
       {modalEditar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <div className="w-full max-w-[500px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
-            style={{ background: 'rgba(15,23,42,0.97)' }}>
+          <div className={`w-full max-w-[500px] rounded-[20px] p-7 border shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto ${
+            isDarkMode ? 'border-white/[0.12]' : 'border-gray-200'
+          }`}
+            style={{ background: isDarkMode ? 'rgba(15,23,42,0.97)' : '#ffffff' }}>
             <h4 className="text-lg font-extrabold text-amber-400 mb-1">✏️ Editar perfil</h4>
-            <p className="text-xs text-zinc-500 mb-2">{modalEditar.Nombre}</p>
-            <FormPerfil inicial={initialEditar(modalEditar)} onGuardar={handleEditar} onCancelar={() => setModalEditar(null)} cargando={guardando} error={errorModal} />
+            <p className={`text-xs mb-2 ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>{modalEditar.Nombre}</p>
+            <FormPerfil inicial={initialEditar(modalEditar)} onGuardar={handleEditar} onCancelar={() => setModalEditar(null)} cargando={guardando} error={errorModal} isDarkMode={isDarkMode} />
           </div>
         </div>
       )}
@@ -433,18 +468,22 @@ export default function ModuloPresupuestos() {
       {/* Modal Abrir período */}
       {modalAbrirPer && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <div className="w-full max-w-[400px] rounded-[20px] p-7 border border-amber-400/20 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
-            style={{ background: 'rgba(15,23,42,0.97)' }}>
+          <div className={`w-full max-w-[400px] rounded-[20px] p-7 border shadow-[0_24px_60px_rgba(0,0,0,0.6)] ${isDarkMode ? 'border-amber-400/20' : 'border-amber-300'}`}
+            style={{ background: isDarkMode ? 'rgba(15,23,42,0.97)' : '#ffffff' }}>
             <h4 className="text-lg font-extrabold text-amber-400 mb-1">📅 Abrir nuevo período</h4>
-            <p className="text-xs text-zinc-500 mb-1">Perfil activo: <span className="text-zinc-300 font-semibold">{perfilActivo?.Nombre}</span></p>
-            <p className="text-xs text-zinc-500 mb-1">El ingreso estimado se usará para distribuir el presupuesto. Puedes ajustarlo después.</p>
-            <label className={labelCls}>Ingreso estimado *</label>
-            <input className={inputCls} type="number" min="0" step="1000" placeholder="Ej: 3000000"
+            <p className={`text-xs mb-1 ${isDarkMode ? 'text-zinc-500' : 'text-gray-600'}`}>Perfil activo: <span className={`font-semibold ${isDarkMode ? 'text-zinc-300' : 'text-gray-900'}`}>{perfilActivo?.Nombre}</span></p>
+            <p className={`text-xs mb-1 ${isDarkMode ? 'text-zinc-500' : 'text-gray-600'}`}>El ingreso estimado se usará para distribuir el presupuesto. Puedes ajustarlo después.</p>
+            <label className={labelCls(isDarkMode)}>Ingreso estimado *</label>
+            <input className={inputCls(isDarkMode)} type="number" min="0" step="1000" placeholder="Ej: 3000000"
               value={ingresoInput} onChange={e => setIngresoInput(e.target.value)} />
             {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
             <div className="mt-6 flex justify-end gap-2.5">
-              <button onClick={() => setModalAbrirPer(false)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
-              <button onClick={handleAbrirPeriodo} disabled={guardando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-[#0f172a] disabled:opacity-50 disabled:cursor-not-allowed"
+              <button onClick={() => setModalAbrirPer(false)} className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                isDarkMode
+                  ? 'bg-transparent text-zinc-400 border-white/[0.15] hover:bg-white/[0.07]'
+                  : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'
+              }`}>Cancelar</button>
+              <button onClick={handleAbrirPeriodo} disabled={guardando} className="px-5 py-2.5 rounded-xl text-sm font-bold text-[#0f172a] disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}>
                 {guardando ? 'Abriendo...' : 'Abrir período'}
               </button>
@@ -456,17 +495,21 @@ export default function ModuloPresupuestos() {
       {/* Modal Ajustar ingreso */}
       {modalAjustar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <div className="w-full max-w-[400px] rounded-[20px] p-7 border border-amber-400/20 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
-            style={{ background: 'rgba(15,23,42,0.97)' }}>
+          <div className={`w-full max-w-[400px] rounded-[20px] p-7 border shadow-[0_24px_60px_rgba(0,0,0,0.6)] ${isDarkMode ? 'border-amber-400/20' : 'border-amber-300'}`}
+            style={{ background: isDarkMode ? 'rgba(15,23,42,0.97)' : '#ffffff' }}>
             <h4 className="text-lg font-extrabold text-amber-400 mb-1">🔧 Ajustar ingreso estimado</h4>
-            <p className="text-xs text-zinc-500 mb-1">Esto recalculará los montos de cada categoría automáticamente.</p>
-            <label className={labelCls}>Nuevo ingreso estimado *</label>
-            <input className={inputCls} type="number" min="0" step="1000" placeholder="Ej: 3500000"
+            <p className={`text-xs mb-1 ${isDarkMode ? 'text-zinc-500' : 'text-gray-600'}`}>Esto recalculará los montos de cada categoría automáticamente.</p>
+            <label className={labelCls(isDarkMode)}>Nuevo ingreso estimado *</label>
+            <input className={inputCls(isDarkMode)} type="number" min="0" step="1000" placeholder="Ej: 3500000"
               value={ingresoInput} onChange={e => setIngresoInput(e.target.value)} />
             {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
             <div className="mt-6 flex justify-end gap-2.5">
-              <button onClick={() => setModalAjustar(false)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
-              <button onClick={handleAjustarIngreso} disabled={guardando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-[#0f172a] disabled:opacity-50 disabled:cursor-not-allowed"
+              <button onClick={() => setModalAjustar(false)} className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                isDarkMode
+                  ? 'bg-transparent text-zinc-400 border-white/[0.15] hover:bg-white/[0.07]'
+                  : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'
+              }`}>Cancelar</button>
+              <button onClick={handleAjustarIngreso} disabled={guardando} className="px-5 py-2.5 rounded-xl text-sm font-bold text-[#0f172a] disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}>
                 {guardando ? 'Ajustando...' : 'Confirmar ajuste'}
               </button>
@@ -478,13 +521,17 @@ export default function ModuloPresupuestos() {
       {/* Modal Cerrar período */}
       {confirmarCierre && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <div className="w-full max-w-[400px] rounded-[20px] p-7 border border-red-400/25 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
-            style={{ background: 'rgba(15,23,42,0.97)' }}>
+          <div className={`w-full max-w-[400px] rounded-[20px] p-7 border shadow-[0_24px_60px_rgba(0,0,0,0.6)] ${isDarkMode ? 'border-red-400/25' : 'border-red-300'}`}
+            style={{ background: isDarkMode ? 'rgba(15,23,42,0.97)' : '#ffffff' }}>
             <h4 className="text-lg font-extrabold text-red-400 mb-2">🔒 ¿Cerrar el período?</h4>
-            <p className="text-sm text-zinc-400">El sistema calculará el ingreso real y el saldo sobrante se acumulará al siguiente período.</p>
+            <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>El sistema calculará el ingreso real y el saldo sobrante se acumulará al siguiente período.</p>
             <div className="mt-6 flex justify-end gap-2.5">
-              <button onClick={() => setConfirmarCierre(false)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
-              <button onClick={handleCerrarPeriodo} disabled={guardando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              <button onClick={() => setConfirmarCierre(false)} className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                isDarkMode
+                  ? 'bg-transparent text-zinc-400 border-white/[0.15] hover:bg-white/[0.07]'
+                  : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'
+              }`}>Cancelar</button>
+              <button onClick={handleCerrarPeriodo} disabled={guardando} className="px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: guardando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)' }}>
                 {guardando ? 'Cerrando...' : 'Cerrar período'}
               </button>
@@ -496,13 +543,17 @@ export default function ModuloPresupuestos() {
       {/* Modal Eliminar perfil */}
       {confirmarId && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <div className="w-full max-w-[380px] rounded-[20px] p-7 border border-red-400/25 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
-            style={{ background: 'rgba(15,23,42,0.97)' }}>
+          <div className={`w-full max-w-[380px] rounded-[20px] p-7 border shadow-[0_24px_60px_rgba(0,0,0,0.6)] ${isDarkMode ? 'border-red-400/25' : 'border-red-300'}`}
+            style={{ background: isDarkMode ? 'rgba(15,23,42,0.97)' : '#ffffff' }}>
             <h4 className="text-lg font-extrabold text-red-400 mb-2">🗑️ ¿Eliminar perfil?</h4>
-            <p className="text-sm text-zinc-400">Esta acción no se puede deshacer. Solo se puede eliminar si no tiene períodos asociados.</p>
+            <p className={`text-sm ${isDarkMode ? 'text-zinc-400' : 'text-gray-600'}`}>Esta acción no se puede deshacer. Solo se puede eliminar si no tiene períodos asociados.</p>
             <div className="mt-6 flex justify-end gap-2.5">
-              <button onClick={() => setConfirmarId(null)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
-              <button onClick={handleEliminar} disabled={eliminando} className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              <button onClick={() => setConfirmarId(null)} className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                isDarkMode
+                  ? 'bg-transparent text-zinc-400 border-white/[0.15] hover:bg-white/[0.07]'
+                  : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'
+              }`}>Cancelar</button>
+              <button onClick={handleEliminar} disabled={eliminando} className="px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: eliminando ? 'rgba(248,113,113,0.4)' : 'linear-gradient(135deg, #f87171, #ef4444)' }}>
                 {eliminando ? 'Eliminando...' : 'Eliminar'}
               </button>

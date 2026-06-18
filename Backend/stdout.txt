@@ -1,0 +1,3 @@
+◇ injected env (15) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Servidor corriendo en http://localhost:3000
+Conexión a la base de datos exitosa

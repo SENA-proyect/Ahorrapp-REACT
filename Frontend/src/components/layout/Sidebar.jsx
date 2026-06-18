@@ -275,36 +275,6 @@ export default function Sidebar() {
                     variants={itemVariants}
                     type="button"
                     onClick={() => {
-                      navigate('/reportes')
-                      setOpen(false)
-                    }}
-                    className={`flex w-full items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-bold transition-all duration-300 hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(59,130,246,0.35)] ${
-                      isDarkMode
-                        ? 'border-white/10 bg-white/5 text-white hover:border-blue-500/50 hover:bg-blue-600/80'
-                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700'
-                    }`}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      />
-                    </svg>
-                    <span className="hidden sm:inline">Reportes / Estadísticas</span>
-                  </motion.button>
-
-                  <motion.button
-                    variants={itemVariants}
-                    type="button"
-                    onClick={() => {
                       navigate('/historial')
                       setOpen(false)
                     }}

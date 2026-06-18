@@ -152,7 +152,7 @@ export default function NewsDashboard() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className={`backdrop-blur-md rounded-3xl border p-6 shadow-2xl mb-8 w-full transition-colors duration-300 sm:p-8 ${
+      className={`h-full w-full rounded-2xl border p-6 shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-colors duration-300 ${
         isDarkMode ? 'border-white/10 bg-white/[0.04]' : 'border-gray-200 bg-white/70'
       }`}
     >

@@ -6,10 +6,6 @@ export default function PanelDependientes() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    getDependientes();
-  }, []);
-
   const getDependientes = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -35,6 +31,10 @@ export default function PanelDependientes() {
       setCargando(false);
     }
   };
+
+  useEffect(() => {
+    getDependientes();
+  }, []);
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1133a1ff, #97720cff)' }}>

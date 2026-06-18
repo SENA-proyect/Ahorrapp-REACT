@@ -18,7 +18,7 @@ import PanelMovimientos from './components/panels/PanelMovimientos.jsx'
 import PanelUsuarios from './components/panels/PanelUsuarios.jsx'
 import VerificacionCorreo from './components/auth/VerificacionCorreo.jsx'
 import VMIDependientes from './components/vistas/VM_I-Dependientes.jsx'
-import FormMovimiento from './components/forms/FormMovimientos.jsx'
+
 import Asistente from './components/widgets/Asistente/Asistente'
 import Export from './components/widgets/Exportar.jsx'
 import Configuracion from './components/pages/Configuracion.jsx'
@@ -26,12 +26,13 @@ import Sidebar from './components/layout/Sidebar.jsx'
 import { useTheme } from './hooks/useTheme'
 import Noticias from "./components/pages/Noticias.jsx"
 import ModulosPresupuestos from './components/modulos/ModulosPresupuestos.jsx'
-import Modalnuevomovimiento from './components/Modalnuevomovimiento.jsx'
+import Modalnuevomovimiento from './components/forms/Modalnuevomovimiento.jsx'
 
 function AppContent() {
   const location = useLocation()
   const currentPath = location.pathname.toLowerCase()
-  const showSidebar = !['/', '/login', '/registro'].includes(currentPath)
+  const isAdminPanel = currentPath.startsWith('/panel')
+  const showSidebar = !['/', '/login', '/registro'].includes(currentPath) && !isAdminPanel
   const { isDarkMode } = useTheme()
 
   return (
@@ -75,7 +76,7 @@ function AppContent() {
         </Routes>
       </div>
 
-      {showSidebar && <Asistente />}
+      {showSidebar && !isAdminPanel && <Asistente />}
     </div>
   )
 }

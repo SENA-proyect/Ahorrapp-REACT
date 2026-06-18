@@ -165,6 +165,7 @@ const crearMovimiento = async (req, res) => {
 
     // 4. Ejecutar la actualización POST-COMMIT usando el pool (fuera de la transacción de forma segura)
     if (subtipo_modulo === "Ingreso") {
+      await actualizarIngresoReal(ID_usuario);
     }
 
     return res.status(201).json({

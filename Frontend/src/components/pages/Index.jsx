@@ -151,58 +151,7 @@ export default function Index() {
               </Link>
             </div>
             
-            {/* Stats — tarjetas estilo stat-cards del Dashboard */}
-            <div className="mt-20 grid grid-cols-3 gap-5">
-              {[
-                { 
-                  value: '10K+', 
-                  label: 'Usuarios activos', 
-                  emoji: '👥',
-                  gradient: isDarkMode 
-                    ? 'radial-gradient(ellipse at left, rgba(34,197,94,0.35), rgba(16,185,129,0.04))'
-                    : 'radial-gradient(ellipse at left, rgba(34,197,94,0.15), rgba(16,185,129,0.02))',
-                  color: 'text-emerald-600',
-                  textColor: isDarkMode ? 'text-white' : 'text-gray-900',
-                  borderColor: isDarkMode ? 'border-white/10' : 'border-gray-200',
-                },
-                { 
-                  value: '$50M+', 
-                  label: 'Gestionados', 
-                  emoji: '💰',
-                  gradient: isDarkMode
-                    ? 'radial-gradient(ellipse at left, rgba(245,158,11,0.35), rgba(249,115,22,0.04))'
-                    : 'radial-gradient(ellipse at left, rgba(245,158,11,0.15), rgba(249,115,22,0.02))',
-                  color: 'text-amber-600',
-                  textColor: isDarkMode ? 'text-white' : 'text-gray-900',
-                  borderColor: isDarkMode ? 'border-white/10' : 'border-gray-200',
-                },
-                { 
-                  value: '99%', 
-                  label: 'Satisfacción', 
-                  emoji: '⭐',
-                  gradient: isDarkMode
-                    ? 'radial-gradient(ellipse at left, rgba(168,85,247,0.35), rgba(147,51,234,0.04))'
-                    : 'radial-gradient(ellipse at left, rgba(168,85,247,0.15), rgba(147,51,234,0.02))',
-                  color: 'text-violet-600',
-                  textColor: isDarkMode ? 'text-white' : 'text-gray-900',
-                  borderColor: isDarkMode ? 'border-white/10' : 'border-gray-200',
-                },
-              ].map(({ value, label, emoji, gradient, color, textColor, borderColor }) => (
-                <article
-                  key={label}
-                  className={`rounded-3xl border p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] ${borderColor}`}
-                  style={{ background: gradient }}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="text-left">
-                      <p className={`mb-2 text-xs font-bold uppercase tracking-[0.2em] ${color}`}>{label}</p>
-                      <p className={`text-3xl font-black ${textColor}`}>{value}</p>
-                    </div>
-                    <span className="text-4xl opacity-30">{emoji}</span>
-                  </div>
-                </article>
-              ))}
-            </div>
+
           </div>
         </section>
         

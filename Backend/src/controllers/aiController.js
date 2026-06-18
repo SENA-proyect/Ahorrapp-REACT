@@ -33,12 +33,10 @@ const chat = async (req, res) => {
     }
 
   } catch (err) {
-    // Esto nos dirá el error REAL en la terminal
+    // Esto nos dir� el error REAL en la terminal
     console.error("ERROR REAL DE OPENROUTER:", err.response ? err.response.data : err.message);
     
-    const detailedError = err.response
-      ? err.response.data?.error?.message || err.response.data?.message || JSON.stringify(err.response.data)
-      : err.message || "Error de conexión";
+    const detailedError = err.response ? err.response.data.error.message : "Error de conexi�n";
     res.status(500).json({ error: detailedError });
   }
 };

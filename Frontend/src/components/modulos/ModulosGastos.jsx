@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias, getDependientes } from '../../api'
+import ModalNuevoMovimiento from '../forms/Modalnuevomovimiento'
 import HeaderModulos from '../layout/HeaderModulos'
 import { useTheme } from '../../hooks/useTheme'
 import gastosImg from '../../assets/Gastos.png' // ✅ Asegúrate de guardar la imagen aquí
@@ -20,6 +21,7 @@ export default function ModuloGastos() {
   const [errorModal, setErrorModal] = useState(null)
   const [categorias, setCategorias] = useState([])
   const [dependientes, setDependientes] = useState([])
+  const [showNuevoMovimiento, setShowNuevoMovimiento] = useState(false)
 
   const cargarGastos = () => {
     setCargando(true)
@@ -211,7 +213,7 @@ export default function ModuloGastos() {
             </div>
 
             <button
-              onClick={() => navigate('/movimientos/nuevo')}
+              onClick={() => setShowNuevoMovimiento(true)}
               className="inline-flex w-full max-w-[240px] items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 via-red-400 to-red-500 px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-px hover:shadow-xl sm:w-auto"
             >
               ➕ Registrar gasto nuevo
@@ -271,7 +273,7 @@ export default function ModuloGastos() {
                   No hay gastos registrados aún.
                 </p>
                 <button
-                  onClick={() => navigate('/movimientos/nuevo')}
+                  onClick={() => setShowNuevoMovimiento(true)}
                   className="mt-2 rounded-xl bg-gradient-to-br from-red-400 to-red-500 px-5 py-2 text-xs font-bold text-white transition-all hover:-translate-y-px hover:shadow-lg"
                 >
                   ➕ Registrar primer gasto
@@ -562,6 +564,10 @@ export default function ModuloGastos() {
             </div>
           </div>
         </div>
+      )}
+
+      {showNuevoMovimiento && (
+        <ModalNuevoMovimiento subtipo="Gasto" onCerrar={() => setShowNuevoMovimiento(false)} onGuardado={() => cargarGastos()} />
       )}
 
       {/* MODAL CONFIRMAR ELIMINAR */}

@@ -13,10 +13,6 @@ export default function PanelUsuarios() {
   const [rol, setRol] = useState('usuario');
   const [cargandoModal, setCargandoModal] = useState(false);
 
-  useEffect(() => {
-    getUsuarios();
-  }, []);
-
   async function getUsuarios() {
     try {
       const token = localStorage.getItem('token');
@@ -37,6 +33,10 @@ export default function PanelUsuarios() {
       setCargando(false);
     }
   };
+
+  useEffect(() => {
+    getUsuarios();
+  }, []);
 
   const handleEditar = (usuario) => {
     setUsuarioSeleccionado(usuario);
@@ -255,9 +255,8 @@ export default function PanelUsuarios() {
                   onChange={(e) => setRol(e.target.value)}
                   className='w-full p-[10px] border-1 border-gray-500 bg-[#2a2a2a] rounded-lg text-white'
                 >
-                  <option value="usuario">Usuario</option>
-                  <option value="moderador">Moderador</option>
-                  <option value="admin">Admin</option>
+                  <option value="Usuario">Usuario</option>
+                  <option value="Administrador">Administrador</option>
                 </select>
               </div>
 

@@ -1,4 +1,4 @@
-const API_URL = "/api";
+const API_URL = "http://localhost:3000/api";
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -20,6 +20,41 @@ export const loginUser = async (datos) => {
     body: JSON.stringify(datos),
   });
   return response.json();
+};
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+export const getDashboardData = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/dashboard/resumen`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  return {
+    totalIngresos: data.totalIngresos ?? 0,
+    totalGastos:   data.totalGastos   ?? 0,
+    totalAhorros:  data.totalAhorros  ?? 0,
+    balance:       data.balance       ?? 0,
+    periodo:       data.periodo       ?? null,
+    sin_periodo:   data.sin_periodo   ?? true,
+  };
+};
+
+export const getPresupuestoVsEjecutado = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/dashboard/presupuesto-vs-ejecutado`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  return data.data ?? [];
+};
+
+export const getFlujoPorSemana = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/dashboard/flujo-semanal`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  return data.data ?? [];
 };
 
 // ── Dependientes ────────────────────────────────────────────────────────────────
@@ -372,3 +407,24 @@ export const cerrarPeriodo = (datos) => presupuestoFetch(`${API_URL}/presupuesto
 export const ajustarIngresoPeriodo = (datos) => presupuestoFetch(`${API_URL}/presupuestos/periodos/ajustar-ingreso`, { method: "PATCH", body: JSON.stringify(datos) });
 export const crearPerfil = (datos) => presupuestoFetch(`${API_URL}/presupuestos`, { method: "POST", body: JSON.stringify(datos) });
 export const editarPerfil = (id, datos) => presupuestoFetch(`${API_URL}/presupuestos/${id}`, { method: "PUT", body: JSON.stringify(datos) });
+
+// ── Abonos ─────────────────────────────────────────────────────────────────
+export const abonarDeuda = async (id, cuotas = 1) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/movimientos/deudas/${id}/abonar`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ cuotas }),
+  });
+  return res.json();
+};
+
+export const abonarAhorro = async (id, monto) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/movimientos/ahorros/${id}/abonar`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ monto }),
+  });
+  return res.json();
+};

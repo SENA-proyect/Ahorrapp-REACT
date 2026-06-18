@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     ID_usuario  INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del usuario',
     Nombre VARCHAR(100) NOT NULL COMMENT 'Nombre del usuario',
     Apellido VARCHAR(100) COMMENT 'Apellido del usuario',
-    -- Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
+    Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
     Password_hash VARCHAR(255) NOT NULL COMMENT 'Hash de la contraseña del usuario',
     Email VARCHAR(255) NOT NULL UNIQUE COMMENT 'Correo electrónico principal',
     Activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el usuario está activo o inactivo',
@@ -260,6 +260,24 @@ CREATE TABLE IF NOT EXISTS HISTORIAL (
 )ENGINE=InnoDB;
 
 -- ========================================================================
+--     TABLA: configuraciones
+-- ========================================================================
+CREATE TABLE IF NOT EXISTS CONFIGURACIONES (
+    ID_configuracion INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la configuración',
+    ID_usuario INT NOT NULL UNIQUE COMMENT 'Usuario al que pertenece la configuración',
+    idioma VARCHAR(10) NOT NULL DEFAULT 'es' COMMENT 'Idioma de la app',
+    formatoFecha VARCHAR(20) NOT NULL DEFAULT 'DD/MM/AAAA' COMMENT 'Formato preferido de fecha',
+    alertasActivas BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Alertas globales activadas',
+    moneda VARCHAR(10) NOT NULL DEFAULT 'COP' COMMENT 'Moneda preferida',
+    presupuestoMensual DECIMAL(15,2) NOT NULL DEFAULT 1000000.00 COMMENT 'Presupuesto mensual definido por el usuario',
+    alertaGastos BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Notificación de gastos grandes',
+    recordatorioPresupuesto BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Recordatorio de límite de presupuesto',
+    notificacionMetas BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Notificación de metas de ahorro',
+    correoResumen BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Resumen semanal por correo',
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ========================================================================
 --     TABLA: notificaciones
 -- ========================================================================
 CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
@@ -345,3 +363,10 @@ CREATE TABLE IF NOT EXISTS PERIODOS_PRESUPUESTO (
 --     );
 -- NOTA: MySQL evalúa CHECKs por fila pero no entre columnas de forma confiable
 --       en todas las versiones. Por lo tanto se manejara esta validación en el backend.
+
+-- ========================================================================
+-- Migracion para BD existentes (columnas que CREATE TABLE IF NOT EXISTS no agrega)
+-- ========================================================================
+ALTER TABLE USUARIOS
+ADD COLUMN IF NOT EXISTS Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario'
+COMMENT 'Rol del usuario dentro del sistema';

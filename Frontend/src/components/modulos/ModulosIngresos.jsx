@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategorias } from '../../api'
+import ModalNuevoMovimiento from '../forms/Modalnuevomovimiento'
 import HeaderModulos from '../layout/HeaderModulos'
 import { useTheme } from '../../hooks/useTheme'
 import ingresosImg from '../../assets/Ingresos.png'
@@ -19,6 +20,7 @@ export default function ModuloIngresos() {
   const [eliminando, setEliminando] = useState(false)
   const [errorModal, setErrorModal] = useState(null)
   const [categorias, setCategorias] = useState([])
+  const [showNuevoMovimiento, setShowNuevoMovimiento] = useState(false)
 
   const cargarIngresos = () => {
     setCargando(true)
@@ -224,7 +226,7 @@ export default function ModuloIngresos() {
             </div>
 
             <button
-              onClick={() => navigate('/movimientos/nuevo')}
+              onClick={() => setShowNuevoMovimiento(true)}
               className="inline-flex w-full max-w-[240px] items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-emerald-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px hover:shadow-xl sm:w-auto"
             >
               ➕ Agregar ingreso nuevo
@@ -280,7 +282,7 @@ export default function ModuloIngresos() {
                   No hay ingresos registrados aún.
                 </p>
                 <button
-                  onClick={() => navigate('/movimientos/nuevo')}
+                  onClick={() => setShowNuevoMovimiento(true)}
                   className="mt-2 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2 text-xs font-bold text-slate-900 transition-all hover:-translate-y-px hover:shadow-lg"
                 >
                   ➕ Crear primer ingreso
@@ -560,6 +562,10 @@ export default function ModuloIngresos() {
             </div>
           </div>
         </div>
+      )}
+
+      {showNuevoMovimiento && (
+        <ModalNuevoMovimiento subtipo="Ingreso" onCerrar={() => setShowNuevoMovimiento(false)} onGuardado={() => cargarIngresos()} />
       )}
 
       {/* MODAL CONFIRMAR ELIMINAR */}

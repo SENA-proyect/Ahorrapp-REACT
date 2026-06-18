@@ -668,125 +668,7 @@ const actualizarIngresoReal = async (ID_usuario, connection) => {
   );
 };
 
-const abonarDeuda = async (req, res) => {
-  const ID_usuario = req.usuario.id;
-  const { id }     = req.params;
-  const cuotas     = parseInt(req.body.cuotas) || 1;
-
-  if (cuotas < 1) {
-    return res.status(400).json({ ok: false, mensaje: "El número de cuotas debe ser >= 1" });
-  }
-
-  try {
-    // 1. Obtener deuda y verificar propiedad
-    const [[deuda]] = await pool.query(
-      `SELECT d.ID_deudas, d.Cuotas_total, d.Cuotas_pagadas, d.Estado
-       FROM   DEUDAS d
-       JOIN   SALIDA s      ON d.ID_salida     = s.ID_salida
-       JOIN   MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE  d.ID_deudas = ? AND m.ID_usuario = ?`,
-      [id, ID_usuario]
-    );
-
-    if (!deuda) {
-      return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
-    }
-    if (deuda.Estado === "pagada") {
-      return res.status(409).json({ ok: false, mensaje: "Esta deuda ya está pagada" });
-    }
-
-    // 2. Calcular nuevas cuotas pagadas
-    const nuevasCuotas = deuda.Cuotas_pagadas + cuotas;
-
-    // No puede superar el total (si tiene total definido)
-    if (deuda.Cuotas_total !== null && nuevasCuotas > deuda.Cuotas_total) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: `No puedes pagar más cuotas de las que tiene la deuda. Quedan ${deuda.Cuotas_total - deuda.Cuotas_pagadas}.`
-      });
-    }
-
-    // 3. Determinar nuevo estado
-    const nuevoEstado =
-      deuda.Cuotas_total !== null && nuevasCuotas >= deuda.Cuotas_total
-        ? "pagada"
-        : "pendiente";
-
-    // 4. Actualizar
-    await pool.query(
-      `UPDATE DEUDAS
-       SET    Cuotas_pagadas = ?,
-              Estado         = ?
-       WHERE  ID_deudas      = ?`,
-      [nuevasCuotas, nuevoEstado, id]
-    );
-
-    res.status(200).json({
-      ok:             true,
-      mensaje:        nuevoEstado === "pagada" ? "Deuda pagada completamente" : "Cuota registrada",
-      cuotas_pagadas: nuevasCuotas,
-      cuotas_total:   deuda.Cuotas_total,
-      estado:         nuevoEstado,
-    });
-  } catch (error) {
-    console.error("Error en abonarDeuda:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
-};
-
-
-const abonarAhorro = async (req, res) => {
-  const ID_usuario = req.usuario.id;
-  const { id }     = req.params;
-  const monto      = parseFloat(req.body.monto);
-
-  if (!monto || monto <= 0) {
-    return res.status(400).json({ ok: false, mensaje: "El monto del abono debe ser mayor a 0" });
-  }
-
-  try {
-    // 1. Verificar propiedad y obtener datos actuales
-    const [[ahorro]] = await pool.query(
-      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Monto_acumulado
-       FROM   AHORROS a
-       JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
-       JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE  a.ID_ahorros = ? AND m.ID_usuario = ?`,
-      [id, ID_usuario]
-    );
-
-    if (!ahorro) {
-      return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
-    }
-
-    // 2. Calcular nuevo acumulado (no supera la meta)
-    const nuevoAcumulado = Math.min(
-      parseFloat(ahorro.Monto_acumulado) + monto,
-      parseFloat(ahorro.meta_monto)
-    );
-    const metaAlcanzada = nuevoAcumulado >= parseFloat(ahorro.meta_monto);
-
-    // 3. Actualizar
-    await pool.query(
-      `UPDATE AHORROS
-       SET    Monto_acumulado = ?
-       WHERE  ID_ahorros      = ?`,
-      [nuevoAcumulado, id]
-    );
-
-    res.status(200).json({
-      ok:              true,
-      mensaje:         metaAlcanzada ? "Meta de ahorro alcanzada" : "Abono registrado",
-      monto_acumulado: nuevoAcumulado,
-      meta_monto:      ahorro.meta_monto,
-      progreso:        parseFloat(((nuevoAcumulado / ahorro.meta_monto) * 100).toFixed(2)),
-      meta_alcanzada:  metaAlcanzada,
-    });
-  } catch (error) {
-    console.error("Error en abonarAhorro:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
-};
+// (abonarDeuda y abonarAhorro se manejan en movimientosController)
 
 // ─────────────────────────────────────────────────────────────
 //  EXPORTS
@@ -805,7 +687,5 @@ module.exports = {
     listarPeriodos,
     obtenerPeriodoActivo,
     ajustarIngresoPeriodo,
-    // Abonos
-    abonarDeuda,
-    abonarAhorro,
+
 };

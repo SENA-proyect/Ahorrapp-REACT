@@ -3,8 +3,26 @@ import { useNavigate } from 'react-router-dom'
 import HeaderModulos from '../layout/HeaderModulos'
 import { useTheme } from '../../hooks/useTheme'
 import ahorrosImg from '../../assets/Ahorros.png'
+import { abonarAhorro, getCategorias } from '../../api'
+import ModalNuevoMovimiento from '../forms/Modalnuevomovimiento'
 
 const API = '/api/movimientos'
+
+const BarraProgreso = ({ acumulado, meta }) => {
+  const { isDarkMode } = useTheme()
+  const pct = meta && Number(meta) > 0 ? Math.min(100, (Number(acumulado || 0) / Number(meta)) * 100) : 0
+
+  return (
+    <div className="mt-1">
+      <div className={`h-2 w-full overflow-hidden rounded-full ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'}`}>
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-300"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
 
 export default function ModuloAhorros() {
   const navigate = useNavigate()
@@ -18,6 +36,11 @@ export default function ModuloAhorros() {
   const [guardando, setGuardando] = useState(false)
   const [eliminando, setEliminando] = useState(false)
   const [errorModal, setErrorModal] = useState(null)
+  const [modalAbonar, setModalAbonar] = useState(null)
+  const [abonando, setAbonando] = useState(false)
+  const [montoAbono, setMontoAbono] = useState('')
+  const [categorias, setCategorias] = useState([])
+  const [showNuevoMovimiento, setShowNuevoMovimiento] = useState(false)
 
   const cargarAhorros = () => {
     setCargando(true)
@@ -35,7 +58,29 @@ export default function ModuloAhorros() {
     cargarAhorros()
   }, [])
 
+  useEffect(() => {
+    getCategorias().then(setCategorias).catch(() => {})
+  }, [])
+
   const total = ahorros.reduce((acc, a) => acc + Number(a.monto || 0), 0)
+
+  const abrirAbonar = a => {
+    setErrorModal(null)
+    setMontoAbono('')
+    setModalAbonar(a)
+  }
+
+  const hacerAbono = async () => {
+    const monto = parseFloat(montoAbono)
+    if (!monto || monto <= 0) return setErrorModal('El monto del abono debe ser mayor a 0')
+    setAbonando(true)
+    try {
+      const data = await abonarAhorro(modalAbonar.id, monto)
+      if (data.ok) { setModalAbonar(null); cargarAhorros() }
+      else setErrorModal(data.mensaje || 'Error al abonar')
+    } catch { setErrorModal('Error al conectar con el servidor') }
+    finally { setAbonando(false) }
+  }
 
   const abrirEditar = a => {
     setErrorModal(null)
@@ -43,6 +88,7 @@ export default function ModuloAhorros() {
       id: a.id,
       monto: String(a.monto),
       meta: a.meta || '',
+      categoria: a.categoria || '',
       descripcion: a.descripcion || '',
       fecha_meta: a.fecha_meta ? a.fecha_meta.slice(0, 10) : '',
       acumulado: String(a.monto_acumulado ?? a.acumulado ?? 0),
@@ -72,6 +118,7 @@ export default function ModuloAhorros() {
         body: JSON.stringify({
           monto: Number(modalEditar.monto),
           meta: modalEditar.meta || null,
+          categoria: modalEditar.categoria || null,
           descripcion: modalEditar.descripcion || null,
           fecha_meta: modalEditar.fecha_meta || null,
           monto_acumulado: Number(modalEditar.acumulado) || 0,
@@ -193,7 +240,7 @@ export default function ModuloAhorros() {
             </div>
 
             <button
-              onClick={() => navigate('/movimientos/nuevo')}
+              onClick={() => setShowNuevoMovimiento(true)}
               className="inline-flex w-full max-w-[240px] items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-amber-500 px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:-translate-y-px hover:shadow-xl sm:w-auto"
             >
               ➕ Crear una meta nueva
@@ -241,7 +288,7 @@ export default function ModuloAhorros() {
                   No hay ahorros registrados aún.
                 </p>
                 <button
-                  onClick={() => navigate('/movimientos/nuevo')}
+                  onClick={() => setShowNuevoMovimiento(true)}
                   className="mt-2 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 px-5 py-2 text-xs font-bold text-slate-900 transition-all hover:-translate-y-px hover:shadow-lg"
                 >
                   ➕ Crear primera meta
@@ -293,6 +340,7 @@ export default function ModuloAhorros() {
                           </td>
                           <td className={`px-4 py-3 text-sm font-extrabold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
                             ${Number(a.acumulado || 0).toLocaleString('es-CO')}
+                            <BarraProgreso acumulado={a.acumulado} meta={a.monto} />
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
@@ -305,6 +353,16 @@ export default function ModuloAhorros() {
                                 }`}
                               >
                                 Editar
+                              </button>
+                              <button
+                                onClick={() => abrirAbonar(a)}
+                                className={`rounded-lg border px-4 py-1.5 text-xs font-bold transition-colors ${
+                                  isDarkMode
+                                    ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20'
+                                    : 'border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                }`}
+                              >
+                                Abonar
                               </button>
                               <button
                                 onClick={() => setConfirmarId(a.id)}
@@ -364,6 +422,19 @@ export default function ModuloAhorros() {
               value={modalEditar.meta}
               onChange={handleEditarChange}
             />
+
+            <label className={labelModal}>Categoría</label>
+            <select
+              className={inputModal}
+              name="categoria"
+              value={modalEditar.categoria}
+              onChange={handleEditarChange}
+            >
+              <option value="">Sin categoría</option>
+              {categorias.map(c => (
+                <option key={c.id} value={c.id}>{c.nombre}</option>
+              ))}
+            </select>
 
             <label className={labelModal}>Descripción</label>
             <input
@@ -460,6 +531,81 @@ export default function ModuloAhorros() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODAL ABONAR */}
+      {modalAbonar && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+          <div className={`w-full max-w-[420px] rounded-2xl border p-6 shadow-2xl sm:p-7 transition-colors ${
+            isDarkMode
+              ? 'border-white/10 bg-slate-950/95'
+              : 'border-gray-200 bg-white'
+          }`}>
+            <h4 className={`text-lg font-extrabold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+              💰 Abonar al ahorro
+            </h4>
+            <p className={`mt-1 text-xs ${isDarkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+              Añade un abono a &quot;{modalAbonar.meta || 'tu meta'}&quot;
+            </p>
+
+            <div className="mt-5">
+              <div className="mb-1 flex justify-between text-xs">
+                <span className={isDarkMode ? 'text-zinc-400' : 'text-gray-500'}>
+                  ${Number(modalAbonar.acumulado || 0).toLocaleString('es-CO')}
+                </span>
+                <span className={isDarkMode ? 'text-zinc-400' : 'text-gray-500'}>
+                  ${Number(modalAbonar.monto || 0).toLocaleString('es-CO')}
+                </span>
+              </div>
+              <BarraProgreso acumulado={modalAbonar.acumulado} meta={modalAbonar.monto} />
+            </div>
+
+            <label className={labelModal}>Monto del abono</label>
+            <input
+              className={inputModal}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Ej: 50000"
+              value={montoAbono}
+              onChange={e => setMontoAbono(e.target.value)}
+            />
+
+            {errorModal && (
+              <p className={`mt-4 rounded-xl border px-4 py-3 text-sm font-semibold ${
+                isDarkMode
+                  ? 'border-red-400/40 bg-red-400/10 text-red-400'
+                  : 'border-red-300 bg-red-50 text-red-700'
+              }`}>
+                {errorModal}
+              </p>
+            )}
+
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                onClick={() => { setModalAbonar(null); setErrorModal(null) }}
+                className={`rounded-xl border px-5 py-2.5 text-sm font-bold transition-colors ${
+                  isDarkMode
+                    ? 'border-white/15 bg-transparent text-zinc-400 hover:bg-white/10'
+                    : 'border-gray-300 bg-transparent text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={hacerAbono}
+                disabled={abonando}
+                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {abonando ? 'Abonando...' : 'Abonar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showNuevoMovimiento && (
+        <ModalNuevoMovimiento subtipo="Ahorro" onCerrar={() => setShowNuevoMovimiento(false)} onGuardado={() => cargarAhorros()} />
       )}
     </div>
   )

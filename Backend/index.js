@@ -37,7 +37,6 @@ app.use("/api/movimientos", movimientosRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/noticias", noticiasRoutes);
 app.use('/api', bolsaRoutes);
-app.use("/api/bolsa", bolsaRoutes);
 app.use('/api/exportar', exportarRoutes);
 app.use("/api/exportarRoutes", exportRoutes);
 app.use("/api/configuraciones", configuracionesRoutes);

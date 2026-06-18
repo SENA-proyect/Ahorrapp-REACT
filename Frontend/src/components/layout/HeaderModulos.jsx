@@ -6,11 +6,12 @@ const navItems = [
   { href: '/Dashboard',           emoji: '📊', label: 'Dashboard' },
   { href: '/ModulosIngresos',     emoji: '💰', label: 'Ingresos' },
   { href: '/ModulosGastos',       emoji: '💸', label: 'Gastos' },
-  { href: '/ModuloAhorros',       emoji: '', label: 'Ahorrar' },
+  { href: '/ModuloAhorros',       emoji: '🎯', label: 'Ahorrar' },
   { href: '/ModuloImprevistos',   emoji: '🛡️', label: 'Imprevistos' },
   { href: '/ModuloDeudas',        emoji: '💳', label: 'Deudas' },
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
-  { href: '/ModulosCategorias',   emoji: '', label: 'Categorias' },
+  { href: '/ModulosCategorias',   emoji: '🧩', label: 'Categorias' },
+  { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
   { href: '/movimientos/nuevo',   emoji: '➕', label: 'Nuevo Movimiento' },
 ]
 
@@ -49,26 +50,27 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
       style={{ background: headerBackground }}
     >
       <section className="w-full max-w-[1400px] px-4 sm:px-6 md:px-10 mb-4 sm:mb-6">
-        <div className="flex flex-col items-center gap-2">
-          {/* Logo con gradiente dinámico */}
-          <h1
-            className={`text-2xl sm:text-3xl md:text-4xl font-black tracking-tight bg-clip-text text-transparent ${
-              isDarkMode
-                ? 'bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500'
-                : 'bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600'
-            }`}
-          >
-            Ahorrapp
-          </h1>
-          
-          {/* Sección actual */}
-          <span
-            className={`text-[0.6rem] sm:text-[0.65rem] font-semibold tracking-widest uppercase ${
-              isDarkMode ? 'text-zinc-500' : 'text-gray-500'
-            }`}
-          >
-            {section}
-          </span>
+        <div className="flex w-full items-center justify-between">
+          <div className="flex-1 text-center">
+            <h1
+              className={`text-2xl sm:text-3xl md:text-4xl font-black tracking-tight bg-clip-text text-transparent ${
+                isDarkMode
+                  ? 'bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500'
+                  : 'bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600'
+              }`}
+            >
+              Ahorrapp
+            </h1>
+            <span
+              className={`text-[0.6rem] sm:text-[0.65rem] font-semibold tracking-widest uppercase ${
+                isDarkMode ? 'text-zinc-500' : 'text-gray-500'
+              }`}
+            >
+              {section}
+            </span>
+          </div>
+
+
         </div>
       </section>
 
