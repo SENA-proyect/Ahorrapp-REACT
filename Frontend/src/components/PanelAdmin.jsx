@@ -27,120 +27,157 @@ export default function PanelAdmin() {
       } catch (error) {
         console.error('Error al obtener dependientes:', error);
       }
-    }
+    };
 
     cargarDependientes();
   }, []);
 
+  const linksNav = [
+    { to: '/PanelUsuarios', label: 'Panel de Usuarios', icon: (
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+    ) },
+    { to: '/PanelDependientes', label: 'Panel de Dependientes', icon: (
+      <>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ) },
+    { to: '/PanelHistorial', label: 'Panel de Historial', icon: (
+      <>
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </>
+    ) },
+    { to: '/PanelMovimientos', label: 'Panel de Movimientos', icon: (
+      <>
+        <polyline points="16 3 21 8 16 13" />
+        <line x1="21" y1="8" x2="9" y2="8" />
+        <polyline points="8 21 3 16 8 11" />
+        <line x1="3" y1="16" x2="15" y2="16" />
+      </>
+    ) },
+  ];
+
+  const handleLogout = () => { 
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.replace('/login');
+  }
+
   return (
-    <div className='min-h-screen bg-gradient-to-br from-black via-green-950 to-blue-900 flex flex-col'>
-      <header className='p-5'>
-        <h2 className='text-white font-bold text-3xl w-1/2 rounded-xl p-3 text-center'>
-          Panel de administrador.
-        </h2>
-      </header>
+    <div className="min-h-screen bg-[#080c18] flex">
 
-      <main className='flex flex-1 relative'>
-        <div className='bg-blue-950/80 backdrop-blur-lg border-r border-blue-800/40 p-5 fixed top-0 left-0 w-56 h-screen overflow-y-auto z-10'>
-          <ul className='flex flex-col gap-3 mt-20'>
-            <li>
-              <Link to="/PanelDependientes">
-                <button className='w-full p-3 border border-blue-800/40 hover:border-blue-400 rounded-lg text-gray-400 hover:text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 hover:bg-blue-900/40 hover:scale-[1.02] active:scale-[0.98]'>
-                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                  <span>Panel de Dependientes</span>
-                </button>
-              </Link>
-            </li>
+      {/* Sidebar */}
+      <aside className="w-64 bg-[#0d1526] border-r border-[#1c2942] fixed top-0 left-0 h-screen flex flex-col p-5 z-10">
 
-            <li>
-              <Link to="/PanelHistorial">
-                <button className='w-full p-3 border border-blue-800/40 hover:border-blue-400 rounded-lg text-gray-400 hover:text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 hover:bg-blue-900/40 hover:scale-[1.02] active:scale-[0.98]'>
-                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                    <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" />
-                  </svg>
-                  <span>Panel de Historial</span>
-                </button>
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/PanelMovimientos">
-                <button className='w-full p-3 border border-blue-800/40 hover:border-blue-400 rounded-lg text-gray-400 hover:text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 hover:bg-blue-900/40 hover:scale-[1.02] active:scale-[0.98]'>
-                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <polyline points="16 3 21 8 16 13" />
-                    <line x1="21" y1="8" x2="9" y2="8" />
-                    <polyline points="8 21 3 16 8 11" />
-                    <line x1="3" y1="16" x2="15" y2="16" />
-                  </svg>
-                  <span>Panel de Movimientos</span>
-                </button>
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/PanelUsuarios">
-                <button className='w-full p-3 border border-blue-800/40 hover:border-blue-400 rounded-lg text-gray-400 hover:text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 hover:bg-blue-900/40 hover:scale-[1.02] active:scale-[0.98]'>
-                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span>Panel de Usuarios</span>
-                </button>
-              </Link>
-            </li>
-          </ul>
-
-          <div className='border-1 border-gray-700 p-5 mt-96 mx-0 flex-col justify-center items-center rounded-lg'>
-            <h1 className='text-white text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 hover:bg-blue-900/40 hover:scale-[1.02] active:scale-[0.98]'>
-              Bienvenido, Administrador.
-            </h1>
-
-            <button className='w-full p-2 mt-1 border-red-600 rounded-lg text-red-400 text-white font-semibold cursor-pointer transition-all duration-300 flex items-center gap-3 bg-red-700 hover:bg-red-800/40 hover:scale-[1.02] active:scale-[0.98]'>
-              Cerrar sesion
-            </button>
-          </div>
+        <div className="mb-8">
+          <p className="text-xs text-[#7d8aa8] mb-1">Bienvenido</p>
+          <p className="text-base font-semibold text-[#e0b855]">Administrador</p>
         </div>
 
-        <section className='flex flex-wrap justify-around flex-1 p-10 gap-3 ml-56'>
-          <section className='bg-gradient-to-br from-green-950 to-blue-900 border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
-            <h1 className='text-white font-bold text-xl text-center'>Usuarios</h1>
+        <nav className="flex flex-col gap-2 flex-1">
+          {linksNav.map((item) => (
+            <Link key={item.to} to={item.to}>
+              <button className="w-full p-3 rounded-lg text-sm font-medium text-[#9aa6c4] hover:text-[#e0b855] hover:bg-[#1a2438] flex items-center gap-3 transition-colors duration-200">
+                <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  {item.icon}
+                </svg>
+                <span>{item.label}</span>
+              </button>
+            </Link>
+          ))}
+        </nav>
 
-            <p className='text-white text-center mt-10 text-6xl font-bold'>
-              {usuarios.totalUsuarios}
-            </p>
+        <div className="border-t border-[#1c2942] pt-4">
+          <button onClick={handleLogout} className="w-full p-2.5 rounded-lg text-sm font-medium text-red-300 border border-red-900/40 hover:bg-red-900/20 transition-colors duration-200 flex items-center justify-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Cerrar sesion
+          </button>
+        </div>
+      </aside>
 
-            <p className='text-gray-300 text-center mt-4'>
-              Usuarios registrados
-            </p>
-          </section>
+      {/* Contenido principal */}
+      <main className="flex-1 ml-64 p-8 flex flex-col gap-6">
 
-          <section className='bg-gradient-to-br from-green-950 to-blue-900 border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
-            <h1 className='text-white font-bold text-xl text-center'>Movimientos</h1>
-            <p className='text-white text-center mt-5'>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Error blanditiis voluptate nobis,
-              officiis repellat nesciunt rerum, quod modi delectus voluptates totam quidem.
-              Recusandae voluptatem nisi amet saepe, in quaerat officiis.
-            </p>
-          </section>
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-[#f4f1e8]">Panel de administrador</h1>
+            <p className="text-sm text-[#7d8aa8] mt-1">Resumen general del sistema</p>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-[#1a2438] border border-[#2a3a5a] flex items-center justify-center">
+            <svg className="w-5 h-5 text-[#e0b855]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </div>
+        </header>
 
-          <section className='bg-gradient-to-br from-green-950 to-blue-900 border-2 border-blue-600 rounded-lg p-5 w-96 h-96'>
-            <h1 className='text-white font-bold text-xl text-center'>Dependientes</h1>
-            <p className='text-white text-center mt-10 text-6xl font-bold'>
-              {dependientes.totalDependientes}
-            </p>
+        {/* Tarjetas de estadisticas */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-            <p className='text-gray-300 text-center mt-4'>
-              Dependientes registrados
-            </p>
-          </section>
+          <div className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#9aa6c4]">Usuarios registrados</p>
+              <div className="w-8 h-8 rounded-md bg-[#e0b855]/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-[#e0b855]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-[#f4f1e8]">{usuarios.totalUsuarios}</p>
+            <p className="text-xs text-[#9aa6c4]">Total de cuentas activas</p>
+          </div>
+
+          <div className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#9aa6c4]">Dependientes</p>
+              <div className="w-8 h-8 rounded-md bg-[#e0b855]/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-[#e0b855]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-[#f4f1e8]">{dependientes.totalDependientes}</p>
+            <p className="text-xs text-[#9aa6c4]">Total registrados</p>
+          </div>
+
+          <div className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#9aa6c4]">Movimientos</p>
+              <div className="w-8 h-8 rounded-md bg-[#e0b855]/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-[#e0b855]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="16 3 21 8 16 13" />
+                  <line x1="21" y1="8" x2="9" y2="8" />
+                  <polyline points="8 21 3 16 8 11" />
+                  <line x1="3" y1="16" x2="15" y2="16" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-[#f4f1e8]">--</p>
+            <p className="text-xs text-[#9aa6c4]">Pendiente de conectar</p>
+          </div>
+
         </section>
+
+        {/* Bloque inferior, listo para tabla o lista de actividad */}
+        <section className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex-1">
+          <h2 className="text-base font-semibold text-[#f4f1e8] mb-4">Actividad reciente</h2>
+          <p className="text-sm text-[#9aa6c4]">
+            Aqui puedes mapear una lista de movimientos, registros recientes u otra
+            informacion proveniente de tu API.
+          </p>
+        </section>
+
       </main>
     </div>
   );

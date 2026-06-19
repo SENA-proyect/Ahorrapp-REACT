@@ -16,9 +16,10 @@ const dashboardRoutes     = require('./src/routes/dashboardRoutes');
 const app = express();
 
 // Middlewares globales
+// se agrego "options" entre los metodos
 app.use(cors({
-  origin: "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  origin: "https://localhost:5173",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
@@ -42,6 +43,7 @@ app.get("/", (req, res) => {
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en https://localhost:${PORT}`);
 });

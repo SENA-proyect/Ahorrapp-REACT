@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 
 const API_KEY = process.env.FINNHUB_API_KEY || 'd7v307pr01qp7l70r6i0d7v307pr01qp7l70r6ig'
+// hacer pruebas de compatiblidad entre la linea arriba del comentario y la linea abajo del comentario
+// const API_KEY = 'd7v307pr01qp7l70r6i0d7v307pr01qp7l70r6ig'
 
 router.get('/bolsa/:symbol', async (req, res) => {
   const { symbol } = req.params

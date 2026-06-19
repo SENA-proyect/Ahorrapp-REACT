@@ -352,13 +352,66 @@ export const getGastos = async () => {
 };
 
 // ── Panel Admin ───────────────────────────────────────────────────────────────
-export const getUsuariosPanelAdmin = async () =>
-  fetchJSON(`${API_URL}/auth/usuarios/PanelAdmin`);
+// export const getUsuariosPanelAdmin = async () =>
+//   fetchJSON(`${API_URL}/auth/usuarios/PanelAdmin`);
 
-export const getDependientesPanelAdmin = async () =>
-  fetchJSON(`${API_URL}/auth/dependientes/PanelAdmin`);
+// export const getDependientesPanelAdmin = async () =>
+//   fetchJSON(`${API_URL}/auth/dependientes/PanelAdmin`);
 
+// export const getTodosDependientesAdmin = async () => {
+//   const data = await fetchJSON(`${API_URL}/auth/PanelDependientes`);
+//   return data.dependientes ?? data;
+// };
+
+export const getUsuariosPanelAdmin = async () => {
+  const token = localStorage.getItem("token");z
+  const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener total de usuarios");
+  }
+
+  return response.json(); 
+}
+
+export const getDependientesPanelAdmin = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/auth/dependientes/PanelAdmin`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener total de dependientes");
+  }
+
+  return response.json(); 
+}
+
+// Todos los dependientes para admin
 export const getTodosDependientesAdmin = async () => {
-  const data = await fetchJSON(`${API_URL}/auth/PanelDependientes`);
+  const token = localStorage.getItem('token');
+
+  const res = await fetch(`${API_URL}/auth/PanelDependientes`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('Error al obtener todos los dependientes');
+  }
+
+  const data = await res.json();
+
   return data.dependientes ?? data;
 };

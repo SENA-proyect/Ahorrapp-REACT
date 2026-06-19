@@ -7,6 +7,9 @@ import HeaderModulos from './HeaderModulos'
 import BolsaWidget from './BolsaWidget'
 import { getDashboardData, getPresupuestoVsEjecutado, getFlujoPorSemana } from '../api'
 
+// agregado para la seguirdad por roles
+import { useAuth } from './AuthContext'
+
 // ── Tooltip personalizado para la gráfica de barras ──────────
 const TooltipPresupuesto = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
@@ -53,6 +56,9 @@ export default function Dashboard() {
       return null
     }
   }, [])
+
+// agregado para la seguirdad por roles
+  const { user } = useAuth();
 
   const [totales, setTotales] = useState({
     totalIngresos: 0,

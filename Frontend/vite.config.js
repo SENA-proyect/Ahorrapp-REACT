@@ -6,11 +6,11 @@ export default defineConfig({
   plugins: [react()], 
   server: {
     host: `localhost`,
-    // port: 5173,
-    // https: {
-    //   key: fs.readFileSync(('certs/localhost.key')),
-    //   cert: fs.readFileSync(('certs/localhost.crt')),
-    // },
+    port: 5173,
+    https: {
+      key: fs.readFileSync(('certs/localhost.key')),
+      cert: fs.readFileSync(('certs/localhost.crt')),
+    },
     proxy: {
       "/api": {
         target: "http://localhost:3000",
