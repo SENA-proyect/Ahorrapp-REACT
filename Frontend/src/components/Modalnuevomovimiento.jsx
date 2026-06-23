@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getCategorias, getDependientes } from '../api'
 
-const API = 'http://localhost:3000/api/movimientos'
+const API = 'https://localhost:3000/api/movimientos'
 
 // ── Configuración por subtipo ─────────────────────────────────
 const CONFIG = {

@@ -8,14 +8,15 @@ export default defineConfig({
     host: `localhost`,
     port: 5173,
     https: {
-      key: fs.readFileSync(('certs/localhost.key')),
-      cert: fs.readFileSync(('certs/localhost.crt')),
+      key: fs.readFileSync('certs/localhost.key'),
+      cert: fs.readFileSync('certs/localhost.crt'),
     },
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: "https://localhost:3000",
         changeOrigin: true,
+        secure: false,
       },
     },
   },
-}); 
+});

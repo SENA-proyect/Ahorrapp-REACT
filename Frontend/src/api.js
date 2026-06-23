@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://localhost:3000/api";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const authHeaders = () => ({
@@ -364,7 +364,7 @@ export const getGastos = async () => {
 // };
 
 export const getUsuariosPanelAdmin = async () => {
-  const token = localStorage.getItem("token");z
+  const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {
     method: "GET",
     headers: {

@@ -22,7 +22,7 @@ export default function PanelUsuarios() {
   
       // 1. IMPORTANTE: Cambiado a https:// para que no te salte error de Fetch
       const response = await fetch(
-        "http://localhost:3000/api/auth/PanelUsuarios",
+        "https://localhost:3000/api/auth/PanelUsuarios",
         {
           headers: {
             Authorization: `Bearer ${token}`,
