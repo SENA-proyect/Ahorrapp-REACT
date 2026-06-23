@@ -39,9 +39,4 @@ app.get("/", (req, res) => {
   res.json({ ok: true, mensaje: "Servidor AhorrApp corriendo" });
 });
 
-// Iniciar servidor
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en https://localhost:${PORT}`);
-});
+module.exports = app;
