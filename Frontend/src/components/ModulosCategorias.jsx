@@ -17,7 +17,12 @@ import {
 } from '../api'
 
 
-const usuario = JSON.parse(localStorage.getItem('usuario'))
+let usuario = null
+try {
+  usuario = JSON.parse(localStorage.getItem('usuario'))
+} catch {
+  usuario = null
+}
 
 export default function ModuloCategorias() {
 
@@ -74,7 +79,9 @@ export default function ModuloCategorias() {
 
       setCategorias(combinadas)
     })
-    .catch(() => {})
+    .catch(error => {
+      console.error('Error al cargar categorías combinadas:', error)
+    })
 }, [])
 
   const activas = categorias.filter(c => c.activa == 1 || c.activa === true)
@@ -87,29 +94,33 @@ export default function ModuloCategorias() {
   const handleAgregar = async () => {
     if (!formNombre.trim()) return alert('El nombre es obligatorio')
 
-    const respuesta = await crearCategoria({
-      nombre: formNombre.trim(),
-      descripcion: formDesc.trim(),
-    })
+    try {
+      const respuesta = await crearCategoria({
+        nombre: formNombre.trim(),
+        descripcion: formDesc.trim(),
+      })
 
-    if (respuesta.ok) {
-      setCategorias(prev => [
-        ...prev,
-        {
-          id: respuesta.id,
-          nombre: formNombre.trim(),
-          descripcion: formDesc.trim(),
-          activa: true,
-          sistema: false,
-          es_global: false,
-          total_movimientos: 0,
-        },
-      ])
-      setFormNombre('')
-      setFormDesc('')
-      setModalAgregar(false)
-    } else {
-      alert(respuesta.mensaje || 'Error al crear la categoría')
+      if (respuesta.ok) {
+        setCategorias(prev => [
+          ...prev,
+          {
+            id: respuesta.id,
+            nombre: formNombre.trim(),
+            descripcion: formDesc.trim(),
+            activa: true,
+            sistema: false,
+            es_global: false,
+            total_movimientos: 0,
+          },
+        ])
+        setFormNombre('')
+        setFormDesc('')
+        setModalAgregar(false)
+      } else {
+        alert(respuesta.mensaje || 'Error al crear la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al crear la categoría')
     }
   }
 
@@ -121,44 +132,56 @@ export default function ModuloCategorias() {
   const handleGuardarEdicion = async () => {
     if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
 
-    const respuesta = await editarCategoria(categoriaEdit.id, {
-      nombre: categoriaEdit.nombre,
-      descripcion: categoriaEdit.descripcion,
-    })
+    try {
+      const respuesta = await editarCategoria(categoriaEdit.id, {
+        nombre: categoriaEdit.nombre,
+        descripcion: categoriaEdit.descripcion,
+      })
 
-    if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
-      )
-      setModalEditar(false)
-    } else {
-      alert(respuesta.mensaje || 'Error al editar la categoría')
+      if (respuesta.ok) {
+        setCategorias(prev =>
+          prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
+        )
+        setModalEditar(false)
+      } else {
+        alert(respuesta.mensaje || 'Error al editar la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al editar la categoría')
     }
   }
 
   const handleDeshabilitar = async id => {
     if (!window.confirm('¿Seguro que deseas deshabilitar esta categoría?')) return
 
-    const respuesta = await deshabilitarCategoria(id)
+    try {
+      const respuesta = await deshabilitarCategoria(id)
 
-    if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => (c.id === id ? { ...c, activa: false } : c))
-      )
-    } else {
-      alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
+      if (respuesta.ok) {
+        setCategorias(prev =>
+          prev.map(c => (c.id === id ? { ...c, activa: false } : c))
+        )
+      } else {
+        alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al deshabilitar la categoría')
     }
   }
 
   const handleHabilitar = async id => {
-    const respuesta = await habilitarCategoria(id)
+    try {
+      const respuesta = await habilitarCategoria(id)
 
-    if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => (c.id === id ? { ...c, activa: true } : c))
-      )
-    } else {
-      alert(respuesta.mensaje || 'Error al habilitar la categoría')
+      if (respuesta.ok) {
+        setCategorias(prev =>
+          prev.map(c => (c.id === id ? { ...c, activa: true } : c))
+        )
+      } else {
+        alert(respuesta.mensaje || 'Error al habilitar la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al habilitar la categoría')
     }
   }
 
