@@ -10,3 +10,6 @@ openssl req -x509 -new -nodes -key localhost.key -sha256 -days 365 -out localhos
 validamos el certificado:
 openssl x509 -in localhost.crt -text -noout
 
+al momento de realizar la instalacion de las llaves, deberemos cambiar el nombre a los siguientes archivos:
+localhost.key -> private.key
+localhost.crt -> certificate.key
