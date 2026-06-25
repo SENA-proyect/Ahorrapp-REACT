@@ -269,19 +269,45 @@ CREATE TABLE IF NOT EXISTS HISTORIAL (
 -- ========================================================================
 --     TABLA: notificaciones
 -- ========================================================================
+
+
 CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
-    ID_notificacion INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la notificación',
-    ID_usuario INT NOT NULL COMMENT 'Usuario destinatario de la notificación',
-    ID_historial INT DEFAULT NULL COMMENT 'Historial relacionado con la notificación',
-    Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL COMMENT 'Tipo de notificación',
+    ID_notificacion INT AUTO_INCREMENT PRIMARY KEY,
+    ID_usuario INT NOT NULL,
+    Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL,
     Entidad_tipo VARCHAR(50) DEFAULT NULL,
     Entidad_id INT DEFAULT NULL,
-    Mensaje TEXT NOT NULL COMMENT 'Contenido de la notificación',
-    Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación de la notificación',
-    Leida BOOLEAN DEFAULT FALSE COMMENT 'Indica si la notificación fue leída',
-    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (ID_historial) REFERENCES HISTORIAL(ID_historial) ON DELETE CASCADE ON UPDATE CASCADE
-)ENGINE=InnoDB;
+    Mensaje TEXT NOT NULL,
+    Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Leida BOOLEAN DEFAULT FALSE COMMENT 'Para la bandeja de entrada del usuario',
+    Archivada BOOLEAN DEFAULT FALSE COMMENT 'TRUE actúa como el "Historial de Notificaciones Pasadas"',
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS PREFERENCIAS_NOTIFICACION (
+    ID_usuario INT NOT NULL,
+    Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL,
+    Activa BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (ID_usuario, Tipo),
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- CREATE INDEX idx_notif_usuario_leida ON NOTIFICACIONES (ID_usuario, Leida, Archivada);
+
+
+-- CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
+--     ID_notificacion INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la notificación',
+--     ID_usuario INT NOT NULL COMMENT 'Usuario destinatario de la notificación',
+--     ID_historial INT DEFAULT NULL COMMENT 'Historial relacionado con la notificación',
+--     Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL COMMENT 'Tipo de notificación',
+--     Entidad_tipo VARCHAR(50) DEFAULT NULL,
+--     Entidad_id INT DEFAULT NULL,
+--     Mensaje TEXT NOT NULL COMMENT 'Contenido de la notificación',
+--     Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación de la notificación',
+--     Leida BOOLEAN DEFAULT FALSE COMMENT 'Indica si la notificación fue leída',
+--     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
+--     FOREIGN KEY (ID_historial) REFERENCES HISTORIAL(ID_historial) ON DELETE CASCADE ON UPDATE CASCADE
+-- )ENGINE=InnoDB;
 
 -- ========================================================================
 --  TABLA: presupuestos  

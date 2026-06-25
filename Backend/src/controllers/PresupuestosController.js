@@ -1,5 +1,6 @@
 // const db = require('../db/connection'); 
 const pool = require("../db/connection");
+const { verificarImprevistosNoUsados } = require("../services/notificacionesService");
 
 // ─────────────────────────────────────────────────────────────
 //  HELPERS
@@ -33,9 +34,21 @@ function calcularMontos(ingresoBase, saldoAnterior, perfil) {
 }
 
 
+//  Devuelve cuántos días tiene un mes dado (maneja años bisiestos
+//  automáticamente). mes es 1-12 (no 0-indexado).
+//  Truco: el "día 0" del mes siguiente es el último día del mes actual.
+function ultimoDiaDelMes(anio, mes) {
+  return new Date(anio, mes, 0).getDate();
+}
+
 //  Calcula la fecha de fin de un período dado su fecha de inicio
 //  y el Dia_corte del perfil.
 //  Ej: inicio = 2025-03-15, dia_corte = 15 → fin = 2025-04-14
+//
+//  Si diaCorte no existe en el mes de destino (ej. 31 en un mes de
+//  30 días, o 29/30/31 en febrero), se recorta automáticamente al
+//  último día disponible de ese mes — nunca se desborda al mes
+//  siguiente (que es el comportamiento por defecto de Date en JS).
 
 function calcularFechaFin(fechaInicio, diaCorte) {
   const inicio = new Date(fechaInicio);
@@ -45,15 +58,30 @@ function calcularFechaFin(fechaInicio, diaCorte) {
 
   if (mes > 12) { mes = 1; anio++; }
 
+  // Ajustar el día de corte al último día disponible de ese mes,
+  // en vez de dejar que Date desborde al mes siguiente.
+  const diaMaximo = ultimoDiaDelMes(anio, mes);
+  const diaAjustado = Math.min(diaCorte, diaMaximo);
+
   // Fecha fin = día anterior al corte en el mes siguiente
   // Si corte es 1, fin es el último día del mes actual
   // Si corte es 15, fin es el 14 del mes siguiente
-  const fin = new Date(anio, mes - 1, diaCorte);
+  const fin = new Date(anio, mes - 1, diaAjustado);
   fin.setDate(fin.getDate() - 1);
 
   // Garantizar que fin > inicio
   if (fin <= inicio) {
-    fin.setMonth(fin.getMonth() + 1);
+    // Recalcular el mes siguiente con el mismo ajuste de día máximo
+    let anio2 = fin.getFullYear();
+    let mes2  = fin.getMonth() + 2;
+    if (mes2 > 12) { mes2 = 1; anio2++; }
+
+    const diaMaximo2 = ultimoDiaDelMes(anio2, mes2);
+    const diaAjustado2 = Math.min(diaCorte, diaMaximo2);
+
+    const finRecalculado = new Date(anio2, mes2 - 1, diaAjustado2);
+    finRecalculado.setDate(finRecalculado.getDate() - 1);
+    return toLocalDate(finRecalculado);
   }
 
   return toLocalDate(fin);
@@ -135,8 +163,8 @@ const crearPerfil = async (req, res) => {
         });
     }
 
-    if (Dia_corte < 1 || Dia_corte > 28) {
-        return res.status(400).json({ ok: false, mensaje: 'El día de corte debe estar entre 1 y 28' });
+    if (Dia_corte < 1 || Dia_corte > 31) {
+        return res.status(400).json({ ok: false, mensaje: 'El día de corte debe estar entre 1 y 31' });
     }
 
     try {
@@ -191,6 +219,11 @@ const editarPerfil = async (req, res) => {
         Porcentaje_gastos, Porcentaje_deudas,
         Porcentaje_imprevistos, Porcentaje_ahorros, Porcentaje_emergencia
     } = req.body;
+
+    // Validar rango de Dia_corte si se envía
+    if (Dia_corte !== undefined && (Dia_corte < 1 || Dia_corte > 31)) {
+        return res.status(400).json({ ok: false, mensaje: 'El día de corte debe estar entre 1 y 31' });
+    }
 
     // Validar porcentajes si se envían
     if (
@@ -467,6 +500,12 @@ const cerrarPeriodo = async (req, res) => {
              WHERE ID_periodo = ?`,
             [ingresoReal, periodo.ID_periodo]
         );
+
+        // Post-cierre: si el fondo de imprevistos casi no se usó,
+        // sugerir redirigir ese dinero a ahorros (no debe afectar
+        // la respuesta principal si falla).
+        await verificarImprevistosNoUsados(ID_usuario, periodo);
+
         res.json({
             ok: true,
             mensaje: 'Período cerrado correctamente',
@@ -668,125 +707,11 @@ const actualizarIngresoReal = async (ID_usuario, connection) => {
   );
 };
 
-const abonarDeuda = async (req, res) => {
-  const ID_usuario = req.usuario.id;
-  const { id }     = req.params;
-  const cuotas     = parseInt(req.body.cuotas) || 1;
+// NOTA: abonarDeuda y abonarAhorro fueron removidas de este archivo.
+// No tenían rutas asociadas (ver PresupuestosRoutes.js) — la única
+// implementación en uso real vive en movimientosController.js,
+// la cual usa transacción y está conectada al sistema de notificaciones.
 
-  if (cuotas < 1) {
-    return res.status(400).json({ ok: false, mensaje: "El número de cuotas debe ser >= 1" });
-  }
-
-  try {
-    // 1. Obtener deuda y verificar propiedad
-    const [[deuda]] = await pool.query(
-      `SELECT d.ID_deudas, d.Cuotas_total, d.Cuotas_pagadas, d.Estado
-       FROM   DEUDAS d
-       JOIN   SALIDA s      ON d.ID_salida     = s.ID_salida
-       JOIN   MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE  d.ID_deudas = ? AND m.ID_usuario = ?`,
-      [id, ID_usuario]
-    );
-
-    if (!deuda) {
-      return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
-    }
-    if (deuda.Estado === "pagada") {
-      return res.status(409).json({ ok: false, mensaje: "Esta deuda ya está pagada" });
-    }
-
-    // 2. Calcular nuevas cuotas pagadas
-    const nuevasCuotas = deuda.Cuotas_pagadas + cuotas;
-
-    // No puede superar el total (si tiene total definido)
-    if (deuda.Cuotas_total !== null && nuevasCuotas > deuda.Cuotas_total) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: `No puedes pagar más cuotas de las que tiene la deuda. Quedan ${deuda.Cuotas_total - deuda.Cuotas_pagadas}.`
-      });
-    }
-
-    // 3. Determinar nuevo estado
-    const nuevoEstado =
-      deuda.Cuotas_total !== null && nuevasCuotas >= deuda.Cuotas_total
-        ? "pagada"
-        : "pendiente";
-
-    // 4. Actualizar
-    await pool.query(
-      `UPDATE DEUDAS
-       SET    Cuotas_pagadas = ?,
-              Estado         = ?
-       WHERE  ID_deudas      = ?`,
-      [nuevasCuotas, nuevoEstado, id]
-    );
-
-    res.status(200).json({
-      ok:             true,
-      mensaje:        nuevoEstado === "pagada" ? "Deuda pagada completamente" : "Cuota registrada",
-      cuotas_pagadas: nuevasCuotas,
-      cuotas_total:   deuda.Cuotas_total,
-      estado:         nuevoEstado,
-    });
-  } catch (error) {
-    console.error("Error en abonarDeuda:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
-};
-
-
-const abonarAhorro = async (req, res) => {
-  const ID_usuario = req.usuario.id;
-  const { id }     = req.params;
-  const monto      = parseFloat(req.body.monto);
-
-  if (!monto || monto <= 0) {
-    return res.status(400).json({ ok: false, mensaje: "El monto del abono debe ser mayor a 0" });
-  }
-
-  try {
-    // 1. Verificar propiedad y obtener datos actuales
-    const [[ahorro]] = await pool.query(
-      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Monto_acumulado
-       FROM   AHORROS a
-       JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
-       JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE  a.ID_ahorros = ? AND m.ID_usuario = ?`,
-      [id, ID_usuario]
-    );
-
-    if (!ahorro) {
-      return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
-    }
-
-    // 2. Calcular nuevo acumulado (no supera la meta)
-    const nuevoAcumulado = Math.min(
-      parseFloat(ahorro.Monto_acumulado) + monto,
-      parseFloat(ahorro.meta_monto)
-    );
-    const metaAlcanzada = nuevoAcumulado >= parseFloat(ahorro.meta_monto);
-
-    // 3. Actualizar
-    await pool.query(
-      `UPDATE AHORROS
-       SET    Monto_acumulado = ?
-       WHERE  ID_ahorros      = ?`,
-      [nuevoAcumulado, id]
-    );
-
-    res.status(200).json({
-      ok:              true,
-      mensaje:         metaAlcanzada ? "Meta de ahorro alcanzada" : "Abono registrado",
-      monto_acumulado: nuevoAcumulado,
-      meta_monto:      ahorro.meta_monto,
-      progreso:        parseFloat(((nuevoAcumulado / ahorro.meta_monto) * 100).toFixed(2)),
-      meta_alcanzada:  metaAlcanzada,
-    });
-  } catch (error) {
-    console.error("Error en abonarAhorro:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
-};
 
 // ─────────────────────────────────────────────────────────────
 //  EXPORTS
@@ -805,7 +730,4 @@ module.exports = {
     listarPeriodos,
     obtenerPeriodoActivo,
     ajustarIngresoPeriodo,
-    // Abonos
-    abonarDeuda,
-    abonarAhorro,
 };

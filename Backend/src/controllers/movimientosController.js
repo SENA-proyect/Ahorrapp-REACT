@@ -1,4 +1,9 @@
 const pool = require("../db/connection");
+const {
+  verificarUmbralGastos,
+  verificarUmbralImprevistos,
+  verificarMetaAhorroAlcanzada,
+} = require("../services/notificacionesService");
 
 const getMovimientos = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -155,6 +160,10 @@ const crearMovimiento = async (req, res) => {
     // 4. Ejecutar la actualización POST-COMMIT usando el pool (fuera de la transacción de forma segura)
     if (subtipo_modulo === "Ingreso") {
       await actualizarIngresoReal(ID_usuario);
+    } else if (subtipo_modulo === "Gasto") {
+      await verificarUmbralGastos(ID_usuario);
+    } else if (subtipo_modulo === "Imprevisto") {
+      await verificarUmbralImprevistos(ID_usuario);
     }
 
     return res.status(201).json({
@@ -755,7 +764,7 @@ const abonarAhorro = async (req, res) => {
 
     // 1. Verificar propiedad del ahorro
     const [[ahorro]] = await connection.query(
-      `SELECT a.ID_ahorros, a.Monto AS meta_monto
+      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Descripcion AS descripcion
        FROM   AHORROS a
        JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
        JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
@@ -793,6 +802,8 @@ const abonarAhorro = async (req, res) => {
     );
 
     await connection.commit();
+
+    await verificarMetaAhorroAlcanzada(ID_usuario, ahorro, nuevoAcumulado);
 
     res.status(200).json({
       ok:              true,
