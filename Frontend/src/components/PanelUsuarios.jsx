@@ -73,7 +73,7 @@ export default function PanelUsuarios() {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:3000/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
+        `https://localhost:3000/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
         {
           method: 'PUT',
           headers: {
@@ -113,7 +113,7 @@ export default function PanelUsuarios() {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:3000/api/auth/PanelUsuarios/${id}`,
+          `https://localhost:3000/api/auth/PanelUsuarios/${id}`,
           {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }

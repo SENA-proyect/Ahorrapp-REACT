@@ -8,7 +8,7 @@ const authHeaders = () => ({
 
 const fetchJSON = async (url, options = {}) => {
   const res = await fetch(url, { headers: authHeaders(), ...options });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`HTTPS ${res.status}`);
   return res.json();
 };
 

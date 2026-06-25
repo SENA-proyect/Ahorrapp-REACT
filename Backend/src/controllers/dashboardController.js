@@ -235,6 +235,15 @@ const getPresupuestoVsEjecutado = async (req, res) => {
 const getFlujoPorSemana = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
+  // Helper: formatea un Date como YYYY-MM-DD usando componentes LOCALES,
+  // evitando el desfase de día que produce toISOString() (que usa UTC).
+  const toLocalISODate = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
 
@@ -251,11 +260,10 @@ const getFlujoPorSemana = async (req, res) => {
     let num = 1;
 
     while (cursor <= fin) {
-      const semInicio = cursor.toISOString().split("T")[0];
+      const semInicio = toLocalISODate(cursor);
       const semFinDate = new Date(cursor);
       semFinDate.setDate(semFinDate.getDate() + 6);
-      const semFin = (semFinDate > fin ? fin : semFinDate)
-        .toISOString().split("T")[0];
+      const semFin = toLocalISODate(semFinDate > fin ? fin : semFinDate);
 
       semanas.push({ label: `Sem ${num}`, inicio: semInicio, fin: semFin });
       cursor.setDate(cursor.getDate() + 7);

@@ -149,7 +149,7 @@ export default function BolsaWidget() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/bolsa/${sym}`
+        `https://localhost:3000/api/bolsa/${sym}`
       )
 
       const data = await res.json()

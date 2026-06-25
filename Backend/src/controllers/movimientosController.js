@@ -18,13 +18,13 @@ const getMovimientos = async (req, res) => {
     
     // 3. Consultar Deudas
     const [deudas] = await pool.query(
-      "SELECT 'deuda' as tipo, Monto as monto, Descripcion as descripcion, Estado as estado FROM DEUDAS d JOIN SALIDA s ON d.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+      "SELECT 'deuda' as tipo, Monto as monto, Descripcion as descripcion, Estado as estado, Fecha_fin as fecha FROM DEUDAS d JOIN SALIDA s ON d.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
       [ID_usuario]
     );
     
     // 4. Consultar Ahorros
     const [ahorros] = await pool.query(
-      "SELECT 'ahorro' as tipo, Monto_acumulado as monto, Descripcion as descripcion FROM AHORROS a JOIN ENTRADA s ON a.ID_entrada = s.ID_entrada JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+      "SELECT 'ahorro' as tipo, Monto_acumulado as monto, Descripcion as descripcion, Fecha_registro as fecha, Fecha_meta as fecha_meta FROM AHORROS a JOIN ENTRADA s ON a.ID_entrada = s.ID_entrada JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
       [ID_usuario]
     );
 
@@ -69,9 +69,10 @@ const crearMovimiento = async (req, res) => {
   }
 
   // 2. Apertura de conexión e inicio de la transacción
-  const connection = await pool.getConnection();
+  let connection;
 
   try {
+    connection = await pool.getConnection();
     const ID_usuario = req.usuario.id;
     await connection.beginTransaction();
 
@@ -142,7 +143,7 @@ const crearMovimiento = async (req, res) => {
         const [result] = await connection.query(
           `INSERT INTO DEUDAS (ID_salida, ID_categoria, Monto, Fuente, Descripcion, Cuotas_total, Fecha_inicio, Fecha_fin)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [ID_salida, id_categoria || null, monto, fuente, descripcion || null, cuotas_total || null, fecha_inicio || null, fecha_fin || null]
+          [ID_salida, id_categoria || null, monto, fuente || null, descripcion || null, cuotas_total || null, fecha_inicio || null, fecha_fin || null]
         );
         ID_detalle = result.insertId;
       }
@@ -225,8 +226,9 @@ const updateIngresos = async (req, res) => {
 const deleteIngresos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const connection = await pool.getConnection();
+  let connection;
   try {
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
@@ -252,11 +254,11 @@ const deleteIngresos = async (req, res) => {
     await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Ingreso eliminado exitosamente" });
   } catch (error) {
-    await connection.rollback();
+    if (connection) await connection.rollback();
     console.error("Error en deleteIngresos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 };
 
@@ -316,8 +318,9 @@ const updateAhorros = async (req, res) => {
 const deleteAhorros = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const connection = await pool.getConnection();
+  let connection;
   try {
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
@@ -344,11 +347,11 @@ const deleteAhorros = async (req, res) => {
     await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Ahorro eliminado exitosamente" });
   } catch (error) {
-    await connection.rollback();
+    if (connection) await connection.rollback();
     console.error("Error en deleteAhorros:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 };
 
@@ -411,8 +414,10 @@ const updateGastos = async (req, res) => {
 const deleteGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const connection = await pool.getConnection();
-    try {    await connection.beginTransaction();
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
     // 1. Buscar el ID_salida y ID_movimiento antes de borrar
     const [[gasto]] = await connection.query(
       `SELECT s.ID_salida, s.ID_movimiento
@@ -433,11 +438,12 @@ const deleteGastos = async (req, res) => {
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [gasto.ID_movimiento]);
     await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Gasto eliminado exitosamente" });
-    } catch (error) {
-    await connection.rollback();
+  } catch (error) {
+    if (connection) await connection.rollback();
     console.error("Error en deleteGastos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  } finally {    connection.release();
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -513,8 +519,10 @@ const updateImprevistos = async (req, res) => {
 const deleteImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const connection = await pool.getConnection();
-    try {    await connection.beginTransaction();
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
     // 1. Buscar el ID_salida y ID_movimiento antes de borrar
     const [[imprevisto]] = await connection.query(
         `SELECT s.ID_salida, s.ID_movimiento
@@ -535,11 +543,12 @@ const deleteImprevistos = async (req, res) => {
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [imprevisto.ID_movimiento]);
     await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Imprevisto eliminado exitosamente" });
-    } catch (error) {
-    await connection.rollback();
+  } catch (error) {
+    if (connection) await connection.rollback();
     console.error("Error en deleteImprevistos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  } finally {    connection.release();
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -602,8 +611,10 @@ const updateDeudas = async (req, res) => {
 const deleteDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
-  const connection = await pool.getConnection();
-    try {    await connection.beginTransaction();
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
     // 1. Buscar el ID_salida y ID_movimiento antes de borrar
     const [[deuda]] = await connection.query(
         `SELECT s.ID_salida, s.ID_movimiento
@@ -624,11 +635,12 @@ const deleteDeudas = async (req, res) => {
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [deuda.ID_movimiento]);
     await connection.commit();
     res.status(200).json({ ok: true, mensaje: "Deuda eliminada exitosamente" });
-    } catch (error) {
-    await connection.rollback();
+  } catch (error) {
+    if (connection) await connection.rollback();
     console.error("Error en deleteDeudas:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  } finally {    connection.release();
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -731,13 +743,14 @@ const abonarAhorro = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id }     = req.params;
   const monto      = parseFloat(req.body.monto);
-  const nota       = req.body.nota || null;
+  // const nota       = req.body.nota || null;
 
   if (!monto || monto <= 0)
     return res.status(400).json({ ok: false, mensaje: "El monto del abono debe ser mayor a 0" });
 
-  const connection = await pool.getConnection();
+  let connection;
   try {
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     // 1. Verificar propiedad del ahorro
@@ -750,14 +763,16 @@ const abonarAhorro = async (req, res) => {
       [id, ID_usuario]
     );
 
-    if (!ahorro)
+    if (!ahorro) {
+      await connection.rollback();
       return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
+    }
 
     // 2. Insertar abono en ABONOS_AHORRO
     await connection.query(
-      `INSERT INTO ABONOS_AHORRO (ID_ahorros, ID_usuario, Monto, Fecha_registro, Nota)
-       VALUES (?, ?, ?, CURRENT_DATE, ?)`,
-      [id, ID_usuario, monto, nota]
+      `INSERT INTO ABONOS_AHORRO (ID_ahorros, ID_usuario, Monto, Fecha_registro)
+       VALUES (?, ?, ?, CURRENT_DATE)`,
+      [id, ID_usuario, monto]
     );
 
     // 3. Recalcular Monto_acumulado sumando todos los abonos
@@ -788,11 +803,11 @@ const abonarAhorro = async (req, res) => {
       meta_alcanzada:  metaAlcanzada,
     });
   } catch (error) {
-    await connection.rollback();
+    if (connection) await connection.rollback();
     console.error("Error en abonarAhorro:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 };
 

@@ -171,8 +171,8 @@ const updateUsuario = async (req, res) => {
     }
 
     await pool.query(
-      "UPDATE USUARIOS SET Nombre = ?, Apellido = ?, Email = ?, Rol = ? WHERE ID_usuario = ?",
-      [Nombre, Apellido, Email, Rol, id]
+      "UPDATE USUARIOS SET Nombre = ?, Apellido = ?, Email = ? WHERE ID_usuario = ?",
+      [Nombre, Apellido, Email, id]
     );
 
     return res.status(200).json({

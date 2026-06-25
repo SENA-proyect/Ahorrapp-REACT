@@ -24,7 +24,10 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     ID_usuario  INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del usuario',
     Nombre VARCHAR(100) NOT NULL COMMENT 'Nombre del usuario',
     Apellido VARCHAR(100) COMMENT 'Apellido del usuario',
+    -- __________________________________________________________________________________________
+    -- linea comentada debido a cambio de la logica de roles a tabla separada
     -- Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
+    -- __________________________________________________________________________________________
     Password_hash VARCHAR(255) NOT NULL COMMENT 'Hash de la contraseña del usuario',
     Email VARCHAR(255) NOT NULL UNIQUE COMMENT 'Correo electrónico principal',
     Activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el usuario está activo o inactivo',
@@ -52,22 +55,25 @@ CREATE TABLE IF NOT EXISTS CATEGORIAS (
     ID_usuario INT DEFAULT NULL COMMENT 'Usuario al que pertenece la categoría (NULL si es global)',
     Nombre VARCHAR(50) NOT NULL COMMENT 'Nombre de la categoría financiera',
     Descripcion VARCHAR(255),
-    Color VARCHAR(7) DEFAULT '#000000' COMMENT 'Color representativo de la categoría (formato HEX)',
-    Icono VARCHAR(255) COMMENT 'Ruta o URL del icono de la categoría',
+    -- __________________________________________________________________________________________
+    -- lineas comentadas debido a que no estan siendo utilizadas actualmente
+    -- Color VARCHAR(7) DEFAULT '#000000' COMMENT 'Color representativo de la categoría (formato HEX)',
+    -- Icono VARCHAR(255) COMMENT 'Ruta o URL del icono de la categoría',
+    -- __________________________________________________________________________________________
     Activa BOOLEAN DEFAULT true,
     Sistema BOOLEAN DEFAULT false,
     ES_global BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si la categoría es global (visible para todos los usuarios) o personalizada (visible solo para el usuario propietario)',
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB;
 
--- CATEOGIRAS PREDETERMINADAS POR EL SISTEMA
-INSERT INTO CATEGORIAS (ID_usuario, Nombre, Descripcion, Color, Activa, Sistema, ES_global) VALUES
-(NULL, 'Alimentación',    'Gastos en comida y bebida',          '#FF6B6B', TRUE, TRUE, TRUE),
-(NULL, 'Transporte',      'Movilidad y combustible',            '#4ECDC4', TRUE, TRUE, TRUE),
-(NULL, 'Salud',           'Médicos, medicamentos y bienestar',  '#45B7D1', TRUE, TRUE, TRUE),
-(NULL, 'Educación',       'Colegiaturas, libros y cursos',      '#96CEB4', TRUE, TRUE, TRUE),
-(NULL, 'Entretenimiento', 'Ocio, streaming y salidas',          '#FFEAA7', TRUE, TRUE, TRUE),
-(NULL, 'Servicios',       'Agua, luz, internet y gas',          '#DDA0DD', TRUE, TRUE, TRUE);
+-- CATEGORIAS PREDETERMINADAS POR EL SISTEMA
+INSERT INTO CATEGORIAS (ID_usuario, Nombre, Descripcion, Activa, Sistema, ES_global) VALUES
+(NULL, 'Alimentación',    'Gastos en comida y bebida',          TRUE, TRUE, TRUE),
+(NULL, 'Transporte',      'Movilidad y combustible',            TRUE, TRUE, TRUE),
+(NULL, 'Salud',           'Médicos, medicamentos y bienestar',  TRUE, TRUE, TRUE),
+(NULL, 'Educación',       'Colegiaturas, libros y cursos',      TRUE, TRUE, TRUE),
+(NULL, 'Entretenimiento', 'Ocio, streaming y salidas',          TRUE, TRUE, TRUE),
+(NULL, 'Servicios',       'Agua, luz, internet y gas',          TRUE, TRUE, TRUE);
 
 
  -- ========================================================================
@@ -151,8 +157,10 @@ CREATE TABLE IF NOT EXISTS ABONOS_AHORRO (
     ID_usuario INT NOT NULL COMMENT 'Usuario que realizó el abono',
     Monto DECIMAL(15,2) NOT NULL COMMENT 'Monto abonado en esta transacción',
     Fecha_registro DATE NOT NULL DEFAULT (CURRENT_DATE) COMMENT 'Fecha en que se realizó el abono',
-    Nota VARCHAR(255) DEFAULT NULL COMMENT 'Nota opcional del abono',
-
+    -- __________________________________________________________________________________________
+    -- Actualmente no aplicado al sistema
+    -- Nota VARCHAR(255) DEFAULT NULL COMMENT 'Nota opcional del abono',
+    -- __________________________________________________________________________________________
     CONSTRAINT chk_abono_monto CHECK (Monto > 0),
 
     FOREIGN KEY (ID_ahorros) REFERENCES AHORROS(ID_ahorros) ON DELETE CASCADE ON UPDATE CASCADE,
