@@ -8,7 +8,7 @@ const authHeaders = () => ({
 
 const fetchJSON = async (url, options = {}) => {
   const res = await fetch(url, { headers: authHeaders(), ...options });
-  if (!res.ok) throw new Error(`HTTPS ${res.status}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 };
 
@@ -139,6 +139,49 @@ export const deshabilitarCategoria = (id) =>
 
 export const habilitarCategoria = (id) =>
   fetchJSON(`${API_URL}/categorias/${id}/habilitar`, { method: "PATCH" });
+
+// ── Notificaciones ────────────────────────────────────────────────────────────
+export const getNotificaciones = async (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  const data = await fetchJSON(`${API_URL}/notificaciones${query ? `?${query}` : ""}`);
+  return {
+    notificaciones: data.notificaciones ?? [],
+    paginacion: data.paginacion ?? null,
+  };
+};
+
+export const getNoLeidasCount = async () => {
+  try {
+    const data = await fetchJSON(`${API_URL}/notificaciones/no-leidas/count`);
+    return data.count ?? 0;
+  } catch (error) {
+    console.error("Error en getNoLeidasCount:", error);
+    return 0;
+  }
+};
+
+export const marcarNotificacionLeida = (id) =>
+  fetchJSON(`${API_URL}/notificaciones/${id}/leer`, { method: "PATCH" });
+
+export const marcarTodasNotificacionesLeidas = () =>
+  fetchJSON(`${API_URL}/notificaciones/leer-todas`, { method: "PATCH" });
+
+export const archivarNotificacion = (id) =>
+  fetchJSON(`${API_URL}/notificaciones/${id}/archivar`, { method: "PATCH" });
+
+export const eliminarNotificacion = (id) =>
+  fetchJSON(`${API_URL}/notificaciones/${id}`, { method: "DELETE" });
+
+export const getPreferenciasNotificacion = async () => {
+  const data = await fetchJSON(`${API_URL}/preferencias-notificacion`);
+  return data.preferencias ?? [];
+};
+
+export const actualizarPreferenciasNotificacion = (preferencias) =>
+  fetchJSON(`${API_URL}/preferencias-notificacion`, {
+    method: "PUT",
+    body: JSON.stringify({ preferencias }),
+  });
 
 // ── Presupuestos ──────────────────────────────────────────────────────────────
 export const getPerfilesPrespuesto = () =>

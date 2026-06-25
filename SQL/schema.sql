@@ -292,7 +292,18 @@ CREATE TABLE IF NOT EXISTS PREFERENCIAS_NOTIFICACION (
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- CREATE INDEX idx_notif_usuario_leida ON NOTIFICACIONES (ID_usuario, Leida, Archivada);
+-- ── Índice de rendimiento ──────────────────────────────────────
+-- Acelera el endpoint de polling (COUNT no leídas) y el listado
+-- paginado, que siempre filtran por estas 3 columnas juntas.
+CREATE INDEX idx_notif_usuario_leida
+    ON NOTIFICACIONES (ID_usuario, Leida, Archivada);
+ 
+-- ── Índice de apoyo para el cron de vencimientos ───────────────
+-- Evita reinsertar la misma notificación de "deuda por vencer"
+-- cada día: el job consulta por Entidad_tipo + Entidad_id antes
+-- de crear una nueva.
+CREATE INDEX idx_notif_entidad
+    ON NOTIFICACIONES (Entidad_tipo, Entidad_id, Tipo);
 
 
 -- CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
@@ -319,7 +330,7 @@ CREATE TABLE IF NOT EXISTS PRESUPUESTOS (
     Nombre VARCHAR(80) NOT NULL DEFAULT 'Mi presupuesto' COMMENT 'Nombre descriptivo del perfil',
     Descripcion VARCHAR(255) DEFAULT NULL COMMENT 'Descripción opcional del perfil',
     Activo BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si este perfil es el activo del usuario',
-    Dia_corte TINYINT NOT NULL DEFAULT 1 COMMENT 'Día de corte (1-28)',
+    Dia_corte TINYINT NOT NULL DEFAULT 1 COMMENT 'Día de corte (1-31)',
     
     Porcentaje_gastos DECIMAL(5,2) NOT NULL DEFAULT 40.00,
     Porcentaje_deudas DECIMAL(5,2) NOT NULL DEFAULT 20.00,
@@ -330,7 +341,7 @@ CREATE TABLE IF NOT EXISTS PRESUPUESTOS (
     Fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     -- Validaciones compatibles
-    CONSTRAINT chk_dia_corte CHECK (Dia_corte BETWEEN 1 AND 28),
+    CONSTRAINT chk_dia_corte CHECK (Dia_corte BETWEEN 1 AND 31),
     
     -- Relación
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE

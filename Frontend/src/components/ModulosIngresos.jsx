@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import { getCategorias } from '../api'
 import HeaderModulos from './HeaderModulos'
+import { useToast } from './ToastContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -15,6 +16,7 @@ const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06
 export default function ModuloIngresos() {
   const navigate  = useNavigate()
   const usuario   = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
+  const { mostrarToast } = useToast()
 
   const [ingresos,    setIngresos]    = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -74,7 +76,11 @@ export default function ModuloIngresos() {
         }),
       })
       const data = await res.json()
-      if (res.ok) { setModalEditar(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Ingreso actualizado correctamente')
+        setModalEditar(null)
+        cargar()
+      }
       else setErrorModal(data.mensaje || 'Error al guardar')
     } catch { setErrorModal('Error al conectar con el servidor') }
     finally { setGuardando(false) }
@@ -85,7 +91,11 @@ export default function ModuloIngresos() {
     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${API}/ingresos/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) { setConfirmarId(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Ingreso eliminado correctamente')
+        setConfirmarId(null)
+        cargar()
+      }
     } catch {}
     finally { setEliminando(false) }
   }

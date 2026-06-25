@@ -1,6 +1,6 @@
 // const db = require('../db/connection'); 
 const pool = require("../db/connection");
-const { verificarImprevistosNoUsados } = require("../services/notificacionesService");
+const { verificarImprevistosNoUsados } = require ("../service/NotificacionesService");
 
 // ─────────────────────────────────────────────────────────────
 //  HELPERS

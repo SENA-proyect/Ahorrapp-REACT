@@ -4,7 +4,7 @@
 // ============================================================
 
 const pool = require("../db/connection");
-const { getPeriodoActivo } = require("../services/periodoHelper");
+const { getPeriodoActivo } = require("../service/periodoHelper");
 
 
 // ─────────────────────────────────────────────────────────────

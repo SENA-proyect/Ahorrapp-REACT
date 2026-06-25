@@ -15,9 +15,9 @@ const bolsaRoutes         = require('./src/routes/alphaVantageRoutes');
 const exportarRoutes      = require('./src/routes/exportar');
 const PresupuestosRoutes  = require('./src/routes/PresupuestosRoutes');
 const dashboardRoutes     = require('./src/routes/dashboardRoutes');
-const notificacionesRoutes = require('./src/routes/notificaciones.routes');
+const NotificacionesRoutes = require ('./src/routes/NotificacionesRoutes');
 
-const { iniciarVencimientosJob } = require('./src/services/jobs/vencimientosJob');
+const { iniciarVencimientosJob } = require('./src/service/jobs/VencimientosJob');
 
 const app = express();
 
@@ -40,7 +40,7 @@ app.use('/api',              bolsaRoutes);
 app.use('/api/exportar',     exportarRoutes);
 app.use('/api/presupuestos', PresupuestosRoutes);
 app.use('/api/dashboard',    dashboardRoutes);
-app.use('/api',               notificacionesRoutes);
+app.use('/api', NotificacionesRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

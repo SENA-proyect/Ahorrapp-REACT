@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/AuthContext.jsx';
+import { ToastProvider } from './components/ToastContext.jsx';
+import { NotificacionesProvider } from './components/NotificacionesContext.jsx';
 import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 
 
@@ -61,8 +63,10 @@ function AsistenteFlotante() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <ToastProvider>
+        <NotificacionesProvider>
+          <BrowserRouter>
+            <Routes>
           {/* ========== RUTAS PÚBLICAS (sin sesión) ========== */}
           <Route path="/" element={<Index />} />
           <Route path="/Login" element={<Login />} />
@@ -243,7 +247,9 @@ function App() {
         
         {/* Asistente visible en todas las páginas (solo si hay sesión) */}
         <AsistenteFlotante />
-      </BrowserRouter>
+          </BrowserRouter>
+        </NotificacionesProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

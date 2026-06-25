@@ -3,7 +3,7 @@ const {
   verificarUmbralGastos,
   verificarUmbralImprevistos,
   verificarMetaAhorroAlcanzada,
-} = require("../services/notificacionesService");
+} = require ("../service/NotificacionesService");
 
 const getMovimientos = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -764,7 +764,7 @@ const abonarAhorro = async (req, res) => {
 
     // 1. Verificar propiedad del ahorro
     const [[ahorro]] = await connection.query(
-      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Descripcion AS descripcion
+      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Meta AS meta_nombre
        FROM   AHORROS a
        JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
        JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento

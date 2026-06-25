@@ -274,7 +274,7 @@ const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) 
     );
     if (yaExiste) return;
 
-    const descripcion = ahorro.descripcion?.trim() || "tu meta de ahorro";
+    const descripcion = ahorro.meta_nombre?.trim() || "tu meta de ahorro";
 
     await crearNotificacion({
       ID_usuario,

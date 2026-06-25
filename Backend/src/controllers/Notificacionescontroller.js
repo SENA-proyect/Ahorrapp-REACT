@@ -7,7 +7,7 @@ const {
   getPreferencias,
   setPreferencia,
   TIPOS_NOTIFICACION,
-} = require("../services/notificacionesService");
+} = require("../service/NotificacionesService")
 
 // ─────────────────────────────────────────────────────────────
 //  GET /api/notificaciones
