@@ -227,9 +227,10 @@ export default function ModuloCategorias() {
       <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6 md:gap-6 md:p-8">
         <div>
           <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
-          <h2 className="break-words text-xl font-extrabold text-white sm:text-2xl">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
+          {/* <h2 className="break-words text-xl font-extrabold text-white sm:text-2xl">
             {usuario?.nombre || 'Usuario'} <span>👋</span>
-          </h2>
+          </h2> */}
         </div>
 
         <article className="flex flex-col justify-between gap-4 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.25),rgba(5,150,105,0.04))] px-5 py-5 sm:flex-row sm:items-center sm:px-8 sm:py-6">

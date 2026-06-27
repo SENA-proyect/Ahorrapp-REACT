@@ -96,9 +96,10 @@ const Dependientes = () => {
         {/* Bienvenida */}
         <div>
           <p className="text-[#a1a1aa] text-sm">Bienvenido de vuelta</p>
-          <h2 className="text-2xl font-extrabold text-white">
-            {usuario?.nombre || 'Usuario'} <span>👋</span>
-          </h2>
+          {/* <h2 className="text-2xl font-extrabold text-white"> */}
+            {/* {usuario?.nombre || 'Usuario'} <span>👋</span> */}
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
+          {/* </h2> */}
         </div>
 
         {/* Stat + botón */}
