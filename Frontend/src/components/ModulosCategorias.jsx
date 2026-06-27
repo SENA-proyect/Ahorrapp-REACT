@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import HeaderModulos from './HeaderModulos'
 import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 // activar SOLO si se utilizan mas adelante
 // import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -31,6 +32,7 @@ export default function ModuloCategorias() {
   // const navigate = useNavigate()
   // const location = useLocation()
   const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [categorias, setCategorias] = useState([])
   const [modalAgregar, setModalAgregar] = useState(false)
@@ -228,9 +230,6 @@ export default function ModuloCategorias() {
         <div>
           <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
           <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
-          {/* <h2 className="break-words text-xl font-extrabold text-white sm:text-2xl">
-            {usuario?.nombre || 'Usuario'} <span>👋</span>
-          </h2> */}
         </div>
 
         <article className="flex flex-col justify-between gap-4 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.25),rgba(5,150,105,0.04))] px-5 py-5 sm:flex-row sm:items-center sm:px-8 sm:py-6">

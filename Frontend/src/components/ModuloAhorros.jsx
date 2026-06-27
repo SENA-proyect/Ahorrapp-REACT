@@ -4,6 +4,7 @@ import { getCategorias, abonarAhorro } from '../api'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import HeaderModulos from './HeaderModulos'
 import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -36,6 +37,7 @@ export default function ModuloAhorros() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
   const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [ahorros,     setAhorros]     = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -112,6 +114,7 @@ export default function ModuloAhorros() {
       const data = await res.json()
       if (res.ok) {
         mostrarToast('Ahorro actualizado correctamente')
+        revisarAhora()
         setModalEditar(null)
         cargar()
       }
@@ -129,6 +132,7 @@ export default function ModuloAhorros() {
       const data = await abonarAhorro(modalAbonar.id, monto)
       if (data.ok) {
         mostrarToast('Abono registrado correctamente')
+        revisarAhora()
         setModalAbonar(null)
         cargar()
       }
@@ -144,6 +148,7 @@ export default function ModuloAhorros() {
       const res = await fetch(`${API}/ahorros/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         mostrarToast('Ahorro eliminado correctamente')
+        revisarAhora()
         setConfirmarId(null)
         cargar()
       }

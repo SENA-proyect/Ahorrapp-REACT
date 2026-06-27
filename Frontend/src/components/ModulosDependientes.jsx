@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import HeaderModulos from './HeaderModulos'
 import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 
 let usuario = null
@@ -22,6 +23,7 @@ const Dependientes = () => {
   const location = useLocation()
   const token    = localStorage.getItem('token')
   const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [dependientes, setDependientes] = useState([])
   const [mostrarModal, setMostrarModal] = useState(false)
@@ -96,10 +98,8 @@ const Dependientes = () => {
         {/* Bienvenida */}
         <div>
           <p className="text-[#a1a1aa] text-sm">Bienvenido de vuelta</p>
-          {/* <h2 className="text-2xl font-extrabold text-white"> */}
-            {/* {usuario?.nombre || 'Usuario'} <span>👋</span> */}
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
-          {/* </h2> */}
+
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
         </div>
 
         {/* Stat + botón */}

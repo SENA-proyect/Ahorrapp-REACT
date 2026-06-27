@@ -4,6 +4,7 @@ import { getCategorias, getDependientes } from '../api'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import HeaderModulos from './HeaderModulos'
 import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -17,6 +18,7 @@ export default function ModulosGastos() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
   const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [gastos,      setGastos]      = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -81,6 +83,7 @@ export default function ModulosGastos() {
       const data = await res.json()
       if (res.ok) {
         mostrarToast('Gasto actualizado correctamente')
+        revisarAhora()
         setModalEditar(null)
         cargar()
       }
@@ -96,6 +99,7 @@ export default function ModulosGastos() {
       const res = await fetch(`${API}/gastos/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         mostrarToast('Gasto eliminado correctamente')
+        revisarAhora()
         setConfirmarId(null)
         cargar()
       }

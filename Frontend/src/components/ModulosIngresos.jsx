@@ -4,6 +4,7 @@ import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import { getCategorias } from '../api'
 import HeaderModulos from './HeaderModulos'
 import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -17,6 +18,7 @@ export default function ModuloIngresos() {
   const navigate  = useNavigate()
   const usuario   = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
   const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [ingresos,    setIngresos]    = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -78,6 +80,7 @@ export default function ModuloIngresos() {
       const data = await res.json()
       if (res.ok) {
         mostrarToast('Ingreso actualizado correctamente')
+        revisarAhora()
         setModalEditar(null)
         cargar()
       }
@@ -93,6 +96,7 @@ export default function ModuloIngresos() {
       const res = await fetch(`${API}/ingresos/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         mostrarToast('Ingreso eliminado correctamente')
+        revisarAhora()
         setConfirmarId(null)
         cargar()
       }

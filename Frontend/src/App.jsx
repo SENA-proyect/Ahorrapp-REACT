@@ -30,6 +30,7 @@ import Asistente from './components/Asistente/Asistente';
 import Noticias from './components/Noticias';
 import Export from "./components/exportar.jsx"
 import ModulosPresupuestos from './components/ModulosPresupuestos.jsx'
+import Configuracion from './components/Configuracion.jsx'
 
 // ______________________________________________________________________________________________________________________________________________________________________
 // ruta del archivo corregida debido a actualizacion de la logica al registrar un movimiento para los modulos financieros
@@ -181,6 +182,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ModulosPresupuestos />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/Configuracion"
+            element={
+              <ProtectedRoute>
+                <Configuracion />
               </ProtectedRoute>
             }
           />

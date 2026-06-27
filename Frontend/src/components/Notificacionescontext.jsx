@@ -1,18 +1,19 @@
 // src/components/NotificacionesContext.jsx
 import { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
-import { useToast } from './ToastContext';
 import { getNoLeidasCount, getNotificaciones } from '../api';
 
 const NotificacionesContext = createContext();
 
-const INTERVALO_POLLING_MS = 60000; // 60 segundos
+const INTERVALO_POLLING_MS = 60000; // 60 segundos (respaldo, ej. recordatorios del cron)
 const LIMITE_REVISION = 5; // cuantas no leidas recientes se revisan por ciclo
 
 export const NotificacionesProvider = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  const { mostrarToast } = useToast();
   const [noLeidasCount, setNoLeidasCount] = useState(0);
+  // Notificación pendiente de mostrar como toast anclado a la campana.
+  // null = no hay nada pendiente. HeaderModulos la consume y la limpia.
+  const [notificacionPendiente, setNotificacionPendiente] = useState(null);
   const intervaloRef = useRef(null);
   const ultimoIdVistoRef = useRef(null); // null = aun no se ha sincronizado
 
@@ -22,9 +23,10 @@ export const NotificacionesProvider = ({ children }) => {
   }, []);
 
   // Revisa las notificaciones no leídas más recientes. Si encuentra IDs
-  // nunca vistos, dispara un toast por cada una (con su Mensaje real) y
-  // avanza el marcador. En la primera ejecución solo sincroniza en
-  // silencio, sin mostrar toasts retroactivos de lo que ya existía.
+  // nunca vistos, deja la más reciente en notificacionPendiente (para que
+  // HeaderModulos la muestre como toast anclado a la campana) y avanza
+  // el marcador. En la primera ejecución solo sincroniza en silencio,
+  // sin mostrar nada retroactivo de lo que ya existía.
   const revisarNotificacionesNuevas = useCallback(async () => {
     try {
       const { notificaciones } = await getNotificaciones({ leida: 'false', limit: String(LIMITE_REVISION) });
@@ -34,9 +36,12 @@ export const NotificacionesProvider = ({ children }) => {
       const esPrimeraSincronizacion = ultimoIdVistoRef.current === null;
 
       if (!esPrimeraSincronizacion) {
-        idsOrdenadosAsc
-          .filter((n) => n.id > ultimoIdVistoRef.current)
-          .forEach((n) => mostrarToast(n.mensaje, 'info'));
+        const nuevas = idsOrdenadosAsc.filter((n) => n.id > ultimoIdVistoRef.current);
+        if (nuevas.length > 0) {
+          // Solo se muestra una a la vez; si llegaron varias de golpe,
+          // se prioriza la más reciente (última del arreglo ordenado asc).
+          setNotificacionPendiente(nuevas[nuevas.length - 1]);
+        }
       }
 
       const idMaximo = idsOrdenadosAsc[idsOrdenadosAsc.length - 1].id;
@@ -44,12 +49,23 @@ export const NotificacionesProvider = ({ children }) => {
     } catch (error) {
       console.error('Error en revisarNotificacionesNuevas:', error);
     }
-  }, [mostrarToast]);
+  }, []);
 
   const ejecutarCiclo = useCallback(async () => {
     await refrescarCount();
     await revisarNotificacionesNuevas();
   }, [refrescarCount, revisarNotificacionesNuevas]);
+
+  // Permite a cualquier componente (ej. justo tras crear un gasto) forzar
+  // una revisión inmediata, sin esperar al próximo ciclo de polling.
+  const revisarAhora = useCallback(() => {
+    ejecutarCiclo();
+  }, [ejecutarCiclo]);
+
+  // HeaderModulos llama esto en cuanto termina de mostrar el toast anclado.
+  const limpiarNotificacionPendiente = useCallback(() => {
+    setNotificacionPendiente(null);
+  }, []);
 
   useEffect(() => {
     // Mientras se resuelve la sesión, o si no hay usuario, no se hace polling.
@@ -72,6 +88,9 @@ export const NotificacionesProvider = ({ children }) => {
   const value = {
     noLeidasCount,
     refrescarCount,
+    revisarAhora,
+    notificacionPendiente,
+    limpiarNotificacionPendiente,
   };
 
   return (

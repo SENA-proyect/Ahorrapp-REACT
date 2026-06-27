@@ -4,6 +4,7 @@ import { getCategorias, getDependientes } from '../api'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import HeaderModulos from './HeaderModulos'
 import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -17,6 +18,7 @@ export default function ModuloImprevistos() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
   const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [imprevistos, setImprevistos] = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -81,6 +83,7 @@ const abrirEditar = (i) => {
       const data = await res.json()
       if (res.ok) {
         mostrarToast('Imprevisto actualizado correctamente')
+        revisarAhora()
         setModalEditar(null)
         cargar()
       }
@@ -96,6 +99,7 @@ const abrirEditar = (i) => {
       const res = await fetch(`${API}/imprevistos/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         mostrarToast('Imprevisto eliminado correctamente')
+        revisarAhora()
         setConfirmarId(null)
         cargar()
       }

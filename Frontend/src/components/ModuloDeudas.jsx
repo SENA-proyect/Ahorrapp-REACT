@@ -4,6 +4,7 @@ import { getCategorias, abonarDeuda } from '../api'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import HeaderModulos from './HeaderModulos'
 import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -57,6 +58,7 @@ export default function ModuloDeudas() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
   const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [deudas,         setDeudas]         = useState([])
   const [cargando,       setCargando]       = useState(true)
@@ -136,6 +138,7 @@ export default function ModuloDeudas() {
       const data = await res.json()
       if (res.ok) {
         mostrarToast('Deuda actualizada correctamente')
+        revisarAhora()
         setModalEditar(null)
         cargar()
       }
@@ -153,6 +156,7 @@ export default function ModuloDeudas() {
       const data = await abonarDeuda(modalAbonar.id, cuotas)
       if (data.ok) {
         mostrarToast(data.estado === 'pagada' ? 'Deuda pagada completamente' : 'Abono registrado correctamente')
+        revisarAhora()
         setModalAbonar(null)
         cargar()
       }
@@ -168,6 +172,7 @@ export default function ModuloDeudas() {
       const res = await fetch(`${API}/deudas/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         mostrarToast('Deuda eliminada correctamente')
+        revisarAhora()
         setConfirmarId(null)
         cargar()
       }
