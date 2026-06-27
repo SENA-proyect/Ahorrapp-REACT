@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import HeaderModulos from './HeaderModulos'
+import { useToast } from './ToastContext'
 // activar SOLO si se utilizan mas adelante
 // import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -29,6 +30,7 @@ export default function ModuloCategorias() {
   // activas SOLO si se usan mas adelante
   // const navigate = useNavigate()
   // const location = useLocation()
+  const { mostrarToast } = useToast()
 
   const [categorias, setCategorias] = useState([])
   const [modalAgregar, setModalAgregar] = useState(false)
@@ -101,6 +103,7 @@ export default function ModuloCategorias() {
       })
 
       if (respuesta.ok) {
+        mostrarToast('Categoría registrada correctamente')
         setCategorias(prev => [
           ...prev,
           {
@@ -139,6 +142,7 @@ export default function ModuloCategorias() {
       })
 
       if (respuesta.ok) {
+        mostrarToast('Categoría actualizada correctamente')
         setCategorias(prev =>
           prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
         )
@@ -158,6 +162,7 @@ export default function ModuloCategorias() {
       const respuesta = await deshabilitarCategoria(id)
 
       if (respuesta.ok) {
+        mostrarToast('Categoría deshabilitada correctamente')
         setCategorias(prev =>
           prev.map(c => (c.id === id ? { ...c, activa: false } : c))
         )
@@ -174,6 +179,7 @@ export default function ModuloCategorias() {
       const respuesta = await habilitarCategoria(id)
 
       if (respuesta.ok) {
+        mostrarToast('Categoría habilitada correctamente')
         setCategorias(prev =>
           prev.map(c => (c.id === id ? { ...c, activa: true } : c))
         )

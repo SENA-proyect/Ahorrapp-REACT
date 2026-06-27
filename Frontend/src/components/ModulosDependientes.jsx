@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import HeaderModulos from './HeaderModulos'
+import { useToast } from './ToastContext'
 
 
-const usuario = JSON.parse(localStorage.getItem('usuario'))
+let usuario = null
+try {
+  usuario = JSON.parse(localStorage.getItem('usuario'))
+} catch {
+  usuario = null
+}
 
 const PESO_LABELS = { 1: 'Muy bajo', 2: 'Bajo', 3: 'Medio', 4: 'Alto', 5: 'Muy alto' }
 
@@ -15,6 +21,7 @@ const Dependientes = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const token    = localStorage.getItem('token')
+  const { mostrarToast } = useToast()
 
   const [dependientes, setDependientes] = useState([])
   const [mostrarModal, setMostrarModal] = useState(false)
@@ -35,12 +42,18 @@ const Dependientes = () => {
     const payload = { ...formDatos, Peso_economico: parseInt(formDatos.Peso_economico), Fecha_nacimiento: formDatos.Fecha_nacimiento || null }
     if (editandoId) {
       const res = await fetch(`/api/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
-      if (res.ok) setDependientes(dependientes.map(d => d.ID_dependientes === editandoId ? { ...payload, ID_dependientes: editandoId } : d))
+      if (res.ok) {
+        mostrarToast('Dependiente actualizado correctamente')
+        setDependientes(dependientes.map(d => d.ID_dependientes === editandoId ? { ...payload, ID_dependientes: editandoId } : d))
+      }
       else { const data = await res.json(); alert(data.error || 'Error al actualizar') }
     } else {
       const res = await fetch('/api/dependientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
       const data = await res.json()
-      if (res.ok) setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
+      if (res.ok) {
+        mostrarToast('Dependiente registrado correctamente')
+        setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
+      }
       else alert(data.error || 'Error al guardar')
     }
     cerrarModal()
@@ -55,7 +68,10 @@ const Dependientes = () => {
   const handleEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
     const res = await fetch(`/api/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-    if (res.ok) setDependientes(dependientes.filter(d => d.ID_dependientes !== id))
+    if (res.ok) {
+      mostrarToast('Dependiente eliminado correctamente')
+      setDependientes(dependientes.filter(d => d.ID_dependientes !== id))
+    }
     else alert('Error al eliminar el dependiente')
   }
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getCategorias, abonarAhorro } from '../api'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import HeaderModulos from './HeaderModulos'
+import { useToast } from './ToastContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -34,6 +35,7 @@ const BarraProgreso = ({ acumulado, meta }) => {
 export default function ModuloAhorros() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
+  const { mostrarToast } = useToast()
 
   const [ahorros,     setAhorros]     = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -108,7 +110,11 @@ export default function ModuloAhorros() {
         }),
       })
       const data = await res.json()
-      if (res.ok) { setModalEditar(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Ahorro actualizado correctamente')
+        setModalEditar(null)
+        cargar()
+      }
       else setErrorModal(data.mensaje || 'Error al guardar')
     } catch { setErrorModal('Error al conectar con el servidor') }
     finally { setGuardando(false) }
@@ -121,7 +127,11 @@ export default function ModuloAhorros() {
     setAbonando(true)
     try {
       const data = await abonarAhorro(modalAbonar.id, monto)
-      if (data.ok) { setModalAbonar(null); cargar() }
+      if (data.ok) {
+        mostrarToast('Abono registrado correctamente')
+        setModalAbonar(null)
+        cargar()
+      }
       else setErrorModal(data.mensaje || 'Error al abonar')
     } catch { setErrorModal('Error al conectar con el servidor') }
     finally { setAbonando(false) }
@@ -132,7 +142,11 @@ export default function ModuloAhorros() {
     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${API}/ahorros/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) { setConfirmarId(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Ahorro eliminado correctamente')
+        setConfirmarId(null)
+        cargar()
+      }
     } catch {}
     finally { setEliminando(false) }
   }
