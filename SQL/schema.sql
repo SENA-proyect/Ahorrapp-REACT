@@ -257,14 +257,50 @@ CREATE TABLE IF NOT EXISTS DEUDAS (
 -- ========================================================================
 --     TABLA: historial
 -- ========================================================================
-CREATE TABLE IF NOT EXISTS HISTORIAL (
-    ID_historial INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del historial',
-    ID_usuario INT NOT NULL COMMENT 'Usuario que realizó la acción',
-    accion VARCHAR(200) NOT NULL COMMENT 'Acción realizada por el usuario',
-    detalles TEXT COMMENT 'Detalles adicionales de la acción',
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora del registro',
-    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
-)ENGINE=InnoDB;
+
+ALTER TABLE HISTORIAL
+    CHANGE COLUMN accion Accion ENUM('crear','editar','eliminar','abonar') NOT NULL,
+    ADD COLUMN Entidad_tipo VARCHAR(50) NOT NULL AFTER Accion,
+    ADD COLUMN Entidad_id INT DEFAULT NULL AFTER Entidad_tipo,
+    CHANGE COLUMN detalles Descripcion VARCHAR(255) NOT NULL,
+    CHANGE COLUMN fecha Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN Archivada BOOLEAN DEFAULT FALSE COMMENT 'TRUE = oculto para el usuario, pero conservado en BD';
+
+CREATE INDEX idx_historial_usuario_fecha ON HISTORIAL (ID_usuario, Fecha DESC);
+
+DELIMITER $$
+CREATE TRIGGER trg_historial_no_delete
+BEFORE DELETE ON HISTORIAL
+FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'No está permitido eliminar registros del historial de actividad.';
+END$$
+DELIMITER ;
+
+CREATE TABLE IF NOT EXISTS HISTORIAL_AUDITORIA (
+    ID_auditoria        INT AUTO_INCREMENT PRIMARY KEY,
+    ID_usuario_admin    INT NOT NULL COMMENT 'Quien ejecutó la acción administrativa',
+    Accion              VARCHAR(100) NOT NULL COMMENT 'ej: cambiar_rol, deshabilitar_usuario',
+    Entidad_tipo        VARCHAR(50)  NOT NULL COMMENT 'ej: usuario, categoria_global',
+    Entidad_id          INT          DEFAULT NULL COMMENT 'ID del usuario/recurso afectado',
+    Entidad_descripcion VARCHAR(150) DEFAULT NULL COMMENT 'Nombre/email del afectado, para lectura rápida sin JOIN',
+    Descripcion         VARCHAR(255) NOT NULL COMMENT 'Detalle legible de la acción',
+    Fecha               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ID_usuario_admin) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_auditoria_fecha ON HISTORIAL_AUDITORIA (Fecha DESC);
+CREATE INDEX idx_auditoria_entidad ON HISTORIAL_AUDITORIA (Entidad_tipo, Entidad_id);
+
+-- CREATE TABLE IF NOT EXISTS HISTORIAL (
+--     ID_historial INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del historial',
+--     ID_usuario INT NOT NULL COMMENT 'Usuario que realizó la acción',
+--     accion VARCHAR(200) NOT NULL COMMENT 'Acción realizada por el usuario',
+--     detalles TEXT COMMENT 'Detalles adicionales de la acción',
+--     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora del registro',
+--     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+-- )ENGINE=InnoDB;
 
 -- ========================================================================
 --     TABLA: notificaciones
