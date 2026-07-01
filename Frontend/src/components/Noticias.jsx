@@ -104,6 +104,7 @@ export default function Noticias() {
   };
 
   return (
+  <div className="body">
     <div className="noticias-container">
       <button type="button" className="btn-volver-atras" onClick={handleVolverAtras}>
         ← Volver atrás
@@ -205,6 +206,7 @@ export default function Noticias() {
         </div>
       )}
     </div>
+  </div>
   );
 }
 
