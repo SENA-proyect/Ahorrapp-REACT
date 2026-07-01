@@ -19,7 +19,17 @@ import {
 } from '../api'
 
 
-const usuario = JSON.parse(localStorage.getItem('usuario'))
+// Límites de validación para los campos del formulario de categorías.
+const NOMBRE_MAX_LENGTH = 50
+const NOMBRE_MIN_LENGTH = 2
+const DESCRIPCION_MAX_LENGTH = 200
+
+let usuario = null
+try {
+  usuario = JSON.parse(localStorage.getItem('usuario'))
+} catch {
+  usuario = null
+}
 
 export default function ModuloCategorias() {
 
@@ -93,31 +103,49 @@ export default function ModuloCategorias() {
     cat.sistema == 1 || cat.sistema === true
 
   const handleAgregar = async () => {
-    if (!formNombre.trim()) return alert('El nombre es obligatorio')
+    const nombre = formNombre.trim()
+    const descripcion = formDesc.trim()
 
-    const respuesta = await crearCategoria({
-      nombre: formNombre.trim(),
-      descripcion: formDesc.trim(),
-    })
+    if (!nombre) return alert('El nombre es obligatorio')
+    if (nombre.length < NOMBRE_MIN_LENGTH || nombre.length > NOMBRE_MAX_LENGTH) {
+      return alert(`El nombre debe tener entre ${NOMBRE_MIN_LENGTH} y ${NOMBRE_MAX_LENGTH} caracteres`)
+    }
+    if (descripcion.length > DESCRIPCION_MAX_LENGTH) {
+      return alert(`La descripción no puede superar los ${DESCRIPCION_MAX_LENGTH} caracteres`)
+    }
+    if (guardando) return // evita doble envío si ya hay una petición en curso
 
-    if (respuesta.ok) {
-      setCategorias(prev => [
-        ...prev,
-        {
-          id: respuesta.id,
-          nombre: formNombre.trim(),
-          descripcion: formDesc.trim(),
-          activa: true,
-          sistema: false,
-          es_global: false,
-          total_movimientos: 0,
-        },
-      ])
-      setFormNombre('')
-      setFormDesc('')
-      setModalAgregar(false)
-    } else {
-      alert(respuesta.mensaje || 'Error al crear la categoría')
+    setGuardando(true)
+    try {
+      const respuesta = await crearCategoria({
+        nombre,
+        descripcion,
+      })
+
+      if (respuesta.ok) {
+        mostrarToast('Categoría registrada correctamente')
+        setCategorias(prev => [
+          ...prev,
+          {
+            id: respuesta.id,
+            nombre,
+            descripcion,
+            activa: true,
+            sistema: false,
+            es_global: false,
+            total_movimientos: 0,
+          },
+        ])
+        setFormNombre('')
+        setFormDesc('')
+        setModalAgregar(false)
+      } else {
+        alert(respuesta.mensaje || 'Error al crear la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al crear la categoría')
+    } finally {
+      setGuardando(false)
     }
   }
 
@@ -127,20 +155,38 @@ export default function ModuloCategorias() {
   }
 
   const handleGuardarEdicion = async () => {
-    if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
+    const nombre = (categoriaEdit.nombre || '').trim()
+    const descripcion = (categoriaEdit.descripcion || '').trim()
 
-    const respuesta = await editarCategoria(categoriaEdit.id, {
-      nombre: categoriaEdit.nombre,
-      descripcion: categoriaEdit.descripcion,
-    })
+    if (!nombre) return alert('El nombre es obligatorio')
+    if (nombre.length < NOMBRE_MIN_LENGTH || nombre.length > NOMBRE_MAX_LENGTH) {
+      return alert(`El nombre debe tener entre ${NOMBRE_MIN_LENGTH} y ${NOMBRE_MAX_LENGTH} caracteres`)
+    }
+    if (descripcion.length > DESCRIPCION_MAX_LENGTH) {
+      return alert(`La descripción no puede superar los ${DESCRIPCION_MAX_LENGTH} caracteres`)
+    }
+    if (guardando) return // evita doble envío si ya hay una petición en curso
 
-    if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
-      )
-      setModalEditar(false)
-    } else {
-      alert(respuesta.mensaje || 'Error al editar la categoría')
+    setGuardando(true)
+    try {
+      const respuesta = await editarCategoria(categoriaEdit.id, {
+        nombre,
+        descripcion,
+      })
+
+      if (respuesta.ok) {
+        mostrarToast('Categoría actualizada correctamente')
+        setCategorias(prev =>
+          prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit, nombre, descripcion } : c))
+        )
+        setModalEditar(false)
+      } else {
+        alert(respuesta.mensaje || 'Error al editar la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al editar la categoría')
+    } finally {
+      setGuardando(false)
     }
   }
 
@@ -150,12 +196,16 @@ export default function ModuloCategorias() {
     try {
       const respuesta = await deshabilitarCategoria(id)
 
-    if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => (c.id === id ? { ...c, activa: false } : c))
-      )
-    } else {
-      alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
+      if (respuesta.ok) {
+        mostrarToast('Categoría deshabilitada correctamente')
+        setCategorias(prev =>
+          prev.map(c => (c.id === id ? { ...c, activa: false } : c))
+        )
+      } else {
+        alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al deshabilitar la categoría')
     }
   }
 
@@ -163,12 +213,16 @@ export default function ModuloCategorias() {
     try {
       const respuesta = await habilitarCategoria(id)
 
-    if (respuesta.ok) {
-      setCategorias(prev =>
-        prev.map(c => (c.id === id ? { ...c, activa: true } : c))
-      )
-    } else {
-      alert(respuesta.mensaje || 'Error al habilitar la categoría')
+      if (respuesta.ok) {
+        mostrarToast('Categoría habilitada correctamente')
+        setCategorias(prev =>
+          prev.map(c => (c.id === id ? { ...c, activa: true } : c))
+        )
+      } else {
+        alert(respuesta.mensaje || 'Error al habilitar la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al habilitar la categoría')
     }
   }
 
