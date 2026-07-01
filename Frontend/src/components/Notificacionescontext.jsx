@@ -22,11 +22,6 @@ export const NotificacionesProvider = ({ children }) => {
     setNoLeidasCount(count);
   }, []);
 
-  // Revisa las notificaciones no leídas más recientes. Si encuentra IDs
-  // nunca vistos, deja la más reciente en notificacionPendiente (para que
-  // HeaderModulos la muestre como toast anclado a la campana) y avanza
-  // el marcador. En la primera ejecución solo sincroniza en silencio,
-  // sin mostrar nada retroactivo de lo que ya existía.
   const revisarNotificacionesNuevas = useCallback(async () => {
     try {
       const { notificaciones } = await getNotificaciones({ leida: 'false', limit: String(LIMITE_REVISION) });
@@ -56,26 +51,24 @@ export const NotificacionesProvider = ({ children }) => {
     await revisarNotificacionesNuevas();
   }, [refrescarCount, revisarNotificacionesNuevas]);
 
-  // Permite a cualquier componente (ej. justo tras crear un gasto) forzar
-  // una revisión inmediata, sin esperar al próximo ciclo de polling.
+
   const revisarAhora = useCallback(() => {
     ejecutarCiclo();
   }, [ejecutarCiclo]);
 
-  // HeaderModulos llama esto en cuanto termina de mostrar el toast anclado.
   const limpiarNotificacionPendiente = useCallback(() => {
     setNotificacionPendiente(null);
   }, []);
 
   useEffect(() => {
-    // Mientras se resuelve la sesión, o si no hay usuario, no se hace polling.
+
     if (loading || !isAuthenticated) {
       setNoLeidasCount(0);
-      ultimoIdVistoRef.current = null; // se re-sincroniza en el siguiente login
+      ultimoIdVistoRef.current = null; 
       return;
     }
 
-    // Primera carga inmediata al iniciar sesión.
+
     ejecutarCiclo();
 
     intervaloRef.current = setInterval(ejecutarCiclo, INTERVALO_POLLING_MS);

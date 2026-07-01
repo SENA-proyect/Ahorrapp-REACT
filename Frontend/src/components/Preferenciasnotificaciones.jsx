@@ -1,4 +1,3 @@
-// src/components/PreferenciasNotificacion.jsx
 import { useState, useEffect } from 'react'
 import { getPreferenciasNotificacion, actualizarPreferenciasNotificacion } from '../api'
 import { useToast } from './ToastContext'

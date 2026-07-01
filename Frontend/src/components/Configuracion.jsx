@@ -1,4 +1,3 @@
-// src/components/Configuracion.jsx
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import HeaderModulos from './HeaderModulos'
@@ -8,7 +7,7 @@ import Preferenciasnotificaciones from './Preferenciasnotificaciones'
 const SECCIONES = [
   { id: 'notificaciones', label: 'Notificaciones', emoji: '🔔' },
   { id: 'preferencias', label: 'Preferencias', emoji: '🎛️' },
-  { id: 'cuenta', label: 'Mi cuenta', emoji: '👤', proximamente: true },
+  // { id: 'cuenta', label: 'Mi cuenta', emoji: '👤', proximamente: true },
 ]
 
 export default function Configuracion() {

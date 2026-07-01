@@ -13,7 +13,7 @@ const navItems = [
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
   { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
   { href: '/Noticias', emoji: '📰', label: 'Noticias' },
-  { href: '/Exportar', emoji: '📈', label: 'Reportes' },
+  // { href: '/Exportar', emoji: '📈', label: 'Reportes' },
 ]
 
 export default function HeaderModulos({ section = 'Dashboard' }) {
@@ -25,9 +25,7 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
   const [pulsando, setPulsando] = useState(false)
   const timeoutRef = useRef(null)
 
-  // Cuando llega una notificación nueva (vía polling o revisión inmediata),
-  // se muestra como toast anclado debajo de la campana por 3s, junto con
-  // un pulso sutil en el borde del botón.
+
   useEffect(() => {
     if (!notificacionPendiente) return
 

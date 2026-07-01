@@ -1,16 +1,7 @@
-// ============================================================
-//  AhorrApp — periodoHelper.js
-//  Helper compartido: obtiene el período de presupuesto activo
-//  de un usuario. Usado por dashboardController.js y por la
-//  lógica de generación de notificaciones (alertas de presupuesto).
-// ============================================================
-
 const pool = require("../db/connection");
 
 // ─────────────────────────────────────────────────────────────
 //  getPeriodoActivo
-//  Retorna el período abierto del usuario (con los porcentajes
-//  de su perfil de presupuesto), o null si no tiene ninguno abierto.
 // ─────────────────────────────────────────────────────────────
 const getPeriodoActivo = async (ID_usuario) => {
   const [rows] = await pool.query(

@@ -1,7 +1,3 @@
-// ============================================================
-//  AhorrApp — notificaciones.routes.js
-// ============================================================
-
 const express = require("express");
 const router = express.Router();
 
@@ -15,7 +11,7 @@ const {
   eliminarNotificacion,
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
-} = require("../controllers/notificacionesController");
+} = require("../controllers/notificacionescontroller");
 
 router.use(verifyToken);
 

@@ -1,30 +1,6 @@
-// ============================================================
-//  AhorrApp — notificacionesService.js
-//  Módulo desacoplado: cualquier controller o job puede invocar
-//  crearNotificacion(...) sin acoplarse a la lógica de negocio
-//  de notificaciones. Centraliza también lectura/escritura del
-//  estado (leída, archivada) y de las preferencias del usuario.
-// ============================================================
-
 const pool = require("../db/connection");
 const { getPeriodoActivo } = require("./periodoHelper");
 
-// ─────────────────────────────────────────────────────────────
-//  crearNotificacion
-//  Punto de entrada único para generar una notificación.
-//  Respeta las preferencias del usuario: si el usuario desactivó
-//  ese Tipo, la notificación NO se inserta (no se "manda en vano").
-//
-//  @param {Object} datos
-//    ID_usuario   {number}  requerido
-//    Tipo         {string}  'sistema' | 'recordatorio' | 'sugerencia' | 'alerta_presupuesto'
-//    Mensaje      {string}  requerido
-//    Entidad_tipo {string}  opcional, ej. 'deuda', 'ahorro', 'gasto'
-//    Entidad_id   {number}  opcional, ID del registro relacionado
-//
-//  @returns {number|null} ID_notificacion insertado, o null si no
-//           se generó (preferencia desactivada o error controlado)
-// ─────────────────────────────────────────────────────────────
 const crearNotificacion = async ({
   ID_usuario,
   Tipo,
@@ -49,8 +25,7 @@ const crearNotificacion = async ({
 
     return result.insertId;
   } catch (error) {
-    // Una notificación fallida NUNCA debe tumbar la operación principal
-    // (ej. crear un gasto no debe fallar porque la notificación falló).
+
     console.error("Error en crearNotificacion:", error.message);
     return null;
   }
@@ -74,16 +49,12 @@ const existeNotificacionEntidad = async (ID_usuario, Tipo, Entidad_tipo, Entidad
     return rows.length > 0;
   } catch (error) {
     console.error("Error en existeNotificacionEntidad:", error.message);
-    // Ante error de verificación, asumimos que SÍ existe para evitar
-    // duplicados accidentales (más seguro fallar en silencio que espamear).
     return true;
   }
 };
 
 // ─────────────────────────────────────────────────────────────
 //  preferenciaActiva
-//  Filosofía opt-out: si no hay fila en PREFERENCIAS_NOTIFICACION
-//  para (usuario, tipo), se asume TRUE.
 // ─────────────────────────────────────────────────────────────
 const preferenciaActiva = async (ID_usuario, Tipo) => {
   try {
@@ -97,34 +68,23 @@ const preferenciaActiva = async (ID_usuario, Tipo) => {
     return Boolean(rows[0].Activa);
   } catch (error) {
     console.error("Error en preferenciaActiva:", error.message);
-    return true; // ante error, no bloquear notificaciones legítimas
+    return true; 
   }
 };
 
 // ─────────────────────────────────────────────────────────────
 //  getPreferencias
-//  Devuelve las 4 categorías con su estado actual (TRUE si no
-//  hay fila explícita), para alimentar la vista de Configuración.
 // ─────────────────────────────────────────────────────────────
 const TIPOS_NOTIFICACION = ["sistema", "recordatorio", "sugerencia", "alerta_presupuesto"];
 
 // ─────────────────────────────────────────────────────────────
-//  UMBRALES de alerta de presupuesto (% del monto destinado
-//  en el período activo). Ajustables aquí sin tocar los
-//  controllers que invocan esta lógica.
+//  UMBRALES de alerta de presupuesto
 // ─────────────────────────────────────────────────────────────
 const UMBRAL_GASTOS = 85;
 const UMBRAL_IMPREVISTOS = 85;
 
 // ─────────────────────────────────────────────────────────────
 //  verificarUmbralGastos
-//  Se invoca DESPUÉS de confirmar (commit) el registro de un
-//  gasto. Compara el total ejecutado de Gastos del período activo
-//  contra Monto_gastos. Si supera el umbral y no se había avisado
-//  ya para este período, genera la alerta.
-//
-//  Nota: NUNCA debe lanzar — un fallo aquí no debe afectar al
-//  caller (crearMovimiento ya respondió 201 al usuario).
 // ─────────────────────────────────────────────────────────────
 const verificarUmbralGastos = async (ID_usuario) => {
   try {
@@ -146,8 +106,6 @@ const verificarUmbralGastos = async (ID_usuario) => {
     const porcentaje = (Number(gas.total) / Number(Monto_gastos)) * 100;
     if (porcentaje < UMBRAL_GASTOS) return;
 
-    // Una sola alerta por período (no una por cada gasto adicional
-    // una vez ya se cruzó el umbral).
     const yaExiste = await existeNotificacionEntidad(
       ID_usuario, "alerta_presupuesto", "periodo_gastos", periodo.ID_periodo
     );
@@ -167,8 +125,6 @@ const verificarUmbralGastos = async (ID_usuario) => {
 
 // ─────────────────────────────────────────────────────────────
 //  verificarUmbralImprevistos
-//  Misma lógica que verificarUmbralGastos, pero sobre el fondo
-//  de imprevistos (RF-05).
 // ─────────────────────────────────────────────────────────────
 const verificarUmbralImprevistos = async (ID_usuario) => {
   try {
@@ -209,16 +165,11 @@ const verificarUmbralImprevistos = async (ID_usuario) => {
 
 // ─────────────────────────────────────────────────────────────
 //  verificarImprevistosNoUsados
-//  Se invoca al CERRAR un período (no en cada gasto). Si el
+//  Se invoca al CERRAR un período. Si el
 //  fondo de imprevistos prácticamente no se usó, sugiere
-//  redirigir ese dinero a ahorros (RF-14).
-//
-//  @param {number} ID_usuario
-//  @param {Object} periodo  Fila de PERIODOS_PRESUPUESTO ya cerrada
-//                           (debe incluir ID_periodo, Fecha_inicio,
-//                           Fecha_fin, Monto_imprevistos)
+//  redirigir ese dinero a ahorros
 // ─────────────────────────────────────────────────────────────
-const UMBRAL_IMPREVISTOS_NO_USADO = 10; // % por debajo del cual se considera "no usado"
+const UMBRAL_IMPREVISTOS_NO_USADO = 10; 
 
 const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
   try {
@@ -256,12 +207,6 @@ const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
 
 // ─────────────────────────────────────────────────────────────
 //  verificarMetaAhorroAlcanzada
-//  Se invoca tras registrar un abono de ahorro. Si el monto
-//  acumulado alcanzó la meta, genera la alerta de logro (RF-04).
-//
-//  @param {number} ID_usuario
-//  @param {Object} ahorro  Debe incluir ID_ahorros, meta_monto, descripcion
-//  @param {number} montoAcumulado
 // ─────────────────────────────────────────────────────────────
 const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) => {
   try {
@@ -304,7 +249,6 @@ const getPreferencias = async (ID_usuario) => {
 
 // ─────────────────────────────────────────────────────────────
 //  setPreferencia
-//  Upsert: crea o actualiza la preferencia de un tipo puntual.
 // ─────────────────────────────────────────────────────────────
 const setPreferencia = async (ID_usuario, Tipo, Activa) => {
   if (!TIPOS_NOTIFICACION.includes(Tipo)) {
