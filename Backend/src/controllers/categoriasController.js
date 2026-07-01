@@ -1,4 +1,5 @@
 const pool = require("../db/connection");
+const { registrarActividad } = require("../service/HistorialService")
 
 // ── GET todas las categorías (sistema + las del usuario) ────────────────────
 const getCategorias = async (req, res) => {
@@ -11,7 +12,8 @@ const getCategorias = async (req, res) => {
         ID_usuario    AS id_usuario,
         Nombre        AS nombre,
         Descripcion   AS descripcion,
-
+        Color         AS color,
+        Icono         AS icono,
         Activa        AS activa,
         Sistema       AS sistema,
         ES_global     AS es_global
@@ -38,7 +40,8 @@ const getGastosPorCategoria = async (req, res) => {
         ID_usuario AS id_usuario,
         Nombre AS nombre,
         Descripcion AS descripcion,
-
+        Color AS color,
+        Icono AS icono,
         Activa AS activa,
         Sistema AS sistema,
         ES_global AS es_global
@@ -95,7 +98,8 @@ const getIngresosPorCategoria = async (req, res) => {
         ID_usuario AS id_usuario,
         Nombre AS nombre,
         Descripcion AS descripcion,
-
+        Color AS color,
+        Icono AS icono,
         Activa AS activa,
         Sistema AS sistema,
         ES_global AS es_global
@@ -152,7 +156,8 @@ const getImprevistosPorCategoria = async (req, res) => {
         ID_usuario AS id_usuario,
         Nombre AS nombre,
         Descripcion AS descripcion,
-
+        Color AS color,
+        Icono AS icono,
         Activa AS activa,
         Sistema AS sistema,
         ES_global AS es_global
@@ -209,7 +214,8 @@ const getDeudasPorCategoria = async (req, res) => {
         ID_usuario AS id_usuario,
         Nombre AS nombre,
         Descripcion AS descripcion,
-
+        Color AS color,
+        Icono AS icono,
         Activa AS activa,
         Sistema AS sistema,
         ES_global AS es_global
@@ -266,7 +272,8 @@ const getAhorrosPorCategoria = async (req, res) => {
         ID_usuario AS id_usuario,
         Nombre AS nombre,
         Descripcion AS descripcion,
-
+        Color AS color,
+        Icono AS icono,
         Activa AS activa,
         Sistema AS sistema,
         ES_global AS es_global
@@ -328,6 +335,14 @@ const crearCategoria = async (req, res) => {
       [id_usuario, nombre.trim(), descripcion?.trim() || null]
     );
 
+    await registrarActividad({
+      ID_usuario: id_usuario,
+      Accion: "crear",
+      Entidad_tipo: "categoria",
+      Entidad_id: result.insertId,
+      Descripcion: `Creó la categoría "${nombre.trim()}"`,
+    });
+
     return res.status(201).json({
       ok: true,
       mensaje: "Categoria creada exitosamente",
@@ -367,6 +382,14 @@ const actualizarCategoria = async (req, res) => {
       [nombre.trim(), descripcion?.trim() || null, id]
     );
 
+    await registrarActividad({
+      ID_usuario: id_usuario,
+      Accion: "editar",
+      Entidad_tipo: "categoria",
+      Entidad_id: id,
+      Descripcion: `Actualizó la categoría "${nombre.trim()}"`,
+    });
+
     return res.status(200).json({ ok: true, mensaje: "Categoria actualizada exitosamente" });
   } catch (error) {
     console.error("Error en actualizarCategoria:", error.message);
@@ -380,7 +403,7 @@ const deshabilitarCategoria = async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT ID_categoria FROM CATEGORIAS
+      `SELECT ID_categoria, Nombre FROM CATEGORIAS
        WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
       [id, id_usuario]
     );
@@ -390,6 +413,14 @@ const deshabilitarCategoria = async (req, res) => {
     }
 
     await pool.query("UPDATE CATEGORIAS SET Activa = FALSE WHERE ID_categoria = ?", [id]);
+
+    await registrarActividad({
+      ID_usuario: id_usuario,
+      Accion: "cambiar_estado",
+      Entidad_tipo: "categoria",
+      Entidad_id: id,
+      Descripcion: `Deshabilitó la categoría "${rows[0].Nombre}"`,
+    });
 
     return res.status(200).json({ ok: true, mensaje: "Categoria deshabilitada" });
   } catch (error) {
@@ -404,7 +435,7 @@ const habilitarCategoria = async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT ID_categoria FROM CATEGORIAS
+      `SELECT ID_categoria, Nombre FROM CATEGORIAS
        WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
       [id, id_usuario]
     );
@@ -414,6 +445,14 @@ const habilitarCategoria = async (req, res) => {
     }
 
     await pool.query("UPDATE CATEGORIAS SET Activa = TRUE WHERE ID_categoria = ?", [id]);
+
+    await registrarActividad({
+      ID_usuario: id_usuario,
+      Accion: "cambiar_estado",
+      Entidad_tipo: "categoria",
+      Entidad_id: id,
+      Descripcion: `Habilitó la categoría "${rows[0].Nombre}"`,
+    });
 
     return res.status(200).json({ ok: true, mensaje: "Categoria habilitada" });
   } catch (error) {

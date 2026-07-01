@@ -1,22 +1,9 @@
-// ============================================================
-//  AhorrApp — vencimientosJob.js
-//  Cron diario: revisa deudas próximas a vencer y genera
-//  recordatorios. Usa node-cron (requiere: npm install node-cron)
-// ============================================================
-
 const cron = require("node-cron");
 const pool = require("../../db/connection");
 const { crearNotificacion, existeNotificacionEntidad } = require("../notificacionesService");
 
 const DIAS_AVISO_DEUDA = 5;
 
-// ─────────────────────────────────────────────────────────────
-//  revisarDeudasPorVencer
-//  Busca deudas NO pagadas cuya Fecha_fin caiga exactamente
-//  dentro de la ventana de aviso (hoy + DIAS_AVISO_DEUDA días o antes,
-//  pero aún no vencidas), y crea un recordatorio si no existe ya uno
-//  para esa deuda.
-// ─────────────────────────────────────────────────────────────
 const revisarDeudasPorVencer = async () => {
   try {
     const [deudas] = await pool.query(
@@ -69,7 +56,6 @@ const revisarDeudasPorVencer = async () => {
 };
 
 // ─────────────────────────────────────────────────────────────
-//  iniciarVencimientosJob
 //  Registra el cron. Se llama una sola vez al arrancar el server.
 //  Corre todos los días a las 06:00 (hora del servidor).
 // ─────────────────────────────────────────────────────────────
@@ -84,5 +70,5 @@ const iniciarVencimientosJob = () => {
 
 module.exports = {
   iniciarVencimientosJob,
-  revisarDeudasPorVencer, // exportado para poder probarlo manualmente o desde un endpoint de test
+  revisarDeudasPorVencer, 
 };

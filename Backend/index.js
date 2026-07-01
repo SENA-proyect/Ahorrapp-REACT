@@ -16,8 +16,10 @@ const exportarRoutes      = require('./src/routes/exportar');
 const PresupuestosRoutes  = require('./src/routes/PresupuestosRoutes');
 const dashboardRoutes     = require('./src/routes/dashboardRoutes');
 const NotificacionesRoutes = require ('./src/routes/NotificacionesRoutes');
+const historialRoutes = require('./src/routes/historialRoutes');
 
 const { iniciarVencimientosJob } = require('./src/service/jobs/VencimientosJob');
+const { iniciarArchivadoHistorialJob } = require('./src/service/jobs/archivadoHistorialJob');
 
 const app = express();
 
@@ -41,6 +43,7 @@ app.use('/api/exportar',     exportarRoutes);
 app.use('/api/presupuestos', PresupuestosRoutes);
 app.use('/api/dashboard',    dashboardRoutes);
 app.use('/api', NotificacionesRoutes);
+app.use('/api', historialRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {
@@ -94,6 +97,7 @@ try {
     console.log(`   GET  https://localhost:${PORT}/api/dashboard`);
     console.log(`   GET  https://localhost:${PORT}/api/presupuestos`);
     console.log(`   GET  https://localhost:${PORT}/api/notificaciones`);
+    console.log(`   GET  https://localhost:${PORT}/api/historial`);
     console.log(`\n⚠️  Configuración para POSTMAN:`);
     console.log(`   1. Settings (engranaje)`);
     console.log(`   2. General`);
@@ -101,6 +105,8 @@ try {
 
     // Cron de notificaciones: solo se inicia si el servidor levantó con éxito
     iniciarVencimientosJob();
+    // Cron de archivado de historial (RF-11): cada 3 días
+    iniciarArchivadoHistorialJob();
   });
 
 } catch (error) {

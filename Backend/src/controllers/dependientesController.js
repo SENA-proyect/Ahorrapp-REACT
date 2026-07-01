@@ -1,4 +1,5 @@
 const pool = require('../db/connection');
+const { registrarActividad } = require("../service/HistorialService")
 
 
 // ── GET: Obtener dependientes del usuario autenticado ──────
@@ -40,6 +41,15 @@ const addDependiente = async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?)`,
       [ID_usuario, Nombre, Relacion, Ocupacion || null, Fecha_nacimiento, Peso_economico || null]
     );
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: 'crear',
+      Entidad_tipo: 'dependiente',
+      Entidad_id: result.insertId,
+      Descripcion: `Agregó al dependiente "${Nombre}" (${Relacion})`,
+    });
+
     res.status(201).json({ message: 'Dependiente agregado', id: result.insertId });
   } catch (err) {
     console.error('Error al agregar dependiente:', err);
@@ -68,6 +78,15 @@ const updateDependiente = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Dependiente no encontrado' });
     }
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: 'editar',
+      Entidad_tipo: 'dependiente',
+      Entidad_id: id,
+      Descripcion: `Actualizó los datos del dependiente "${Nombre}" (${Relacion})`,
+    });
+
     res.json({ message: 'Dependiente actualizado' });
   } catch (err) {
     console.error('Error al actualizar dependiente:', err);
@@ -82,6 +101,11 @@ const deleteDependiente = async (req, res) => {
 
 
   try {
+    const [[dependiente]] = await pool.query(
+      'SELECT Nombre, Relacion FROM dependientes WHERE ID_dependientes = ? AND ID_usuario = ?',
+      [id, ID_usuario]
+    );
+
     const [result] = await pool.query(
       'DELETE FROM dependientes WHERE ID_dependientes = ? AND ID_usuario = ?',
       [id, ID_usuario]
@@ -91,6 +115,17 @@ const deleteDependiente = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Dependiente no encontrado' });
     }
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: 'eliminar',
+      Entidad_tipo: 'dependiente',
+      Entidad_id: id,
+      Descripcion: dependiente
+        ? `Eliminó al dependiente "${dependiente.Nombre}" (${dependiente.Relacion})`
+        : `Eliminó un dependiente (ID ${id})`,
+    });
+
     res.json({ message: 'Dependiente eliminado' });
   } catch (err) {
     console.error('Error al eliminar dependiente:', err);

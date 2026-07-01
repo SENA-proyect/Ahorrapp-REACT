@@ -258,40 +258,45 @@ CREATE TABLE IF NOT EXISTS DEUDAS (
 --     TABLA: historial
 -- ========================================================================
 
-ALTER TABLE HISTORIAL
-    CHANGE COLUMN accion Accion ENUM('crear','editar','eliminar','abonar') NOT NULL,
-    ADD COLUMN Entidad_tipo VARCHAR(50) NOT NULL AFTER Accion,
-    ADD COLUMN Entidad_id INT DEFAULT NULL AFTER Entidad_tipo,
-    CHANGE COLUMN detalles Descripcion VARCHAR(255) NOT NULL,
-    CHANGE COLUMN fecha Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ADD COLUMN Archivada BOOLEAN DEFAULT FALSE COMMENT 'TRUE = oculto para el usuario, pero conservado en BD';
+CREATE TABLE IF NOT EXISTS HISTORIAL (
+    ID_historial INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del historial',
+    ID_usuario INT NOT NULL COMMENT 'Usuario que realizó la acción',
+    Accion ENUM('crear', 'editar', 'eliminar', 'abonar', 'cambiar_estado') NOT NULL COMMENT 'Acción realizada por el usuario',
+    Entidad_tipo VARCHAR(50) NOT NULL COMMENT 'Tipo de entidad afectada (ej: deudas, salidas)',
+    Entidad_id INT DEFAULT NULL COMMENT 'ID del registro afectado',
+    Descripcion VARCHAR(255) NOT NULL COMMENT 'Descripción detallada de la acción',
+    Fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() COMMENT 'Fecha y hora exacta del registro',
+    Archivada TINYINT(1) DEFAULT 0 COMMENT '1 = oculto para el usuario (manual o antigüedad), 0 = visible',
 
-CREATE INDEX idx_historial_usuario_fecha ON HISTORIAL (ID_usuario, Fecha DESC);
+    -- Validaciones (CHECKs) consolidadas al final
+    CONSTRAINT chk_archivada_booleano CHECK (Archivada IN (0, 1)),
 
-DELIMITER $$
-CREATE TRIGGER trg_historial_no_delete
-BEFORE DELETE ON HISTORIAL
-FOR EACH ROW
-BEGIN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'No está permitido eliminar registros del historial de actividad.';
-END$$
-DELIMITER ;
+    -- Índices optimizados para búsquedas
+    KEY idx_historial_usuario_fecha (ID_usuario, Fecha) USING BTREE,
+
+    -- Llaves foráneas (Asumiendo una tabla USUARIOS existente)
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS HISTORIAL_AUDITORIA (
-    ID_auditoria        INT AUTO_INCREMENT PRIMARY KEY,
-    ID_usuario_admin    INT NOT NULL COMMENT 'Quien ejecutó la acción administrativa',
-    Accion              VARCHAR(100) NOT NULL COMMENT 'ej: cambiar_rol, deshabilitar_usuario',
-    Entidad_tipo        VARCHAR(50)  NOT NULL COMMENT 'ej: usuario, categoria_global',
-    Entidad_id          INT          DEFAULT NULL COMMENT 'ID del usuario/recurso afectado',
-    Entidad_descripcion VARCHAR(150) DEFAULT NULL COMMENT 'Nombre/email del afectado, para lectura rápida sin JOIN',
-    Descripcion         VARCHAR(255) NOT NULL COMMENT 'Detalle legible de la acción',
-    Fecha               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    ID_auditoria INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la auditoría',
+    ID_usuario_admin INT NOT NULL COMMENT 'Usuario administrador que ejecutó la acción',
+    Accion VARCHAR(100) NOT NULL COMMENT 'ej: cambiar_rol, deshabilitar_usuario, editar_categoria_global',
+    Entidad_tipo VARCHAR(50) NOT NULL COMMENT 'ej: usuario, categoria_global, presupuesto',
+    Entidad_id INT DEFAULT NULL COMMENT 'ID del recurso afectado. Sin FK para sobrevivir a eliminaciones',
+    Entidad_descripcion VARCHAR(150) DEFAULT NULL COMMENT 'Nombre/email del afectado congelado para lectura rápida sin JOIN',
+    Descripcion VARCHAR(255) NOT NULL COMMENT 'Detalle legible de la acción realizada',
+    Fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() COMMENT 'Fecha y hora exacta de la auditoría',
+
+    -- Índices optimizados para búsquedas de auditoría
+    KEY idx_auditoria_usuario (ID_usuario_admin) USING BTREE,
+    KEY idx_auditoria_fecha (Fecha) USING BTREE,
+    KEY idx_auditoria_entidad (Entidad_tipo, Entidad_id) USING BTREE,
+
+    -- Llaves foráneas (Asumiendo una tabla USUARIOS existente)
     FOREIGN KEY (ID_usuario_admin) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE INDEX idx_auditoria_fecha ON HISTORIAL_AUDITORIA (Fecha DESC);
-CREATE INDEX idx_auditoria_entidad ON HISTORIAL_AUDITORIA (Entidad_tipo, Entidad_id);
 
 -- CREATE TABLE IF NOT EXISTS HISTORIAL (
 --     ID_historial INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del historial',

@@ -221,9 +221,19 @@ const updateIngresos = async (req, res) => {
             WHERE ID_ingresos = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
         [monto, descripcion, fuente, fecha_registro, id_categoria, id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
+    
+  if (rows.affectedRows === 0) {
         return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
     }
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "editar",
+      Entidad_tipo: "ingreso",
+      Entidad_id: id,
+      Descripcion: `Editó un ingreso a $${Number(monto).toLocaleString("es-CO")}${descripcion ? ` (${descripcion})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Ingreso actualizado exitosamente" });
     } catch (error) {
     console.error("Error en updateIngresos:", error.message);
@@ -242,7 +252,7 @@ const deleteIngresos = async (req, res) => {
 
     // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
     const [[ingreso]] = await connection.query(
-      `SELECT e.ID_entrada, e.ID_movimiento
+      `SELECT e.ID_entrada, e.ID_movimiento, i.Monto, i.Descripcion
        FROM INGRESOS i
        INNER JOIN ENTRADA e     ON i.ID_entrada    = e.ID_entrada
        INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
@@ -261,6 +271,15 @@ const deleteIngresos = async (req, res) => {
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`,      [ingreso.ID_movimiento]);
 
     await connection.commit();
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "eliminar",
+      Entidad_tipo: "ingreso",
+      Entidad_id: id,
+      Descripcion: `Eliminó un ingreso de $${Number(ingreso.Monto).toLocaleString("es-CO")}${ingreso.Descripcion ? ` (${ingreso.Descripcion})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Ingreso eliminado exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
@@ -312,9 +331,17 @@ const updateAhorros = async (req, res) => {
       [monto, monto_acumulado, descripcion, meta, fecha_registro || null, fecha_meta || null, id_categoria || null, id, ID_usuario]
     );
 
-    if (rows.affectedRows === 0) {
+  if (rows.affectedRows === 0) {
       return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
     }
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "editar",
+      Entidad_tipo: "ahorro",
+      Entidad_id: id,
+      Descripcion: `Editó un ahorro a $${Number(monto).toLocaleString("es-CO")}${descripcion ? ` (${descripcion})` : ""}`,
+    });
 
     res.status(200).json({ ok: true, mensaje: "Ahorro actualizado exitosamente" });
   } catch (error) {
@@ -334,7 +361,7 @@ const deleteAhorros = async (req, res) => {
 
     // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
     const [[ahorro]] = await connection.query(
-      `SELECT e.ID_entrada, e.ID_movimiento
+      `SELECT e.ID_entrada, e.ID_movimiento, a.Monto, a.Descripcion
        FROM AHORROS a
        INNER JOIN ENTRADA e     ON a.ID_entrada    = e.ID_entrada
        INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
@@ -354,6 +381,15 @@ const deleteAhorros = async (req, res) => {
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [ahorro.ID_movimiento]);
 
     await connection.commit();
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "eliminar",
+      Entidad_tipo: "ahorro",
+      Entidad_id: id,
+      Descripcion: `Eliminó un ahorro de $${Number(ahorro.Monto).toLocaleString("es-CO")}${ahorro.Descripcion ? ` (${ahorro.Descripcion})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Ahorro eliminado exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
@@ -412,6 +448,13 @@ const updateGastos = async (req, res) => {
     if (rows.affectedRows === 0) {
         return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
     }
+    await registrarActividad({
+      ID_usuario,
+      Accion: "editar",
+      Entidad_tipo: "gasto",
+      Entidad_id: id,
+      Descripcion: `Editó un gasto a $${Number(monto).toLocaleString("es-CO")}${descripcion ? ` (${descripcion})` : ""}`,
+    });
     res.status(200).json({ ok: true, mensaje: "Gasto actualizado exitosamente" });
     } catch (error) {
     console.error("Error en updateGastos:", error.message);
@@ -429,7 +472,7 @@ const deleteGastos = async (req, res) => {
     await connection.beginTransaction();
     // 1. Buscar el ID_salida y ID_movimiento antes de borrar
     const [[gasto]] = await connection.query(
-      `SELECT s.ID_salida, s.ID_movimiento
+      `SELECT s.ID_salida, s.ID_movimiento, g.Monto, g.Descripcion
          FROM GASTOS g
             INNER JOIN SALIDA s       ON g.ID_salida      = s.ID_salida
             INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
@@ -446,6 +489,15 @@ const deleteGastos = async (req, res) => {
     await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [gasto.ID_salida]);
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [gasto.ID_movimiento]);
     await connection.commit();
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "eliminar",
+      Entidad_tipo: "gasto",
+      Entidad_id: id,
+      Descripcion: `Eliminó un gasto de $${Number(gasto.Monto).toLocaleString("es-CO")}${gasto.Descripcion ? ` (${gasto.Descripcion})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Gasto eliminado exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
@@ -516,6 +568,15 @@ const updateImprevistos = async (req, res) => {
     if (rows.affectedRows === 0) {
       return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado o sin permisos" });
     }
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "editar",
+      Entidad_tipo: "imprevisto",
+      Entidad_id: id,
+      Descripcion: `Editó un imprevisto a $${Number(monto).toLocaleString("es-CO")}${causa ? ` (${causa})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Imprevisto actualizado exitosamente" });
   } catch (error) {
     console.error("Error en updateImprevistos:", error.message);
@@ -534,7 +595,7 @@ const deleteImprevistos = async (req, res) => {
     await connection.beginTransaction();
     // 1. Buscar el ID_salida y ID_movimiento antes de borrar
     const [[imprevisto]] = await connection.query(
-        `SELECT s.ID_salida, s.ID_movimiento
+        `SELECT s.ID_salida, s.ID_movimiento, i.Monto, i.Causa
             FROM IMPREVISTOS i
             INNER JOIN SALIDA s       ON i.ID_salida      = s.ID_salida
             INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
@@ -551,6 +612,15 @@ const deleteImprevistos = async (req, res) => {
     await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [imprevisto.ID_salida]);
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [imprevisto.ID_movimiento]);
     await connection.commit();
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "eliminar",
+      Entidad_tipo: "imprevisto",
+      Entidad_id: id,
+      Descripcion: `Eliminó un imprevisto de $${Number(imprevisto.Monto).toLocaleString("es-CO")}${imprevisto.Causa ? ` (${imprevisto.Causa})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Imprevisto eliminado exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
@@ -609,6 +679,15 @@ const updateDeudas = async (req, res) => {
     if (rows.affectedRows === 0) {
         return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
     }
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "editar",
+      Entidad_tipo: "deuda",
+      Entidad_id: id,
+      Descripcion: `Editó una deuda a $${Number(monto).toLocaleString("es-CO")}${descripcion ? ` (${descripcion})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Deuda actualizada exitosamente" });
     } catch (error) {
     console.error("Error en updateDeudas:", error.message);
@@ -626,7 +705,7 @@ const deleteDeudas = async (req, res) => {
     await connection.beginTransaction();
     // 1. Buscar el ID_salida y ID_movimiento antes de borrar
     const [[deuda]] = await connection.query(
-        `SELECT s.ID_salida, s.ID_movimiento
+        `SELECT s.ID_salida, s.ID_movimiento, d.Monto, d.Descripcion
             FROM DEUDAS d
             INNER JOIN SALIDA s      ON d.ID_salida     = s.ID_salida
             INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
@@ -643,6 +722,15 @@ const deleteDeudas = async (req, res) => {
     await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [deuda.ID_salida]);
     await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [deuda.ID_movimiento]);
     await connection.commit();
+
+    await registrarActividad({
+      ID_usuario,
+      Accion: "eliminar",
+      Entidad_tipo: "deuda",
+      Entidad_id: id,
+      Descripcion: `Eliminó una deuda de $${Number(deuda.Monto).toLocaleString("es-CO")}${deuda.Descripcion ? ` (${deuda.Descripcion})` : ""}`,
+    });
+
     res.status(200).json({ ok: true, mensaje: "Deuda eliminada exitosamente" });
   } catch (error) {
     if (connection) await connection.rollback();
