@@ -3,8 +3,37 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
 import { useAuth } from "./AuthContext";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// Mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula, 1 número y 1 símbolo
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}$/;
+// Solo letras (con acentos/ñ) y espacios, entre 2 y 50 caracteres
+const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]{2,50}$/;
+
+const isValidEmail = (value) => EMAIL_REGEX.test(value.trim());
+const isStrongPassword = (value) => PASSWORD_REGEX.test(value);
+const isValidName = (value) => NAME_REGEX.test(value.trim());
+
+const PASSWORD_HINT =
+  "Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo (ej. !@#$%).";
+
 // ── Mini-componente reutilizable para cada campo del formulario ────────────
-function Field({ id, label, type, placeholder, name, value, onChange, icon, className }) {
+function Field({
+  id,
+  label,
+  type,
+  placeholder,
+  name,
+  value,
+  onChange,
+  icon,
+  className,
+  required,
+  minLength,
+  maxLength,
+  pattern,
+  title,
+  autoComplete,
+}) {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm text-zinc-400 font-medium">
@@ -18,6 +47,12 @@ function Field({ id, label, type, placeholder, name, value, onChange, icon, clas
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          required={required}
+          minLength={minLength}
+          maxLength={maxLength}
+          pattern={pattern}
+          title={title}
+          autoComplete={autoComplete}
           className={`w-full bg-[#07152D] border border-zinc-700 text-zinc-100 rounded-xl px-4 py-2.5 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-amber-400 transition-colors ${icon ? "pr-10" : ""} ${className ?? ""}`}
         />
         {icon && (
@@ -57,8 +92,16 @@ export default function Login() {
     e.preventDefault();
     setError(null);
 
-    if (!loginForm.Email || !loginForm.Password_hash) {
+    const email = loginForm.Email.trim();
+    const password = loginForm.Password_hash;
+
+    if (!email || !password) {
       setError("Por favor completa todos los campos");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Ingresa un correo electrónico válido");
       return;
     }
 
@@ -66,8 +109,8 @@ export default function Login() {
 
     try {
       const respuesta = await loginUser({
-        Email: loginForm.Email,
-        Password_hash: loginForm.Password_hash,
+        Email: email,
+        Password_hash: password,
       });
 
       if (respuesta.ok) {
@@ -93,29 +136,48 @@ export default function Login() {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setCargando(true);
 
-    if (
-      !registerForm.Nombre ||
-      !registerForm.Apellido ||
-      !registerForm.Email ||
-      !registerForm.Password_hash
-    ) {
+    const nombre = registerForm.Nombre.trim();
+    const apellido = registerForm.Apellido.trim();
+    const email = registerForm.Email.trim();
+    const password = registerForm.Password_hash;
+
+    if (!nombre || !apellido || !email || !password) {
       setError("Todos los campos son obligatorios");
-      setCargando(false);
+      return;
+    }
+
+    if (!isValidName(nombre) || !isValidName(apellido)) {
+      setError("Nombre y apellido solo deben contener letras (2-50 caracteres)");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Ingresa un correo electrónico válido");
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      setError(`Contraseña insegura. ${PASSWORD_HINT}`);
       return;
     }
 
     const checkbox = document.getElementById("terminos");
     if (!checkbox || !checkbox.checked) {
       setError("Debes aceptar los términos y condiciones.");
-      setCargando(false);
       return;
     }
 
+    setCargando(true);
+
     try {
       const { registerUser } = await import("../api");
-      const respuesta = await registerUser(registerForm);
+      const respuesta = await registerUser({
+        Nombre: nombre,
+        Apellido: apellido,
+        Email: email,
+        Password_hash: password,
+      });
       setCargando(false);
 
       if (respuesta.ok) {
@@ -175,6 +237,9 @@ export default function Login() {
                     value={loginForm.Email}
                     onChange={handleLoginChange}
                     className="bg-[#07152D] hover:border-amber-400"
+                    required
+                    maxLength={100}
+                    autoComplete="username"
                   />
                   <Field
                     id="login-password"
@@ -186,6 +251,9 @@ export default function Login() {
                     value={loginForm.Password_hash}
                     onChange={handleLoginChange}
                     className="bg-[#07152D] hover:border-amber-400"
+                    required
+                    maxLength={128}
+                    autoComplete="current-password"
                   />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -248,6 +316,12 @@ export default function Login() {
                         value={registerForm.Nombre}
                         onChange={handleRegisterChange}
                         className="bg-[#07152D] hover:border-amber-400"
+                        required
+                        minLength={2}
+                        maxLength={50}
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+"
+                        title="Solo letras, entre 2 y 50 caracteres"
+                        autoComplete="given-name"
                       />
                     </div>
                     <div className="flex-1">
@@ -261,6 +335,12 @@ export default function Login() {
                         value={registerForm.Apellido}
                         onChange={handleRegisterChange}
                         className="bg-[#07152D] hover:border-amber-400"
+                        required
+                        minLength={2}
+                        maxLength={50}
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+"
+                        title="Solo letras, entre 2 y 50 caracteres"
+                        autoComplete="family-name"
                       />
                     </div>
                   </div>
@@ -275,6 +355,9 @@ export default function Login() {
                     value={registerForm.Email}
                     onChange={handleRegisterChange}
                     className="bg-[#07152D] hover:border-amber-400"
+                    required
+                    maxLength={100}
+                    autoComplete="email"
                   />
                   <Field
                     id="reg-password"
@@ -282,11 +365,23 @@ export default function Login() {
                     type="password"
                     name="Password_hash"
                     icon={<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M7 10.0288C7.47142 10 8.05259 10 8.8 10H15.2C15.9474 10 16.5286 10 17 10.0288M7 10.0288C6.41168 10.0647 5.99429 10.1455 5.63803 10.327C5.07354 10.6146 4.6146 11.0735 4.32698 11.638C4 12.2798 4 13.1198 4 14.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V14.8C20 13.1198 20 12.2798 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C18.0057 10.1455 17.5883 10.0647 17 10.0288M7 10.0288V8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V10.0288" stroke="#ffbe33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     value={registerForm.Password_hash}
                     onChange={handleRegisterChange}
                     className="bg-[#07152D] hover:border-amber-400"
+                    required
+                    minLength={8}
+                    maxLength={64}
+                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}"
+                    title={PASSWORD_HINT}
+                    autoComplete="new-password"
+// pattern: expresión regular que exige contraseña fuerte (min./mayús./número/símbolo, 8-64 caracteres);
+// el navegador bloquea el envío del formulario si no se cumple (validación HTML5 nativa).
+// title: mensaje que el navegador muestra en el tooltip de error cuando el pattern no se cumple.
+// autoComplete="new-password": le indica al navegador/gestor de contraseñas que es un campo
+// para crear una contraseña nueva (evita autocompletar con una guardada y sugiere generar una segura).
                   />
+                  <p className="text-xs text-zinc-500 -mt-2">{PASSWORD_HINT}</p>
 
                   <div className="flex items-center gap-2">
                     <input type="checkbox" id="terminos" className="w-4 h-4 accent-amber-400 cursor-pointer" />

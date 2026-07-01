@@ -14,6 +14,14 @@ try {
 
 const PESO_LABELS = { 1: 'Muy bajo', 2: 'Bajo', 3: 'Medio', 4: 'Alto', 5: 'Muy alto' }
 
+// Reglas de validación del formulario de dependientes.
+// Deben coincidir (o ser más estrictas) con las validaciones del backend.
+const NOMBRE_MAX_LENGTH = 80
+const OCUPACION_MAX_LENGTH = 80
+const PESO_VALORES_VALIDOS = [1, 2, 3, 4, 5]
+// Fecha máxima permitida: hoy (un dependiente no puede haber nacido en el futuro)
+const HOY_ISO = new Date().toISOString().split('T')[0]
+
 // Clases reutilizables para el modal
 const inputModal = "w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/[0.07] text-[#f4f4f5] text-sm outline-none mt-1.5"
 const labelModal = "block text-[0.72rem] font-bold text-[#a1a1aa] uppercase tracking-widest mt-3.5"
@@ -29,6 +37,8 @@ const Dependientes = () => {
   const [mostrarModal, setMostrarModal] = useState(false)
   const [editandoId,   setEditandoId]   = useState(null)
   const [formDatos,    setFormDatos]    = useState({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' })
+  // evita doble envío del formulario (doble clic / doble submit)
+  const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
     fetch('/api/dependientes', { headers: { Authorization: `Bearer ${token}` } })
@@ -41,24 +51,54 @@ const Dependientes = () => {
 
   const handleSubmit = async e => {
     e.preventDefault()
-    const payload = { ...formDatos, Peso_economico: parseInt(formDatos.Peso_economico), Fecha_nacimiento: formDatos.Fecha_nacimiento || null }
-    if (editandoId) {
-      const res = await fetch(`/api/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
-      if (res.ok) {
-        mostrarToast('Dependiente actualizado correctamente')
-        setDependientes(dependientes.map(d => d.ID_dependientes === editandoId ? { ...payload, ID_dependientes: editandoId } : d))
-      }
-      else { const data = await res.json(); alert(data.error || 'Error al actualizar') }
-    } else {
-      const res = await fetch('/api/dependientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
-      const data = await res.json()
-      if (res.ok) {
-        mostrarToast('Dependiente registrado correctamente')
-        setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
-      }
-      else alert(data.error || 'Error al guardar')
+
+    const nombre = formDatos.Nombre.trim()
+    const ocupacion = formDatos.Ocupacion.trim()
+    const peso = parseInt(formDatos.Peso_economico)
+
+    if (!nombre) return alert('El nombre es obligatorio')
+    if (nombre.length > NOMBRE_MAX_LENGTH) {
+      return alert(`El nombre no puede superar los ${NOMBRE_MAX_LENGTH} caracteres`)
     }
-    cerrarModal()
+    if (ocupacion.length > OCUPACION_MAX_LENGTH) {
+      return alert(`La ocupación no puede superar los ${OCUPACION_MAX_LENGTH} caracteres`)
+    }
+    if (!formDatos.Relacion) return alert('La relación es obligatoria')
+    if (!formDatos.Fecha_nacimiento) return alert('La fecha de nacimiento es obligatoria')
+    if (formDatos.Fecha_nacimiento > HOY_ISO) {
+      return alert('La fecha de nacimiento no puede ser posterior a hoy')
+    }
+    if (!PESO_VALORES_VALIDOS.includes(peso)) {
+      return alert('El peso económico no es válido')
+    }
+    if (guardando) return // evita doble envío si ya hay una petición en curso
+
+    const payload = { ...formDatos, Nombre: nombre, Ocupacion: ocupacion, Peso_economico: peso, Fecha_nacimiento: formDatos.Fecha_nacimiento || null }
+
+    setGuardando(true)
+    try {
+      if (editandoId) {
+        const res = await fetch(`/api/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+        if (res.ok) {
+          mostrarToast('Dependiente actualizado correctamente')
+          setDependientes(dependientes.map(d => d.ID_dependientes === editandoId ? { ...payload, ID_dependientes: editandoId } : d))
+        }
+        else { const data = await res.json(); alert(data.error || 'Error al actualizar') }
+      } else {
+        const res = await fetch('/api/dependientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+        const data = await res.json()
+        if (res.ok) {
+          mostrarToast('Dependiente registrado correctamente')
+          setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
+        }
+        else alert(data.error || 'Error al guardar')
+      }
+      cerrarModal()
+    } catch (error) {
+      alert('Error de conexión con el servidor')
+    } finally {
+      setGuardando(false)
+    }
   }
 
   const handleEditar = d => {
@@ -69,12 +109,16 @@ const Dependientes = () => {
 
   const handleEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
-    const res = await fetch(`/api/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-    if (res.ok) {
-      mostrarToast('Dependiente eliminado correctamente')
-      setDependientes(dependientes.filter(d => d.ID_dependientes !== id))
+    try {
+      const res = await fetch(`/api/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      if (res.ok) {
+        mostrarToast('Dependiente eliminado correctamente')
+        setDependientes(dependientes.filter(d => d.ID_dependientes !== id))
+      }
+      else alert('Error al eliminar el dependiente')
+    } catch (error) {
+      alert('Error de conexión con el servidor')
     }
-    else alert('Error al eliminar el dependiente')
   }
 
   const abrirModal  = () => { setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }); setEditandoId(null); setMostrarModal(true) }
@@ -197,10 +241,10 @@ const Dependientes = () => {
             <form onSubmit={handleSubmit} className="flex flex-col gap-1">
 
               <label className={labelModal}>Nombre *</label>
-              <input className={inputModal} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required placeholder="Nombre del dependiente" />
+              <input className={inputModal} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required maxLength={NOMBRE_MAX_LENGTH} disabled={guardando} placeholder="Nombre del dependiente" />
 
               <label className={labelModal}>Relación *</label>
-              <select className={inputModal} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required>
+              <select className={inputModal} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
                 <option value="">Selecciona una relación</option>
                 {['Hijo','Hija','Hermano','Hermana','Padre','Madre','Abuelo','Abuela','Otro'].map(r => (
                   <option key={r} value={r}>{r}</option>
@@ -208,13 +252,13 @@ const Dependientes = () => {
               </select>
 
               <label className={labelModal}>Ocupación</label>
-              <input className={inputModal} type="text" name="Ocupacion" value={formDatos.Ocupacion} onChange={handleChange} placeholder="Ocupación del dependiente" />
+              <input className={inputModal} type="text" name="Ocupacion" value={formDatos.Ocupacion} onChange={handleChange} maxLength={OCUPACION_MAX_LENGTH} disabled={guardando} placeholder="Ocupación del dependiente" />
 
               <label className={labelModal}>Fecha de Nacimiento *</label>
-              <input className={inputModal} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required />
+              <input className={inputModal} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required max={HOY_ISO} disabled={guardando} />
 
               <label className={labelModal}>Peso Económico</label>
-              <select className={inputModal} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange}>
+              <select className={inputModal} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
                 <option value="1">1 - Muy bajo</option>
                 <option value="2">2 - Bajo</option>
                 <option value="3">3 - Medio</option>
@@ -225,14 +269,16 @@ const Dependientes = () => {
               <div className="mt-6 flex gap-2.5">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold cursor-pointer border-none text-white"
+                  disabled={guardando}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold cursor-pointer border-none text-white disabled:opacity-50"
                   style={{ background: 'linear-gradient(135deg, #818cf8, #6366f1)' }}>
-                  Guardar
+                  {guardando ? 'Guardando...' : 'Guardar'}
                 </button>
                 <button
                   type="button"
                   onClick={cerrarModal}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold cursor-pointer bg-transparent text-[#a1a1aa] border border-white/15 hover:bg-white/[0.07] transition-colors duration-150">
+                  disabled={guardando}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold cursor-pointer bg-transparent text-[#a1a1aa] border border-white/15 hover:bg-white/[0.07] transition-colors duration-150 disabled:opacity-50">
                   Cancelar
                 </button>
               </div>
