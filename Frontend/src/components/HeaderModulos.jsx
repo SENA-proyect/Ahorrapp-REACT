@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useNotificaciones } from './NotificacionesContext'
 
 const navItems = [
   { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
@@ -12,13 +13,36 @@ const navItems = [
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
   { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
   { href: '/Noticias', emoji: '📰', label: 'Noticias' },
-  { href: '/Exportar', emoji: '📈', label: 'Reportes' },
+  // { href: '/Exportar', emoji: '📈', label: 'Reportes' },
 ]
 
 export default function HeaderModulos({ section = 'Dashboard' }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { noLeidasCount, notificacionPendiente, limpiarNotificacionPendiente } = useNotificaciones()
+  const [mensajeVisible, setMensajeVisible] = useState(null)
+  const [pulsando, setPulsando] = useState(false)
+  const timeoutRef = useRef(null)
+
+
+  useEffect(() => {
+    if (!notificacionPendiente) return
+
+    setMensajeVisible(notificacionPendiente.mensaje)
+    setPulsando(true)
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => {
+      setMensajeVisible(null)
+      setPulsando(false)
+      limpiarNotificacionPendiente()
+    }, 3000)
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [notificacionPendiente, limpiarNotificacionPendiente])
 
   const navButtonClass = isActive =>
     isActive
@@ -51,17 +75,51 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
             </span>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="justify-self-end flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-bold rounded-xl sm:rounded-2xl border border-white/10 bg-transparent text-white transition-all duration-300 hover:bg-red-600 hover:border-red-500/40 hover:-translate-y-px hover:shadow-[0_4px_10px_rgba(228,33,33,0.4)]"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            
-            <span className="hidden sm:inline">Cerrar Sesión</span>
-            <span className="sm:hidden">Salir</span>
-          </button>
+          <div className="justify-self-end flex items-center gap-2">
+            <div className="relative">
+              <button
+                onClick={() => navigate('/Configuracion?tab=notificaciones')}
+                aria-label="Notificaciones"
+                className={`relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border bg-transparent text-white transition-all duration-300 hover:bg-amber-500/20 hover:border-amber-400/50 hover:-translate-y-px ${pulsando ? 'animate-[campana-pulso_0.6s_ease-in-out_2]' : 'border-white/10'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                {noLeidasCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[0.65rem] font-bold leading-none">
+                    {noLeidasCount > 99 ? '99+' : noLeidasCount}
+                  </span>
+                )}
+              </button>
+
+              {mensajeVisible && (
+                <div className="absolute right-0 top-full mt-2 w-60 sm:w-72 px-3.5 py-2.5 rounded-xl border border-amber-400/30 bg-slate-950/95 backdrop-blur-lg shadow-[0_8px_24px_rgba(0,0,0,0.45)] text-xs sm:text-sm text-white z-20 animate-[anclado-in_0.2s_ease-out]">
+                  {mensajeVisible}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-bold rounded-xl sm:rounded-2xl border border-white/10 bg-transparent text-white transition-all duration-300 hover:bg-red-600 hover:border-red-500/40 hover:-translate-y-px hover:shadow-[0_4px_10px_rgba(228,33,33,0.4)]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              
+              <span className="hidden sm:inline">Cerrar Sesión</span>
+              <span className="sm:hidden">Salir</span>
+            </button>
+          </div>
         </div>
       </section>
+
+      <style>{`
+        @keyframes campana-pulso {
+          0%, 100% { border-color: rgba(255,255,255,0.1); box-shadow: none; }
+          50% { border-color: rgba(251,191,36,0.7); box-shadow: 0 0 10px rgba(251,191,36,0.5); }
+        }
+        @keyframes anclado-in {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       <nav className="w-full px-4 sm:px-6 md:px-10">
         <div className="md:hidden">

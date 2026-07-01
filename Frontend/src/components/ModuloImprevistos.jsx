@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { getCategorias, getDependientes } from '../api'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import HeaderModulos from './HeaderModulos'
+import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -15,6 +17,8 @@ const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06
 export default function ModuloImprevistos() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
+  const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [imprevistos, setImprevistos] = useState([])
   const [cargando,    setCargando]    = useState(true)
@@ -77,7 +81,12 @@ const abrirEditar = (i) => {
         }),
       })
       const data = await res.json()
-      if (res.ok) { setModalEditar(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Imprevisto actualizado correctamente')
+        revisarAhora()
+        setModalEditar(null)
+        cargar()
+      }
       else setErrorModal(data.mensaje || 'Error al guardar')
     } catch { setErrorModal('Error al conectar con el servidor') }
     finally { setGuardando(false) }
@@ -88,7 +97,12 @@ const abrirEditar = (i) => {
     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${API}/imprevistos/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) { setConfirmarId(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Imprevisto eliminado correctamente')
+        revisarAhora()
+        setConfirmarId(null)
+        cargar()
+      }
     } catch {}
     finally { setEliminando(false) }
   }

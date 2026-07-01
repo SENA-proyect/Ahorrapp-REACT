@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getCategorias, getDependientes } from '../api'
+import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -70,6 +72,8 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
   const cfg   = CONFIG[subtipo]
   const color = COLORES[cfg.color]
   const inputCls = mkInput(color.ring)
+  const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [form,        setForm]        = useState(INICIAL[subtipo])
   const [categorias,  setCategorias]  = useState([])
@@ -111,7 +115,12 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
         }),
       })
       const data = await res.json()
-      if (data.ok) { onGuardado?.(); onCerrar() }
+      if (data.ok) {
+        mostrarToast(`${cfg.label} registrado correctamente`)
+        revisarAhora()
+        onGuardado?.()
+        onCerrar()
+      }
       else setError(data.mensaje || 'Error al registrar')
     } catch { setError('Error al conectar con el servidor') }
     finally { setCargando(false) }

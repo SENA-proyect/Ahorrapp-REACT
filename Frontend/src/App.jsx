@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/AuthContext.jsx';
+import { ToastProvider } from './components/ToastContext.jsx';
+import { NotificacionesProvider } from './components/NotificacionesContext.jsx';
 import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 
 
@@ -28,6 +30,7 @@ import Asistente from './components/Asistente/Asistente';
 import Noticias from './components/Noticias';
 import Export from "./components/exportar.jsx"
 import ModulosPresupuestos from './components/ModulosPresupuestos.jsx'
+import Configuracion from './components/Configuracion.jsx'
 
 // ______________________________________________________________________________________________________________________________________________________________________
 // ruta del archivo corregida debido a actualizacion de la logica al registrar un movimiento para los modulos financieros
@@ -61,8 +64,10 @@ function AsistenteFlotante() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <ToastProvider>
+        <NotificacionesProvider>
+          <BrowserRouter>
+            <Routes>
           {/* ========== RUTAS PÚBLICAS (sin sesión) ========== */}
           <Route path="/" element={<Index />} />
           <Route path="/Login" element={<Login />} />
@@ -181,6 +186,15 @@ function App() {
             }
           />
 
+          <Route
+            path="/Configuracion"
+            element={
+              <ProtectedRoute>
+                <Configuracion />
+              </ProtectedRoute>
+            }
+          />
+
           <Route 
             path="/movimientos/nuevo" 
             element={
@@ -243,7 +257,9 @@ function App() {
         
         {/* Asistente visible en todas las páginas (solo si hay sesión) */}
         <AsistenteFlotante />
-      </BrowserRouter>
+          </BrowserRouter>
+        </NotificacionesProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

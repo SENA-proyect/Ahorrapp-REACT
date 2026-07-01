@@ -1,4 +1,9 @@
 const pool = require("../db/connection");
+const {
+  verificarUmbralGastos,
+  verificarUmbralImprevistos,
+  verificarMetaAhorroAlcanzada,
+} = require ("../service/NotificacionesService");
 
 const getMovimientos = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -152,9 +157,13 @@ const crearMovimiento = async (req, res) => {
     // 3. Confirmar la transacción
     await connection.commit();
 
-    // 4. Ejecutar la actualización POST-COMMIT usando el pool (fuera de la transacción de forma segura)
+   
     if (subtipo_modulo === "Ingreso") {
       await actualizarIngresoReal(ID_usuario);
+    } else if (subtipo_modulo === "Gasto") {
+      await verificarUmbralGastos(ID_usuario);
+    } else if (subtipo_modulo === "Imprevisto") {
+      await verificarUmbralImprevistos(ID_usuario);
     }
 
     return res.status(201).json({
@@ -679,8 +688,6 @@ const actualizarIngresoReal = async (ID_usuario) => {
 
 // ─────────────────────────────────────────────────────────────
 //  PATCH /movimientos/deudas/:id/abonar
-//  Registra un pago de cuota(s) sobre una deuda existente.
-//  Body: { cuotas? }  (default: 1)
 // ─────────────────────────────────────────────────────────────
 const abonarDeuda = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -736,8 +743,6 @@ const abonarDeuda = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────
 //  PATCH /movimientos/ahorros/:id/abonar
-//  Abona un monto al Monto_acumulado de un ahorro existente.
-//  Body: { monto }
 // ─────────────────────────────────────────────────────────────
 const abonarAhorro = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -753,9 +758,9 @@ const abonarAhorro = async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // 1. Verificar propiedad del ahorro
+
     const [[ahorro]] = await connection.query(
-      `SELECT a.ID_ahorros, a.Monto AS meta_monto
+      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Meta AS meta_nombre
        FROM   AHORROS a
        JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
        JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
@@ -768,14 +773,14 @@ const abonarAhorro = async (req, res) => {
       return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
     }
 
-    // 2. Insertar abono en ABONOS_AHORRO
+  
     await connection.query(
       `INSERT INTO ABONOS_AHORRO (ID_ahorros, ID_usuario, Monto, Fecha_registro)
        VALUES (?, ?, ?, CURRENT_DATE)`,
       [id, ID_usuario, monto]
     );
 
-    // 3. Recalcular Monto_acumulado sumando todos los abonos
+
     const [[{ total }]] = await connection.query(
       `SELECT COALESCE(SUM(Monto), 0) AS total
        FROM ABONOS_AHORRO
@@ -783,7 +788,6 @@ const abonarAhorro = async (req, res) => {
       [id]
     );
 
-    // 4. Limitar al tope de la meta
     const nuevoAcumulado = Math.min(Number(total), Number(ahorro.meta_monto));
     const metaAlcanzada  = nuevoAcumulado >= Number(ahorro.meta_monto);
 
@@ -793,6 +797,8 @@ const abonarAhorro = async (req, res) => {
     );
 
     await connection.commit();
+
+    await verificarMetaAhorroAlcanzada(ID_usuario, ahorro, nuevoAcumulado);
 
     res.status(200).json({
       ok:              true,

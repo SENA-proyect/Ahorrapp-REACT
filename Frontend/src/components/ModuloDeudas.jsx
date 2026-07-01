@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { getCategorias, abonarDeuda } from '../api'
 import ModalNuevoMovimiento from './Modalnuevomovimiento'
 import HeaderModulos from './HeaderModulos'
+import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
@@ -55,6 +57,8 @@ const BarraCuotas = ({ monto, cuotas_pagadas: cp, cuotas_total: ct }) => {
 export default function ModuloDeudas() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
+  const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [deudas,         setDeudas]         = useState([])
   const [cargando,       setCargando]       = useState(true)
@@ -132,7 +136,12 @@ export default function ModuloDeudas() {
         }),
       })
       const data = await res.json()
-      if (res.ok) { setModalEditar(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Deuda actualizada correctamente')
+        revisarAhora()
+        setModalEditar(null)
+        cargar()
+      }
       else setErrorModal(data.mensaje || 'Error al guardar')
     } catch { setErrorModal('Error al conectar con el servidor') }
     finally { setGuardando(false) }
@@ -145,7 +154,12 @@ export default function ModuloDeudas() {
     setAbonando(true)
     try {
       const data = await abonarDeuda(modalAbonar.id, cuotas)
-      if (data.ok) { setModalAbonar(null); cargar() }
+      if (data.ok) {
+        mostrarToast(data.estado === 'pagada' ? 'Deuda pagada completamente' : 'Abono registrado correctamente')
+        revisarAhora()
+        setModalAbonar(null)
+        cargar()
+      }
       else setErrorModal(data.mensaje || 'Error al abonar')
     } catch { setErrorModal('Error al conectar con el servidor') }
     finally { setAbonando(false) }
@@ -156,7 +170,12 @@ export default function ModuloDeudas() {
     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${API}/deudas/${confirmarId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) { setConfirmarId(null); cargar() }
+      if (res.ok) {
+        mostrarToast('Deuda eliminada correctamente')
+        revisarAhora()
+        setConfirmarId(null)
+        cargar()
+      }
     } catch {}
     finally { setEliminando(false) }
   }

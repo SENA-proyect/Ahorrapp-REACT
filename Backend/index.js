@@ -15,6 +15,9 @@ const bolsaRoutes         = require('./src/routes/alphaVantageRoutes');
 const exportarRoutes      = require('./src/routes/exportar');
 const PresupuestosRoutes  = require('./src/routes/PresupuestosRoutes');
 const dashboardRoutes     = require('./src/routes/dashboardRoutes');
+const NotificacionesRoutes = require ('./src/routes/NotificacionesRoutes');
+
+const { iniciarVencimientosJob } = require('./src/service/jobs/VencimientosJob');
 
 const app = express();
 
@@ -37,6 +40,7 @@ app.use('/api',              bolsaRoutes);
 app.use('/api/exportar',     exportarRoutes);
 app.use('/api/presupuestos', PresupuestosRoutes);
 app.use('/api/dashboard',    dashboardRoutes);
+app.use('/api', NotificacionesRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {
@@ -89,10 +93,14 @@ try {
     console.log(`   POST https://localhost:${PORT}/api/ai/chat`);
     console.log(`   GET  https://localhost:${PORT}/api/dashboard`);
     console.log(`   GET  https://localhost:${PORT}/api/presupuestos`);
+    console.log(`   GET  https://localhost:${PORT}/api/notificaciones`);
     console.log(`\n⚠️  Configuración para POSTMAN:`);
     console.log(`   1. Settings (engranaje)`);
     console.log(`   2. General`);
     console.log(`   3. SSL certificate verification: OFF`);
+
+    // Cron de notificaciones: solo se inicia si el servidor levantó con éxito
+    iniciarVencimientosJob();
   });
 
 } catch (error) {

@@ -1,8 +1,6 @@
-// src/components/PanelMovimientos.jsx
 import { Link } from 'react-router-dom';
 
-// Configuración visual por tipo de movimiento: color e icono.
-// Centralizar esto en un objeto evita repetir ternarios largos en el JSX.
+
 const TIPO_CONFIG = {
   Ahorro: {
     color: '#e0b855',

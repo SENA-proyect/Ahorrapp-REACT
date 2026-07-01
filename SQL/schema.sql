@@ -269,19 +269,56 @@ CREATE TABLE IF NOT EXISTS HISTORIAL (
 -- ========================================================================
 --     TABLA: notificaciones
 -- ========================================================================
+
+
 CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
-    ID_notificacion INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la notificación',
-    ID_usuario INT NOT NULL COMMENT 'Usuario destinatario de la notificación',
-    ID_historial INT DEFAULT NULL COMMENT 'Historial relacionado con la notificación',
-    Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL COMMENT 'Tipo de notificación',
+    ID_notificacion INT AUTO_INCREMENT PRIMARY KEY,
+    ID_usuario INT NOT NULL,
+    Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL,
     Entidad_tipo VARCHAR(50) DEFAULT NULL,
     Entidad_id INT DEFAULT NULL,
-    Mensaje TEXT NOT NULL COMMENT 'Contenido de la notificación',
-    Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación de la notificación',
-    Leida BOOLEAN DEFAULT FALSE COMMENT 'Indica si la notificación fue leída',
-    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (ID_historial) REFERENCES HISTORIAL(ID_historial) ON DELETE CASCADE ON UPDATE CASCADE
-)ENGINE=InnoDB;
+    Mensaje TEXT NOT NULL,
+    Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Leida BOOLEAN DEFAULT FALSE COMMENT 'Para la bandeja de entrada del usuario',
+    Archivada BOOLEAN DEFAULT FALSE COMMENT 'TRUE actúa como el "Historial de Notificaciones Pasadas"',
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS PREFERENCIAS_NOTIFICACION (
+    ID_usuario INT NOT NULL,
+    Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL,
+    Activa BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (ID_usuario, Tipo),
+    FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ── Índice de rendimiento ──────────────────────────────────────
+-- Acelera el endpoint de polling (COUNT no leídas) y el listado
+-- paginado, que siempre filtran por estas 3 columnas juntas.
+CREATE INDEX idx_notif_usuario_leida
+    ON NOTIFICACIONES (ID_usuario, Leida, Archivada);
+ 
+-- ── Índice de apoyo para el cron de vencimientos ───────────────
+-- Evita reinsertar la misma notificación de "deuda por vencer"
+-- cada día: el job consulta por Entidad_tipo + Entidad_id antes
+-- de crear una nueva.
+CREATE INDEX idx_notif_entidad
+    ON NOTIFICACIONES (Entidad_tipo, Entidad_id, Tipo);
+
+
+-- CREATE TABLE IF NOT EXISTS NOTIFICACIONES (
+--     ID_notificacion INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la notificación',
+--     ID_usuario INT NOT NULL COMMENT 'Usuario destinatario de la notificación',
+--     ID_historial INT DEFAULT NULL COMMENT 'Historial relacionado con la notificación',
+--     Tipo ENUM('sistema','recordatorio','sugerencia','alerta_presupuesto') NOT NULL COMMENT 'Tipo de notificación',
+--     Entidad_tipo VARCHAR(50) DEFAULT NULL,
+--     Entidad_id INT DEFAULT NULL,
+--     Mensaje TEXT NOT NULL COMMENT 'Contenido de la notificación',
+--     Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación de la notificación',
+--     Leida BOOLEAN DEFAULT FALSE COMMENT 'Indica si la notificación fue leída',
+--     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
+--     FOREIGN KEY (ID_historial) REFERENCES HISTORIAL(ID_historial) ON DELETE CASCADE ON UPDATE CASCADE
+-- )ENGINE=InnoDB;
 
 -- ========================================================================
 --  TABLA: presupuestos  
@@ -293,7 +330,7 @@ CREATE TABLE IF NOT EXISTS PRESUPUESTOS (
     Nombre VARCHAR(80) NOT NULL DEFAULT 'Mi presupuesto' COMMENT 'Nombre descriptivo del perfil',
     Descripcion VARCHAR(255) DEFAULT NULL COMMENT 'Descripción opcional del perfil',
     Activo BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si este perfil es el activo del usuario',
-    Dia_corte TINYINT NOT NULL DEFAULT 1 COMMENT 'Día de corte (1-28)',
+    Dia_corte TINYINT NOT NULL DEFAULT 1 COMMENT 'Día de corte (1-31)',
     
     Porcentaje_gastos DECIMAL(5,2) NOT NULL DEFAULT 40.00,
     Porcentaje_deudas DECIMAL(5,2) NOT NULL DEFAULT 20.00,
@@ -304,7 +341,7 @@ CREATE TABLE IF NOT EXISTS PRESUPUESTOS (
     Fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     -- Validaciones compatibles
-    CONSTRAINT chk_dia_corte CHECK (Dia_corte BETWEEN 1 AND 28),
+    CONSTRAINT chk_dia_corte CHECK (Dia_corte BETWEEN 1 AND 31),
     
     -- Relación
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE

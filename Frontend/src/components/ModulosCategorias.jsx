@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import HeaderModulos from './HeaderModulos'
+import { useToast } from './ToastContext'
+import { useNotificaciones } from './NotificacionesContext'
 // activar SOLO si se utilizan mas adelante
 // import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -17,18 +19,15 @@ import {
 } from '../api'
 
 
-let usuario = null
-try {
-  usuario = JSON.parse(localStorage.getItem('usuario'))
-} catch {
-  usuario = null
-}
+const usuario = JSON.parse(localStorage.getItem('usuario'))
 
 export default function ModuloCategorias() {
 
   // activas SOLO si se usan mas adelante
   // const navigate = useNavigate()
   // const location = useLocation()
+  const { mostrarToast } = useToast()
+  const { revisarAhora } = useNotificaciones()
 
   const [categorias, setCategorias] = useState([])
   const [modalAgregar, setModalAgregar] = useState(false)
@@ -36,6 +35,8 @@ export default function ModuloCategorias() {
   const [categoriaEdit, setCategoriaEdit] = useState(null)
   const [formNombre, setFormNombre] = useState('')
   const [formDesc, setFormDesc] = useState('')
+  // evita doble envío del formulario (doble clic / doble submit)
+  const [guardando, setGuardando] = useState(false)
 // agregado pero no revizado, verificar funcionalidad
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -94,33 +95,29 @@ export default function ModuloCategorias() {
   const handleAgregar = async () => {
     if (!formNombre.trim()) return alert('El nombre es obligatorio')
 
-    try {
-      const respuesta = await crearCategoria({
-        nombre: formNombre.trim(),
-        descripcion: formDesc.trim(),
-      })
+    const respuesta = await crearCategoria({
+      nombre: formNombre.trim(),
+      descripcion: formDesc.trim(),
+    })
 
-      if (respuesta.ok) {
-        setCategorias(prev => [
-          ...prev,
-          {
-            id: respuesta.id,
-            nombre: formNombre.trim(),
-            descripcion: formDesc.trim(),
-            activa: true,
-            sistema: false,
-            es_global: false,
-            total_movimientos: 0,
-          },
-        ])
-        setFormNombre('')
-        setFormDesc('')
-        setModalAgregar(false)
-      } else {
-        alert(respuesta.mensaje || 'Error al crear la categoría')
-      }
-    } catch (error) {
-      alert(error.message || 'Error al crear la categoría')
+    if (respuesta.ok) {
+      setCategorias(prev => [
+        ...prev,
+        {
+          id: respuesta.id,
+          nombre: formNombre.trim(),
+          descripcion: formDesc.trim(),
+          activa: true,
+          sistema: false,
+          es_global: false,
+          total_movimientos: 0,
+        },
+      ])
+      setFormNombre('')
+      setFormDesc('')
+      setModalAgregar(false)
+    } else {
+      alert(respuesta.mensaje || 'Error al crear la categoría')
     }
   }
 
@@ -132,22 +129,18 @@ export default function ModuloCategorias() {
   const handleGuardarEdicion = async () => {
     if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
 
-    try {
-      const respuesta = await editarCategoria(categoriaEdit.id, {
-        nombre: categoriaEdit.nombre,
-        descripcion: categoriaEdit.descripcion,
-      })
+    const respuesta = await editarCategoria(categoriaEdit.id, {
+      nombre: categoriaEdit.nombre,
+      descripcion: categoriaEdit.descripcion,
+    })
 
-      if (respuesta.ok) {
-        setCategorias(prev =>
-          prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
-        )
-        setModalEditar(false)
-      } else {
-        alert(respuesta.mensaje || 'Error al editar la categoría')
-      }
-    } catch (error) {
-      alert(error.message || 'Error al editar la categoría')
+    if (respuesta.ok) {
+      setCategorias(prev =>
+        prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
+      )
+      setModalEditar(false)
+    } else {
+      alert(respuesta.mensaje || 'Error al editar la categoría')
     }
   }
 
@@ -157,15 +150,12 @@ export default function ModuloCategorias() {
     try {
       const respuesta = await deshabilitarCategoria(id)
 
-      if (respuesta.ok) {
-        setCategorias(prev =>
-          prev.map(c => (c.id === id ? { ...c, activa: false } : c))
-        )
-      } else {
-        alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
-      }
-    } catch (error) {
-      alert(error.message || 'Error al deshabilitar la categoría')
+    if (respuesta.ok) {
+      setCategorias(prev =>
+        prev.map(c => (c.id === id ? { ...c, activa: false } : c))
+      )
+    } else {
+      alert(respuesta.mensaje || 'Error al deshabilitar la categoría')
     }
   }
 
@@ -173,15 +163,12 @@ export default function ModuloCategorias() {
     try {
       const respuesta = await habilitarCategoria(id)
 
-      if (respuesta.ok) {
-        setCategorias(prev =>
-          prev.map(c => (c.id === id ? { ...c, activa: true } : c))
-        )
-      } else {
-        alert(respuesta.mensaje || 'Error al habilitar la categoría')
-      }
-    } catch (error) {
-      alert(error.message || 'Error al habilitar la categoría')
+    if (respuesta.ok) {
+      setCategorias(prev =>
+        prev.map(c => (c.id === id ? { ...c, activa: true } : c))
+      )
+    } else {
+      alert(respuesta.mensaje || 'Error al habilitar la categoría')
     }
   }
 
@@ -221,9 +208,7 @@ export default function ModuloCategorias() {
       <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6 md:gap-6 md:p-8">
         <div>
           <p className="text-sm text-zinc-400">Bienvenido de vuelta</p>
-          <h2 className="break-words text-xl font-extrabold text-white sm:text-2xl">
-            {usuario?.nombre || 'Usuario'} <span>👋</span>
-          </h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white">{usuario?.nombre || 'Usuario'} <span>👋</span></h2>
         </div>
 
         <article className="flex flex-col justify-between gap-4 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_left,rgba(16,185,129,0.25),rgba(5,150,105,0.04))] px-5 py-5 sm:flex-row sm:items-center sm:px-8 sm:py-6">
@@ -425,6 +410,10 @@ export default function ModuloCategorias() {
               placeholder="Ej: Ropa, Mascotas..."
               value={formNombre}
               onChange={e => setFormNombre(e.target.value)}
+              required
+              minLength={NOMBRE_MIN_LENGTH}
+              maxLength={NOMBRE_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <label className={labelClass}>Descripción</label>
@@ -434,20 +423,24 @@ export default function ModuloCategorias() {
               placeholder="Descripción opcional"
               value={formDesc}
               onChange={e => setFormDesc(e.target.value)}
+              maxLength={DESCRIPCION_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={closeModal}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
+                disabled={guardando}
+                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleAgregar}
-                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
+                disabled={guardando}
+                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900 disabled:opacity-50"
               >
-                Guardar
+                {guardando ? 'Guardando...' : 'Guardar'}
               </button>
             </div>
           </div>
@@ -465,6 +458,10 @@ export default function ModuloCategorias() {
               type="text"
               value={categoriaEdit.nombre}
               onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))}
+              required
+              minLength={NOMBRE_MIN_LENGTH}
+              maxLength={NOMBRE_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <label className={labelClass}>Descripción</label>
@@ -473,20 +470,24 @@ export default function ModuloCategorias() {
               type="text"
               value={categoriaEdit.descripcion || ''}
               onChange={e => setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))}
+              maxLength={DESCRIPCION_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={closeModal}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
+                disabled={guardando}
+                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleGuardarEdicion}
-                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
+                disabled={guardando}
+                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900 disabled:opacity-50"
               >
-                Guardar cambios
+                {guardando ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
           </div>
