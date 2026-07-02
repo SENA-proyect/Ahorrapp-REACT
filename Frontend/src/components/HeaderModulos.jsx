@@ -59,7 +59,7 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
       <section className="w-full max-w-[1400px] flex flex-col gap-4 px-4 sm:px-6 md:px-10 mb-4 sm:mb-6">
         <div className="w-full grid grid-cols-2 sm:grid-cols-3 items-center gap-3">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/IndexLogeado')}
             className="justify-self-start flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-bold rounded-xl sm:rounded-2xl border border-white/10 bg-transparent text-white transition-all duration-300 hover:bg-green-600 hover:border-green-500/50 hover:-translate-y-px hover:shadow-[0_4px_10px_rgba(31,187,31,0.4)]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-5.25H9V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" /></svg>
