@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     -- linea comentada debido a cambio de la logica de roles a tabla separada
     -- Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
     -- __________________________________________________________________________________________
+    
+    Reset_code VARCHAR(255) DEFAULT NULL COMMENT 'Hash del código de recuperación',
+    Reset_code_expires DATETIME DEFAULT NULL COMMENT 'Expiración del código de recuperación',
     Password_hash VARCHAR(255) NOT NULL COMMENT 'Hash de la contraseña del usuario',
     Email VARCHAR(255) NOT NULL UNIQUE COMMENT 'Correo electrónico principal',
     Activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el usuario está activo o inactivo',

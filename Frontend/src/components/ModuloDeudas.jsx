@@ -375,15 +375,15 @@ export default function ModuloDeudas() {
             <input className={inputCls} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta..." value={modalEditar.fuente} onChange={handleChange} />
             <label className={labelCls}>Monto *</label>
             <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
-            <label className={labelCls}>Categoría</label>
-            <select className={inputCls} name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
+            <label className="bg-red-500">Categoría</label>
+            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
               <option value="">Sin categoría</option>
               {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
             <label className={labelCls}>Estado</label>
-            <select className={inputCls} name="estado" value={modalEditar.estado} onChange={handleChange}>
+            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="estado" value={modalEditar.estado} onChange={handleChange}>
               <option value="pendiente">Pendiente</option>
               <option value="pagada">Pagada</option>
             </select>

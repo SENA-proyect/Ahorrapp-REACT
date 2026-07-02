@@ -244,7 +244,7 @@ const Dependientes = () => {
               <input className={inputModal} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required maxLength={NOMBRE_MAX_LENGTH} disabled={guardando} placeholder="Nombre del dependiente" />
 
               <label className={labelModal}>Relación *</label>
-              <select className={inputModal} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
+              <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
                 <option value="">Selecciona una relación</option>
                 {['Hijo','Hija','Hermano','Hermana','Padre','Madre','Abuelo','Abuela','Otro'].map(r => (
                   <option key={r} value={r}>{r}</option>
@@ -258,7 +258,7 @@ const Dependientes = () => {
               <input className={inputModal} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required max={HOY_ISO} disabled={guardando} />
 
               <label className={labelModal}>Peso Económico</label>
-              <select className={inputModal} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
+              <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
                 <option value="1">1 - Muy bajo</option>
                 <option value="2">2 - Bajo</option>
                 <option value="3">3 - Medio</option>
