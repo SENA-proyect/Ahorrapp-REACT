@@ -9,11 +9,12 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 // ====================================================
 // Componentes públicos
 // ====================================================
-import ConfirmacionCambioContrasena from './components/ConfirmacionCambioContrasena.jsx'
+import ConfirmacionCambioContrasena from './components/IngresoNuevaContrasena.jsx'
 import Index from './components/Index.jsx';
 import Login from './components/Login.jsx';
 import OlvidarContrasena from './components/OlvidarContrasena.jsx';
 import VerificacionCorreo from './components/VerificacionCorreo.jsx';
+import IngresoNuevaContrasena from './components/IngresoNuevaContrasena.jsx';
 
 // ====================================================
 // Componentes protegidos (requieren sesión)
@@ -76,6 +77,8 @@ function App() {
           <Route path="/OlvidarContrasena" element={<OlvidarContrasena />} />
           <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
           <Route path="/ConfirmacionCambioContrasena" element={<ConfirmacionCambioContrasena />} />
+          <Route path="/IngresoNuevaContrasena" element={<IngresoNuevaContrasena />} />
+          
 
 
           

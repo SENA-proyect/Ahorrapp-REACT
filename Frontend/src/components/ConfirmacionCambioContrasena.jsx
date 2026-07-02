@@ -12,7 +12,7 @@ export default function ConfirmacionCambioContrasena() {
   }, [resetToken, navigate]);
 
   const handleContinue = () => {
-    navigate("/IngresarNuevaContrasena", { state: { resetToken } });
+    navigate("/IngresoNuevaContrasena", { state: { resetToken } });
   };
 
   return (
