@@ -74,12 +74,12 @@ export default function Index() {
           </p>
 
           <div className="relative z-10 flex items-center justify-center gap-4">
-            <Link to="/Dashboard">
+            <Link to="/Login">
               <button
                 className="cursor-pointer rounded-md bg-[#e0b855] px-8 py-3 text-sm font-bold uppercase tracking-[0.05em] text-[#080c18] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#c9a84c] hover:shadow-[0_8px_24px_rgba(224,184,85,0.35)]"
                 onClick={() => navigate('/Login')}
               >
-                Vuelve al dashboard!
+                Empezar ahora
               </button>
             </Link>
           </div>
