@@ -8,9 +8,47 @@ const authHeaders = () => ({
 
 const fetchJSON = async (url, options = {}) => {
   const res = await fetch(url, { headers: authHeaders(), ...options });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`HTTPS ${res.status}`);
   return res.json();
 };
+
+// Helper específico para endpoints públicos (sin token, ya que el usuario
+// aún no está logueado en el flujo de recuperación de contraseña)
+const fetchPublicJSON = async (url, options = {}) => {
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const error = new Error(data.mensaje || `HTTP ${res.status}`);
+    error.response = { status: res.status, data };
+    throw error;
+  }
+
+  return data;
+};
+
+// ── Olvidar contraseña ──────────────────────────────────────────────────────────────────────
+export const forgotPassword = (email) =>
+  fetchPublicJSON(`${API_URL}/auth/forgot-password`, {
+    method: "POST",
+    body: JSON.stringify({ Email: email }),
+  });
+
+export const verifyResetCode = (email, code) =>
+  fetchPublicJSON(`${API_URL}/auth/verify-reset-code`, {
+    method: "POST",
+    body: JSON.stringify({ Email: email, code }),
+  });
+
+export const resetPassword = (resetToken, nuevaPassword) =>
+  fetchPublicJSON(`${API_URL}/auth/reset-password`, {
+    method: "POST",
+    body: JSON.stringify({ resetToken, nuevaPassword }),
+  });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const registerUser = (datos) =>

@@ -1,24 +1,48 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { forgotPassword } from "../api";
 
 export default function OlvidarContra() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  const handleSubmit = async () => {
+    if (!isValid || loading) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await forgotPassword(email);
+      // El backend siempre responde "ok" (exista o no el correo), así que avanzamos directo
+      navigate("/VerificacionCorreo", { state: { email } });
+    } catch (err) {
+      setError(
+        err.response?.data?.mensaje || "Ocurrió un error, intenta de nuevo"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#080b14] relative overflow-hidden px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#080c18] relative overflow-hidden px-4">
 
       {/* Ambient glows */}
-      <div className="absolute -top-32 -left-24 w-96 h-96 bg-violet-700/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -right-16 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-32 -left-24 w-96 h-96 bg-[#e0b855]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -right-16 w-72 h-72 bg-[#c9a84c]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Card */}
-      <div className="relative z-10 w-full max-w-md bg-white/[0.03] border border-white/[0.08] rounded-3xl p-10 backdrop-blur-xl">
+      <div className="relative z-10 w-full max-w-md bg-[#0d1526]/80 border border-[#e0b855]/10 rounded-3xl p-10 backdrop-blur-xl">
 
         {/* Brand */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-            LULU
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#e0b855] to-[#c9a84c] flex items-center justify-center text-[#080c18] text-sm font-bold">
+            AH
           </div>
           <p className="text-center text-white/90 text-sm font-semibold tracking-wide">AhorrApp</p>
         </div>
@@ -43,36 +67,43 @@ export default function OlvidarContra() {
               placeholder="tu@correo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3.5 pl-9 pr-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-violet-500/60 focus:bg-violet-500/[0.06] transition-all"
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              className="w-full bg-white/[0.04] border border-white/10 rounded-xl py-3.5 pl-9 pr-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-[#e0b855]/60 focus:bg-[#e0b855]/[0.06] transition-all"
             />
           </div>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <p className="text-red-400 text-xs mb-4 -mt-1">{error}</p>
+        )}
+
         {/* Info hint */}
-        <div className="flex items-start gap-2.5 bg-violet-500/[0.07] border border-violet-500/20 rounded-xl px-4 py-3.5 mb-8">
-          <span className="text-violet-400 text-sm mt-px flex-shrink-0">ℹ</span>
-          <p className="text-violet-300/70 text-xs leading-relaxed">
+        <div className="flex items-start gap-2.5 bg-[#e0b855]/[0.07] border border-[#e0b855]/20 rounded-xl px-4 py-3.5 mb-8">
+          <span className="text-[#e0b855] text-sm mt-px flex-shrink-0">ℹ</span>
+          <p className="text-[#e0b855]/70 text-xs leading-relaxed">
             Recibirás un código de 6 dígitos en tu bandeja de entrada. Revisa también tu carpeta de spam.
           </p>
         </div>
 
         {/* Submit button */}
         <button
-          disabled={!isValid}
+          onClick={handleSubmit}
+          disabled={!isValid || loading}
           className={`w-full py-4 rounded-xl text-sm font-semibold transition-all mb-6 ${
-            isValid
-              ? "bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:opacity-90 active:scale-[0.98]"
+            isValid && !loading
+              ? "bg-gradient-to-r from-[#e0b855] to-[#c9a84c] text-[#080c18] hover:opacity-90 active:scale-[0.98]"
               : "bg-white/[0.05] text-white/20 cursor-not-allowed"
           }`}
         >
-          Enviar código
+          {loading ? "Enviando..." : "Enviar código"}
         </button>
 
         {/* Footer */}
         <p className="text-center text-xs text-white/30">
           ¿Recordaste tu contraseña?{" "}
           <a href="/Login">
-            <span className="text-violet-400 font-medium cursor-pointer hover:text-violet-300 transition-colors">
+            <span className="text-[#e0b855] font-medium cursor-pointer hover:text-[#c9a84c] transition-colors">
               Iniciar sesión
             </span>
           </a>
