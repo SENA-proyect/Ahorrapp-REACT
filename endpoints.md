@@ -1776,13 +1776,19 @@
 }
 ```
 
-
 # Errores HTTP
 
 | Código | Nombre | Causa |
 |---|---|---|
 |200|OK|Solicitud procesada correctamente.|
 |201|Created|Recurso creado exitosamente.|
+|300|Multiple Choices|Existen múltiples representaciones del recurso y el cliente debe elegir una.|
+|301|Moved Permanently|El recurso fue movido permanentemente a una nueva URL.|
+|302|Found|El recurso se encuentra temporalmente en otra ubicación.|
+|303|See Other|La respuesta debe obtenerse mediante una solicitud GET a otra URL.|
+|304|Not Modified|El recurso no ha cambiado desde la última solicitud, por lo que puede utilizarse la versión almacenada en caché.|
+|307|Temporary Redirect|Redirección temporal manteniendo el mismo método HTTP.|
+|308|Permanent Redirect|Redirección permanente manteniendo el mismo método HTTP.|
 |400|Bad Request|Datos inválidos o incompletos.|
 |401|Unauthorized|No se envió el token JWT o no es válido.|
 |403|Forbidden|El usuario autenticado no tiene permisos o el token expiró.|
