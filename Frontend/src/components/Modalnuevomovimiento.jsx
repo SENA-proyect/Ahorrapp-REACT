@@ -172,7 +172,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
             <label className={labelCls}>Fuente</label>
             <input className={inputCls} type="text" name="fuente" placeholder="Ej: Salario, Freelance..." value={form.fuente} onChange={handleChange} />
             <label className={labelCls}>Categoría</label>
-            <select className={inputCls} name="id_categoria" value={form.id_categoria} onChange={handleChange}>
+            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={form.id_categoria} onChange={handleChange}>
               <option value="">Sin categoría</option>
               {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
@@ -206,7 +206,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
 
           {subtipo === 'Gasto' && <>
             <label className={labelCls}>Categoría</label>
-            <select className={inputCls} name="id_categoria" value={form.id_categoria} onChange={handleChange}>
+            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={form.id_categoria} onChange={handleChange}>
               <option value="">Sin categoría</option>
               {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
