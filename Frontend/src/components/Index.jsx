@@ -38,7 +38,7 @@ export default function Index() {
           </h2>
         </div>
 
-        <Link to="/ConfirmacionCodigo">
+        <Link to="/Login">
           <button
             className="cursor-pointer rounded-md border-[1.5px] border-[#c9a84c]/70 bg-transparent px-[22px] py-2.5 text-sm font-semibold tracking-[0.01em] text-[#e0b855] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#e0b855] hover:bg-[#e0b855] hover:text-[#080c18] hover:shadow-[0_4px_15px_rgba(224,184,85,0.3)]"
             onClick={() => navigate('/Login')}
