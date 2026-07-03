@@ -43,21 +43,21 @@ export default function PanelAdmin() {
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </>
-    ) },
-    { to: '/PanelHistorial', label: 'Panel de Historial', icon: (
-      <>
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
-      </>
-    ) },
-    { to: '/PanelMovimientos', label: 'Panel de Movimientos', icon: (
-      <>
-        <polyline points="16 3 21 8 16 13" />
-        <line x1="21" y1="8" x2="9" y2="8" />
-        <polyline points="8 21 3 16 8 11" />
-        <line x1="3" y1="16" x2="15" y2="16" />
-      </>
-    ) },
+    ) }
+    // { to: '/PanelHistorial', label: 'Panel de Historial', icon: (
+    //   <>
+    //     <circle cx="12" cy="12" r="10" />
+    //     <polyline points="12 6 12 12 16 14" />
+    //   </>
+    // ) },
+    // { to: '/PanelMovimientos', label: 'Panel de Movimientos', icon: (
+    //   <>
+    //     <polyline points="16 3 21 8 16 13" />
+    //     <line x1="21" y1="8" x2="9" y2="8" />
+    //     <polyline points="8 21 3 16 8 11" />
+    //     <line x1="3" y1="16" x2="15" y2="16" />
+    //   </>
+    // ) },
   ];
 
   const handleLogout = () => { 

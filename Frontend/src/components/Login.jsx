@@ -209,14 +209,14 @@ export default function Login() {
           style={{ border: "1px solid #27272a" }}
         >
 
-          <div className="overflow-hidden w-full lg:w-[520px] h-auto lg:h-[500px] px-6 lg:px-10 py-8 lg:py-0">
+          <div className="overflow-hidden w-full lg:w-[520px] h-auto lg:h-[580px] px-6 lg:px-10 py-8 lg:py-0">
 
             <div
               className={`flex flex-col transition-transform duration-700 ease-in-out ${
-                isRegister ? "lg:-translate-y-[500px]" : "translate-y-0"
+                isRegister ? "lg:-translate-y-[580px]" : "translate-y-0"
               }`}
             >
-              <div className={`h-auto lg:h-[500px] flex flex-col justify-center gap-5 ${isRegister ? "hidden lg:flex" : "flex"}`}>
+              <div className={`h-auto lg:h-[580px] flex flex-col justify-center gap-5 ${isRegister ? "hidden lg:flex" : "flex"}`}>
                 <div className="mb-5">
                   <p className="text-amber-400 text-sm mb-4 tracking-widest">ACCESO SEGURO</p>
                   <div className="text-3xl lg:text-4xl font-bold text-white flex gap-2 mb-1">
@@ -293,7 +293,7 @@ export default function Login() {
                   </button>
                 </p>
               </div>
-              <div className={`h-auto lg:h-[500px] flex flex-col justify-center gap-4 ${isRegister ? "flex" : "hidden lg:flex"}`}>
+              <div className={`h-auto lg:h-[580px] flex flex-col justify-center gap-4 ${isRegister ? "flex" : "hidden lg:flex"}`}>
                 <div className="mb-1">
                   <p className="text-amber-400 text-sm mb-4 tracking-widest">CREA TU CUENTA</p>
                   <div className="text-3xl lg:text-4xl font-bold text-white flex gap-2 mb-1">
