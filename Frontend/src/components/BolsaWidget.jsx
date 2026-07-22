@@ -56,7 +56,7 @@ export default function BolsaWidget() {
   // TRM
   // ─────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch('https://localhost:3000/api/bolsa/trm/usd-cop')
+    fetch('http://localhost:3000/api/bolsa/trm/usd-cop')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.trm) {
@@ -78,7 +78,7 @@ export default function BolsaWidget() {
       await Promise.all(
         lista.map(async (accion) => {
           const res = await fetch(
-            `https://localhost:3000/api/bolsa/${accion.symbol}`
+            `http://localhost:3000/api/bolsa/${accion.symbol}`
           )
 
           const data = await res.json()
@@ -149,7 +149,7 @@ export default function BolsaWidget() {
 
     try {
       const res = await fetch(
-        `https://localhost:3000/api/bolsa/${sym}`
+        `http://localhost:3000/api/bolsa/${sym}`
       )
 
       const data = await res.json()

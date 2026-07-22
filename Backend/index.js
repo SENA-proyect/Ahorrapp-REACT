@@ -1,8 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const https = require("https");        // ✅ NUEVO: Para crear servidor HTTPS
-const fs = require("fs");              // ✅ NUEVO: Para leer archivos (certificados)
-const path = require("path");          // ✅ NUEVO: Para manejar rutas de archivos
 require("dotenv").config();
 
 const authRoutes          = require("./src/routes/authRoutes");
@@ -23,7 +20,7 @@ const app = express();
 
 // Middlewares globales
 app.use(cors({
-  origin: "https://localhost:5173",
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -48,74 +45,24 @@ app.get("/", (req, res) => {
 });
 
 // ============================================
-// 🚀 CONFIGURACIÓN SSL (NUEVO)
+// 🚀 SERVIDOR HTTP (sin SSL)
 // ============================================
 
 const PORT = process.env.PORT || 3000;
 
-// 📁 PASO 1: Definir la ruta donde están los certificados
-const certsPath = path.join(__dirname, 'certs');
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Servidor HTTP corriendo en http://localhost:${PORT}`);
+  console.log(`\n📝 Endpoints disponibles:`);
+  console.log(`   GET  http://localhost:${PORT}/`);
+  console.log(`   POST http://localhost:${PORT}/api/auth/login`);
+  console.log(`   GET  http://localhost:${PORT}/api/categorias`);
+  console.log(`   GET  http://localhost:${PORT}/api/movimientos`);
+  console.log(`   POST http://localhost:${PORT}/api/ai/chat`);
+  console.log(`   GET  http://localhost:${PORT}/api/dashboard`);
+  console.log(`   GET  http://localhost:${PORT}/api/presupuestos`);
+  console.log(`   GET  http://localhost:${PORT}/api/notificaciones`);
 
-// 🔐 PASO 2: Intentar cargar los certificados SSL
-try {
-  // 📂 PASO 3: Leer los archivos de certificados
-  const privateKey = fs.readFileSync(path.join(certsPath, 'private.key'), 'utf8');
-  const certificate = fs.readFileSync(path.join(certsPath, 'certificate.crt'), 'utf8');
-  
-  // 📂 PASO 4: Leer CA Bundle (opcional, si existe)
-  let ca = null;
-  const caPath = path.join(certsPath, 'ca_bundle.crt');
-  if (fs.existsSync(caPath)) {
-    ca = fs.readFileSync(caPath, 'utf8');
-    console.log('✅ CA Bundle cargado');
-  }
-
-  // 🔧 PASO 5: Crear objeto con las credenciales SSL
-  const credentials = { 
-    key: privateKey,    // Clave privada del servidor
-    cert: certificate,  // Certificado público
-    ...(ca && { ca: ca }) // Si existe CA, lo añade
-  };
-
-  // 🌐 PASO 6: Crear servidor HTTPS
-  const httpsServer = https.createServer(credentials, app);
-
-  // 🚀 PASO 7: Iniciar servidor HTTPS
-  httpsServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Servidor HTTPS corriendo en https://localhost:${PORT}`);
-    console.log(`🔒 SSL activado correctamente`);
-    console.log(`📁 Certificados cargados desde: ${certsPath}`);
-    console.log(`\n📝 Endpoints disponibles:`);
-    console.log(`   GET  https://localhost:${PORT}/`);
-    console.log(`   POST https://localhost:${PORT}/api/auth/login`);
-    console.log(`   GET  https://localhost:${PORT}/api/categorias`);
-    console.log(`   GET  https://localhost:${PORT}/api/movimientos`);
-    console.log(`   POST https://localhost:${PORT}/api/ai/chat`);
-    console.log(`   GET  https://localhost:${PORT}/api/dashboard`);
-    console.log(`   GET  https://localhost:${PORT}/api/presupuestos`);
-    console.log(`   GET  https://localhost:${PORT}/api/notificaciones`);
-    console.log(`\n⚠️  Configuración para POSTMAN:`);
-    console.log(`   1. Settings (engranaje)`);
-    console.log(`   2. General`);
-    console.log(`   3. SSL certificate verification: OFF`);
-
-    // Cron de notificaciones: solo se inicia si el servidor levantó con éxito
-    iniciarVencimientosJob();
-  });
-
-} catch (error) {
-  // ❌ PASO 8: Si falla SSL, mostrar error y usar HTTP como fallback
-  console.error(`\n❌ Error al cargar certificados SSL:`);
-  console.error(`   ${error.message}`);
-  console.log(`\n📁 Verifica que los archivos existan en: ${certsPath}`);
-  console.log(`   Archivos necesarios:`);
-  console.log(`   - private.key`);
-  console.log(`   - certificate.crt`);
-  console.log(`   - ca_bundle.crt (opcional)`);
-  console.log(`\n📝 Para generar certificados autofirmados ejecuta:`);
-  console.log(`   openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365 -subj "/CN=localhost"`);
-  console.log(`   Luego renombra key.pem → private.key y cert.pem → certificate.crt`);
-  console.log(`\n⚠️  Iniciando servidor en modo HTTP (sin SSL)...`);
-}
+  iniciarVencimientosJob();
+});
 
 module.exports = app;
