@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://localhost:3000/api";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const authHeaders = () => ({
@@ -26,6 +26,12 @@ export const loginUser = (datos) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(datos),
   }).then((r) => r.json());
+
+export const actualizarRolUsuario = (id, ID_rol) =>
+  fetchJSON(`${API_URL}/auth/PanelUsuarios/${id}/rol`, {
+    method: "PUT",
+    body: JSON.stringify({ ID_rol }),
+  });
 
 // ── Movimientos (base) ────────────────────────────────────────────────────────
 export const getMovimientos = async () => {
@@ -395,17 +401,6 @@ export const getGastos = async () => {
 };
 
 // ── Panel Admin ───────────────────────────────────────────────────────────────
-// export const getUsuariosPanelAdmin = async () =>
-//   fetchJSON(`${API_URL}/auth/usuarios/PanelAdmin`);
-
-// export const getDependientesPanelAdmin = async () =>
-//   fetchJSON(`${API_URL}/auth/dependientes/PanelAdmin`);
-
-// export const getTodosDependientesAdmin = async () => {
-//   const data = await fetchJSON(`${API_URL}/auth/PanelDependientes`);
-//   return data.dependientes ?? data;
-// };
-
 export const getUsuariosPanelAdmin = async () => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {

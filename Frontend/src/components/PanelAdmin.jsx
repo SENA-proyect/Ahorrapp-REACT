@@ -151,21 +151,6 @@ export default function PanelAdmin() {
             <p className="text-xs text-[#9aa6c4]">Total registrados</p>
           </div>
 
-          <div className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[#9aa6c4]">Movimientos</p>
-              <div className="w-8 h-8 rounded-md bg-[#e0b855]/10 flex items-center justify-center">
-                <svg className="w-4 h-4 text-[#e0b855]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <polyline points="16 3 21 8 16 13" />
-                  <line x1="21" y1="8" x2="9" y2="8" />
-                  <polyline points="8 21 3 16 8 11" />
-                  <line x1="3" y1="16" x2="15" y2="16" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-[#f4f1e8]">--</p>
-            <p className="text-xs text-[#9aa6c4]">Pendiente de conectar</p>
-          </div>
 
         </section>
 

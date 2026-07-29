@@ -1,5 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
 require("dotenv").config();
 
 const authRoutes          = require("./src/routes/authRoutes");
@@ -20,7 +23,7 @@ const app = express();
 
 // Middlewares globales
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://localhost:5173",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -45,22 +48,28 @@ app.get("/", (req, res) => {
 });
 
 // ============================================
-// 🚀 SERVIDOR HTTP (sin SSL)
+// 🔒 SERVIDOR HTTPS
 // ============================================
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Servidor HTTP corriendo en http://localhost:${PORT}`);
+const sslOptions = {
+  key:  fs.readFileSync(path.join(__dirname, "certs", "localhost.key")),
+  cert: fs.readFileSync(path.join(__dirname, "certs", "localhost.crt")),
+};
+
+https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Servidor HTTPS corriendo en https://localhost:${PORT}`);
   console.log(`\n📝 Endpoints disponibles:`);
-  console.log(`   GET  http://localhost:${PORT}/`);
-  console.log(`   POST http://localhost:${PORT}/api/auth/login`);
-  console.log(`   GET  http://localhost:${PORT}/api/categorias`);
-  console.log(`   GET  http://localhost:${PORT}/api/movimientos`);
-  console.log(`   POST http://localhost:${PORT}/api/ai/chat`);
-  console.log(`   GET  http://localhost:${PORT}/api/dashboard`);
-  console.log(`   GET  http://localhost:${PORT}/api/presupuestos`);
-  console.log(`   GET  http://localhost:${PORT}/api/notificaciones`);
+  console.log(`   GET  https://localhost:${PORT}/`);
+  console.log(`   POST https://localhost:${PORT}/api/auth/login`);
+  console.log(`   GET  https://localhost:${PORT}/api/categorias`);
+  console.log(`   GET  https://localhost:${PORT}/api/movimientos`);
+  console.log(`   POST https://localhost:${PORT}/api/ai/chat`);
+  console.log(`   GET  https://localhost:${PORT}/api/dashboard`);
+  console.log(`   GET  https://localhost:${PORT}/api/presupuestos`);
+  console.log(`   GET  https://localhost:${PORT}/api/notificaciones`);
+  console.log(`   PUT  https://localhost:${PORT}/api/auth/PanelUsuarios/:id/rol`);
 
   iniciarVencimientosJob();
 });
