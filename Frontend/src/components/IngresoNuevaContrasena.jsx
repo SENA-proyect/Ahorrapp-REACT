@@ -143,7 +143,7 @@ export default function RestablecerContra() {
         )}
 
         {/* Confirmar contraseña */}
-        <div className="mb-3">
+        <div className="mb-7">
           <label className="block text-white/45 text-[10px] font-medium uppercase tracking-widest mb-2">
             Confirmar contraseña
           </label>
