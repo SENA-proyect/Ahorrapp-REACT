@@ -46,6 +46,12 @@ const register = async (req, res) => {
       [Nombre, Apellido, Email, passwordHash]
     );
 
+    // Asigna el rol por defecto (ID_rol = 1 → "user") al usuario recién creado
+    await pool.query(
+      "INSERT INTO usuarios_roles (ID_usuario, ID_rol) VALUES (?, ?)",
+      [result.insertId, 1]
+    );
+
     return res.status(201).json({
       ok: true,
       mensaje: "Usuario registrado exitosamente",
@@ -323,9 +329,20 @@ const resetPassword = async (req, res) => {
 const getUsuarios = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT ID_usuario, Nombre, Apellido, Email, Activo
-      FROM USUARIOS
-      WHERE Activo = TRUE
+      SELECT
+        U.ID_usuario,
+        U.Nombre,
+        U.Apellido,
+        U.Email,
+        U.Activo,
+        R.ID_rol,
+        R.Cargo
+      FROM USUARIOS U
+      LEFT JOIN usuarios_roles UR
+        ON U.ID_usuario = UR.ID_usuario
+      LEFT JOIN rol R
+        ON UR.ID_rol = R.ID_rol
+      WHERE U.Activo = TRUE
     `);
 
     return res.status(200).json({
@@ -340,9 +357,10 @@ const getUsuarios = async (req, res) => {
 };
 
 // ── PUT /PanelUsuarios/:id ───────────────────────────────────────────────────
+// ── PUT /PanelUsuarios/:id ───────────────────────────────────────────────────
 const updateUsuario = async (req, res) => {
   const { id } = req.params;
-  const { Nombre, Apellido, Email, Rol } = req.body;
+  const { Nombre, Apellido, Email } = req.body;
 
   try {
     if (!id || isNaN(id)) {
@@ -365,7 +383,9 @@ const updateUsuario = async (req, res) => {
     }
 
     await pool.query(
-      "UPDATE USUARIOS SET Nombre = ?, Apellido = ?, Email = ? WHERE ID_usuario = ?",
+      `UPDATE USUARIOS
+       SET Nombre = ?, Apellido = ?, Email = ?
+       WHERE ID_usuario = ?`,
       [Nombre, Apellido, Email, id]
     );
 
@@ -379,6 +399,64 @@ const updateUsuario = async (req, res) => {
   }
 };
 
+// ── PUT /PanelUsuarios/:id/rol (solo superuser) ──────────────────────────────
+const actualizarRolUsuario = async (req, res) => {
+  const { id } = req.params;
+  const { ID_rol } = req.body;
+
+  try {
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: "ID inválido",
+      });
+    }
+
+    if (!ID_rol) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: "Debes indicar el rol",
+      });
+    }
+
+    const [existe] = await pool.query(
+      "SELECT ID_usuario FROM USUARIOS WHERE ID_usuario = ?",
+      [id]
+    );
+
+    if (existe.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: "Usuario no encontrado",
+      });
+    }
+
+    const [rolExiste] = await pool.query(
+      "SELECT ID_rol FROM rol WHERE ID_rol = ?",
+      [ID_rol]
+    );
+
+    if (rolExiste.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: "El rol indicado no existe",
+      });
+    }
+
+    await pool.query(
+      "UPDATE usuarios_roles SET ID_rol = ? WHERE ID_usuario = ?",
+      [ID_rol, id]
+    );
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Rol actualizado exitosamente",
+    });
+
+  } catch (error) {
+    return handleServerError(res, error, "Error al actualizar el rol");
+  }
+};
 // ── DELETE /PanelUsuarios/:id ────────────────────────────────────────────────
 const deleteUsuario = async (req, res) => {
   const { id } = req.params;
@@ -501,4 +579,5 @@ module.exports = {
   getUsuariosPanelAdmin,
   getDependientesPanelAdmin, 
   getTodosDependientesAdmin,
+  actualizarRolUsuario,
 };

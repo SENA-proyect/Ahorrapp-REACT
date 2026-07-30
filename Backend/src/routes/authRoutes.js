@@ -9,8 +9,10 @@ const {
   getUsuarios,
   updateUsuario,
   deleteUsuario,
+  actualizarRolUsuario,
 } = require("../controllers/authController");
-const { verifyToken } = require("../middlewares/authMiddleware");
+
+const { verifyToken, requireRole } = require("../middlewares/authMiddleware");
 const { getUsuariosPanelAdmin, getDependientesPanelAdmin, getTodosDependientesAdmin } = require("../controllers/authController");
 
 
@@ -25,4 +27,6 @@ router.delete("/PanelUsuarios/:id",   verifyToken, deleteUsuario);
 router.get("/usuarios/PanelAdmin",    verifyToken, getUsuariosPanelAdmin);
 router.get("/dependientes/PanelAdmin", verifyToken, getDependientesPanelAdmin);
 router.get("/PanelDependientes", verifyToken, getTodosDependientesAdmin);
+
+router.put("/PanelUsuarios/:id/rol",  verifyToken, requireRole(["superuser"]), actualizarRolUsuario);
 module.exports = router;
