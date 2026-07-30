@@ -42,6 +42,9 @@ CREATE TABLE IF NOT EXISTS ROL (
     Cargo VARCHAR(50) NOT NULL COMMENT 'Nombre del rol (e.g., Administrador, Usuario, superusuario)'
 ) ENGINE=InnoDB;
 
+Insert into rol (Cargo) VALUES ('user'),('admin'),('superuser');
+
+
 CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
     ID_usuario INT NOT NULL COMMENT 'ID del usuario',
     ID_rol INT NOT NULL COMMENT 'ID del rol',
@@ -49,6 +52,8 @@ CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_rol) REFERENCES ROL(ID_rol) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
+
+
 
 -- ========================================================================
 --     TABLA: categorias
