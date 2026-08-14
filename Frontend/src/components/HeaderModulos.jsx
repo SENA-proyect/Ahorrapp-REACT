@@ -157,7 +157,8 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
           )}
         </div>
 
-        <ul className="hidden flex-wrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base">
+        {/* <ul className="hidden flex-wrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base"> */}
+        <ul className="hidden flex-nowrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base">
           {navItems.map(item => {
             const isActive = location.pathname === item.href
 
