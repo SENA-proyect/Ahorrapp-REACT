@@ -1,8 +1,6 @@
 const API_URL = "https://localhost:3000/api";
 
-// ________________________________________________________________________________
-// ==================================<|HELPERS|>==================================
-// ________________________________________________________________________________
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const authHeaders = () => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -87,46 +85,37 @@ export const getMovimientos = async () => {
 export const getDashboardData = async () => {
   const data = await fetchJSON(`${API_URL}/dashboard/resumen`);
   return {
-    notificaciones: data.notificaciones ?? [],
-    paginacion: data.paginacion ?? null,
+    totalIngresos: data.totalIngresos ?? 0,
+    totalGastos:   data.totalGastos   ?? 0,
+    totalAhorros:  data.totalAhorros  ?? 0,
+    balance:       data.balance       ?? 0,
+    periodo:       data.periodo       ?? null,
+    sin_periodo:   data.sin_periodo   ?? true,
   };
 };
+ 
+export const getPresupuestoVsEjecutado = async () => {
+  const data = await fetchJSON(`${API_URL}/dashboard/presupuesto-vs-ejecutado`);
+  return data.data ?? [];
+};
+ 
+export const getFlujoPorSemana = async () => {
+  const data = await fetchJSON(`${API_URL}/dashboard/flujo-semanal`);
+  return data.data ?? [];
+};
+ 
 
-export const getNoLeidasCount = async () => {
+// ── Dependientes ──────────────────────────────────────────────────────────────
+export const getDependientes = async () => {
   try {
-    const data = await fetchJSON(`${API_URL}/notificaciones/no-leidas/count`);
-    return data.count ?? 0;
+    return await fetchJSON(`${API_URL}/dependientes`);
   } catch (error) {
-    console.error("Error en getNoLeidasCount:", error);
-    return 0;
+    console.error("Error en getDependientes:", error);
+    throw error;
   }
 };
 
-export const marcarNotificacionLeida = (id) =>
-  fetchJSON(`${API_URL}/notificaciones/${id}/leer`, { method: "PATCH" });
-
-export const marcarTodasNotificacionesLeidas = () =>
-  fetchJSON(`${API_URL}/notificaciones/leer-todas`, { method: "PATCH" });
-
-export const archivarNotificacion = (id) =>
-  fetchJSON(`${API_URL}/notificaciones/${id}/archivar`, { method: "PATCH" });
-
-export const eliminarNotificacion = (id) =>
-  fetchJSON(`${API_URL}/notificaciones/${id}`, { method: "DELETE" });
-
-export const getPreferenciasNotificacion = async () => {
-  const data = await fetchJSON(`${API_URL}/preferencias-notificacion`);
-  return data.preferencias ?? [];
-};
-
-export const actualizarPreferenciasNotificacion = (preferencias) =>
-  fetchJSON(`${API_URL}/preferencias-notificacion`, {
-    method: "PUT",
-    body: JSON.stringify({ preferencias }),
-  });
-// ________________________________________________________________________________
-// ==================================<| CATEGORIAS |>==================================
-// ________________________________________________________________________________
+// ── Categorías ────────────────────────────────────────────────────────────────
 export const getCategorias = async () => {
   const data = await fetchJSON(`${API_URL}/categorias`);
   return data.categorias ?? [];
@@ -195,40 +184,50 @@ export const deshabilitarCategoria = (id) =>
 export const habilitarCategoria = (id) =>
   fetchJSON(`${API_URL}/categorias/${id}/habilitar`, { method: "PATCH" });
 
-// ________________________________________________________________________________
-// ==================================<| DEPENDIENTES |>==================================
-// ________________________________________________________________________________
-export const getDependientes = async () => {
+// ── Notificaciones ────────────────────────────────────────────────────────────
+export const getNotificaciones = async (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  const data = await fetchJSON(`${API_URL}/notificaciones${query ? `?${query}` : ""}`);
+  return {
+    notificaciones: data.notificaciones ?? [],
+    paginacion: data.paginacion ?? null,
+  };
+};
+
+export const getNoLeidasCount = async () => {
   try {
-    return await fetchJSON(`${API_URL}/dependientes`);
+    const data = await fetchJSON(`${API_URL}/notificaciones/no-leidas/count`);
+    return data.count ?? 0;
   } catch (error) {
-    console.error("Error en getDependientes:", error);
-    throw error;
+    console.error("Error en getNoLeidasCount:", error);
+    return 0;
   }
 };
-// ________________________________________________________________________________
-// ==================================<| PERIODOS |>==================================
-// ________________________________________________________________________________
-export const getPeriodoActivo = () =>
-  fetchJSON(`${API_URL}/presupuestos/periodos/activo`);
- 
-export const abrirPeriodo = (ingreso_estimado) =>
-  fetchJSON(`${API_URL}/presupuestos/periodos/abrir`, {
-    method: "POST",
-    body: JSON.stringify({ ingreso_estimado }),
+
+export const marcarNotificacionLeida = (id) =>
+  fetchJSON(`${API_URL}/notificaciones/${id}/leer`, { method: "PATCH" });
+
+export const marcarTodasNotificacionesLeidas = () =>
+  fetchJSON(`${API_URL}/notificaciones/leer-todas`, { method: "PATCH" });
+
+export const archivarNotificacion = (id) =>
+  fetchJSON(`${API_URL}/notificaciones/${id}/archivar`, { method: "PATCH" });
+
+export const eliminarNotificacion = (id) =>
+  fetchJSON(`${API_URL}/notificaciones/${id}`, { method: "DELETE" });
+
+export const getPreferenciasNotificacion = async () => {
+  const data = await fetchJSON(`${API_URL}/preferencias-notificacion`);
+  return data.preferencias ?? [];
+};
+
+export const actualizarPreferenciasNotificacion = (preferencias) =>
+  fetchJSON(`${API_URL}/preferencias-notificacion`, {
+    method: "PUT",
+    body: JSON.stringify({ preferencias }),
   });
- 
-export const cerrarPeriodo = () =>
-  fetchJSON(`${API_URL}/presupuestos/periodos/cerrar`, { method: "PUT" });
- 
-export const ajustarIngresoPeriodo = (ingreso_estimado) =>
-  fetchJSON(`${API_URL}/presupuestos/periodos/ajustar-ingreso`, {
-    method: "PATCH",
-    body: JSON.stringify({ ingreso_estimado }),
-  });
-// ________________________________________________________________________________
-// ==================================<| PRESUPUESTOS |>==================================
-// ________________________________________________________________________________
+
+// ── Presupuestos ──────────────────────────────────────────────────────────────
 export const getPerfilesPrespuesto = () =>
   fetchJSON(`${API_URL}/presupuestos`);
  
@@ -250,49 +249,26 @@ export const eliminarPerfil = (id) =>
 export const activarPerfil = (id) =>
   fetchJSON(`${API_URL}/presupuestos/${id}/activar`, { method: "PUT" });
  
-// ________________________________________________________________________________
-// ==================================<| DASHBOARD |>==================================
-// ________________________________________________________________________________
-export const getDashboardData = async () => {
-  const data = await fetchJSON(`${API_URL}/dashboard/resumen`);
-  return {
-    totalIngresos: data.totalIngresos ?? 0,
-    totalGastos:   data.totalGastos   ?? 0,
-    totalAhorros:  data.totalAhorros  ?? 0,
-    balance:       data.balance       ?? 0,
-    periodo:       data.periodo       ?? null,
-    sin_periodo:   data.sin_periodo   ?? true,
-  };
-};
+// ── Períodos ──────────────────────────────────────────────────────────────────
+export const getPeriodoActivo = () =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/activo`);
  
-export const getPresupuestoVsEjecutado = async () => {
-  const data = await fetchJSON(`${API_URL}/dashboard/presupuesto-vs-ejecutado`);
-  return data.data ?? [];
-};
+export const abrirPeriodo = (ingreso_estimado) =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/abrir`, {
+    method: "POST",
+    body: JSON.stringify({ ingreso_estimado }),
+  });
  
-export const getFlujoPorSemana = async () => {
-  const data = await fetchJSON(`${API_URL}/dashboard/flujo-semanal`);
-  return data.data ?? [];
-};
-// ________________________________________________________________________________
-// ==================================<| MOVIMIENTOS |>==================================
-// ________________________________________________________________________________
-export const getMovimientos = async () => {
-  try {
-    const data = await fetchJSON(`${API_URL}/movimientos`);
-    return Array.isArray(data) ? data : (data.movimientos ?? []);
-  } catch {
-    return [];
-  }
-};
-
-// ________________________________________________________________________________
-// ==================================<|  |>==================================
-// ________________________________________________________________________________
-
-// ________________________________________________________________________________
-// ==================================<| ABONOS |>==================================
-// ________________________________________________________________________________
+export const cerrarPeriodo = () =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/cerrar`, { method: "PUT" });
+ 
+export const ajustarIngresoPeriodo = (ingreso_estimado) =>
+  fetchJSON(`${API_URL}/presupuestos/periodos/ajustar-ingreso`, {
+    method: "PATCH",
+    body: JSON.stringify({ ingreso_estimado }),
+  });
+ 
+// ── Movimientos extra ─────────────────────────────────────────────────────────
 export const abonarDeuda = (id, cuotas = 1) =>
   fetchJSON(`${API_URL}/movimientos/deudas/${id}/abonar`, {
     method: "PATCH",
@@ -304,10 +280,59 @@ export const abonarAhorro = (id, monto) =>
     method: "PATCH",
     body: JSON.stringify({ monto }),
   });
+ 
 
-// ________________________________________________________________________________
-// ==================================<| EXPORTAR |>==================================
-// ________________________________________________________________________________
+// ── Resumen financiero (para el Asistente) ────────────────────────────────────
+export const getResumenFinancieroBreve = async () => {
+  try {
+    const movimientos = await getMovimientos();
+
+    const sumar = (tipo) =>
+      movimientos
+        .filter((m) => (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === tipo)
+        .reduce((acc, m) => acc + Number(m.monto ?? 0), 0);
+
+    const ingresosTotales = sumar("ingreso");
+    const gastosTotales = sumar("gasto");
+    const deudas = movimientos.filter((m) =>
+      ["deuda"].includes((m.tipo ?? m.tipo_movimiento ?? "").toLowerCase())
+    );
+    const ahorros = movimientos.filter((m) =>
+      ["ahorro"].includes((m.tipo ?? m.tipo_movimiento ?? "").toLowerCase())
+    );
+
+    const lines = [
+      "CONTEXTO FINANCIERO REAL DEL USUARIO:",
+      `- Ingresos totales de este mes: $${ingresosTotales}`,
+      `- Gastos totales de este mes: $${gastosTotales}`,
+      `- Balance actual: $${ingresosTotales - gastosTotales}`,
+      "",
+      "DEUDAS ACTIVAS:",
+      deudas.length === 0
+        ? "  Sin deudas registradas."
+        : deudas
+            .map(
+              (d) =>
+                `  * ${d.descripcion ?? "Deuda"}: $${d.monto} (Estado: ${d.estado ?? "Pendiente"})`
+            )
+            .join("\n"),
+      "",
+      "PLANES DE AHORRO:",
+      ahorros.length === 0
+        ? "  Sin ahorros registrados."
+        : ahorros
+            .map((a) => `  * ${a.descripcion ?? "Ahorro"}: $${a.monto}`)
+            .join("\n"),
+    ];
+
+    return lines.join("\n");
+  } catch (error) {
+    console.error("Error al recopilar el contexto financiero:", error);
+    return "No se pudo cargar la información financiera actual del usuario.";
+  }
+};
+
+// ── Exportar Datos ────────────────────────────────────────────────────────────
 export const exportarDatos = async (payload, { onError, onDone } = {}) => {
   try {
     const res = await fetch(`${API_URL}/exportar`, {
@@ -361,6 +386,7 @@ export const exportarDatos = async (payload, { onError, onDone } = {}) => {
   }
 };
 
+// ── Historial de Exportaciones ───────────────────────────────────────────────
 export const getHistorialExportaciones = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
 
@@ -379,6 +405,7 @@ export const getHistorialExportaciones = async (params = {}) => {
   return response.json();
 };
 
+// ── Eliminar Exportación del Historial ───────────────────────────────────────
 export const eliminarExportacion = async (id) => {
   const response = await fetch(`${API_URL}/exportar/${id}`, {
     method: "DELETE",
@@ -395,56 +422,13 @@ export const eliminarExportacion = async (id) => {
 
   return response.json();
 };
-// ________________________________________________________________________________
-// ==================================<| DATOS IA |>==================================
-// ________________________________________________________________________________
-export const getResumenFinancieroBreve = async () => {
-  try {
-    const movimientos = await getMovimientos();
 
-    const sumar = (tipo) =>
-      movimientos
-        .filter((m) => (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === tipo)
-        .reduce((acc, m) => acc + Number(m.monto ?? 0), 0);
-
-    const ingresosTotales = sumar("ingreso");
-    const gastosTotales = sumar("gasto");
-    const deudas = movimientos.filter((m) =>
-      ["deuda"].includes((m.tipo ?? m.tipo_movimiento ?? "").toLowerCase())
-    );
-    const ahorros = movimientos.filter((m) =>
-      ["ahorro"].includes((m.tipo ?? m.tipo_movimiento ?? "").toLowerCase())
-    );
-
-    const lines = [
-      "CONTEXTO FINANCIERO REAL DEL USUARIO:",
-      `- Ingresos totales de este mes: $${ingresosTotales}`,
-      `- Gastos totales de este mes: $${gastosTotales}`,
-      `- Balance actual: $${ingresosTotales - gastosTotales}`,
-      "",
-      "DEUDAS ACTIVAS:",
-      deudas.length === 0
-        ? "  Sin deudas registradas."
-        : deudas
-            .map(
-              (d) =>
-                `  * ${d.descripcion ?? "Deuda"}: $${d.monto} (Estado: ${d.estado ?? "Pendiente"})`
-            )
-            .join("\n"),
-      "",
-      "PLANES DE AHORRO:",
-      ahorros.length === 0
-        ? "  Sin ahorros registrados."
-        : ahorros
-            .map((a) => `  * ${a.descripcion ?? "Ahorro"}: $${a.monto}`)
-            .join("\n"),
-    ];
-
-    return lines.join("\n");
-  } catch (error) {
-    console.error("Error al recopilar el contexto financiero:", error);
-    return "No se pudo cargar la información financiera actual del usuario.";
-  }
+// ── Ingresos / Gastos ─────────────────────────────────────────────────────────
+export const getIngresos = async () => {
+  const movimientos = await getMovimientos();
+  return movimientos.filter(m =>
+    (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "ingreso"
+  );
 };
 
 export const getGastos = async () => {
@@ -488,6 +472,7 @@ export const getDependientesPanelAdmin = async () => {
   return response.json(); 
 }
 
+// Todos los dependientes para admin
 export const getTodosDependientesAdmin = async () => {
   const token = localStorage.getItem('token');
 
@@ -506,37 +491,3 @@ export const getTodosDependientesAdmin = async () => {
 
   return data.dependientes ?? data;
 };
-
-
-
-// ____________________________________________________________________________________________
-
-
-// ¿CODIGO MUERTO?
-
-// ── Ingresos / Gastos ─────────────────────────────────────────────────────────
-// export const getIngresos = async () => {
-//   const movimientos = await getMovimientos();
-//   return movimientos.filter(m =>
-//     (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "ingreso"
-//   );
-// };
-
-// export const getGastos = async () => {
-//   const movimientos = await getMovimientos();
-//   return movimientos.filter(m =>
-//     (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "gasto"
-//   );
-// };
-
-// ── Panel Admin ───────────────────────────────────────────────────────────────
-// export const getUsuariosPanelAdmin = async () =>
-//   fetchJSON(`${API_URL}/auth/usuarios/PanelAdmin`);
-
-// export const getDependientesPanelAdmin = async () =>
-//   fetchJSON(`${API_URL}/auth/dependientes/PanelAdmin`);
-
-// export const getTodosDependientesAdmin = async () => {
-//   const data = await fetchJSON(`${API_URL}/auth/PanelDependientes`);
-//   return data.dependientes ?? data;
-// };
