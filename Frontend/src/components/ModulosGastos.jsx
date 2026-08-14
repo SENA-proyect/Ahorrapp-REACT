@@ -11,8 +11,9 @@ const API = 'https://localhost:3000/api/movimientos'
 const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
 const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
 
-// const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
-// const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
+const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
+const selectCls = inputCls 
+const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
 
 export default function ModulosGastos() {
   const navigate = useNavigate()
@@ -243,16 +244,36 @@ export default function ModulosGastos() {
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
-            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            <select
+              className={selectCls}
+              style={{ colorScheme: 'dark' }}
+              name="id_categoria"
+              value={modalEditar.id_categoria}
+              onChange={handleChange}
+            >
+              <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Sin categoría</option>
+              {categorias.filter(c => c.activa == 1).map(c => (
+                <option key={c.id} value={c.id} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
+                  {c.nombre}
+                </option>
+              ))}
             </select>
 
             <label className={labelCls}>Dependiente</label>
-            <select className={inputCls} name="ID_dependientes" value={modalEditar.ID_dependientes} onChange={handleChange}>
-              <option value="">Ninguno (gasto propio)</option>
-              {dependientes.map(d => <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>)}
-            </select>
+            <select
+              className={selectCls}
+              style={{ colorScheme: 'dark' }}
+              name="ID_dependientes"
+              value={modalEditar.ID_dependientes}
+              onChange={handleChange}
+            >
+              <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Ninguno (gasto propio)</option>
+              {dependientes.map(d => (
+                <option key={d.ID_dependientes} value={d.ID_dependientes} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
+                  {d.Nombre}
+                </option>
+              ))}
+            </select> 
 
             <label className={labelCls}>Fecha</label>
             <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />
