@@ -14,11 +14,6 @@ const fetchJSON = async (url, options = {}) => {
   return res.json();
 };
 
-<<<<<<< HEAD
-// ________________________________________________________________________________
-// ==================================<|LOGIN & REGISTER|>==================================
-// ________________________________________________________________________________
-=======
 // Helper específico para endpoints públicos (sin token, ya que el usuario
 // aún no está logueado en el flujo de recuperación de contraseña)
 const fetchPublicJSON = async (url, options = {}) => {
@@ -58,7 +53,6 @@ export const resetPassword = (resetToken, nuevaPassword) =>
   });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
->>>>>>> main
 export const registerUser = (datos) =>
   fetch(`${API_URL}/auth/register`, {
     method: "POST",
@@ -73,14 +67,6 @@ export const loginUser = (datos) =>
     body: JSON.stringify(datos),
   }).then((r) => r.json());
 
-<<<<<<< HEAD
-// ________________________________________________________________________________
-// ==================================<| NOTIFICACIONES |>==================================
-// ________________________________________________________________________________
-export const getNotificaciones = async (params = {}) => {
-  const query = new URLSearchParams(params).toString();
-  const data = await fetchJSON(`${API_URL}/notificaciones${query ? `?${query}` : ""}`);
-=======
 export const actualizarRolUsuario = (id, ID_rol) =>
   fetchJSON(`${API_URL}/auth/PanelUsuarios/${id}/rol`, {
     method: "PUT",
@@ -100,7 +86,6 @@ export const getMovimientos = async () => {
 // ── Dashboard (una sola llamada) ──────────────────────────────────────────────
 export const getDashboardData = async () => {
   const data = await fetchJSON(`${API_URL}/dashboard/resumen`);
->>>>>>> main
   return {
     notificaciones: data.notificaciones ?? [],
     paginacion: data.paginacion ?? null,
@@ -461,11 +446,6 @@ export const getResumenFinancieroBreve = async () => {
     return "No se pudo cargar la información financiera actual del usuario.";
   }
 };
-<<<<<<< HEAD
-// ________________________________________________________________________________
-// ==================================<| PANEL ADMIN |>==================================
-// ________________________________________________________________________________
-=======
 
 export const getGastos = async () => {
   const movimientos = await getMovimientos();
@@ -475,7 +455,6 @@ export const getGastos = async () => {
 };
 
 // ── Panel Admin ───────────────────────────────────────────────────────────────
->>>>>>> main
 export const getUsuariosPanelAdmin = async () => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {

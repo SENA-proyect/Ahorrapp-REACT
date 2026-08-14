@@ -4,12 +4,9 @@ const { crearNotificacion, existeNotificacionEntidad } = require("../notificacio
 
 const DIAS_AVISO_DEUDA = 5;
 
-<<<<<<< HEAD
-=======
 // ─────────────────────────────────────────────────────────────
 //  revisarDeudasPorVencer
 // ─────────────────────────────────────────────────────────────
->>>>>>> main
 const revisarDeudasPorVencer = async () => {
   try {
     const [deudas] = await pool.query(
@@ -62,6 +59,7 @@ const revisarDeudasPorVencer = async () => {
 };
 
 // ─────────────────────────────────────────────────────────────
+//  iniciarVencimientosJob
 //  Registra el cron. Se llama una sola vez al arrancar el server.
 //  Corre todos los días a las 06:00 (hora del servidor).
 // ─────────────────────────────────────────────────────────────
@@ -76,9 +74,5 @@ const iniciarVencimientosJob = () => {
 
 module.exports = {
   iniciarVencimientosJob,
-<<<<<<< HEAD
-  revisarDeudasPorVencer, 
-=======
   revisarDeudasPorVencer,
->>>>>>> main
 };

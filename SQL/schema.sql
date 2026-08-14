@@ -265,55 +265,14 @@ CREATE TABLE IF NOT EXISTS DEUDAS (
 -- ========================================================================
 --     TABLA: historial
 -- ========================================================================
-
 CREATE TABLE IF NOT EXISTS HISTORIAL (
     ID_historial INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del historial',
     ID_usuario INT NOT NULL COMMENT 'Usuario que realizó la acción',
-    Accion ENUM('crear', 'editar', 'eliminar', 'abonar', 'cambiar_estado') NOT NULL COMMENT 'Acción realizada por el usuario',
-    Entidad_tipo VARCHAR(50) NOT NULL COMMENT 'Tipo de entidad afectada (ej: deudas, salidas)',
-    Entidad_id INT DEFAULT NULL COMMENT 'ID del registro afectado',
-    Descripcion VARCHAR(255) NOT NULL COMMENT 'Descripción detallada de la acción',
-    Fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() COMMENT 'Fecha y hora exacta del registro',
-    Archivada TINYINT(1) DEFAULT 0 COMMENT '1 = oculto para el usuario (manual o antigüedad), 0 = visible',
-
-    -- Validaciones (CHECKs) consolidadas al final
-    CONSTRAINT chk_archivada_booleano CHECK (Archivada IN (0, 1)),
-
-    -- Índices optimizados para búsquedas
-    KEY idx_historial_usuario_fecha (ID_usuario, Fecha) USING BTREE,
-
-    -- Llaves foráneas (Asumiendo una tabla USUARIOS existente)
+    accion VARCHAR(200) NOT NULL COMMENT 'Acción realizada por el usuario',
+    detalles TEXT COMMENT 'Detalles adicionales de la acción',
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora del registro',
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS HISTORIAL_AUDITORIA (
-    ID_auditoria INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único de la auditoría',
-    ID_usuario_admin INT NOT NULL COMMENT 'Usuario administrador que ejecutó la acción',
-    Accion VARCHAR(100) NOT NULL COMMENT 'ej: cambiar_rol, deshabilitar_usuario, editar_categoria_global',
-    Entidad_tipo VARCHAR(50) NOT NULL COMMENT 'ej: usuario, categoria_global, presupuesto',
-    Entidad_id INT DEFAULT NULL COMMENT 'ID del recurso afectado. Sin FK para sobrevivir a eliminaciones',
-    Entidad_descripcion VARCHAR(150) DEFAULT NULL COMMENT 'Nombre/email del afectado congelado para lectura rápida sin JOIN',
-    Descripcion VARCHAR(255) NOT NULL COMMENT 'Detalle legible de la acción realizada',
-    Fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() COMMENT 'Fecha y hora exacta de la auditoría',
-
-    -- Índices optimizados para búsquedas de auditoría
-    KEY idx_auditoria_usuario (ID_usuario_admin) USING BTREE,
-    KEY idx_auditoria_fecha (Fecha) USING BTREE,
-    KEY idx_auditoria_entidad (Entidad_tipo, Entidad_id) USING BTREE,
-
-    -- Llaves foráneas (Asumiendo una tabla USUARIOS existente)
-    FOREIGN KEY (ID_usuario_admin) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
-
--- CREATE TABLE IF NOT EXISTS HISTORIAL (
---     ID_historial INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del historial',
---     ID_usuario INT NOT NULL COMMENT 'Usuario que realizó la acción',
---     accion VARCHAR(200) NOT NULL COMMENT 'Acción realizada por el usuario',
---     detalles TEXT COMMENT 'Detalles adicionales de la acción',
---     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora del registro',
---     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE
--- )ENGINE=InnoDB;
+)ENGINE=InnoDB;
 
 -- ========================================================================
 --     TABLA: notificaciones

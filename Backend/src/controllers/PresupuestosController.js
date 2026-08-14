@@ -1,21 +1,18 @@
 const pool = require("../db/connection");
-const { verificarImprevistosNoUsados } = require("../service/NotificacionesService");
-const { registrarActividad } = require("../service/HistorialService")
+const { verificarImprevistosNoUsados } = require ("../service/NotificacionesService");
 
 // ─────────────────────────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 const toLocalDate = (date) => {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
+
 
 function calcularMontos(ingresoBase, saldoAnterior, perfil) {
     const total = Number(ingresoBase) + Number(saldoAnterior);
@@ -78,15 +75,9 @@ function calcularFechaFin(fechaInicio, diaCorte) {
 
   return toLocalDate(fin);
 };
-<<<<<<< HEAD
-// ─────────────────────────────────────────────────────────────
-//  PERFILES DE PRESUPUESTO — CRUD
-// ─────────────────────────────────────────────────────────────
-=======
 
 //   GET /presupuestos
 
->>>>>>> main
 const listarPerfiles = async (req, res) => {
     try {
         const [perfiles] = await pool.query(
@@ -106,12 +97,9 @@ const listarPerfiles = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
-=======
 
 //  * GET /presupuestos/:id (perfil especifico)
 
->>>>>>> main
 const obtenerPerfil = async (req, res) => {
     try {
         const [rows] = await pool.query(
@@ -126,14 +114,8 @@ const obtenerPerfil = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
-//   POST /presupuestos
-//   Crea un nuevo perfil de presupuesto.
-//   Valida que los porcentajes sumen exactamente 100.
-=======
 
 //   POST /presupuestos (los porcentajes siempre deben dar 100%)
->>>>>>> main
 
 const crearPerfil = async (req, res) => {
     const {
@@ -179,14 +161,6 @@ const crearPerfil = async (req, res) => {
                 Porcentaje_ahorros, Porcentaje_emergencia
             ]
         );
-        await registrarActividad({
-            ID_usuario: req.usuario.id,
-            Accion: 'crear',
-            Entidad_tipo: 'presupuesto',
-            Entidad_id: result.insertId,
-            Descripcion: `Creó el perfil de presupuesto "${Nombre}"`,
-        });
-
         res.status(201).json({ ok: true, mensaje: 'Perfil creado', ID_presupuesto: result.insertId });
     } catch (err) {
         res.status(500).json({ ok: false, mensaje: 'Error al crear perfil', error: err.message });
@@ -202,11 +176,12 @@ const editarPerfil = async (req, res) => {
 
 
     const [rows] = await pool.query(
-        `SELECT ID_presupuesto, Nombre FROM PRESUPUESTOS WHERE ID_presupuesto = ? AND ID_usuario = ?`,
+        `SELECT ID_presupuesto FROM PRESUPUESTOS WHERE ID_presupuesto = ? AND ID_usuario = ?`,
         [id, req.usuario.id]
     );
     if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado' });
 
+    // Bloquear edición si hay un período abierto asociado a este perfil
     const [periodos] = await pool.query(
         `SELECT ID_periodo FROM PERIODOS_PRESUPUESTO
          WHERE ID_presupuesto = ? AND Estado = 'abierto'`,
@@ -225,18 +200,12 @@ const editarPerfil = async (req, res) => {
         Porcentaje_imprevistos, Porcentaje_ahorros, Porcentaje_emergencia
     } = req.body;
 
-<<<<<<< HEAD
-=======
    
->>>>>>> main
     if (Dia_corte !== undefined && (Dia_corte < 1 || Dia_corte > 31)) {
         return res.status(400).json({ ok: false, mensaje: 'El día de corte debe estar entre 1 y 31' });
     }
 
-<<<<<<< HEAD
-=======
   
->>>>>>> main
     if (
         Porcentaje_gastos !== undefined ||
         Porcentaje_deudas !== undefined
@@ -276,15 +245,6 @@ const editarPerfil = async (req, res) => {
                 id
             ]
         );
-
-        await registrarActividad({
-            ID_usuario: req.usuario.id,
-            Accion: 'editar',
-            Entidad_tipo: 'presupuesto',
-            Entidad_id: id,
-            Descripcion: `Actualizó el perfil de presupuesto "${Nombre ?? rows[0].Nombre}"`,
-        });
-
         res.json({ ok: true, mensaje: 'Perfil actualizado' });
     } catch (err) {
         res.status(500).json({ ok: false, mensaje: 'Error al actualizar perfil', error: err.message });
@@ -299,7 +259,7 @@ const eliminarPerfil = async (req, res) => {
     const { id } = req.params;
 
     const [rows] = await pool.query(
-        `SELECT Activo, Nombre FROM PRESUPUESTOS WHERE ID_presupuesto = ? AND ID_usuario = ?`,
+        `SELECT Activo FROM PRESUPUESTOS WHERE ID_presupuesto = ? AND ID_usuario = ?`,
         [id, req.usuario.id]
     );
     if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado' });
@@ -320,15 +280,6 @@ const eliminarPerfil = async (req, res) => {
 
     try {
         await pool.query(`DELETE FROM PRESUPUESTOS WHERE ID_presupuesto = ?`, [id]);
-
-        await registrarActividad({
-            ID_usuario: req.usuario.id,
-            Accion: 'eliminar',
-            Entidad_tipo: 'presupuesto',
-            Entidad_id: id,
-            Descripcion: `Eliminó el perfil de presupuesto "${rows[0].Nombre}"`,
-        });
-
         res.json({ ok: true, mensaje: 'Perfil eliminado' });
     } catch (err) {
         res.status(500).json({ ok: false, mensaje: 'Error al eliminar perfil', error: err.message });
