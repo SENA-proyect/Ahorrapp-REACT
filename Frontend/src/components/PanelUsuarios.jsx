@@ -1,7 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from './AuthContext.jsx';
+import { actualizarRolUsuario } from '../api';
+
+const ROLES = [
+  { id: 1, nombre: 'user' },
+  { id: 2, nombre: 'admin' },
+  { id: 3, nombre: 'superuser' },
+];
 
 export default function PanelUsuarios() {
+  const { user } = useAuth();
+  const esSuperusuario = user?.roles?.includes('superuser');
+
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -10,6 +21,7 @@ export default function PanelUsuarios() {
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState('');
+  const [rolId, setRolId] = useState('');
   const [cargandoModal, setCargandoModal] = useState(false);
 
   useEffect(() => {
@@ -19,8 +31,7 @@ export default function PanelUsuarios() {
   const getUsuarios = async () => {
     try {
       const token = localStorage.getItem("token");
-  
-      // 1. IMPORTANTE: Cambiado a https:// para que no te salte error de Fetch
+
       const response = await fetch(
         "https://localhost:3000/api/auth/PanelUsuarios",
         {
@@ -29,20 +40,18 @@ export default function PanelUsuarios() {
           },
         }
       );
-  
+
       console.log("Status:", response.status);
-  
-      // 2. CORRECCIÓN AQUÍ: Usamos response.json() en lugar de response.text()
+
       const data = await response.json();
       console.log("Respuesta JSON:", data);
-  
-      // 3. Llenamos el estado con el array que viene dentro de la propiedad '.usuarios'
+
       if (data.ok && data.usuarios) {
-        setUsuarios(data.usuarios); 
+        setUsuarios(data.usuarios);
       } else {
         setError(data.mensaje || "Error al procesar los usuarios");
       }
-  
+
     } catch (err) {
       console.error(err);
       setError("Error al obtener usuarios");
@@ -56,6 +65,7 @@ export default function PanelUsuarios() {
     setNombre(usuario.Nombre);
     setApellido(usuario.Apellido);
     setEmail(usuario.Email);
+    setRolId(usuario.ID_rol || '');
     setModalAbierto(true);
   };
 
@@ -73,7 +83,7 @@ export default function PanelUsuarios() {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:3000/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
+        `https://localhost:3000/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
         {
           method: 'PUT',
           headers: {
@@ -91,9 +101,14 @@ export default function PanelUsuarios() {
       const data = await response.json();
 
       if (data.ok) {
+        // Solo un superusuario puede tocar el rol, y solo si realmente cambió
+        if (esSuperusuario && rolId && rolId !== usuarioSeleccionado.ID_rol) {
+          await actualizarRolUsuario(usuarioSeleccionado.ID_usuario, rolId);
+        }
+
         setUsuarios(usuarios.map(u =>
           u.ID_usuario === usuarioSeleccionado.ID_usuario
-            ? { ...u, Nombre: nombre, Apellido: apellido, Email: email }
+            ? { ...u, Nombre: nombre, Apellido: apellido, Email: email, ID_rol: rolId || u.ID_rol }
             : u
         ));
         setModalAbierto(false);
@@ -113,7 +128,7 @@ export default function PanelUsuarios() {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:3000/api/auth/PanelUsuarios/${id}`,
+          `https://localhost:3000/api/auth/PanelUsuarios/${id}`,
           {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
@@ -199,8 +214,8 @@ export default function PanelUsuarios() {
               <p className="text-sm font-medium text-[#f4f1e8]">
                 {usuario.Nombre} {usuario.Apellido || ""}
               </p>
-              <p className="text-xs text-[#7d8aa8']">
-                ID {usuario.ID_usuario}
+              <p className="text-xs text-[#7d8aa8]">
+                ID {usuario.ID_usuario} · {usuario.Cargo || 'sin rol'}
               </p>
             </div>
           </div>
@@ -327,6 +342,21 @@ export default function PanelUsuarios() {
                   className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 />
               </div>
+
+              {esSuperusuario && (
+                <div>
+                  <label className="block mb-1.5 text-sm font-medium text-[#9aa6c4]">Rol</label>
+                  <select
+                    value={rolId}
+                    onChange={(e) => setRolId(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r.id} value={r.id}>{r.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="flex gap-3 justify-end mt-2">
                 <button

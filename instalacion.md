@@ -1,5 +1,5 @@
 BACKEND:
-npm install express cors nodemon axios pdfkit node-cron
+npm install express cors nodemon axios pdfkit node-cron nodemailer bcrypt
 
 FRONTEND:
 npm install -D tailwindcss @tailwindcss/postcss postcss autoprefixer axios recharts

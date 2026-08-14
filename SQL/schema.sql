@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     -- linea comentada debido a cambio de la logica de roles a tabla separada
     -- Rol ENUM('Administrador','Usuario') NOT NULL DEFAULT 'Usuario' COMMENT 'Rol del usuario dentro del sistema',
     -- __________________________________________________________________________________________
+    
+    Reset_code VARCHAR(255) DEFAULT NULL COMMENT 'Hash del código de recuperación',
+    Reset_code_expires DATETIME DEFAULT NULL COMMENT 'Expiración del código de recuperación',
     Password_hash VARCHAR(255) NOT NULL COMMENT 'Hash de la contraseña del usuario',
     Email VARCHAR(255) NOT NULL UNIQUE COMMENT 'Correo electrónico principal',
     Activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el usuario está activo o inactivo',
@@ -39,6 +42,9 @@ CREATE TABLE IF NOT EXISTS ROL (
     Cargo VARCHAR(50) NOT NULL COMMENT 'Nombre del rol (e.g., Administrador, Usuario, superusuario)'
 ) ENGINE=InnoDB;
 
+Insert into rol (Cargo) VALUES ('user'),('admin'),('superuser');
+
+
 CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
     ID_usuario INT NOT NULL COMMENT 'ID del usuario',
     ID_rol INT NOT NULL COMMENT 'ID del rol',
@@ -46,6 +52,8 @@ CREATE TABLE IF NOT EXISTS USUARIOS_ROLES (
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID_usuario) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_rol) REFERENCES ROL(ID_rol) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
+
+
 
 -- ========================================================================
 --     TABLA: categorias

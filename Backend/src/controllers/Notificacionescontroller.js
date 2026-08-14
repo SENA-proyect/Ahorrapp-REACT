@@ -1,7 +1,3 @@
-// ============================================================
-//  AhorrApp — notificacionesController.js
-// ============================================================
-
 const pool = require("../db/connection");
 const {
   getPreferencias,
@@ -11,8 +7,6 @@ const {
 
 // ─────────────────────────────────────────────────────────────
 //  GET /api/notificaciones
-//  Listado paginado, con filtros opcionales por query string:
-//  ?leida=true|false  ?archivada=true|false  ?page=1  ?limit=20
 // ─────────────────────────────────────────────────────────────
 const getNotificaciones = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -35,9 +29,6 @@ const getNotificaciones = async (req, res) => {
       condiciones.push("Archivada = ?");
       params.push(archivada === "true");
     } else {
-      // Por defecto, el listado principal NO muestra archivadas
-      // (esas viven en /historial). Si se pide explícitamente
-      // archivada=true o archivada=false, se respeta ese filtro.
       condiciones.push("Archivada = FALSE");
     }
 
@@ -78,7 +69,6 @@ const getNotificaciones = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────
 //  GET /api/notificaciones/no-leidas/count
-//  Endpoint de polling. Liviano a propósito: solo un COUNT().
 // ─────────────────────────────────────────────────────────────
 const getNoLeidasCount = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -169,7 +159,6 @@ const archivarNotificacion = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────
 //  DELETE /api/notificaciones/:id
-//  Eliminación definitiva (distinta de archivar).
 // ─────────────────────────────────────────────────────────────
 const eliminarNotificacion = async (req, res) => {
   const ID_usuario = req.usuario.id;

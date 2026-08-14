@@ -1,12 +1,26 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { verifyResetCode, forgotPassword } from "../api";
+import ModalVerificacion from "./ConfirmacionCambioContrasena";
 
 export default function CodigoRecu() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [countdown, setCountdown] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const inputs = useRef([]);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
+
+  // Si el usuario llega a esta vista sin haber pasado por "Olvidé mi contraseña",
+  // no hay email para verificar el código, así que lo mandamos de vuelta.
+  useEffect(() => {
+    if (!email) navigate("/olvidar-contrasena", { replace: true });
+  }, [email, navigate]);
 
   useEffect(() => {
     if (countdown === 0) { setCanResend(true); return; }
@@ -14,12 +28,18 @@ export default function CodigoRecu() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (!canResend) return;
-    setOtp(["", "", "", "", "", ""]);
-    setCountdown(30);
-    setCanResend(false);
-    inputs.current[0]?.focus();
+    setError("");
+    try {
+      await forgotPassword(email);
+      setOtp(["", "", "", "", "", ""]);
+      setCountdown(30);
+      setCanResend(false);
+      inputs.current[0]?.focus();
+    } catch (err) {
+      setError(err.response?.data?.mensaje || "No se pudo reenviar el código");
+    }
   };
 
   const handleChange = (value, index) => {
@@ -49,18 +69,33 @@ export default function CodigoRecu() {
   const filled = otp.filter(Boolean).length;
   const allFilled = filled === 6;
 
-  const handleSubmit = () => {
-    if (!allFilled) return;
-    setShowModal(true);
+  const handleSubmit = async () => {
+    if (!allFilled || loading) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await verifyResetCode(email, otp.join(""));
+      const { resetToken } = res.data;
+      setShowModal(true);
+      // Guardamos el resetToken listo para pasarlo a la siguiente vista al continuar
+      inputs.current.resetToken = resetToken;
+    } catch (err) {
+      setError(err.response?.data?.mensaje || "Código inválido");
+      setOtp(["", "", "", "", "", ""]);
+      inputs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleContinue = () => {
     setShowModal(false);
-    setVerified(true);
+    navigate("/nueva-contrasena", {
+      state: { resetToken: inputs.current.resetToken },
+    });
   };
-
-  // Redirige a la vista de restablecer contraseña
-  if (verified) return <RestablecerContra />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#080b14] relative overflow-hidden px-4">
@@ -121,17 +156,22 @@ export default function CodigoRecu() {
           />
         </div>
 
+        {/* Error message */}
+        {error && (
+          <p className="text-red-400 text-xs text-center -mt-4 mb-6">{error}</p>
+        )}
+
         {/* Submit button */}
         <button
           onClick={handleSubmit}
-          disabled={!allFilled}
+          disabled={!allFilled || loading}
           className={`w-full py-4 rounded-xl text-sm font-semibold transition-all mb-6
-            ${allFilled
+            ${allFilled && !loading
               ? "bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:opacity-90 active:scale-[0.98]"
               : "bg-white/[0.05] text-white/20 cursor-not-allowed"
             }`}
         >
-          Restablecer contraseña
+          {loading ? "Verificando..." : "Verificar código"}
         </button>
 
         {/* Resend */}
@@ -149,6 +189,8 @@ export default function CodigoRecu() {
           </span>
         </p>
       </div>
+
+      <ModalVerificacion visible={showModal} onContinue={handleContinue} />
     </div>
   );
 }

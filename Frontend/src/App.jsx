@@ -9,15 +9,18 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 // ====================================================
 // Componentes públicos
 // ====================================================
+import ConfirmacionCambioContrasena from './components/IngresoNuevaContrasena.jsx'
 import Index from './components/Index.jsx';
 import Login from './components/Login.jsx';
 import OlvidarContrasena from './components/OlvidarContrasena.jsx';
 import VerificacionCorreo from './components/VerificacionCorreo.jsx';
+import IngresoNuevaContrasena from './components/IngresoNuevaContrasena.jsx';
 
 // ====================================================
 // Componentes protegidos (requieren sesión)
 // ====================================================
 import Dashboard from './components/Dashboard.jsx';
+import IndexLogeado from './components/IndexLogeado.jsx'
 import ModuloAhorros from './components/ModuloAhorros.jsx';
 import ModuloDeudas from './components/ModuloDeudas.jsx';
 import ModuloImprevistos from './components/ModuloImprevistos.jsx';
@@ -73,6 +76,11 @@ function App() {
           <Route path="/Login" element={<Login />} />
           <Route path="/OlvidarContrasena" element={<OlvidarContrasena />} />
           <Route path="/VerificacionCorreo" element={<VerificacionCorreo />} />
+          <Route path="/ConfirmacionCambioContrasena" element={<ConfirmacionCambioContrasena />} />
+          <Route path="/IngresoNuevaContrasena" element={<IngresoNuevaContrasena />} />
+          
+
+
           
           {/* ========== RUTA DE ACCESO DENEGADO ========== */}
           <Route path="/Unauthorized" element={<Unauthorized />} />
@@ -83,6 +91,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/IndexLogeado" 
+            element={
+              <ProtectedRoute>
+                <IndexLogeado />
               </ProtectedRoute>
             } 
           />

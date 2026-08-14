@@ -10,13 +10,55 @@ const authHeaders = () => ({
 
 const fetchJSON = async (url, options = {}) => {
   const res = await fetch(url, { headers: authHeaders(), ...options });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`HTTPS ${res.status}`);
   return res.json();
 };
 
+<<<<<<< HEAD
 // ________________________________________________________________________________
 // ==================================<|LOGIN & REGISTER|>==================================
 // ________________________________________________________________________________
+=======
+// Helper específico para endpoints públicos (sin token, ya que el usuario
+// aún no está logueado en el flujo de recuperación de contraseña)
+const fetchPublicJSON = async (url, options = {}) => {
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const error = new Error(data.mensaje || `HTTP ${res.status}`);
+    error.response = { status: res.status, data };
+    throw error;
+  }
+
+  return data;
+};
+
+// ── Olvidar contraseña ──────────────────────────────────────────────────────────────────────
+export const forgotPassword = (email) =>
+  fetchPublicJSON(`${API_URL}/auth/forgot-password`, {
+    method: "POST",
+    body: JSON.stringify({ Email: email }),
+  });
+
+export const verifyResetCode = (email, code) =>
+  fetchPublicJSON(`${API_URL}/auth/verify-reset-code`, {
+    method: "POST",
+    body: JSON.stringify({ Email: email, code }),
+  });
+
+export const resetPassword = (resetToken, nuevaPassword) =>
+  fetchPublicJSON(`${API_URL}/auth/reset-password`, {
+    method: "POST",
+    body: JSON.stringify({ resetToken, nuevaPassword }),
+  });
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+>>>>>>> main
 export const registerUser = (datos) =>
   fetch(`${API_URL}/auth/register`, {
     method: "POST",
@@ -31,12 +73,34 @@ export const loginUser = (datos) =>
     body: JSON.stringify(datos),
   }).then((r) => r.json());
 
+<<<<<<< HEAD
 // ________________________________________________________________________________
 // ==================================<| NOTIFICACIONES |>==================================
 // ________________________________________________________________________________
 export const getNotificaciones = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
   const data = await fetchJSON(`${API_URL}/notificaciones${query ? `?${query}` : ""}`);
+=======
+export const actualizarRolUsuario = (id, ID_rol) =>
+  fetchJSON(`${API_URL}/auth/PanelUsuarios/${id}/rol`, {
+    method: "PUT",
+    body: JSON.stringify({ ID_rol }),
+  });
+
+// ── Movimientos (base) ────────────────────────────────────────────────────────
+export const getMovimientos = async () => {
+  try {
+    const data = await fetchJSON(`${API_URL}/movimientos`);
+    return Array.isArray(data) ? data : (data.movimientos ?? []);
+  } catch {
+    return [];
+  }
+};
+
+// ── Dashboard (una sola llamada) ──────────────────────────────────────────────
+export const getDashboardData = async () => {
+  const data = await fetchJSON(`${API_URL}/dashboard/resumen`);
+>>>>>>> main
   return {
     notificaciones: data.notificaciones ?? [],
     paginacion: data.paginacion ?? null,
@@ -397,9 +461,21 @@ export const getResumenFinancieroBreve = async () => {
     return "No se pudo cargar la información financiera actual del usuario.";
   }
 };
+<<<<<<< HEAD
 // ________________________________________________________________________________
 // ==================================<| PANEL ADMIN |>==================================
 // ________________________________________________________________________________
+=======
+
+export const getGastos = async () => {
+  const movimientos = await getMovimientos();
+  return movimientos.filter(m =>
+    (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === "gasto"
+  );
+};
+
+// ── Panel Admin ───────────────────────────────────────────────────────────────
+>>>>>>> main
 export const getUsuariosPanelAdmin = async () => {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {

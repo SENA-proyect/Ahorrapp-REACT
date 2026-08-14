@@ -19,6 +19,11 @@ import {
 } from '../api'
 
 
+// Límites de validación para los campos del formulario de categorías.
+const NOMBRE_MAX_LENGTH = 50
+const NOMBRE_MIN_LENGTH = 2
+const DESCRIPCION_MAX_LENGTH = 200
+
 let usuario = null
 try {
   usuario = JSON.parse(localStorage.getItem('usuario'))
@@ -40,6 +45,8 @@ export default function ModuloCategorias() {
   const [categoriaEdit, setCategoriaEdit] = useState(null)
   const [formNombre, setFormNombre] = useState('')
   const [formDesc, setFormDesc] = useState('')
+  // evita doble envío del formulario (doble clic / doble submit)
+  const [guardando, setGuardando] = useState(false)
 // agregado pero no revizado, verificar funcionalidad
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -96,12 +103,23 @@ export default function ModuloCategorias() {
     cat.sistema == 1 || cat.sistema === true
 
   const handleAgregar = async () => {
-    if (!formNombre.trim()) return alert('El nombre es obligatorio')
+    const nombre = formNombre.trim()
+    const descripcion = formDesc.trim()
 
+    if (!nombre) return alert('El nombre es obligatorio')
+    if (nombre.length < NOMBRE_MIN_LENGTH || nombre.length > NOMBRE_MAX_LENGTH) {
+      return alert(`El nombre debe tener entre ${NOMBRE_MIN_LENGTH} y ${NOMBRE_MAX_LENGTH} caracteres`)
+    }
+    if (descripcion.length > DESCRIPCION_MAX_LENGTH) {
+      return alert(`La descripción no puede superar los ${DESCRIPCION_MAX_LENGTH} caracteres`)
+    }
+    if (guardando) return // evita doble envío si ya hay una petición en curso
+
+    setGuardando(true)
     try {
       const respuesta = await crearCategoria({
-        nombre: formNombre.trim(),
-        descripcion: formDesc.trim(),
+        nombre,
+        descripcion,
       })
 
       if (respuesta.ok) {
@@ -110,8 +128,8 @@ export default function ModuloCategorias() {
           ...prev,
           {
             id: respuesta.id,
-            nombre: formNombre.trim(),
-            descripcion: formDesc.trim(),
+            nombre,
+            descripcion,
             activa: true,
             sistema: false,
             es_global: false,
@@ -126,6 +144,8 @@ export default function ModuloCategorias() {
       }
     } catch (error) {
       alert(error.message || 'Error al crear la categoría')
+    } finally {
+      setGuardando(false)
     }
   }
 
@@ -135,18 +155,29 @@ export default function ModuloCategorias() {
   }
 
   const handleGuardarEdicion = async () => {
-    if (!categoriaEdit.nombre.trim()) return alert('El nombre es obligatorio')
+    const nombre = (categoriaEdit.nombre || '').trim()
+    const descripcion = (categoriaEdit.descripcion || '').trim()
 
+    if (!nombre) return alert('El nombre es obligatorio')
+    if (nombre.length < NOMBRE_MIN_LENGTH || nombre.length > NOMBRE_MAX_LENGTH) {
+      return alert(`El nombre debe tener entre ${NOMBRE_MIN_LENGTH} y ${NOMBRE_MAX_LENGTH} caracteres`)
+    }
+    if (descripcion.length > DESCRIPCION_MAX_LENGTH) {
+      return alert(`La descripción no puede superar los ${DESCRIPCION_MAX_LENGTH} caracteres`)
+    }
+    if (guardando) return // evita doble envío si ya hay una petición en curso
+
+    setGuardando(true)
     try {
       const respuesta = await editarCategoria(categoriaEdit.id, {
-        nombre: categoriaEdit.nombre,
-        descripcion: categoriaEdit.descripcion,
+        nombre,
+        descripcion,
       })
 
       if (respuesta.ok) {
         mostrarToast('Categoría actualizada correctamente')
         setCategorias(prev =>
-          prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit } : c))
+          prev.map(c => (c.id === categoriaEdit.id ? { ...c, ...categoriaEdit, nombre, descripcion } : c))
         )
         setModalEditar(false)
       } else {
@@ -154,6 +185,8 @@ export default function ModuloCategorias() {
       }
     } catch (error) {
       alert(error.message || 'Error al editar la categoría')
+    } finally {
+      setGuardando(false)
     }
   }
 
@@ -431,6 +464,10 @@ export default function ModuloCategorias() {
               placeholder="Ej: Ropa, Mascotas..."
               value={formNombre}
               onChange={e => setFormNombre(e.target.value)}
+              required
+              minLength={NOMBRE_MIN_LENGTH}
+              maxLength={NOMBRE_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <label className={labelClass}>Descripción</label>
@@ -440,20 +477,24 @@ export default function ModuloCategorias() {
               placeholder="Descripción opcional"
               value={formDesc}
               onChange={e => setFormDesc(e.target.value)}
+              maxLength={DESCRIPCION_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={closeModal}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
+                disabled={guardando}
+                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleAgregar}
-                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
+                disabled={guardando}
+                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900 disabled:opacity-50"
               >
-                Guardar
+                {guardando ? 'Guardando...' : 'Guardar'}
               </button>
             </div>
           </div>
@@ -471,6 +512,10 @@ export default function ModuloCategorias() {
               type="text"
               value={categoriaEdit.nombre}
               onChange={e => setCategoriaEdit(prev => ({ ...prev, nombre: e.target.value }))}
+              required
+              minLength={NOMBRE_MIN_LENGTH}
+              maxLength={NOMBRE_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <label className={labelClass}>Descripción</label>
@@ -479,20 +524,24 @@ export default function ModuloCategorias() {
               type="text"
               value={categoriaEdit.descripcion || ''}
               onChange={e => setCategoriaEdit(prev => ({ ...prev, descripcion: e.target.value }))}
+              maxLength={DESCRIPCION_MAX_LENGTH}
+              disabled={guardando}
             />
 
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={closeModal}
-                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10"
+                disabled={guardando}
+                className="rounded-xl border border-white/15 bg-transparent px-5 py-2.5 text-sm font-bold text-zinc-400 hover:bg-white/10 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleGuardarEdicion}
-                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900"
+                disabled={guardando}
+                className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-900 disabled:opacity-50"
               >
-                Guardar cambios
+                {guardando ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
           </div>

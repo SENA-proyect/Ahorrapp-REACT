@@ -1,10 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { resetPassword } from "../api";
 
 export default function RestablecerContra() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const resetToken = location.state?.resetToken;
+
+  // Sin resetToken no hay forma de completar este paso: el usuario debe reiniciar el flujo
+  useEffect(() => {
+    if (!resetToken) navigate("/OlvidarContrasena", { replace: true });
+  }, [resetToken, navigate]);
 
   const rules = [
     { label: "Mínimo 8 caracteres", pass: newPass.length >= 8 },
@@ -14,12 +27,34 @@ export default function RestablecerContra() {
 
   const allRules = rules.every((r) => r.pass);
   const matches = newPass && confirmPass && newPass === confirmPass;
-  const canSubmit = allRules && matches;
+  const canSubmit = allRules && matches && !loading;
 
   const strength = rules.filter((r) => r.pass).length;
   const strengthLabel = ["", "Débil", "Regular", "Fuerte"][strength];
   const strengthColor = ["", "bg-red-500", "bg-amber-400", "bg-emerald-500"][strength];
   const strengthWidth = ["w-0", "w-1/3", "w-2/3", "w-full"][strength];
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await resetPassword(resetToken, newPass);
+      navigate("/Login", { replace: true });
+    } catch (err) {
+      const mensaje = err.response?.data?.mensaje || "No se pudo actualizar la contraseña";
+      setError(mensaje);
+
+      // Si el token expiró o es inválido, no tiene sentido dejar al usuario aquí
+      if (err.response?.status === 401) {
+        setTimeout(() => navigate("/OlvidarContrasena", { replace: true }), 2000);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#080b14] relative overflow-hidden px-4">
@@ -121,6 +156,7 @@ export default function RestablecerContra() {
               placeholder="••••••••"
               value={confirmPass}
               onChange={(e) => setConfirmPass(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               className={`w-full bg-white/[0.04] border rounded-xl py-3.5 pl-9 pr-11 text-white text-sm placeholder:text-white/25 outline-none transition-all ${
                 confirmPass
                   ? matches
@@ -141,8 +177,14 @@ export default function RestablecerContra() {
           )}
         </div>
 
+        {/* Error del servidor */}
+        {error && (
+          <p className="text-red-400 text-xs mb-4">{error}</p>
+        )}
+
         {/* Submit */}
         <button
+          onClick={handleSubmit}
           disabled={!canSubmit}
           className={`w-full py-4 rounded-xl text-sm font-semibold transition-all ${
             canSubmit
@@ -150,7 +192,7 @@ export default function RestablecerContra() {
               : "bg-white/[0.05] text-white/20 cursor-not-allowed"
           }`}
         >
-          Guardar contraseña
+          {loading ? "Guardando..." : "Guardar contraseña"}
         </button>
       </div>
     </div>

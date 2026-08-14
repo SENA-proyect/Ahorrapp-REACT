@@ -10,3 +10,7 @@ openssl req -x509 -new -nodes -key localhost.key -sha256 -days 365 -out localhos
 validamos el certificado:
 openssl x509 -in localhost.crt -text -noout
 
+Cambiar el nombre de los certificados de las llaves SSL por:
+localhost.key -> private.key
+localhost.crt -> certificate.crt
+Tanto en el backend como en el frontend y en el archivo vie.config

@@ -6,8 +6,6 @@ import {
 import HeaderModulos from './HeaderModulos'
 import BolsaWidget from './BolsaWidget'
 import { getDashboardData, getPresupuestoVsEjecutado, getFlujoPorSemana } from '../api'
-
-// agregado para la seguirdad por roles
 import { useAuth } from './AuthContext'
 
 // ── Tooltip personalizado para la gráfica de barras ──────────

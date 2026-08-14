@@ -221,7 +221,7 @@ export default function ModuloIngresos() {
       {modalEditar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
           <div className="w-full max-w-[460px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
-            style={{ background: 'rgba(15,23,42,0.95)' }}>
+            style={{ background: 'rgba(0, 0, 0, 0.95)' }}>
             <h4 className="text-lg font-extrabold text-emerald-400 mb-1">✏️ Editar Ingreso</h4>
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 

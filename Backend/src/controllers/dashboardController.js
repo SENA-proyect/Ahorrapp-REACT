@@ -1,21 +1,9 @@
-// ============================================================
-//  AhorrApp — dashboardController.js
-//  Endpoints que alimentan el dashboard y las gráficas
-// ============================================================
-
 const pool = require("../db/connection");
 const { getPeriodoActivo } = require("../service/periodoHelper");
 
 
 // ─────────────────────────────────────────────────────────────
 //  GET /dashboard/resumen
-//  Alimenta las 4 stat cards del Dashboard.jsx
-//  Respuesta:
-//  {
-//    totalIngresos, totalGastos, totalAhorros, balance,
-//    periodo: { fecha_inicio, fecha_fin, ingreso_estimado, ingreso_real },
-//    sin_periodo: bool
-//  }
 // ─────────────────────────────────────────────────────────────
 const getResumen = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -110,10 +98,6 @@ const getResumen = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────
 //  GET /dashboard/presupuesto-vs-ejecutado
-//  Alimenta la gráfica de barras: presupuestado vs real
-//  por cada categoría del período activo
-//  Respuesta: array de 5 objetos:
-//  [{ categoria, presupuestado, ejecutado, disponible, porcentaje }]
 // ─────────────────────────────────────────────────────────────
 const getPresupuestoVsEjecutado = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -196,7 +180,7 @@ const getPresupuestoVsEjecutado = async (req, res) => {
       {
         categoria:     "Emergencia",
         presupuestado: Number(periodo.Monto_emergencia),
-        ejecutado:     0, // fondo de emergencia no se "gasta", es reserva
+        ejecutado:     0, 
         disponible:    Number(periodo.Monto_emergencia),
         porcentaje:    0,
       },
@@ -211,10 +195,6 @@ const getPresupuestoVsEjecutado = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────
 //  GET /dashboard/flujo-semanal
-//  Alimenta la gráfica de área: ingresos vs gastos por semana
-//  dentro del período activo
-//  Respuesta: array de semanas:
-//  [{ semana: "Sem 1", ingresos, gastos, balance }]
 // ─────────────────────────────────────────────────────────────
 const getFlujoPorSemana = async (req, res) => {
   const ID_usuario = req.usuario.id;

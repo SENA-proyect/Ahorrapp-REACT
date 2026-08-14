@@ -4,6 +4,12 @@ const { crearNotificacion, existeNotificacionEntidad } = require("../notificacio
 
 const DIAS_AVISO_DEUDA = 5;
 
+<<<<<<< HEAD
+=======
+// ─────────────────────────────────────────────────────────────
+//  revisarDeudasPorVencer
+// ─────────────────────────────────────────────────────────────
+>>>>>>> main
 const revisarDeudasPorVencer = async () => {
   try {
     const [deudas] = await pool.query(
@@ -70,5 +76,9 @@ const iniciarVencimientosJob = () => {
 
 module.exports = {
   iniciarVencimientosJob,
+<<<<<<< HEAD
   revisarDeudasPorVencer, 
+=======
+  revisarDeudasPorVencer,
+>>>>>>> main
 };

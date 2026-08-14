@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 
-export default function Index() {
+export default function IndexLogeado() {
   const navigate = useNavigate()
 
   // const handleSubmit = e => {
@@ -38,12 +38,12 @@ export default function Index() {
           </h2>
         </div>
 
-        <Link to="/Login">
+        <Link to="/Dashboard">
           <button
             className="cursor-pointer rounded-md border-[1.5px] border-[#c9a84c]/70 bg-transparent px-[22px] py-2.5 text-sm font-semibold tracking-[0.01em] text-[#e0b855] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#e0b855] hover:bg-[#e0b855] hover:text-[#080c18] hover:shadow-[0_4px_15px_rgba(224,184,85,0.3)]"
-            onClick={() => navigate('/Login')}
+            onClick={() => navigate('/Dashboard')}
           >
-            Iniciar sesión
+            Dashboard
           </button>
         </Link>
       </header>
@@ -74,12 +74,12 @@ export default function Index() {
           </p>
 
           <div className="relative z-10 flex items-center justify-center gap-4">
-            <Link to="/Login">
+            <Link to="/Dashboard">
               <button
                 className="cursor-pointer rounded-md bg-[#e0b855] px-8 py-3 text-sm font-bold uppercase tracking-[0.05em] text-[#080c18] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#c9a84c] hover:shadow-[0_8px_24px_rgba(224,184,85,0.35)]"
                 onClick={() => navigate('/Login')}
               >
-                Empezar ahora
+                Vuelve a la dashboard!
               </button>
             </Link>
           </div>
