@@ -11,7 +11,8 @@ const API = 'https://localhost:3000/api/movimientos'
 const fmt    = (n)   => `$${Number(n).toLocaleString('es-CO')}`
 const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
 
-const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20'
+const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
+const selectCls = inputCls 
 const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
 
 export default function ModuloIngresos() {
@@ -221,7 +222,7 @@ export default function ModuloIngresos() {
       {modalEditar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
           <div className="w-full max-w-[460px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
-            style={{ background: 'rgba(0, 0, 0, 0.95)' }}>
+            style={{ background: 'rgba(15,23,42,0.95)' }}>
             <h4 className="text-lg font-extrabold text-emerald-400 mb-1">✏️ Editar Ingreso</h4>
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
@@ -232,9 +233,19 @@ export default function ModuloIngresos() {
             <input className={inputCls} type="text" name="fuente" placeholder="Ej: Salario, Freelance..." value={modalEditar.fuente} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
-            <select className={inputCls} name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            <select
+              className={selectCls}
+              style={{ colorScheme: 'dark' }}
+              name="id_categoria"
+              value={modalEditar.id_categoria}
+              onChange={handleChange}
+            >
+              <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Sin categoría</option>
+              {categorias.filter(c => c.activa == 1).map(c => (
+                <option key={c.id} value={c.id} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
+                  {c.nombre}
+                </option>
+              ))}
             </select>
 
             <label className={labelCls}>Descripción</label>

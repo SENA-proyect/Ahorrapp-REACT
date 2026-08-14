@@ -22,9 +22,11 @@ const PESO_VALORES_VALIDOS = [1, 2, 3, 4, 5]
 // Fecha máxima permitida: hoy (un dependiente no puede haber nacido en el futuro)
 const HOY_ISO = new Date().toISOString().split('T')[0]
 
-// Clases reutilizables para el modal
-const inputModal = "w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/[0.07] text-[#f4f4f5] text-sm outline-none mt-1.5"
-const labelModal = "block text-[0.72rem] font-bold text-[#a1a1aa] uppercase tracking-widest mt-3.5"
+
+const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
+const selectCls = inputCls 
+const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
+
 
 const Dependientes = () => {
   const navigate = useNavigate()
@@ -229,36 +231,33 @@ const Dependientes = () => {
 
       {/* MODAL */}
       {mostrarModal && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}>
-          <div className="w-full max-w-[460px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <div className="w-full max-w-[480px] rounded-[20px] p-7 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
             style={{ background: 'rgba(15,23,42,0.92)' }}>
 
-            <h4 className="text-lg font-extrabold text-[#fbbf24] mb-4">
-              {editandoId ? '✏️ Editar Dependiente' : '➕ Agregar Dependiente'}
-            </h4>
+            <h4 className="text-lg font-extrabold text-amber-400 mb-1">{editandoId ? '✏️ Editar Dependiente' : '➕ Agregar Dependiente'}</h4>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-1">
 
-              <label className={labelModal}>Nombre *</label>
-              <input className={inputModal} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required maxLength={NOMBRE_MAX_LENGTH} disabled={guardando} placeholder="Nombre del dependiente" />
+              <label className={labelCls}>Nombre *</label>
+              <input className={inputCls} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required maxLength={NOMBRE_MAX_LENGTH} disabled={guardando} placeholder="Nombre del dependiente" />
 
-              <label className={labelModal}>Relación *</label>
-              <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
+              <label className={labelCls}>Relación *</label>
+              <select className={inputCls} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
                 <option value="">Selecciona una relación</option>
                 {['Hijo','Hija','Hermano','Hermana','Padre','Madre','Abuelo','Abuela','Otro'].map(r => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>
 
-              <label className={labelModal}>Ocupación</label>
-              <input className={inputModal} type="text" name="Ocupacion" value={formDatos.Ocupacion} onChange={handleChange} maxLength={OCUPACION_MAX_LENGTH} disabled={guardando} placeholder="Ocupación del dependiente" />
+              <label className={labelCls}>Ocupación</label>
+              <input className={inputCls} type="text" name="Ocupacion" value={formDatos.Ocupacion} onChange={handleChange} maxLength={OCUPACION_MAX_LENGTH} disabled={guardando} placeholder="Ocupación del dependiente" />
 
-              <label className={labelModal}>Fecha de Nacimiento *</label>
-              <input className={inputModal} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required max={HOY_ISO} disabled={guardando} />
+              <label className={labelCls}>Fecha de Nacimiento *</label>
+              <input className={inputCls} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required max={HOY_ISO} disabled={guardando} />
 
-              <label className={labelModal}>Peso Económico</label>
-              <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
+              <label className={labelCls}>Peso Económico</label>
+              <select className={inputCls} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
                 <option value="1">1 - Muy bajo</option>
                 <option value="2">2 - Bajo</option>
                 <option value="3">3 - Medio</option>

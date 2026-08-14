@@ -8,15 +8,20 @@ import { useNotificaciones } from './NotificacionesContext'
 
 const API = 'https://localhost:3000/api/movimientos'
 
-const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
+
+const fmt = (n) => `$${Math.round(Number(n)).toLocaleString('es-CO', { maximumFractionDigits: 0 })}`
 const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
 
-const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20'
+const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
+const selectCls = inputCls 
 const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
 
 const costoPorCuota  = (monto, ct) => ct ? Number(monto) / Number(ct) : Number(monto)
 const montoPagado    = (monto, cp, ct) => ct ? costoPorCuota(monto, ct) * Number(cp) : 0
 const montoPendiente = (monto, cp, ct) => ct ? costoPorCuota(monto, ct) * (Number(ct) - Number(cp)) : Number(monto)
+
+const formatCOP = (valor) =>
+  Math.round(Number(valor)).toLocaleString('es-CO', { maximumFractionDigits: 0 })
 
 const BadgeEstado = ({ estado }) => estado === 'pagada'
   ? <span className="px-2.5 py-1 rounded-full text-[0.8rem] font-bold bg-emerald-400/15 text-emerald-400 border border-emerald-400/35">Pagada</span>
@@ -371,30 +376,56 @@ export default function ModuloDeudas() {
             style={{ background: 'rgba(15,23,42,0.95)' }}>
             <h4 className="text-lg font-extrabold text-amber-400 mb-1">✏️ Editar Deuda</h4>
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
+
             <label className={labelCls}>Fuente *</label>
             <input className={inputCls} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta..." value={modalEditar.fuente} onChange={handleChange} />
+
             <label className={labelCls}>Monto *</label>
             <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
-            <label className="bg-red-500">Categoría</label>
-            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={modalEditar.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+
+            <label className={labelCls}>Categoría</label>
+            <select
+              className={selectCls}
+              style={{ colorScheme: 'dark' }}
+              name="id_categoria"
+              value={modalEditar.id_categoria}
+              onChange={handleChange}
+            >
+              <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Sin categoría</option>
+              {categorias.filter(c => c.activa == 1).map(c => (
+                <option key={c.id} value={c.id} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
+                  {c.nombre}
+                </option>
+              ))}
             </select>
+
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
+
             <label className={labelCls}>Estado</label>
-            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="estado" value={modalEditar.estado} onChange={handleChange}>
-              <option value="pendiente">Pendiente</option>
-              <option value="pagada">Pagada</option>
+            <select
+              className={selectCls}
+              style={{ colorScheme: 'dark' }}
+              name="estado"
+              value={modalEditar.estado}
+              onChange={handleChange}
+            >
+              <option value="pendiente" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Pendiente</option>
+              <option value="pagada" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Pagada</option>
             </select>
+
             <label className={labelCls}>Cuotas pagadas</label>
             <input className={inputCls} type="number" name="cuotas_pagadas" min="0" step="1" value={modalEditar.cuotas_pagadas} onChange={handleChange} />
+
             <label className={labelCls}>Total de cuotas</label>
             <input className={inputCls} type="number" name="cuotas_total" min="1" step="1" placeholder="Vacío si es pago único" value={modalEditar.cuotas_total} onChange={handleChange} />
+
             <label className={labelCls}>Fecha de inicio</label>
             <input className={inputCls} type="date" name="fecha_inicio" value={modalEditar.fecha_inicio} onChange={handleChange} />
+
             <label className={labelCls}>Fecha de fin</label>
             <input className={inputCls} type="date" name="fecha_fin" value={modalEditar.fecha_fin} onChange={handleChange} />
+
             {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
             <div className="mt-6 flex justify-end gap-2.5">
               <button onClick={() => setModalEditar(null)} className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">Cancelar</button>
