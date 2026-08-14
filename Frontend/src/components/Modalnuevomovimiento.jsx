@@ -68,6 +68,43 @@ const validar = (subtipo, form) => {
   return null
 }
 
+// ── Subcomponentes reutilizables (antes duplicados 5x y 2x) ───
+const CampoCategoria = ({ inputCls, categorias, value, onChange }) => (
+  <>
+    <label className={labelCls}>Categoría</label>
+    <select
+      className={inputCls}
+      style={{ colorScheme: 'dark' }}
+      name="id_categoria"
+      value={value}
+      onChange={onChange}
+    >
+      <option value="">Sin categoría</option>
+      {categorias.filter(c => c.activa == 1).map(c => (
+        <option key={c.id} value={c.id}>{c.nombre}</option>
+      ))}
+    </select>
+  </>
+)
+
+const CampoDependiente = ({ inputCls, dependientes, value, onChange, placeholder }) => (
+  <>
+    <label className={labelCls}>Dependiente</label>
+    <select
+      className={inputCls}
+      style={{ colorScheme: 'dark' }}
+      name="id_dependientes"
+      value={value}
+      onChange={onChange}
+    >
+      <option value="">{placeholder}</option>
+      {dependientes.map(d => (
+        <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>
+      ))}
+    </select>
+  </>
+)
+
 export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) {
   const cfg   = CONFIG[subtipo]
   const color = COLORES[cfg.color]
@@ -75,11 +112,11 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
   const { mostrarToast } = useToast()
   const { revisarAhora } = useNotificaciones()
 
-  const [form,        setForm]        = useState(INICIAL[subtipo])
-  const [categorias,  setCategorias]  = useState([])
-  const [dependientes,setDependientes]= useState([])
-  const [cargando,    setCargando]    = useState(false)
-  const [error,       setError]       = useState(null)
+  const [form,         setForm]         = useState(INICIAL[subtipo])
+  const [categorias,   setCategorias]   = useState([])
+  const [dependientes, setDependientes] = useState([])
+  const [cargando,     setCargando]     = useState(false)
+  const [error,        setError]        = useState(null)
 
   useEffect(() => {
     getCategorias().then(d => { if (Array.isArray(d)) setCategorias(d) }).catch(() => {})
@@ -171,11 +208,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
           {subtipo === 'Ingreso' && <>
             <label className={labelCls}>Fuente</label>
             <input className={inputCls} type="text" name="fuente" placeholder="Ej: Salario, Freelance..." value={form.fuente} onChange={handleChange} />
-            <label className={labelCls}>Categoría</label>
-            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={form.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
+            <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
             <label className={labelCls}>Fecha</label>
@@ -185,11 +218,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
           {subtipo === 'Ahorro' && <>
             <label className={labelCls}>Meta u objetivo</label>
             <input className={inputCls} type="text" name="meta" placeholder="Ej: Vacaciones, Fondo de emergencia..." value={form.meta} onChange={handleChange} />
-            <label className={labelCls}>Categoría</label>
-            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={form.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
+            <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
             <div className="grid grid-cols-2 gap-3">
@@ -205,16 +234,8 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
           </>}
 
           {subtipo === 'Gasto' && <>
-            <label className={labelCls}>Categoría</label>
-            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={form.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
-            <label className={labelCls}>Dependiente</label>
-            <select className={inputCls} name="id_dependientes" value={form.id_dependientes} onChange={handleChange}>
-              <option value="">Ninguno (gasto propio)</option>
-              {dependientes.map(d => <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>)}
-            </select>
+            <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
+            <CampoDependiente inputCls={inputCls} dependientes={dependientes} value={form.id_dependientes} onChange={handleChange} placeholder="Ninguno (gasto propio)" />
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
             <label className={labelCls}>Fecha</label>
@@ -224,11 +245,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
           {subtipo === 'Deuda' && <>
             <label className={labelCls}>Fuente *</label>
             <input className={inputCls} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta de crédito..." value={form.fuente} onChange={handleChange} />
-            <label className={labelCls}>Categoría</label>
-            <select className="mt-1.5 w-full rounded-xl border border-white/15 bg-zinc-700 px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20" name="id_categoria" value={form.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
+            <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <label className={labelCls}>Número de cuotas</label>
             <input className={inputCls} type="number" name="cuotas_total" min="1" step="1" placeholder="Vacío si es pago único" value={form.cuotas_total} onChange={handleChange} />
             <label className={labelCls}>Descripción</label>
@@ -248,16 +265,8 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
           {subtipo === 'Imprevisto' && <>
             <label className={labelCls}>Causa</label>
             <input className={inputCls} type="text" name="causa" placeholder="Ej: Reparación, Emergencia médica..." value={form.causa} onChange={handleChange} />
-            <label className={labelCls}>Categoría</label>
-            <select className={inputCls} name="id_categoria" value={form.id_categoria} onChange={handleChange}>
-              <option value="">Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
-            <label className={labelCls}>Dependiente</label>
-            <select className={inputCls} name="id_dependientes" value={form.id_dependientes} onChange={handleChange}>
-              <option value="">Ninguno (imprevisto propio)</option>
-              {dependientes.map(d => <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>)}
-            </select>
+            <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
+            <CampoDependiente inputCls={inputCls} dependientes={dependientes} value={form.id_dependientes} onChange={handleChange} placeholder="Ninguno (imprevisto propio)" />
             <label className={labelCls}>Fecha</label>
             <input className={inputCls} type="date" name="fecha_registro" value={form.fecha_registro} onChange={handleChange} />
           </>}

@@ -13,6 +13,7 @@ try {
 }
 
 const PESO_LABELS = { 1: 'Muy bajo', 2: 'Bajo', 3: 'Medio', 4: 'Alto', 5: 'Muy alto' }
+const RELACIONES  = ['Hijo', 'Hija', 'Hermano', 'Hermana', 'Padre', 'Madre', 'Abuelo', 'Abuela', 'Otro']
 
 // Reglas de validación del formulario de dependientes.
 // Deben coincidir (o ser más estrictas) con las validaciones del backend.
@@ -22,11 +23,13 @@ const PESO_VALORES_VALIDOS = [1, 2, 3, 4, 5]
 // Fecha máxima permitida: hoy (un dependiente no puede haber nacido en el futuro)
 const HOY_ISO = new Date().toISOString().split('T')[0]
 
+const FORM_VACIO = { Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }
 
-const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
-const selectCls = inputCls 
-const labelCls = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
+const inputCls  = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
+const selectCls = inputCls
+const labelCls  = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
 
+const pesoColor = p => { if (p <= 1) return '#34d399'; if (p <= 2) return '#60a5fa'; if (p <= 3) return '#fbbf24'; if (p <= 4) return '#fb923c'; return '#f87171' }
 
 const Dependientes = () => {
   const navigate = useNavigate()
@@ -38,7 +41,7 @@ const Dependientes = () => {
   const [dependientes, setDependientes] = useState([])
   const [mostrarModal, setMostrarModal] = useState(false)
   const [editandoId,   setEditandoId]   = useState(null)
-  const [formDatos,    setFormDatos]    = useState({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' })
+  const [formDatos,    setFormDatos]    = useState(FORM_VACIO)
   // evita doble envío del formulario (doble clic / doble submit)
   const [guardando, setGuardando] = useState(false)
 
@@ -123,10 +126,8 @@ const Dependientes = () => {
     }
   }
 
-  const abrirModal  = () => { setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }); setEditandoId(null); setMostrarModal(true) }
-  const cerrarModal = () => { setMostrarModal(false); setEditandoId(null); setFormDatos({ Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }) }
-
-  const pesoColor = p => { if (p <= 1) return '#34d399'; if (p <= 2) return '#60a5fa'; if (p <= 3) return '#fbbf24'; if (p <= 4) return '#fb923c'; return '#f87171' }
+  const abrirModal  = () => { setFormDatos(FORM_VACIO); setEditandoId(null); setMostrarModal(true) }
+  const cerrarModal = () => { setMostrarModal(false); setEditandoId(null); setFormDatos(FORM_VACIO) }
 
   return (
     <div className="min-h-screen w-full flex flex-col text-white overflow-x-hidden"
@@ -243,9 +244,9 @@ const Dependientes = () => {
               <input className={inputCls} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required maxLength={NOMBRE_MAX_LENGTH} disabled={guardando} placeholder="Nombre del dependiente" />
 
               <label className={labelCls}>Relación *</label>
-              <select className={inputCls} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
+              <select className={selectCls} style={{ colorScheme: 'dark' }} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
                 <option value="">Selecciona una relación</option>
-                {['Hijo','Hija','Hermano','Hermana','Padre','Madre','Abuelo','Abuela','Otro'].map(r => (
+                {RELACIONES.map(r => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>
@@ -257,12 +258,10 @@ const Dependientes = () => {
               <input className={inputCls} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required max={HOY_ISO} disabled={guardando} />
 
               <label className={labelCls}>Peso Económico</label>
-              <select className={inputCls} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
-                <option value="1">1 - Muy bajo</option>
-                <option value="2">2 - Bajo</option>
-                <option value="3">3 - Medio</option>
-                <option value="4">4 - Alto</option>
-                <option value="5">5 - Muy alto</option>
+              <select className={selectCls} style={{ colorScheme: 'dark' }} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
+                {PESO_VALORES_VALIDOS.map(p => (
+                  <option key={p} value={p}>{p} - {PESO_LABELS[p]}</option>
+                ))}
               </select>
 
               <div className="mt-6 flex gap-2.5">

@@ -337,7 +337,7 @@ export default function ModuloAhorros() {
                 </option>
               ))}
             </select>
-
+            
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
