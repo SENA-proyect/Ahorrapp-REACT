@@ -82,7 +82,9 @@ INSERT INTO CATEGORIAS (ID_usuario, Nombre, Descripcion, Activa, Sistema, ES_glo
 (NULL, 'Educación',       'Colegiaturas, libros y cursos',      TRUE, TRUE, TRUE),
 (NULL, 'Entretenimiento', 'Ocio, streaming y salidas',          TRUE, TRUE, TRUE),
 (NULL, 'Servicios',       'Agua, luz, internet y gas',          TRUE, TRUE, TRUE);
-
+(NULL, 'Vivienda',        'Alquiler, hipoteca y mantenimiento', TRUE, TRUE, TRUE);
+(NULL, 'Salario',         'Pago mensual o quincenal por parte de alguna entidad',  TRUE, TRUE, TRUE);
+(NULL, 'Negocio',         'Ingresos provenientes de un negocio propio',  TRUE, TRUE, TRUE);
 
  -- ========================================================================
 --     TABLA: dependientes
