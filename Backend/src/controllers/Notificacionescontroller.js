@@ -17,42 +17,42 @@ const getNotificaciones = async (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-    const condiciones = ["ID_usuario = ?"];
     const params = [ID_usuario];
+    const condiciones = ["id_usuario = $1"];
 
     if (leida === "true" || leida === "false") {
-      condiciones.push("Leida = ?");
       params.push(leida === "true");
+      condiciones.push(`leida = $${params.length}`);
     }
 
     if (archivada === "true" || archivada === "false") {
-      condiciones.push("Archivada = ?");
       params.push(archivada === "true");
+      condiciones.push(`archivada = $${params.length}`);
     } else {
-      condiciones.push("Archivada = FALSE");
+      condiciones.push("archivada = FALSE");
     }
 
     const where = condiciones.join(" AND ");
 
-    const [rows] = await pool.query(
+    const { rows } = await pool.query(
       `SELECT
-         ID_notificacion AS id,
-         Tipo            AS tipo,
-         Entidad_tipo    AS entidad_tipo,
-         Entidad_id      AS entidad_id,
-         Mensaje         AS mensaje,
-         Fecha           AS fecha,
-         Leida           AS leida,
-         Archivada       AS archivada
-       FROM NOTIFICACIONES
+         id_notificacion AS id,
+         tipo            AS tipo,
+         entidad_tipo    AS entidad_tipo,
+         entidad_id      AS entidad_id,
+         mensaje         AS mensaje,
+         fecha           AS fecha,
+         leida           AS leida,
+         archivada       AS archivada
+       FROM notificaciones
        WHERE ${where}
-       ORDER BY Fecha DESC
-       LIMIT ? OFFSET ?`,
+       ORDER BY fecha DESC
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset]
     );
 
-    const [[{ total }]] = await pool.query(
-      `SELECT COUNT(*) AS total FROM NOTIFICACIONES WHERE ${where}`,
+    const { rows: [{ total }] } = await pool.query(
+      `SELECT COUNT(*)::int AS total FROM notificaciones WHERE ${where}`,
       params
     );
 
@@ -74,9 +74,9 @@ const getNoLeidasCount = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
   try {
-    const [[{ total }]] = await pool.query(
-      `SELECT COUNT(*) AS total FROM NOTIFICACIONES
-       WHERE ID_usuario = ? AND Leida = FALSE AND Archivada = FALSE`,
+    const { rows: [{ total }] } = await pool.query(
+      `SELECT COUNT(*)::int AS total FROM notificaciones
+       WHERE id_usuario = $1 AND leida = FALSE AND archivada = FALSE`,
       [ID_usuario]
     );
 
@@ -95,13 +95,13 @@ const marcarLeida = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await pool.query(
-      `UPDATE NOTIFICACIONES SET Leida = TRUE
-       WHERE ID_notificacion = ? AND ID_usuario = ?`,
+    const result = await pool.query(
+      `UPDATE notificaciones SET leida = TRUE
+       WHERE id_notificacion = $1 AND id_usuario = $2`,
       [id, ID_usuario]
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ ok: false, mensaje: "Notificación no encontrada" });
     }
 
@@ -120,8 +120,8 @@ const marcarTodasLeidas = async (req, res) => {
 
   try {
     await pool.query(
-      `UPDATE NOTIFICACIONES SET Leida = TRUE
-       WHERE ID_usuario = ? AND Leida = FALSE`,
+      `UPDATE notificaciones SET leida = TRUE
+       WHERE id_usuario = $1 AND leida = FALSE`,
       [ID_usuario]
     );
 
@@ -140,13 +140,13 @@ const archivarNotificacion = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await pool.query(
-      `UPDATE NOTIFICACIONES SET Archivada = TRUE
-       WHERE ID_notificacion = ? AND ID_usuario = ?`,
+    const result = await pool.query(
+      `UPDATE notificaciones SET archivada = TRUE
+       WHERE id_notificacion = $1 AND id_usuario = $2`,
       [id, ID_usuario]
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ ok: false, mensaje: "Notificación no encontrada" });
     }
 
@@ -165,12 +165,12 @@ const eliminarNotificacion = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await pool.query(
-      `DELETE FROM NOTIFICACIONES WHERE ID_notificacion = ? AND ID_usuario = ?`,
+    const result = await pool.query(
+      `DELETE FROM notificaciones WHERE id_notificacion = $1 AND id_usuario = $2`,
       [id, ID_usuario]
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ ok: false, mensaje: "Notificación no encontrada" });
     }
 
