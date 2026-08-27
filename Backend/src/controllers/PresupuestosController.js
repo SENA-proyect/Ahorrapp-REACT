@@ -80,15 +80,22 @@ function calcularFechaFin(fechaInicio, diaCorte) {
 
 const listarPerfiles = async (req, res) => {
     try {
-        const [perfiles] = await pool.query(
-            `SELECT ID_presupuesto, Nombre, Descripcion, Activo,
-                    Dia_corte,
-                    Porcentaje_gastos, Porcentaje_deudas,
-                    Porcentaje_imprevistos, Porcentaje_ahorros,
-                    Porcentaje_emergencia, Fecha_actualizacion
-             FROM   PRESUPUESTOS
-             WHERE  ID_usuario = ?
-             ORDER  BY Activo DESC, Fecha_actualizacion DESC`,
+        const { rows: perfiles } = await pool.query(
+            `SELECT
+                id_presupuesto AS "ID_presupuesto",
+                nombre AS "Nombre",
+                descripcion AS "Descripcion",
+                activo AS "Activo",
+                dia_corte AS "Dia_corte",
+                porcentaje_gastos AS "Porcentaje_gastos",
+                porcentaje_deudas AS "Porcentaje_deudas",
+                porcentaje_imprevistos AS "Porcentaje_imprevistos",
+                porcentaje_ahorros AS "Porcentaje_ahorros",
+                porcentaje_emergencia AS "Porcentaje_emergencia",
+                fecha_actualizacion AS "Fecha_actualizacion"
+             FROM   presupuestos
+             WHERE  id_usuario = $1
+             ORDER  BY activo DESC, fecha_actualizacion DESC`,
             [req.usuario.id]
         );
         res.json({ ok: true, data: perfiles });
@@ -97,14 +104,25 @@ const listarPerfiles = async (req, res) => {
     }
 };
 
-
-//  * GET /presupuestos/:id (perfil especifico)
-
+//  *GET /presupuestos/:id (perfil especifico)
 const obtenerPerfil = async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            `SELECT * FROM PRESUPUESTOS
-             WHERE ID_presupuesto = ? AND ID_usuario = ?`,
+        const { rows } = await pool.query(
+            `SELECT
+                id_presupuesto AS "ID_presupuesto",
+                id_usuario AS "ID_usuario",
+                nombre AS "Nombre",
+                descripcion AS "Descripcion",
+                activo AS "Activo",
+                dia_corte AS "Dia_corte",
+                porcentaje_gastos AS "Porcentaje_gastos",
+                porcentaje_deudas AS "Porcentaje_deudas",
+                porcentaje_imprevistos AS "Porcentaje_imprevistos",
+                porcentaje_ahorros AS "Porcentaje_ahorros",
+                porcentaje_emergencia AS "Porcentaje_emergencia",
+                fecha_actualizacion AS "Fecha_actualizacion"
+             FROM presupuestos
+             WHERE id_presupuesto = $1 AND id_usuario = $2`,
             [req.params.id, req.usuario.id]
         );
         if (!rows.length) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado' });
@@ -113,7 +131,6 @@ const obtenerPerfil = async (req, res) => {
         res.status(500).json({ ok: false, mensaje: 'Error al obtener perfil', error: err.message });
     }
 };
-
 
 //   POST /presupuestos (los porcentajes siempre deben dar 100%)
 
@@ -493,17 +510,32 @@ const listarPeriodos = async (req, res) => {
     const offset = (pagina - 1) * limite;
 
     try {
-        const [periodos] = await pool.query(
-            `SELECT pp.*, p.Nombre AS Perfil_nombre
-             FROM   PERIODOS_PRESUPUESTO pp
-             JOIN   PRESUPUESTOS p ON pp.ID_presupuesto = p.ID_presupuesto
-             WHERE  pp.ID_usuario = ?
-             ORDER  BY pp.Fecha_inicio DESC
-             LIMIT  ? OFFSET ?`,
+        const { rows: periodos } = await pool.query(
+            `SELECT
+                pp.id_periodo AS "ID_periodo",
+                pp.id_presupuesto AS "ID_presupuesto",
+                pp.id_usuario AS "ID_usuario",
+                pp.fecha_inicio AS "Fecha_inicio",
+                pp.fecha_fin AS "Fecha_fin",
+                pp.ingreso_estimado AS "Ingreso_estimado",
+                pp.ingreso_real AS "Ingreso_real",
+                pp.saldo_anterior AS "Saldo_anterior",
+                pp.estado AS "Estado",
+                pp.monto_gastos AS "Monto_gastos",
+                pp.monto_deudas AS "Monto_deudas",
+                pp.monto_imprevistos AS "Monto_imprevistos",
+                pp.monto_ahorros AS "Monto_ahorros",
+                pp.monto_emergencia AS "Monto_emergencia",
+                p.nombre AS "Perfil_nombre"
+             FROM   periodos_presupuesto pp
+             JOIN   presupuestos p ON pp.id_presupuesto = p.id_presupuesto
+             WHERE  pp.id_usuario = $1
+             ORDER  BY pp.fecha_inicio DESC
+             LIMIT  $2 OFFSET $3`,
             [req.usuario.id, limite, offset]
         );
-        const [[{ total }]] = await pool.query(
-            `SELECT COUNT(*) AS total FROM PERIODOS_PRESUPUESTO WHERE ID_usuario = ?`,
+        const { rows: [{ total }] } = await pool.query(
+            `SELECT COUNT(*)::int AS total FROM periodos_presupuesto WHERE id_usuario = $1`,
             [req.usuario.id]
         );
         res.json({ ok: true, data: periodos, total, pagina, limite });
@@ -512,48 +544,63 @@ const listarPeriodos = async (req, res) => {
     }
 };
 
-
 //  GET /presupuestos/periodos/activo
 
 const obtenerPeriodoActivo = async (req, res) => {
     const ID_usuario = req.usuario.id;
 
-    const [rows] = await pool.query(
-        `SELECT pp.*, p.Nombre AS Perfil_nombre, p.Dia_corte
-         FROM   PERIODOS_PRESUPUESTO pp
-         JOIN   PRESUPUESTOS p ON pp.ID_presupuesto = p.ID_presupuesto
-         WHERE  pp.ID_usuario = ? AND pp.Estado = 'abierto'`,
+    const { rows } = await pool.query(
+        `SELECT
+            pp.id_periodo AS "ID_periodo",
+            pp.id_presupuesto AS "ID_presupuesto",
+            pp.id_usuario AS "ID_usuario",
+            pp.fecha_inicio AS "Fecha_inicio",
+            pp.fecha_fin AS "Fecha_fin",
+            pp.ingreso_estimado AS "Ingreso_estimado",
+            pp.ingreso_real AS "Ingreso_real",
+            pp.saldo_anterior AS "Saldo_anterior",
+            pp.estado AS "Estado",
+            pp.monto_gastos AS "Monto_gastos",
+            pp.monto_deudas AS "Monto_deudas",
+            pp.monto_imprevistos AS "Monto_imprevistos",
+            pp.monto_ahorros AS "Monto_ahorros",
+            pp.monto_emergencia AS "Monto_emergencia",
+            p.nombre AS "Perfil_nombre",
+            p.dia_corte AS "Dia_corte"
+         FROM   periodos_presupuesto pp
+         JOIN   presupuestos p ON pp.id_presupuesto = p.id_presupuesto
+         WHERE  pp.id_usuario = $1 AND pp.estado = 'abierto'`,
         [ID_usuario]
     );
     if (!rows.length) return res.json({ ok: true, data: null });
     const periodo = rows[0];
 
-    const [gastosReal] = await pool.query(
-        `SELECT COALESCE(SUM(Monto), 0) AS total FROM GASTOS g
-         JOIN SALIDA s ON g.ID_salida = s.ID_salida
-         JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-         WHERE m.ID_usuario = ? AND g.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: gastosReal } = await pool.query(
+        `SELECT COALESCE(SUM(monto), 0)::float AS total FROM gastos g
+         JOIN salida s ON g.id_salida = s.id_salida
+         JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+         WHERE m.id_usuario = $1 AND g.fecha_registro BETWEEN $2 AND $3`,
         [ID_usuario, periodo.Fecha_inicio, periodo.Fecha_fin]
     );
-    const [deudasReal] = await pool.query(
-        `SELECT COALESCE(SUM(Monto), 0) AS total FROM DEUDAS d
-         JOIN SALIDA s ON d.ID_salida = s.ID_salida
-         JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-         WHERE m.ID_usuario = ? AND d.Fecha_inicio BETWEEN ? AND ?`,
+    const { rows: deudasReal } = await pool.query(
+        `SELECT COALESCE(SUM(monto), 0)::float AS total FROM deudas d
+         JOIN salida s ON d.id_salida = s.id_salida
+         JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+         WHERE m.id_usuario = $1 AND d.fecha_inicio BETWEEN $2 AND $3`,
         [ID_usuario, periodo.Fecha_inicio, periodo.Fecha_fin]
     );
-    const [imprevistosReal] = await pool.query(
-        `SELECT COALESCE(SUM(Monto), 0) AS total FROM IMPREVISTOS i
-         JOIN SALIDA s ON i.ID_salida = s.ID_salida
-         JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-         WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: imprevistosReal } = await pool.query(
+        `SELECT COALESCE(SUM(monto), 0)::float AS total FROM imprevistos i
+         JOIN salida s ON i.id_salida = s.id_salida
+         JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+         WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
         [ID_usuario, periodo.Fecha_inicio, periodo.Fecha_fin]
     );
-    const [ahorrosReal] = await pool.query(
-        `SELECT COALESCE(SUM(Monto), 0) AS total FROM AHORROS a
-         JOIN ENTRADA e ON a.ID_entrada = e.ID_entrada
-         JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-         WHERE m.ID_usuario = ? AND a.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: ahorrosReal } = await pool.query(
+        `SELECT COALESCE(SUM(monto), 0)::float AS total FROM ahorros a
+         JOIN entrada e ON a.id_entrada = e.id_entrada
+         JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+         WHERE m.id_usuario = $1 AND a.fecha_registro BETWEEN $2 AND $3`,
         [ID_usuario, periodo.Fecha_inicio, periodo.Fecha_fin]
     );
 
@@ -582,7 +629,6 @@ const obtenerPeriodoActivo = async (req, res) => {
 
     res.json({ ok: true, data: { ...periodo, ejecucion } });
 };
-
 
 //  PATCH /presupuestos/periodos/ajustar-ingreso
 
@@ -678,4 +724,5 @@ module.exports = {
     listarPeriodos,
     obtenerPeriodoActivo,
     ajustarIngresoPeriodo,
+    actualizarIngresoReal
 };
