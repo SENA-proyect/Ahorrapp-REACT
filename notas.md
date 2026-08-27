@@ -6,3 +6,6 @@ A partir de la linea 294 hacia abajo es el codigo implementado desde la rama de 
 
 schema.sql
 Tabla de rol y usarios_roles, comentadas debido a que no se ha realizado el proceso correcto ni las debidas pruebas, se comento con el fin de evitar problemas al exportar la DB
+
+posible error NaN o formato similar:
+revisar dashboardcontroller.js, es posible que el error se encuentre entre los query 10-14 dentro de los respectivos const 

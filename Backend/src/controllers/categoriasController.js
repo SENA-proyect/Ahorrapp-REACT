@@ -1,4 +1,37 @@
+//?NOTAS
+// La query de "categorías" (se repite 6 veces — #1, #2, #4, #6, #8, #10):
+//! #1
+// const { rows } = await pool.query(
+//   `SELECT 
+//     id_categoria AS id,
+//     id_usuario AS id_usuario,
+//     nombre AS nombre,
+//     descripcion AS descripcion,
+//     activa AS activa,
+//     sistema AS sistema,
+//     es_global AS es_global
+//    FROM categorias
+//    WHERE es_global = TRUE OR id_usuario = $1
+//    ORDER BY es_global DESC, nombre ASC`,
+//   [id_usuario]
+// );
 
+//! #2, #4, #6, #8, #10 (idénticas entre sí, cambia solo el nombre de variable)
+// const { rows: categorias } = await pool.query(
+//   `SELECT
+//     id_categoria AS id,
+//     id_usuario AS id_usuario,
+//     nombre AS nombre,
+//     descripcion AS descripcion,
+//     activa AS activa,
+//     sistema AS sistema,
+//     es_global AS es_global
+//    FROM categorias
+//    WHERE es_global = TRUE OR id_usuario = $1
+//    ORDER BY es_global DESC, nombre ASC`,
+//   [id_usuario]
+// );
+//// -------------------------------------------------------------
 const pool = require("../db/connection");
 
 // ── GET todas las categorías (sistema + las del usuario) ────────────────────

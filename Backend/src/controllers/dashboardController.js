@@ -13,26 +13,26 @@ const getResumen = async (req, res) => {
 
     // Sin período activo → totales históricos como fallback
     if (!periodo) {
-      const [[ing]]  = await pool.query(
-        `SELECT COALESCE(SUM(i.Monto), 0) AS total
-         FROM INGRESOS i
-         JOIN ENTRADA e  ON i.ID_entrada    = e.ID_entrada
-         JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-         WHERE m.ID_usuario = ?`, [ID_usuario]
+      const { rows: [ing] } = await pool.query(
+        `SELECT COALESCE(SUM(i.monto), 0)::float AS total
+        FROM ingresos i
+        JOIN entrada e ON i.id_entrada = e.id_entrada
+        JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+        WHERE m.id_usuario = $1`, [ID_usuario]
       );
-      const [[gas]]  = await pool.query(
-        `SELECT COALESCE(SUM(g.Monto), 0) AS total
-         FROM GASTOS g
-         JOIN SALIDA s   ON g.ID_salida      = s.ID_salida
-         JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-         WHERE m.ID_usuario = ?`, [ID_usuario]
+      const { rows: [gas] } = await pool.query(
+        `SELECT COALESCE(SUM(g.monto), 0)::float AS total
+        FROM gastos g
+        JOIN salida s ON g.id_salida = s.id_salida
+        JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+        WHERE m.id_usuario = $1`, [ID_usuario]
       );
-      const [[aho]]  = await pool.query(
-        `SELECT COALESCE(SUM(Monto_acumulado), 0) AS total
-         FROM AHORROS a
-         JOIN ENTRADA e  ON a.ID_entrada    = e.ID_entrada
-         JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-         WHERE m.ID_usuario = ?`, [ID_usuario]
+      const { rows: [aho] } = await pool.query(
+        `SELECT COALESCE(SUM(monto_acumulado), 0)::float AS total
+        FROM ahorros a
+        JOIN entrada e ON a.id_entrada = e.id_entrada
+        JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+        WHERE m.id_usuario = $1`, [ID_usuario]
       );
 
       return res.json({
@@ -49,28 +49,30 @@ const getResumen = async (req, res) => {
     const { Fecha_inicio: fi, Fecha_fin: ff } = periodo;
 
     // Totales del período activo
-    const [[ing]] = await pool.query(
-      `SELECT COALESCE(SUM(i.Monto), 0) AS total
-       FROM INGRESOS i
-       JOIN ENTRADA e     ON i.ID_entrada    = e.ID_entrada
-       JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: [ing] } = await pool.query(
+      `SELECT COALESCE(SUM(i.monto), 0)::float AS total
+      FROM ingresos i
+      JOIN entrada e ON i.id_entrada = e.id_entrada
+      JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
-    const [[gas]] = await pool.query(
-      `SELECT COALESCE(SUM(g.Monto), 0) AS total
-       FROM GASTOS g
-       JOIN SALIDA s      ON g.ID_salida      = s.ID_salida
-       JOIN MOVIMIENTOS m ON s.ID_movimiento  = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND g.Fecha_registro BETWEEN ? AND ?`,
+
+    const { rows: [gas] } = await pool.query(
+      `SELECT COALESCE(SUM(g.monto), 0)::float AS total
+      FROM gastos g
+      JOIN salida s ON g.id_salida = s.id_salida
+      JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1 AND g.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
-    const [[aho]] = await pool.query(
-      `SELECT COALESCE(SUM(a.Monto_acumulado), 0) AS total
-       FROM AHORROS a
-       JOIN ENTRADA e     ON a.ID_entrada    = e.ID_entrada
-       JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND a.Fecha_registro BETWEEN ? AND ?`,
+
+    const { rows: [aho] } = await pool.query(
+      `SELECT COALESCE(SUM(a.monto_acumulado), 0)::float AS total
+      FROM ahorros a
+      JOIN entrada e ON a.id_entrada = e.id_entrada
+      JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1 AND a.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 
@@ -111,37 +113,40 @@ const getPresupuestoVsEjecutado = async (req, res) => {
 
     const { Fecha_inicio: fi, Fecha_fin: ff } = periodo;
 
-    const [[gasReal]]        = await pool.query(
-      `SELECT COALESCE(SUM(g.Monto), 0) AS total FROM GASTOS g
-       JOIN SALIDA s ON g.ID_salida = s.ID_salida
-       JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND g.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: [gasReal] } = await pool.query(
+      `SELECT COALESCE(SUM(g.monto), 0)::float AS total FROM gastos g
+      JOIN salida s ON g.id_salida = s.id_salida
+      JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1 AND g.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
-    const [[deuReal]] = await pool.query(
+
+    const { rows: [deuReal] } = await pool.query(
       `SELECT COALESCE(SUM(
-          (d.Monto / NULLIF(d.Cuotas_total, 0)) * d.Cuotas_pagadas
-      ), 0) AS total
-      FROM DEUDAS d
-      JOIN SALIDA s      ON d.ID_salida      = s.ID_salida
-      JOIN MOVIMIENTOS m ON s.ID_movimiento  = m.ID_movimiento
-      WHERE m.ID_usuario = ?
-        AND d.Fecha_inicio <= ?
-        AND (d.Fecha_fin >= ? OR d.Fecha_fin IS NULL)`,
+          (d.monto / NULLIF(d.cuotas_total, 0)) * d.cuotas_pagadas
+      ), 0)::float AS total
+      FROM deudas d
+      JOIN salida s ON d.id_salida = s.id_salida
+      JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+        AND d.fecha_inicio <= $2
+        AND (d.fecha_fin >= $3 OR d.fecha_fin IS NULL)`,
       [ID_usuario, ff, fi]
     );
-    const [[impReal]]        = await pool.query(
-      `SELECT COALESCE(SUM(i.Monto), 0) AS total FROM IMPREVISTOS i
-       JOIN SALIDA s ON i.ID_salida = s.ID_salida
-       JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
+
+    const { rows: [impReal] } = await pool.query(
+      `SELECT COALESCE(SUM(i.monto), 0)::float AS total FROM imprevistos i
+      JOIN salida s ON i.id_salida = s.id_salida
+      JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
-    const [[ahoReal]] = await pool.query(
-      `SELECT COALESCE(SUM(aa.Monto), 0) AS total
-      FROM ABONOS_AHORRO aa
-      WHERE aa.ID_usuario = ?
-        AND aa.Fecha_registro BETWEEN ? AND ?`,
+
+    const { rows: [ahoReal] } = await pool.query(
+      `SELECT COALESCE(SUM(aa.monto), 0)::float AS total
+      FROM abonos_ahorro aa
+      WHERE aa.id_usuario = $1
+        AND aa.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 
@@ -237,37 +242,40 @@ const getFlujoPorSemana = async (req, res) => {
     // Consultar ingresos y gastos por semana en paralelo
     const data = await Promise.all(
       semanas.map(async ({ label, inicio: si, fin: sf }) => {
-        const [[ing]] = await pool.query(
-          `SELECT COALESCE(SUM(i.Monto), 0) AS total FROM INGRESOS i
-          JOIN ENTRADA e ON i.ID_entrada = e.ID_entrada
-          JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-          WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
+        const { rows: [ing] } = await pool.query(
+          `SELECT COALESCE(SUM(i.monto), 0)::float AS total FROM ingresos i
+          JOIN entrada e ON i.id_entrada = e.id_entrada
+          JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+          WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
           [ID_usuario, si, sf]
         );
-        const [[gas]] = await pool.query(
-          `SELECT COALESCE(SUM(g.Monto), 0) AS total FROM GASTOS g
-          JOIN SALIDA s ON g.ID_salida = s.ID_salida
-          JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-          WHERE m.ID_usuario = ? AND g.Fecha_registro BETWEEN ? AND ?`,
+
+        const { rows: [gas] } = await pool.query(
+          `SELECT COALESCE(SUM(g.monto), 0)::float AS total FROM gastos g
+          JOIN salida s ON g.id_salida = s.id_salida
+          JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+          WHERE m.id_usuario = $1 AND g.fecha_registro BETWEEN $2 AND $3`,
           [ID_usuario, si, sf]
         );
-        const [[imp]] = await pool.query(
-          `SELECT COALESCE(SUM(i.Monto), 0) AS total FROM IMPREVISTOS i
-          JOIN SALIDA s ON i.ID_salida = s.ID_salida
-          JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-          WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
+
+        const { rows: [imp] } = await pool.query(
+          `SELECT COALESCE(SUM(i.monto), 0)::float AS total FROM imprevistos i
+          JOIN salida s ON i.id_salida = s.id_salida
+          JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+          WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
           [ID_usuario, si, sf]
         );
-        const [[deu]] = await pool.query(
+
+        const { rows: [deu] } = await pool.query(
           `SELECT COALESCE(SUM(
-              (d.Monto / NULLIF(d.Cuotas_total, 0)) * d.Cuotas_pagadas
-          ), 0) AS total
-          FROM DEUDAS d
-          JOIN SALIDA s      ON d.ID_salida     = s.ID_salida
-          JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-          WHERE m.ID_usuario = ?
-            AND d.Fecha_inicio <= ?
-            AND (d.Fecha_fin >= ? OR d.Fecha_fin IS NULL)`,
+              (d.monto / NULLIF(d.cuotas_total, 0)) * d.cuotas_pagadas
+          ), 0)::float AS total
+          FROM deudas d
+          JOIN salida s ON d.id_salida = s.id_salida
+          JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+          WHERE m.id_usuario = $1
+            AND d.fecha_inicio <= $2
+            AND (d.fecha_fin >= $3 OR d.fecha_fin IS NULL)`,
           [ID_usuario, sf, si]
         );
 
