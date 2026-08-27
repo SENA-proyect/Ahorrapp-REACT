@@ -1,3 +1,4 @@
+
 const pool = require("../db/connection");
 
 // ── GET todas las categorías (sistema + las del usuario) ────────────────────
@@ -5,19 +6,18 @@ const getCategorias = async (req, res) => {
   const id_usuario = req.usuario.id;
 
   try {
-    const [rows] = await pool.query(
+    const { rows } = await pool.query(
       `SELECT 
-        ID_categoria  AS id,
-        ID_usuario    AS id_usuario,
-        Nombre        AS nombre,
-        Descripcion   AS descripcion,
-
-        Activa        AS activa,
-        Sistema       AS sistema,
-        ES_global     AS es_global
-       FROM CATEGORIAS
-       WHERE ES_global = TRUE OR ID_usuario = ?
-       ORDER BY ES_global DESC, Nombre ASC`,
+        id_categoria AS id,
+        id_usuario AS id_usuario,
+        nombre AS nombre,
+        descripcion AS descripcion,
+        activa AS activa,
+        sistema AS sistema,
+        es_global AS es_global
+      FROM categorias
+      WHERE es_global = TRUE OR id_usuario = $1
+      ORDER BY es_global DESC, nombre ASC`,
       [id_usuario]
     );
 
@@ -32,34 +32,34 @@ const getGastosPorCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
 
   try {
-    const [categorias] = await pool.query(
-      `SELECT
-        ID_categoria AS id,
-        ID_usuario AS id_usuario,
-        Nombre AS nombre,
-        Descripcion AS descripcion,
 
-        Activa AS activa,
-        Sistema AS sistema,
-        ES_global AS es_global
-       FROM CATEGORIAS
-       WHERE ES_global = TRUE OR ID_usuario = ?
-       ORDER BY ES_global DESC, Nombre ASC`,
+    const { rows: categorias } = await pool.query(
+      `SELECT
+        id_categoria AS id,
+        id_usuario AS id_usuario,
+        nombre AS nombre,
+        descripcion AS descripcion,
+        activa AS activa,
+        sistema AS sistema,
+        es_global AS es_global
+      FROM categorias
+      WHERE es_global = TRUE OR id_usuario = $1
+      ORDER BY es_global DESC, nombre ASC`,
       [id_usuario]
     );
 
-    const [gastos] = await pool.query(
+    const { rows: gastos } = await pool.query(
       `SELECT
-        g.ID_gastos AS id,
-        g.ID_categoria AS id_categoria,
-        g.Monto AS monto,
-        g.Descripcion AS descripcion,
-        g.Fecha_registro AS fecha
-       FROM GASTOS g
-       INNER JOIN SALIDA s ON g.ID_salida = s.ID_salida
-       INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ?
-       ORDER BY g.Fecha_registro DESC, g.ID_gastos DESC`,
+        g.id_gastos AS id,
+        g.id_categoria AS id_categoria,
+        g.monto AS monto,
+        g.descripcion AS descripcion,
+        g.fecha_registro AS fecha
+      FROM gastos g
+      INNER JOIN salida s ON g.id_salida = s.id_salida
+      INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+      ORDER BY g.fecha_registro DESC, g.id_gastos DESC`,
       [id_usuario]
     );
 
@@ -89,34 +89,33 @@ const getIngresosPorCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
 
   try {
-    const [categorias] = await pool.query(
+    const { rows: categorias } = await pool.query(
       `SELECT
-        ID_categoria AS id,
-        ID_usuario AS id_usuario,
-        Nombre AS nombre,
-        Descripcion AS descripcion,
-
-        Activa AS activa,
-        Sistema AS sistema,
-        ES_global AS es_global
-       FROM CATEGORIAS
-       WHERE ES_global = TRUE OR ID_usuario = ?
-       ORDER BY ES_global DESC, Nombre ASC`,
+        id_categoria AS id,
+        id_usuario AS id_usuario,
+        nombre AS nombre,
+        descripcion AS descripcion,
+        activa AS activa,
+        sistema AS sistema,
+        es_global AS es_global
+      FROM categorias
+      WHERE es_global = TRUE OR id_usuario = $1
+      ORDER BY es_global DESC, nombre ASC`,
       [id_usuario]
     );
 
-    const [ingresos] = await pool.query(
+    const { rows: ingresos } = await pool.query(
       `SELECT
-        i.ID_ingresos AS id,
-        i.ID_categoria AS id_categoria,
-        i.Monto AS monto,
-        i.Descripcion AS descripcion,
-        i.Fecha_registro AS fecha
-       FROM INGRESOS i
-       INNER JOIN ENTRADA e ON i.ID_entrada = e.ID_entrada
-       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ?
-       ORDER BY i.Fecha_registro DESC, i.ID_ingresos DESC`,
+        i.id_ingresos AS id,
+        i.id_categoria AS id_categoria,
+        i.monto AS monto,
+        i.descripcion AS descripcion,
+        i.fecha_registro AS fecha
+      FROM ingresos i
+      INNER JOIN entrada e ON i.id_entrada = e.id_entrada
+      INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+      ORDER BY i.fecha_registro DESC, i.id_ingresos DESC`,
       [id_usuario]
     );
 
@@ -146,34 +145,33 @@ const getImprevistosPorCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
 
   try {
-    const [categorias] = await pool.query(
+    const { rows: categorias } = await pool.query(
       `SELECT
-        ID_categoria AS id,
-        ID_usuario AS id_usuario,
-        Nombre AS nombre,
-        Descripcion AS descripcion,
-
-        Activa AS activa,
-        Sistema AS sistema,
-        ES_global AS es_global
-       FROM CATEGORIAS
-       WHERE ES_global = TRUE OR ID_usuario = ?
-       ORDER BY ES_global DESC, Nombre ASC`,
+        id_categoria AS id,
+        id_usuario AS id_usuario,
+        nombre AS nombre,
+        descripcion AS descripcion,
+        activa AS activa,
+        sistema AS sistema,
+        es_global AS es_global
+      FROM categorias
+      WHERE es_global = TRUE OR id_usuario = $1
+      ORDER BY es_global DESC, nombre ASC`,
       [id_usuario]
     );
 
-    const [imprevistos] = await pool.query(
+    const { rows: imprevistos } = await pool.query(
       `SELECT
-        imp.ID_imprevistos AS id,
-        imp.ID_categoria AS id_categoria,
-        imp.Monto AS monto,
-        imp.Causa AS descripcion,
-        imp.Fecha_registro AS fecha
-       FROM IMPREVISTOS imp
-       INNER JOIN SALIDA s ON imp.ID_salida = s.ID_salida
-       INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ?
-       ORDER BY imp.Fecha_registro DESC, imp.ID_imprevistos DESC`,
+        imp.id_imprevistos AS id,
+        imp.id_categoria AS id_categoria,
+        imp.monto AS monto,
+        imp.causa AS descripcion,
+        imp.fecha_registro AS fecha
+      FROM imprevistos imp
+      INNER JOIN salida s ON imp.id_salida = s.id_salida
+      INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+      ORDER BY imp.fecha_registro DESC, imp.id_imprevistos DESC`,
       [id_usuario]
     );
 
@@ -203,34 +201,33 @@ const getDeudasPorCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
 
   try {
-    const [categorias] = await pool.query(
+    const { rows: categorias } = await pool.query(
       `SELECT
-        ID_categoria AS id,
-        ID_usuario AS id_usuario,
-        Nombre AS nombre,
-        Descripcion AS descripcion,
-
-        Activa AS activa,
-        Sistema AS sistema,
-        ES_global AS es_global
-       FROM CATEGORIAS
-       WHERE ES_global = TRUE OR ID_usuario = ?
-       ORDER BY ES_global DESC, Nombre ASC`,
+        id_categoria AS id,
+        id_usuario AS id_usuario,
+        nombre AS nombre,
+        descripcion AS descripcion,
+        activa AS activa,
+        sistema AS sistema,
+        es_global AS es_global
+      FROM categorias
+      WHERE es_global = TRUE OR id_usuario = $1
+      ORDER BY es_global DESC, nombre ASC`,
       [id_usuario]
     );
 
-    const [deudas] = await pool.query(
+    const { rows: deudas } = await pool.query(
       `SELECT
-        d.ID_deudas AS id,
-        d.ID_categoria AS id_categoria,
-        d.Monto AS monto,
-        d.Descripcion AS descripcion,
-        d.Fecha_inicio AS fecha
-       FROM DEUDAS d
-       INNER JOIN SALIDA s ON d.ID_salida = s.ID_salida
-       INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ?
-       ORDER BY d.Fecha_inicio DESC, d.ID_deudas DESC`,
+        d.id_deudas AS id,
+        d.id_categoria AS id_categoria,
+        d.monto AS monto,
+        d.descripcion AS descripcion,
+        d.fecha_inicio AS fecha
+      FROM deudas d
+      INNER JOIN salida s ON d.id_salida = s.id_salida
+      INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+      ORDER BY d.fecha_inicio DESC, d.id_deudas DESC`,
       [id_usuario]
     );
 
@@ -260,34 +257,33 @@ const getAhorrosPorCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
 
   try {
-    const [categorias] = await pool.query(
+    const { rows: categorias } = await pool.query(
       `SELECT
-        ID_categoria AS id,
-        ID_usuario AS id_usuario,
-        Nombre AS nombre,
-        Descripcion AS descripcion,
-
-        Activa AS activa,
-        Sistema AS sistema,
-        ES_global AS es_global
-       FROM CATEGORIAS
-       WHERE ES_global = TRUE OR ID_usuario = ?
-       ORDER BY ES_global DESC, Nombre ASC`,
+        id_categoria AS id,
+        id_usuario AS id_usuario,
+        nombre AS nombre,
+        descripcion AS descripcion,
+        activa AS activa,
+        sistema AS sistema,
+        es_global AS es_global
+      FROM categorias
+      WHERE es_global = TRUE OR id_usuario = $1
+      ORDER BY es_global DESC, nombre ASC`,
       [id_usuario]
     );
 
-    const [ahorros] = await pool.query(
+    const { rows: ahorros } = await pool.query(
       `SELECT
-        a.ID_ahorros AS id,
-        a.ID_categoria AS id_categoria,
-        a.Monto AS monto,
-        a.Descripcion AS descripcion,
-        a.Fecha_registro AS fecha
-       FROM AHORROS a
-       INNER JOIN ENTRADA e ON a.ID_entrada = e.ID_entrada
-       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE m.ID_usuario = ?
-       ORDER BY a.Fecha_registro DESC, a.ID_ahorros DESC`,
+        a.id_ahorros AS id,
+        a.id_categoria AS id_categoria,
+        a.monto AS monto,
+        a.descripcion AS descripcion,
+        a.fecha_registro AS fecha
+      FROM ahorros a
+      INNER JOIN entrada e ON a.id_entrada = e.id_entrada
+      INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+      ORDER BY a.fecha_registro DESC, a.id_ahorros DESC`,
       [id_usuario]
     );
 
@@ -313,6 +309,7 @@ const getAhorrosPorCategoria = async (req, res) => {
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
+
 const crearCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
   const { nombre, descripcion } = req.body;
@@ -322,16 +319,17 @@ const crearCategoria = async (req, res) => {
   }
 
   try {
-    const [result] = await pool.query(
-      `INSERT INTO CATEGORIAS (ID_usuario, Nombre, Descripcion, Activa, Sistema, ES_global)
-       VALUES (?, ?, ?, TRUE, FALSE, FALSE)`,
+    const { rows: result } = await pool.query(
+      `INSERT INTO categorias (id_usuario, nombre, descripcion, activa, sistema, es_global)
+       VALUES ($1, $2, $3, TRUE, FALSE, FALSE)
+       RETURNING id_categoria`,
       [id_usuario, nombre.trim(), descripcion?.trim() || null]
     );
 
     return res.status(201).json({
       ok: true,
       mensaje: "Categoria creada exitosamente",
-      id: result.insertId,
+      id: result[0].id_categoria,   // antes: result.insertId
     });
 
   } catch (error) {
@@ -352,9 +350,9 @@ const actualizarCategoria = async (req, res) => {
 
   try {
 
-    const [rows] = await pool.query(
-      `SELECT ID_categoria FROM CATEGORIAS
-       WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
+    const { rows } = await pool.query(
+      `SELECT id_categoria FROM categorias
+      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
       [id, id_usuario]
     );
 
@@ -363,7 +361,7 @@ const actualizarCategoria = async (req, res) => {
     }
 
     await pool.query(
-      "UPDATE CATEGORIAS SET Nombre = ?, Descripcion = ? WHERE ID_categoria = ?",
+      "UPDATE categorias SET nombre = $1, descripcion = $2 WHERE id_categoria = $3",
       [nombre.trim(), descripcion?.trim() || null, id]
     );
 
@@ -379,9 +377,9 @@ const deshabilitarCategoria = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [rows] = await pool.query(
-      `SELECT ID_categoria FROM CATEGORIAS
-       WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
+    const { rows } = await pool.query(
+      `SELECT id_categoria FROM categorias
+      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
       [id, id_usuario]
     );
 
@@ -389,7 +387,7 @@ const deshabilitarCategoria = async (req, res) => {
       return res.status(403).json({ ok: false, mensaje: "No tienes permiso para deshabilitar esta categoria" });
     }
 
-    await pool.query("UPDATE CATEGORIAS SET Activa = FALSE WHERE ID_categoria = ?", [id]);
+    await pool.query("UPDATE categorias SET activa = FALSE WHERE id_categoria = $1", [id]);
 
     return res.status(200).json({ ok: true, mensaje: "Categoria deshabilitada" });
   } catch (error) {
@@ -403,9 +401,9 @@ const habilitarCategoria = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [rows] = await pool.query(
-      `SELECT ID_categoria FROM CATEGORIAS
-       WHERE ID_categoria = ? AND ID_usuario = ? AND ES_global = FALSE`,
+    const { rows } = await pool.query(
+      `SELECT id_categoria FROM categorias
+      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
       [id, id_usuario]
     );
 
@@ -413,7 +411,7 @@ const habilitarCategoria = async (req, res) => {
       return res.status(403).json({ ok: false, mensaje: "No tienes permiso para habilitar esta categoria" });
     }
 
-    await pool.query("UPDATE CATEGORIAS SET Activa = TRUE WHERE ID_categoria = ?", [id]);
+    await pool.query("UPDATE categorias SET activa = TRUE WHERE id_categoria = $1", [id]);
 
     return res.status(200).json({ ok: true, mensaje: "Categoria habilitada" });
   } catch (error) {
