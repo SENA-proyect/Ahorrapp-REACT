@@ -10,32 +10,32 @@ const getMovimientos = async (req, res) => {
 
   try {
     // 1. Consultar Ingresos
-    const [ingresos] = await pool.query(
-      "SELECT 'ingreso' as tipo, Monto as monto, Descripcion as descripcion, Fecha_registro as fecha FROM INGRESOS i JOIN ENTRADA s ON i.ID_entrada = s.ID_entrada JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+    const { rows: ingresos } = await pool.query(
+      "SELECT 'ingreso' as tipo, monto as monto, descripcion as descripcion, fecha_registro as fecha FROM ingresos i JOIN entrada s ON i.id_entrada = s.id_entrada JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
       [ID_usuario]
     );
     
     // 2. Consultar Gastos
-    const [gastos] = await pool.query(
-      "SELECT 'gasto' as tipo, Monto as monto, Descripcion as descripcion, Fecha_registro as fecha FROM GASTOS g JOIN SALIDA s ON g.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+    const { rows: gastos } = await pool.query(
+      "SELECT 'gasto' as tipo, monto as monto, descripcion as descripcion, fecha_registro as fecha FROM gastos g JOIN salida s ON g.id_salida = s.id_salida JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
       [ID_usuario]
     );
     
     // 3. Consultar Deudas
-    const [deudas] = await pool.query(
-      "SELECT 'deuda' as tipo, Monto as monto, Descripcion as descripcion, Estado as estado, Fecha_fin as fecha FROM DEUDAS d JOIN SALIDA s ON d.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+    const { rows: deudas } = await pool.query(
+      "SELECT 'deuda' as tipo, monto as monto, descripcion as descripcion, estado as estado, fecha_fin as fecha FROM deudas d JOIN salida s ON d.id_salida = s.id_salida JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
       [ID_usuario]
     );
     
     // 4. Consultar Ahorros
-    const [ahorros] = await pool.query(
-      "SELECT 'ahorro' as tipo, Monto_acumulado as monto, Descripcion as descripcion, Fecha_registro as fecha, Fecha_meta as fecha_meta FROM AHORROS a JOIN ENTRADA s ON a.ID_entrada = s.ID_entrada JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?", 
+    const { rows: ahorros } = await pool.query(
+      "SELECT 'ahorro' as tipo, monto_acumulado as monto, descripcion as descripcion, fecha_registro as fecha, fecha_meta as fecha_meta FROM ahorros a JOIN entrada s ON a.id_entrada = s.id_entrada JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
       [ID_usuario]
     );
 
     // 5. Consultar Imprevistos
-    const [imprevistos] = await pool.query(
-      "SELECT 'imprevisto' as tipo, Monto as monto, Causa as descripcion, Fecha_registro as fecha FROM IMPREVISTOS i JOIN SALIDA s ON i.ID_salida = s.ID_salida JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento WHERE m.ID_usuario = ?",
+    const { rows: imprevistos } = await pool.query(
+      "SELECT 'imprevisto' as tipo, monto as monto, causa as descripcion, fecha_registro as fecha FROM imprevistos i JOIN salida s ON i.id_salida = s.id_salida JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
       [ID_usuario]
     );
 
@@ -190,16 +190,16 @@ const crearMovimiento = async (req, res) => {
 const getIngresos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   try {
-    const [rows] = await pool.query(
-      `SELECT i.ID_ingresos AS id, i.Monto AS monto, i.Descripcion AS descripcion,
-              i.Fuente AS fuente, i.Fecha_registro AS fecha, i.ID_categoria,
-              c.Nombre AS categoria
-       FROM INGRESOS i
-       INNER JOIN ENTRADA e     ON i.ID_entrada    = e.ID_entrada
-       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       LEFT  JOIN CATEGORIAS c  ON i.ID_categoria  = c.ID_categoria
-       WHERE m.ID_usuario = ?
-       ORDER BY i.Fecha_registro DESC`,
+    const { rows } = await pool.query(
+      `SELECT i.id_ingresos AS id, i.monto AS monto, i.descripcion AS descripcion,
+              i.fuente AS fuente, i.fecha_registro AS fecha, i.id_categoria,
+              c.nombre AS categoria
+       FROM ingresos i
+       INNER JOIN entrada e     ON i.id_entrada    = e.id_entrada
+       INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+       LEFT  JOIN categorias c  ON i.id_categoria  = c.id_categoria
+       WHERE m.id_usuario = $1
+       ORDER BY i.fecha_registro DESC`,
       [ID_usuario]
     );
     res.status(200).json(rows);
@@ -214,18 +214,18 @@ const updateIngresos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
   const { monto, descripcion, fuente, fecha_registro, id_categoria } = req.body;
-    try {
-    const [rows] = await pool.query(
-        `UPDATE INGRESOS    
-            SET Monto = ?, Descripcion = ?, Fuente = ?, Fecha_registro = ?, ID_categoria = ?
-            WHERE ID_ingresos = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [monto, descripcion, fuente, fecha_registro, id_categoria, id, ID_usuario]
+  try {
+    const result = await pool.query(
+      `UPDATE ingresos    
+          SET monto = $1, descripcion = $2, fuente = $3, fecha_registro = $4, id_categoria = $5
+          WHERE id_ingresos = $6 AND id_entrada IN (SELECT id_entrada FROM entrada WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $7))`,
+      [monto, descripcion, fuente, fecha_registro, id_categoria, id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
     }
     res.status(200).json({ ok: true, mensaje: "Ingreso actualizado exitosamente" });
-    } catch (error) {
+  } catch (error) {
     console.error("Error en updateIngresos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
@@ -237,33 +237,33 @@ const deleteIngresos = async (req, res) => {
   const { id } = req.params;
   let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
+    connection = await pool.connect();
+    await connection.query("BEGIN");
 
-    // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
-    const [[ingreso]] = await connection.query(
-      `SELECT e.ID_entrada, e.ID_movimiento
-       FROM INGRESOS i
-       INNER JOIN ENTRADA e     ON i.ID_entrada    = e.ID_entrada
-       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE i.ID_ingresos = ? AND m.ID_usuario = ?`,
+    // 1. Buscar el id_entrada y id_movimiento antes de borrar
+    const { rows: [ingreso] } = await connection.query(
+      `SELECT e.id_entrada, e.id_movimiento
+       FROM ingresos i
+       INNER JOIN entrada e     ON i.id_entrada    = e.id_entrada
+       INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+       WHERE i.id_ingresos = $1 AND m.id_usuario = $2`,
       [id, ID_usuario]
     );
 
     if (!ingreso) {
-      await connection.rollback();
+      await connection.query("ROLLBACK");
       return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
     }
 
     // 2. Borrar en cascada
-    await connection.query(`DELETE FROM INGRESOS    WHERE ID_ingresos = ?`,       [id]);
-    await connection.query(`DELETE FROM ENTRADA     WHERE ID_entrada = ?`,         [ingreso.ID_entrada]);
-    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`,      [ingreso.ID_movimiento]);
+    await connection.query(`DELETE FROM ingresos    WHERE id_ingresos = $1`,  [id]);
+    await connection.query(`DELETE FROM entrada     WHERE id_entrada = $1`,   [ingreso.id_entrada]);
+    await connection.query(`DELETE FROM movimientos WHERE id_movimiento = $1`, [ingreso.id_movimiento]);
 
-    await connection.commit();
+    await connection.query("COMMIT");
     res.status(200).json({ ok: true, mensaje: "Ingreso eliminado exitosamente" });
   } catch (error) {
-    if (connection) await connection.rollback();
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en deleteIngresos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
@@ -274,21 +274,21 @@ const deleteIngresos = async (req, res) => {
 // <==&&==·········· AHORROS ··········==&&==>
 
 // ── GET Ahorros ────────────────────────────────────────────
-const getAhorros = async (req, res) => {
+async function getAhorros(req, res) {
   const ID_usuario = req.usuario.id;
   try {
-    const [rows] = await pool.query(
-      `SELECT a.ID_ahorros AS id, a.Monto AS monto, a.Monto_acumulado AS monto_acumulado,
-              a.Descripcion AS descripcion, a.Meta AS meta,
-              a.Fecha_registro AS fecha, a.Fecha_meta AS fecha_meta,
-              a.ID_categoria,
-              c.Nombre AS categoria
-       FROM AHORROS a
-       INNER JOIN ENTRADA e     ON a.ID_entrada    = e.ID_entrada
-       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       LEFT  JOIN CATEGORIAS c  ON a.ID_categoria  = c.ID_categoria
-       WHERE m.ID_usuario = ?
-       ORDER BY a.Fecha_registro DESC`,
+    const { rows } = await pool.query(
+      `SELECT a.id_ahorros AS id, a.monto AS monto, a.monto_acumulado AS monto_acumulado,
+              a.descripcion AS descripcion, a.meta AS meta,
+              a.fecha_registro AS fecha, a.fecha_meta AS fecha_meta,
+              a.id_categoria,
+              c.nombre AS categoria
+       FROM ahorros a
+       INNER JOIN entrada e     ON a.id_entrada    = e.id_entrada
+       INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+       LEFT  JOIN categorias c  ON a.id_categoria  = c.id_categoria
+       WHERE m.id_usuario = $1
+       ORDER BY a.fecha_registro DESC`,
       [ID_usuario]
     );
     res.status(200).json(rows);
@@ -296,7 +296,7 @@ const getAhorros = async (req, res) => {
     console.error("Error en getAhorros:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
-};
+}
 
 // ── UPDATE Ahorros ────────────────────────────────────────────
 const updateAhorros = async (req, res) => {
@@ -305,14 +305,14 @@ const updateAhorros = async (req, res) => {
   const { monto, monto_acumulado, descripcion, meta, fecha_registro, fecha_meta, id_categoria } = req.body;
 
   try {
-    const [rows] = await pool.query(
-      `UPDATE AHORROS
-       SET Monto = ?, Monto_acumulado = ?, Descripcion = ?, Meta = ?, Fecha_registro = ?, Fecha_meta = ?, ID_categoria = ?
-       WHERE ID_ahorros = ? AND ID_entrada IN (SELECT ID_entrada FROM ENTRADA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
+    const result = await pool.query(
+      `UPDATE ahorros
+       SET monto = $1, monto_acumulado = $2, descripcion = $3, meta = $4, fecha_registro = $5, fecha_meta = $6, id_categoria = $7
+       WHERE id_ahorros = $8 AND id_entrada IN (SELECT id_entrada FROM entrada WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $9))`,
       [monto, monto_acumulado, descripcion, meta, fecha_registro || null, fecha_meta || null, id_categoria || null, id, ID_usuario]
     );
 
-    if (rows.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
     }
 
@@ -329,34 +329,33 @@ const deleteAhorros = async (req, res) => {
   const { id } = req.params;
   let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
+    connection = await pool.connect();
+    await connection.query("BEGIN");
 
-    // 1. Buscar el ID_entrada y ID_movimiento antes de borrar
-    const [[ahorro]] = await connection.query(
-      `SELECT e.ID_entrada, e.ID_movimiento
-       FROM AHORROS a
-       INNER JOIN ENTRADA e     ON a.ID_entrada    = e.ID_entrada
-       INNER JOIN MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE a.ID_ahorros = ? AND m.ID_usuario = ?`,
+    // 1. Buscar el id_entrada y id_movimiento antes de borrar
+    const { rows: [ahorro] } = await connection.query(
+      `SELECT e.id_entrada, e.id_movimiento
+       FROM ahorros a
+       INNER JOIN entrada e     ON a.id_entrada    = e.id_entrada
+       INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+       WHERE a.id_ahorros = $1 AND m.id_usuario = $2`,
       [id, ID_usuario]
     );
 
     if (!ahorro) {
-      await connection.rollback();
+      await connection.query("ROLLBACK");
       return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
     }
 
     // 2. Borrar en cascada
-    await connection.query(`DELETE FROM AHORROS    
-        WHERE ID_ahorros = ?`, [id]);
-    await connection.query(`DELETE FROM ENTRADA     WHERE ID_entrada = ?`, [ahorro.ID_entrada]);
-    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [ahorro.ID_movimiento]);
+    await connection.query(`DELETE FROM ahorros WHERE id_ahorros = $1`, [id]);
+    await connection.query(`DELETE FROM entrada     WHERE id_entrada = $1`, [ahorro.id_entrada]);
+    await connection.query(`DELETE FROM movimientos WHERE id_movimiento = $1`, [ahorro.id_movimiento]);
 
-    await connection.commit();
+    await connection.query("COMMIT");
     res.status(200).json({ ok: true, mensaje: "Ahorro eliminado exitosamente" });
   } catch (error) {
-    if (connection) await connection.rollback();
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en deleteAhorros:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
@@ -364,30 +363,29 @@ const deleteAhorros = async (req, res) => {
   }
 };
 
-
 // <==&&==·········· GASTOS ··········==&&==>
 
 // ── GET Gastos ─────────────────────────────────────────────
 const getGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   try {
-    const [rows] = await pool.query(
-      `SELECT g.ID_gastos AS id, 
-        g.Monto AS monto, 
-        g.Descripcion AS descripcion,
-        g.Fecha_registro AS fecha,
-        g.ID_categoria,    
-        g.ID_dependientes,  
-        c.Nombre AS categoria,
-        d.Nombre AS dependiente
+    const { rows } = await pool.query(
+      `SELECT g.id_gastos AS id, 
+        g.monto AS monto, 
+        g.descripcion AS descripcion,
+        g.fecha_registro AS fecha,
+        g.id_categoria,    
+        g.id_dependientes,  
+        c.nombre AS categoria,
+        d.nombre AS dependiente
 
-       FROM GASTOS g
-       INNER JOIN SALIDA s       ON g.ID_salida      = s.ID_salida
-       INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
-       LEFT  JOIN CATEGORIAS c   ON g.ID_categoria   = c.ID_categoria
-       LEFT  JOIN DEPENDIENTES d ON g.ID_dependientes = d.ID_dependientes
-       WHERE m.ID_usuario = ?
-       ORDER BY g.Fecha_registro DESC`,
+       FROM gastos g
+       INNER JOIN salida s       ON g.id_salida      = s.id_salida
+       INNER JOIN movimientos m  ON s.id_movimiento  = m.id_movimiento
+       LEFT  JOIN categorias c   ON g.id_categoria   = c.id_categoria
+       LEFT  JOIN dependientes d ON g.id_dependientes = d.id_dependientes
+       WHERE m.id_usuario = $1
+       ORDER BY g.fecha_registro DESC`,
       [ID_usuario]
     );
     res.status(200).json(rows);
@@ -402,18 +400,18 @@ const updateGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
   const { monto, descripcion, fecha_registro, id_categoria, id_dependientes } = req.body;
-    try {
-    const [rows] = await pool.query(
-        `UPDATE GASTOS    
-            SET Monto = ?, Descripcion = ?, Fecha_registro = ?, ID_categoria = ?, ID_dependientes = ?
-            WHERE ID_gastos = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [monto, descripcion, fecha_registro, id_categoria, id_dependientes, id, ID_usuario]
+  try {
+    const result = await pool.query(
+      `UPDATE gastos    
+          SET monto = $1, descripcion = $2, fecha_registro = $3, id_categoria = $4, id_dependientes = $5
+          WHERE id_gastos = $6 AND id_salida IN (SELECT id_salida FROM salida WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $7))`,
+      [monto, descripcion, fecha_registro, id_categoria, id_dependientes, id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
     }
     res.status(200).json({ ok: true, mensaje: "Gasto actualizado exitosamente" });
-    } catch (error) {
+  } catch (error) {
     console.error("Error en updateGastos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
@@ -425,30 +423,29 @@ const deleteGastos = async (req, res) => {
   const { id } = req.params;
   let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    // 1. Buscar el ID_salida y ID_movimiento antes de borrar
-    const [[gasto]] = await connection.query(
-      `SELECT s.ID_salida, s.ID_movimiento
-         FROM GASTOS g
-            INNER JOIN SALIDA s       ON g.ID_salida      = s.ID_salida
-            INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
-         WHERE g.ID_gastos = ? AND m.ID_usuario = ?`,
+    connection = await pool.connect();
+    await connection.query("BEGIN");
+    // 1. Buscar el id_salida y id_movimiento antes de borrar
+    const { rows: [gasto] } = await connection.query(
+      `SELECT s.id_salida, s.id_movimiento
+         FROM gastos g
+            INNER JOIN salida s       ON g.id_salida      = s.id_salida
+            INNER JOIN movimientos m  ON s.id_movimiento  = m.id_movimiento
+         WHERE g.id_gastos = $1 AND m.id_usuario = $2`,
       [id, ID_usuario]
-    );  
+    );
     if (!gasto) {
-      await connection.rollback();
+      await connection.query("ROLLBACK");
       return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
     }
     // 2. Borrar en cascada
-    await connection.query(`DELETE FROM GASTOS    
-        WHERE ID_gastos = ?`, [id]);
-    await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [gasto.ID_salida]);
-    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [gasto.ID_movimiento]);
-    await connection.commit();
+    await connection.query(`DELETE FROM gastos WHERE id_gastos = $1`, [id]);
+    await connection.query(`DELETE FROM salida     WHERE id_salida = $1`, [gasto.id_salida]);
+    await connection.query(`DELETE FROM movimientos WHERE id_movimiento = $1`, [gasto.id_movimiento]);
+    await connection.query("COMMIT");
     res.status(200).json({ ok: true, mensaje: "Gasto eliminado exitosamente" });
   } catch (error) {
-    if (connection) await connection.rollback();
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en deleteGastos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
@@ -462,20 +459,20 @@ const deleteGastos = async (req, res) => {
 const getImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   try {
-    const [rows] = await pool.query(
-      `SELECT i.ID_imprevistos AS id, i.Monto AS monto, i.Causa AS causa,
-              i.Fecha_registro AS fecha,
-              i.ID_categoria,    
-              i.ID_dependientes, 
-              c.Nombre AS categoria,
-              d.Nombre AS dependiente
-       FROM IMPREVISTOS i
-       INNER JOIN SALIDA s       ON i.ID_salida      = s.ID_salida
-       INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
-       LEFT  JOIN CATEGORIAS c   ON i.ID_categoria   = c.ID_categoria
-       LEFT  JOIN DEPENDIENTES d ON i.ID_dependientes = d.ID_dependientes
-       WHERE m.ID_usuario = ?
-       ORDER BY i.Fecha_registro DESC`,
+    const { rows } = await pool.query(
+      `SELECT i.id_imprevistos AS id, i.monto AS monto, i.causa AS causa,
+              i.fecha_registro AS fecha,
+              i.id_categoria,    
+              i.id_dependientes, 
+              c.nombre AS categoria,
+              d.nombre AS dependiente
+       FROM imprevistos i
+       INNER JOIN salida s       ON i.id_salida      = s.id_salida
+       INNER JOIN movimientos m  ON s.id_movimiento  = m.id_movimiento
+       LEFT  JOIN categorias c   ON i.id_categoria   = c.id_categoria
+       LEFT  JOIN dependientes d ON i.id_dependientes = d.id_dependientes
+       WHERE m.id_usuario = $1
+       ORDER BY i.fecha_registro DESC`,
       [ID_usuario]
     );
     res.status(200).json(rows);
@@ -492,16 +489,18 @@ const updateImprevistos = async (req, res) => {
   const { monto, causa, fecha_registro, id_categoria, id_dependientes } = req.body;
 
   try {
-    const [rows] = await pool.query(
-      `UPDATE IMPREVISTOS i
-       JOIN SALIDA s ON i.ID_salida = s.ID_salida
-       JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       SET i.Monto = ?, 
-           i.Causa = ?, 
-           i.Fecha_registro = ?, 
-           i.ID_categoria = ?, 
-           i.ID_dependientes = ?
-       WHERE i.ID_imprevistos = ? AND m.ID_usuario = ?`,
+    const result = await pool.query(
+      `UPDATE imprevistos i
+       SET monto = $1, 
+           causa = $2, 
+           fecha_registro = $3, 
+           id_categoria = $4, 
+           id_dependientes = $5
+       FROM salida s, movimientos m
+       WHERE i.id_salida = s.id_salida
+         AND s.id_movimiento = m.id_movimiento
+         AND i.id_imprevistos = $6
+         AND m.id_usuario = $7`,
       [
         monto, 
         causa || null, 
@@ -513,7 +512,7 @@ const updateImprevistos = async (req, res) => {
       ]
     );
 
-    if (rows.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado o sin permisos" });
     }
     res.status(200).json({ ok: true, mensaje: "Imprevisto actualizado exitosamente" });
@@ -523,37 +522,35 @@ const updateImprevistos = async (req, res) => {
   }
 };
 
-
 // ── DELETE Imprevistos ────────────────────────────────────────
 const deleteImprevistos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
   let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    // 1. Buscar el ID_salida y ID_movimiento antes de borrar
-    const [[imprevisto]] = await connection.query(
-        `SELECT s.ID_salida, s.ID_movimiento
-            FROM IMPREVISTOS i
-            INNER JOIN SALIDA s       ON i.ID_salida      = s.ID_salida
-            INNER JOIN MOVIMIENTOS m  ON s.ID_movimiento  = m.ID_movimiento
-            WHERE i.ID_imprevistos = ? AND m.ID_usuario = ?`,
+    connection = await pool.connect();
+    await connection.query("BEGIN");
+    // 1. Buscar el id_salida y id_movimiento antes de borrar
+    const { rows: [imprevisto] } = await connection.query(
+        `SELECT s.id_salida, s.id_movimiento
+            FROM imprevistos i
+            INNER JOIN salida s       ON i.id_salida      = s.id_salida
+            INNER JOIN movimientos m  ON s.id_movimiento  = m.id_movimiento
+            WHERE i.id_imprevistos = $1 AND m.id_usuario = $2`,
         [id, ID_usuario]
     );
     if (!imprevisto) {
-      await connection.rollback();
+      await connection.query("ROLLBACK");
       return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado" });
     }
     // 2. Borrar en cascada
-    await connection.query(`DELETE FROM IMPREVISTOS    
-        WHERE ID_imprevistos = ?`, [id]);
-    await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [imprevisto.ID_salida]);
-    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [imprevisto.ID_movimiento]);
-    await connection.commit();
+    await connection.query(`DELETE FROM imprevistos WHERE id_imprevistos = $1`, [id]);
+    await connection.query(`DELETE FROM salida     WHERE id_salida = $1`, [imprevisto.id_salida]);
+    await connection.query(`DELETE FROM movimientos WHERE id_movimiento = $1`, [imprevisto.id_movimiento]);
+    await connection.query("COMMIT");
     res.status(200).json({ ok: true, mensaje: "Imprevisto eliminado exitosamente" });
   } catch (error) {
-    if (connection) await connection.rollback();
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en deleteImprevistos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
@@ -561,31 +558,30 @@ const deleteImprevistos = async (req, res) => {
   }
 };
 
-
 // <==&&==·········· DEUDAS ··········==&&==>
 // ── GET Deudas ─────────────────────────────────────────────
 const getDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
   try {
-    const [rows] = await pool.query(
+    const { rows } = await pool.query(
       `SELECT 
-              d.ID_deudas AS id, 
-              d.Monto AS monto, 
-              d.Fuente AS fuente,
-              d.Descripcion AS descripcion, 
-              d.Cuotas_total AS cuotas_total,
-              d.Cuotas_pagadas AS cuotas_pagadas, 
-              d.Fecha_inicio AS fecha_inicio,
-              d.Fecha_fin AS fecha_fin, 
-              d.Estado AS estado,
-              d.ID_categoria,
-              c.Nombre AS categoria
-       FROM DEUDAS d
-       INNER JOIN SALIDA s      ON d.ID_salida     = s.ID_salida
-       INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       LEFT  JOIN CATEGORIAS c  ON d.ID_categoria  = c.ID_categoria
-       WHERE m.ID_usuario = ?
-       ORDER BY d.Fecha_inicio DESC`,
+              d.id_deudas AS id, 
+              d.monto AS monto, 
+              d.fuente AS fuente,
+              d.descripcion AS descripcion, 
+              d.cuotas_total AS cuotas_total,
+              d.cuotas_pagadas AS cuotas_pagadas, 
+              d.fecha_inicio AS fecha_inicio,
+              d.fecha_fin AS fecha_fin, 
+              d.estado AS estado,
+              d.id_categoria,
+              c.nombre AS categoria
+       FROM deudas d
+       INNER JOIN salida s      ON d.id_salida     = s.id_salida
+       INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+       LEFT  JOIN categorias c  ON d.id_categoria  = c.id_categoria
+       WHERE m.id_usuario = $1
+       ORDER BY d.fecha_inicio DESC`,
       [ID_usuario]
     );
     res.status(200).json(rows);
@@ -598,19 +594,20 @@ const getDeudas = async (req, res) => {
 // ── UPDATE Deudas ─────────────────────────────────────────────
 const updateDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
-    const { id } = req.params;
-    const { monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria } = req.body;
-    try {    const [rows] = await pool.query(
-        `UPDATE DEUDAS    
-            SET Monto = ?, Fuente = ?, Descripcion = ?, Cuotas_total = ?, Cuotas_pagadas = ?, Fecha_inicio = ?, Fecha_fin = ?, Estado = ?, ID_categoria = ?
-            WHERE ID_deudas = ? AND ID_salida IN (SELECT ID_salida FROM SALIDA WHERE ID_movimiento IN (SELECT ID_movimiento FROM MOVIMIENTOS WHERE ID_usuario = ?))`,
-        [monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria, id, ID_usuario]
+  const { id } = req.params;
+  const { monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE deudas    
+          SET monto = $1, fuente = $2, descripcion = $3, cuotas_total = $4, cuotas_pagadas = $5, fecha_inicio = $6, fecha_fin = $7, estado = $8, id_categoria = $9
+          WHERE id_deudas = $10 AND id_salida IN (SELECT id_salida FROM salida WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $11))`,
+      [monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria, id, ID_usuario]
     );
-    if (rows.affectedRows === 0) {
-        return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
     }
     res.status(200).json({ ok: true, mensaje: "Deuda actualizada exitosamente" });
-    } catch (error) {
+  } catch (error) {
     console.error("Error en updateDeudas:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
@@ -622,30 +619,29 @@ const deleteDeudas = async (req, res) => {
   const { id } = req.params;
   let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    // 1. Buscar el ID_salida y ID_movimiento antes de borrar
-    const [[deuda]] = await connection.query(
-        `SELECT s.ID_salida, s.ID_movimiento
-            FROM DEUDAS d
-            INNER JOIN SALIDA s      ON d.ID_salida     = s.ID_salida
-            INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-            WHERE d.ID_deudas = ? AND m.ID_usuario = ?`,
+    connection = await pool.connect();
+    await connection.query("BEGIN");
+    // 1. Buscar el id_salida y id_movimiento antes de borrar
+    const { rows: [deuda] } = await connection.query(
+        `SELECT s.id_salida, s.id_movimiento
+            FROM deudas d
+            INNER JOIN salida s      ON d.id_salida     = s.id_salida
+            INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+            WHERE d.id_deudas = $1 AND m.id_usuario = $2`,
         [id, ID_usuario]
     );
     if (!deuda) {
-      await connection.rollback();
+      await connection.query("ROLLBACK");
       return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
     }
     // 2. Borrar en cascada
-    await connection.query(`DELETE FROM DEUDAS    
-        WHERE ID_deudas = ?`, [id]);
-    await connection.query(`DELETE FROM SALIDA     WHERE ID_salida = ?`, [deuda.ID_salida]);
-    await connection.query(`DELETE FROM MOVIMIENTOS WHERE ID_movimiento = ?`, [deuda.ID_movimiento]);
-    await connection.commit();
+    await connection.query(`DELETE FROM deudas WHERE id_deudas = $1`, [id]);
+    await connection.query(`DELETE FROM salida     WHERE id_salida = $1`, [deuda.id_salida]);
+    await connection.query(`DELETE FROM movimientos WHERE id_movimiento = $1`, [deuda.id_movimiento]);
+    await connection.query("COMMIT");
     res.status(200).json({ ok: true, mensaje: "Deuda eliminada exitosamente" });
   } catch (error) {
-    if (connection) await connection.rollback();
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en deleteDeudas:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
@@ -653,35 +649,34 @@ const deleteDeudas = async (req, res) => {
   }
 };
 
-
 // ─────────────────────────────────────────────────────────────
 //  HELPER: actualiza Ingreso_real del período activo
 //  Se llama internamente tras registrar un ingreso nuevo
 // ─────────────────────────────────────────────────────────────
 const actualizarIngresoReal = async (ID_usuario) => {
-  const [periodo] = await pool.query(
-    `SELECT ID_periodo, Fecha_inicio, Fecha_fin
-     FROM   PERIODOS_PRESUPUESTO
-     WHERE  ID_usuario = ? AND Estado = 'abierto'
+  const { rows: periodo } = await pool.query(
+    `SELECT id_periodo, fecha_inicio, fecha_fin
+     FROM   periodos_presupuesto
+     WHERE  id_usuario = $1 AND estado = 'abierto'
      LIMIT  1`,
     [ID_usuario]
   );
   if (!periodo.length) return;
 
-  const { ID_periodo, Fecha_inicio, Fecha_fin } = periodo[0];
+  const { id_periodo: ID_periodo, fecha_inicio: Fecha_inicio, fecha_fin: Fecha_fin } = periodo[0];
 
-  const [[{ total }]] = await pool.query(
-    `SELECT COALESCE(SUM(i.Monto), 0) AS total
-     FROM   INGRESOS i
-     JOIN   ENTRADA e     ON i.ID_entrada    = e.ID_entrada
-     JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-     WHERE  m.ID_usuario     = ?
-       AND  i.Fecha_registro BETWEEN ? AND ?`,
+  const { rows: [{ total }] } = await pool.query(
+    `SELECT COALESCE(SUM(i.monto), 0)::float AS total
+     FROM   ingresos i
+     JOIN   entrada e     ON i.id_entrada    = e.id_entrada
+     JOIN   movimientos m ON e.id_movimiento = m.id_movimiento
+     WHERE  m.id_usuario     = $1
+       AND  i.fecha_registro BETWEEN $2 AND $3`,
     [ID_usuario, Fecha_inicio, Fecha_fin]
   );
 
   await pool.query(
-    `UPDATE PERIODOS_PRESUPUESTO SET Ingreso_real = ? WHERE ID_periodo = ?`,
+    `UPDATE periodos_presupuesto SET ingreso_real = $1 WHERE id_periodo = $2`,
     [total, ID_periodo]
   );
 };
@@ -698,33 +693,33 @@ const abonarDeuda = async (req, res) => {
     return res.status(400).json({ ok: false, mensaje: "El número de cuotas debe ser >= 1" });
 
   try {
-    const [[deuda]] = await pool.query(
-      `SELECT d.ID_deudas, d.Cuotas_total, d.Cuotas_pagadas, d.Estado
-       FROM   DEUDAS d
-       JOIN   SALIDA s      ON d.ID_salida     = s.ID_salida
-       JOIN   MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE  d.ID_deudas = ? AND m.ID_usuario = ?`,
+    const { rows: [deuda] } = await pool.query(
+      `SELECT d.id_deudas, d.cuotas_total, d.cuotas_pagadas, d.estado
+       FROM   deudas d
+       JOIN   salida s      ON d.id_salida     = s.id_salida
+       JOIN   movimientos m ON s.id_movimiento = m.id_movimiento
+       WHERE  d.id_deudas = $1 AND m.id_usuario = $2`,
       [id, ID_usuario]
     );
 
     if (!deuda)
       return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
-    if (deuda.Estado === "pagada")
+    if (deuda.estado === "pagada")
       return res.status(409).json({ ok: false, mensaje: "Esta deuda ya está pagada" });
 
-    const nuevasCuotas = deuda.Cuotas_pagadas + cuotas;
+    const nuevasCuotas = deuda.cuotas_pagadas + cuotas;
 
-    if (deuda.Cuotas_total !== null && nuevasCuotas > deuda.Cuotas_total)
+    if (deuda.cuotas_total !== null && nuevasCuotas > deuda.cuotas_total)
       return res.status(400).json({
         ok: false,
-        mensaje: `Quedan ${deuda.Cuotas_total - deuda.Cuotas_pagadas} cuota(s) por pagar.`
+        mensaje: `Quedan ${deuda.cuotas_total - deuda.cuotas_pagadas} cuota(s) por pagar.`
       });
 
-    const nuevoEstado = deuda.Cuotas_total !== null && nuevasCuotas >= deuda.Cuotas_total
+    const nuevoEstado = deuda.cuotas_total !== null && nuevasCuotas >= deuda.cuotas_total
       ? "pagada" : "pendiente";
 
     await pool.query(
-      `UPDATE DEUDAS SET Cuotas_pagadas = ?, Estado = ? WHERE ID_deudas = ?`,
+      `UPDATE deudas SET cuotas_pagadas = $1, estado = $2 WHERE id_deudas = $3`,
       [nuevasCuotas, nuevoEstado, id]
     );
 
@@ -732,7 +727,7 @@ const abonarDeuda = async (req, res) => {
       ok: true,
       mensaje: nuevoEstado === "pagada" ? "Deuda pagada completamente" : "Cuota registrada",
       cuotas_pagadas: nuevasCuotas,
-      cuotas_total:   deuda.Cuotas_total,
+      cuotas_total:   deuda.cuotas_total,
       estado:         nuevoEstado,
     });
   } catch (error) {
@@ -740,7 +735,6 @@ const abonarDeuda = async (req, res) => {
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
-
 // ─────────────────────────────────────────────────────────────
 //  PATCH /movimientos/ahorros/:id/abonar
 // ─────────────────────────────────────────────────────────────
@@ -748,43 +742,39 @@ const abonarAhorro = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id }     = req.params;
   const monto      = parseFloat(req.body.monto);
-  // const nota       = req.body.nota || null;
 
   if (!monto || monto <= 0)
     return res.status(400).json({ ok: false, mensaje: "El monto del abono debe ser mayor a 0" });
 
   let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
+    connection = await pool.connect();
+    await connection.query("BEGIN");
 
-
-    const [[ahorro]] = await connection.query(
-      `SELECT a.ID_ahorros, a.Monto AS meta_monto, a.Meta AS meta_nombre
-       FROM   AHORROS a
-       JOIN   ENTRADA e     ON a.ID_entrada    = e.ID_entrada
-       JOIN   MOVIMIENTOS m ON e.ID_movimiento = m.ID_movimiento
-       WHERE  a.ID_ahorros = ? AND m.ID_usuario = ?`,
+    const { rows: [ahorro] } = await connection.query(
+      `SELECT a.id_ahorros, a.monto AS meta_monto, a.meta AS meta_nombre
+       FROM   ahorros a
+       JOIN   entrada e     ON a.id_entrada    = e.id_entrada
+       JOIN   movimientos m ON e.id_movimiento = m.id_movimiento
+       WHERE  a.id_ahorros = $1 AND m.id_usuario = $2`,
       [id, ID_usuario]
     );
 
     if (!ahorro) {
-      await connection.rollback();
+      await connection.query("ROLLBACK");
       return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
     }
 
-  
     await connection.query(
-      `INSERT INTO ABONOS_AHORRO (ID_ahorros, ID_usuario, Monto, Fecha_registro)
-       VALUES (?, ?, ?, CURRENT_DATE)`,
+      `INSERT INTO abonos_ahorro (id_ahorros, id_usuario, monto, fecha_registro)
+       VALUES ($1, $2, $3, CURRENT_DATE)`,
       [id, ID_usuario, monto]
     );
 
-
-    const [[{ total }]] = await connection.query(
-      `SELECT COALESCE(SUM(Monto), 0) AS total
-       FROM ABONOS_AHORRO
-       WHERE ID_ahorros = ?`,
+    const { rows: [{ total }] } = await connection.query(
+      `SELECT COALESCE(SUM(monto), 0)::float AS total
+       FROM abonos_ahorro
+       WHERE id_ahorros = $1`,
       [id]
     );
 
@@ -792,11 +782,11 @@ const abonarAhorro = async (req, res) => {
     const metaAlcanzada  = nuevoAcumulado >= Number(ahorro.meta_monto);
 
     await connection.query(
-      `UPDATE AHORROS SET Monto_acumulado = ? WHERE ID_ahorros = ?`,
+      `UPDATE ahorros SET monto_acumulado = $1 WHERE id_ahorros = $2`,
       [nuevoAcumulado, id]
     );
 
-    await connection.commit();
+    await connection.query("COMMIT");
 
     await verificarMetaAhorroAlcanzada(ID_usuario, ahorro, nuevoAcumulado);
 
@@ -809,12 +799,11 @@ const abonarAhorro = async (req, res) => {
       meta_alcanzada:  metaAlcanzada,
     });
   } catch (error) {
-    if (connection) await connection.rollback();
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en abonarAhorro:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
     if (connection) connection.release();
   }
 };
-
 module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas, getMovimientos, abonarDeuda, abonarAhorro };

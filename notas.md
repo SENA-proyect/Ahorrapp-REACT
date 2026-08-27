@@ -9,3 +9,11 @@ Tabla de rol y usarios_roles, comentadas debido a que no se ha realizado el proc
 
 posible error NaN o formato similar:
 revisar dashboardcontroller.js, es posible que el error se encuentre entre los query 10-14 dentro de los respectivos const 
+
+exportcontroller.js:
+Actualmente es un archivo fantasma, corresponde a un RF por lo que es necesario restructurarlo, con el fin de usarlo eficientemente
+
+movimientoscontroller.js:
+la columna estado es de tipo ENUM en el esquema (estado_deuda_enum, con valores 'pendiente'/'pagada'). Postgres normalmente infiere el tipo del parámetro $8 a partir de la columna destino y hace el cast automático sin problema — así que debería funcionar tal cual está. Pero si al probar el UPDATE sale un error tipo column "estado" is of type estado_deuda_enum but expression is of type text, la solución sería castearlo explícitamente en la query: estado = $8::estado_deuda_enum
+
+mismo punto de updateDeudas: la columna estado es ENUM. Aquí también debería funcionar el cast automático de Postgres al insertar $2 como texto — pero si da el error de tipo, la solución es estado = $2::estado_deuda_enum en el UPDATE
