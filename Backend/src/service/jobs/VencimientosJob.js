@@ -1,6 +1,6 @@
 const cron = require("node-cron");
 const pool = require("../../db/connection");
-const { crearNotificacion, existeNotificacionEntidad } = require("../notificacionesService");
+const { crearNotificacion, existeNotificacionEntidad } = require("../NotificacionesService");
 
 const DIAS_AVISO_DEUDA = 5;
 
