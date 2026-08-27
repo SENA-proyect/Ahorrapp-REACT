@@ -27,8 +27,8 @@ const register = async (req, res) => {
   }
 
   try {
-    const [existingUser] = await pool.query(
-      "SELECT ID_usuario FROM USUARIOS WHERE Email = ?",
+    const { rows: existingUser } = await pool.query(
+      'SELECT id_usuario AS "ID_usuario" FROM usuarios WHERE email = $1',
       [Email]
     );
 
@@ -41,21 +41,26 @@ const register = async (req, res) => {
 
     const passwordHash = await bcrypt.hash(Password_hash, 10);
 
-    const [result] = await pool.query(
-      "INSERT INTO USUARIOS (Nombre, Apellido, Email, Password_hash) VALUES (?, ?, ?, ?)",
+    const { rows: insertResult } = await pool.query(
+      `INSERT INTO usuarios (nombre, apellido, email, password_hash)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id_usuario AS "ID_usuario"`,
       [Nombre, Apellido, Email, passwordHash]
     );
+    const result = insertResult[0]; // así result.ID_usuario queda disponible    
 
     // Asigna el rol por defecto (ID_rol = 1 → "user") al usuario recién creado
+    
     await pool.query(
-      "INSERT INTO usuarios_roles (ID_usuario, ID_rol) VALUES (?, ?)",
-      [result.insertId, 1]
+      "INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES ($1, $2)",
+      [result.ID_usuario, 1] // antes era result.insertId
     );
 
     return res.status(201).json({
       ok: true,
       mensaje: "Usuario registrado exitosamente",
-      id: result.insertId,
+      id: result.ID_usuario, // antes era
+      // id: result.insertId, 
     });
 
   } catch (error) {
@@ -68,8 +73,9 @@ const login = async (req, res) => {
   const { Email, Password_hash } = req.body;
 
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM USUARIOS WHERE Email = ? AND Activo = TRUE",
+
+    const { rows } = await pool.query(
+      "SELECT * FROM usuarios WHERE email = $1 AND activo = TRUE",
       [Email]
     );
 
@@ -84,7 +90,7 @@ const login = async (req, res) => {
 
     const passwordValida = await bcrypt.compare(
       Password_hash,
-      usuario.Password_hash
+      usuario.password_hash          // antes: usuario.Password_hash
     );
 
     if (!passwordValida) {
@@ -94,21 +100,19 @@ const login = async (req, res) => {
       });
     }
 
-    // Trae los roles del usuario uniendo la tabla puente con la tabla de roles
-    const [rolesRows] = await pool.query(
-      `SELECT r.Cargo
-       FROM usuarios_roles ur
-       INNER JOIN rol r ON ur.ID_rol = r.ID_rol
-       WHERE ur.ID_usuario = ?`,
-      [usuario.ID_usuario]
+    const { rows: rolesRows } = await pool.query(
+      `SELECT r.cargo AS "Cargo"
+      FROM usuarios_roles ur
+      INNER JOIN rol r ON ur.id_rol = r.id_rol
+      WHERE ur.id_usuario = $1`,
+      [usuario.id_usuario]           // antes: usuario.ID_usuario
     );
 
-    // Pasamos todo a minúscula para que coincida con lo que espera el frontend
     const roles = rolesRows.map((fila) => fila.Cargo.toLowerCase());
 
     const token = jwt.sign(
       {
-        id: usuario.ID_usuario,
+        id: usuario.id_usuario,      // antes: usuario.ID_usuario
         roles,
       },
       process.env.JWT_SECRET,
@@ -120,10 +124,10 @@ const login = async (req, res) => {
       mensaje: "Inicio de sesión exitoso",
       token,
       usuario: {
-        id: usuario.ID_usuario,
-        nombre: usuario.Nombre,
-        apellido: usuario.Apellido,
-        email: usuario.Email,
+        id: usuario.id_usuario,      // antes: usuario.ID_usuario
+        nombre: usuario.nombre,      // antes: usuario.Nombre
+        apellido: usuario.apellido,  // antes: usuario.Apellido
+        email: usuario.email,        // antes: usuario.Email
         roles,
       },
     });
@@ -145,8 +149,9 @@ const forgotPassword = async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query(
-      "SELECT ID_usuario, Email FROM USUARIOS WHERE Email = ? AND Activo = TRUE",
+    
+    const { rows } = await pool.query(
+      'SELECT id_usuario AS "ID_usuario", email AS "Email" FROM usuarios WHERE email = $1 AND activo = TRUE',
       [Email]
     );
 
@@ -165,7 +170,7 @@ const forgotPassword = async (req, res) => {
     const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
     await pool.query(
-      "UPDATE USUARIOS SET Reset_code = ?, Reset_code_expires = ? WHERE ID_usuario = ?",
+      "UPDATE usuarios SET reset_code = $1, reset_code_expires = $2 WHERE id_usuario = $3",
       [hashedCode, expires, usuario.ID_usuario]
     );
 
@@ -193,8 +198,13 @@ const verifyResetCode = async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query(
-      "SELECT ID_usuario, Reset_code, Reset_code_expires FROM USUARIOS WHERE Email = ?",
+
+    const { rows } = await pool.query(
+      `SELECT
+        id_usuario AS "ID_usuario",
+        reset_code AS "Reset_code",
+        reset_code_expires AS "Reset_code_expires"
+      FROM usuarios WHERE email = $1`,
       [Email]
     );
 
@@ -215,10 +225,11 @@ const verifyResetCode = async (req, res) => {
     }
 
     if (new Date() > new Date(usuario.Reset_code_expires)) {
-      await pool.query(
-        "UPDATE USUARIOS SET Reset_code = NULL, Reset_code_expires = NULL WHERE ID_usuario = ?",
-        [usuario.ID_usuario]
-      );
+
+    await pool.query(
+      "UPDATE usuarios SET reset_code = NULL, reset_code_expires = NULL WHERE id_usuario = $1",
+      [usuario.ID_usuario]
+    );
 
       return res.status(400).json({
         ok: false,
@@ -236,8 +247,9 @@ const verifyResetCode = async (req, res) => {
     }
 
     // Código correcto: se invalida para que no pueda reutilizarse
+
     await pool.query(
-      "UPDATE USUARIOS SET Reset_code = NULL, Reset_code_expires = NULL WHERE ID_usuario = ?",
+      "UPDATE usuarios SET reset_code = NULL, reset_code_expires = NULL WHERE id_usuario = $1",
       [usuario.ID_usuario]
     );
 
@@ -296,8 +308,9 @@ const resetPassword = async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query(
-      "SELECT ID_usuario FROM USUARIOS WHERE ID_usuario = ? AND Activo = TRUE",
+
+    const { rows } = await pool.query(
+      'SELECT id_usuario AS "ID_usuario" FROM usuarios WHERE id_usuario = $1 AND activo = TRUE',
       [decoded.id]
     );
 
@@ -311,10 +324,9 @@ const resetPassword = async (req, res) => {
     const passwordHash = await bcrypt.hash(nuevaPassword, 10);
 
     await pool.query(
-      "UPDATE USUARIOS SET Password_hash = ? WHERE ID_usuario = ?",
+      "UPDATE usuarios SET password_hash = $1 WHERE id_usuario = $2",
       [passwordHash, decoded.id]
     );
-
     return res.status(200).json({
       ok: true,
       mensaje: "Contraseña actualizada exitosamente",
@@ -328,21 +340,20 @@ const resetPassword = async (req, res) => {
 // ── GET /PanelUsuarios ───────────────────────────────────────────────────────
 const getUsuarios = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
+
+    const { rows } = await pool.query(`
       SELECT
-        U.ID_usuario,
-        U.Nombre,
-        U.Apellido,
-        U.Email,
-        U.Activo,
-        R.ID_rol,
-        R.Cargo
-      FROM USUARIOS U
-      LEFT JOIN usuarios_roles UR
-        ON U.ID_usuario = UR.ID_usuario
-      LEFT JOIN rol R
-        ON UR.ID_rol = R.ID_rol
-      WHERE U.Activo = TRUE
+        u.id_usuario AS "ID_usuario",
+        u.nombre AS "Nombre",
+        u.apellido AS "Apellido",
+        u.email AS "Email",
+        u.activo AS "Activo",
+        r.id_rol AS "ID_rol",
+        r.cargo AS "Cargo"
+      FROM usuarios u
+      LEFT JOIN usuarios_roles ur ON u.id_usuario = ur.id_usuario
+      LEFT JOIN rol r ON ur.id_rol = r.id_rol
+      WHERE u.activo = TRUE
     `);
 
     return res.status(200).json({
@@ -357,7 +368,6 @@ const getUsuarios = async (req, res) => {
 };
 
 // ── PUT /PanelUsuarios/:id ───────────────────────────────────────────────────
-// ── PUT /PanelUsuarios/:id ───────────────────────────────────────────────────
 const updateUsuario = async (req, res) => {
   const { id } = req.params;
   const { Nombre, Apellido, Email } = req.body;
@@ -370,8 +380,8 @@ const updateUsuario = async (req, res) => {
       });
     }
 
-    const [existe] = await pool.query(
-      "SELECT ID_usuario FROM USUARIOS WHERE ID_usuario = ?",
+    const { rows: existe } = await pool.query(
+      'SELECT id_usuario AS "ID_usuario" FROM usuarios WHERE id_usuario = $1',
       [id]
     );
 
@@ -382,10 +392,11 @@ const updateUsuario = async (req, res) => {
       });
     }
 
+
     await pool.query(
-      `UPDATE USUARIOS
-       SET Nombre = ?, Apellido = ?, Email = ?
-       WHERE ID_usuario = ?`,
+      `UPDATE usuarios
+      SET nombre = $1, apellido = $2, email = $3
+      WHERE id_usuario = $4`,
       [Nombre, Apellido, Email, id]
     );
 
@@ -419,8 +430,9 @@ const actualizarRolUsuario = async (req, res) => {
       });
     }
 
-    const [existe] = await pool.query(
-      "SELECT ID_usuario FROM USUARIOS WHERE ID_usuario = ?",
+
+    const { rows: existe } = await pool.query(
+      'SELECT id_usuario AS "ID_usuario" FROM usuarios WHERE id_usuario = $1',
       [id]
     );
 
@@ -431,8 +443,8 @@ const actualizarRolUsuario = async (req, res) => {
       });
     }
 
-    const [rolExiste] = await pool.query(
-      "SELECT ID_rol FROM rol WHERE ID_rol = ?",
+    const { rows: rolExiste } = await pool.query(
+      'SELECT id_rol AS "ID_rol" FROM rol WHERE id_rol = $1',
       [ID_rol]
     );
 
@@ -444,7 +456,7 @@ const actualizarRolUsuario = async (req, res) => {
     }
 
     await pool.query(
-      "UPDATE usuarios_roles SET ID_rol = ? WHERE ID_usuario = ?",
+      "UPDATE usuarios_roles SET id_rol = $1 WHERE id_usuario = $2",
       [ID_rol, id]
     );
 
@@ -469,8 +481,9 @@ const deleteUsuario = async (req, res) => {
       });
     }
 
-    const [existe] = await pool.query(
-      "SELECT ID_usuario FROM USUARIOS WHERE ID_usuario = ?",
+
+    const { rows: existe } = await pool.query(
+      'SELECT id_usuario AS "ID_usuario" FROM usuarios WHERE id_usuario = $1',
       [id]
     );
 
@@ -482,7 +495,7 @@ const deleteUsuario = async (req, res) => {
     }
 
     await pool.query(
-      "UPDATE USUARIOS SET Activo = FALSE WHERE ID_usuario = ?",
+      "UPDATE usuarios SET activo = FALSE WHERE id_usuario = $1",
       [id]
     );
 
@@ -498,8 +511,8 @@ const deleteUsuario = async (req, res) => {
 // ── GetUsuariosPanelAdmin/PanelAdmin/:id ────────────────────────────────────────────────
 const getUsuariosPanelAdmin = async (req, res) => {
   try {
-    const [rows] = await pool.query (
-      "SELECT COUNT(*) AS totalUsuarios FROM usuarios"
+    const { rows } = await pool.query(
+      'SELECT COUNT(*)::int AS "totalUsuarios" FROM usuarios'
     );
     res.json({
       totalUsuarios: rows.length > 0 ? rows[0].totalUsuarios : 0,
@@ -515,9 +528,9 @@ const getUsuariosPanelAdmin = async (req, res) => {
 
 const getDependientesPanelAdmin = async (req, res) => {
   try {
-    const [rows] = await pool.query (
-      "SELECT COUNT(*) AS totalDependientes FROM dependientes"
-    )
+    const { rows } = await pool.query(
+      'SELECT COUNT(*) AS "totalDependientes" FROM dependientes'
+    );
     res.json ({
       totalDependientes: rows.length > 0 ? rows [0].totalDependientes : 0,
     })
@@ -535,18 +548,18 @@ const getTodosDependientesAdmin = async (req, res) => {
   try {
     console.log('Entró a PanelDependientes');
 
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT
-        D.ID_dependientes,
-        D.Nombre,
-        D.Relacion,
-        D.Ocupacion,
-        D.Fecha_nacimiento,
-        D.ID_usuario,
-        U.Nombre AS usuario_nombre
-      FROM DEPENDIENTES D
-      INNER JOIN USUARIOS U ON D.ID_usuario = U.ID_usuario
-      ORDER BY U.Nombre, D.Nombre
+        d.id_dependientes AS "ID_dependientes",
+        d.nombre AS "Nombre",
+        d.relacion AS "Relacion",
+        d.ocupacion AS "Ocupacion",
+        d.fecha_nacimiento AS "Fecha_nacimiento",
+        d.id_usuario AS "ID_usuario",
+        u.nombre AS "usuario_nombre"
+      FROM dependientes d
+      INNER JOIN usuarios u ON d.id_usuario = u.id_usuario
+      ORDER BY u.nombre, d.nombre
     `);
 
     console.log('Dependientes encontrados:', rows);
