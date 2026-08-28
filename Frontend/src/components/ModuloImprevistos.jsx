@@ -56,8 +56,8 @@ const abrirEditar = (i) => {
     id: i.id, monto: String(i.monto),
     causa: i.causa || '',
     fecha_registro: i.fecha ? i.fecha.slice(0, 10) : '',
-    id_categoria: i.ID_categoria || '',
-    ID_dependientes: i.ID_dependientes || '',
+    id_categoria: i.id_categoria || '',
+    ID_dependientes: i.id_dependientes || '',
   })
 }
 
@@ -78,7 +78,7 @@ const abrirEditar = (i) => {
           causa: modalEditar.causa || null,
           fecha_registro: modalEditar.fecha_registro || null,
           id_categoria: modalEditar.id_categoria || null,
-          id_dependientes: modalEditar.ID_dependientes || null,
+          id_dependientes: modalEditar.id_dependientes || null,
         }),
       })
       const data = await res.json()
@@ -110,7 +110,7 @@ const abrirEditar = (i) => {
 
   const nombreDep = (id) => {
     if (!id) return null
-    const dep = dependientes.find(d => String(d.ID_dependientes) === String(id))
+    const dep = dependientes.find(d => String(d.id_dependientes) === String(id))
     return dep?.Nombre || null
   }
 
@@ -263,13 +263,13 @@ const abrirEditar = (i) => {
             <select
               className={selectCls}
               style={{ colorScheme: 'dark' }}
-              name="ID_dependientes"
-              value={modalEditar.ID_dependientes}
+              name="id_dependientes"
+              value={modalEditar.id_dependientes}
               onChange={handleChange}
             >
               <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Ninguno (gasto propio)</option>
               {dependientes.map(d => (
-                <option key={d.ID_dependientes} value={d.ID_dependientes} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
+                <option key={d.id_dependientes} value={d.id_dependientes} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
                   {d.Nombre}
                 </option>
               ))}

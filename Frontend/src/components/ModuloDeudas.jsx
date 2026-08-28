@@ -108,7 +108,7 @@ export default function ModuloDeudas() {
       cuotas_total: d.cuotas_total ? String(d.cuotas_total) : '',
       fecha_inicio: d.fecha_inicio ? d.fecha_inicio.slice(0, 10) : '',
       fecha_fin: d.fecha_fin ? d.fecha_fin.slice(0, 10) : '',
-      id_categoria: d.ID_categoria || '',
+      id_categoria: d.id_categoria || '',
     })
   }
 
@@ -392,7 +392,7 @@ export default function ModuloDeudas() {
               onChange={handleChange}
             >
               <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Sin categoría</option>
-              {categorias.filter(c => c.activa == 1).map(c => (
+              {categorias.filter(c => c.activa).map(c => (
                 <option key={c.id} value={c.id} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
                   {c.nombre}
                 </option>
