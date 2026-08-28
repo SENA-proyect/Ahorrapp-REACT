@@ -3,7 +3,7 @@ import { getCategorias, getDependientes } from '../api'
 import { useToast } from './ToastContext'
 import { useNotificaciones } from './NotificacionesContext'
 
-const API = 'https://localhost:3000/api/movimientos'
+const API = 'http://localhost:3000/api/movimientos'
 
 // ── Configuración por subtipo ─────────────────────────────────
 const CONFIG = {

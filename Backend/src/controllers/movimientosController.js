@@ -79,97 +79,95 @@ const crearMovimiento = async (req, res) => {
   let connection;
 
   try {
-    connection = await pool.getConnection();
+    connection = await pool.connect();
     const ID_usuario = req.usuario.id;
-    await connection.beginTransaction();
+    await connection.query("BEGIN");
 
     // 1. Insertar en MOVIMIENTOS
-    const [movimiento] = await connection.query(
-      `INSERT INTO MOVIMIENTOS (ID_usuario, Tipo_Flujo, Subtipo_Modulo) VALUES (?, ?, ?)`,
+    const { rows: [movimiento] } = await connection.query(
+      `INSERT INTO movimientos (id_usuario, tipo_flujo, subtipo_modulo)
+       VALUES ($1, $2, $3)
+       RETURNING id_movimiento`,
       [ID_usuario, tipo_flujo, subtipo_modulo]
     );
-    const ID_movimiento = movimiento.insertId;
+    const ID_movimiento = movimiento.id_movimiento;
 
     let ID_detalle = null;
 
     if (tipo_flujo === "Entrada") {
       // 2a. Insertar en ENTRADA
-      const [entrada] = await connection.query(
-        `INSERT INTO ENTRADA (ID_movimiento) VALUES (?)`,
+      const { rows: [entrada] } = await connection.query(
+        `INSERT INTO entrada (id_movimiento) VALUES ($1) RETURNING id_entrada`,
         [ID_movimiento]
       );
-      const ID_entrada = entrada.insertId;
+      const ID_entrada = entrada.id_entrada;
 
       if (subtipo_modulo === "Ingreso") {
         const { monto, descripcion, fuente, fecha_registro, id_categoria } = datos;
-        const [result] = await connection.query(
-          `INSERT INTO INGRESOS (ID_entrada, ID_categoria, Monto, Descripcion, Fuente, Fecha_registro)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO ingresos (id_entrada, id_categoria, monto, descripcion, fuente, fecha_registro)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           RETURNING id_ingresos`,
           [ID_entrada, id_categoria || null, monto, descripcion || null, fuente || null, fecha_registro || null]
         );
-        ID_detalle = result.insertId;
+        ID_detalle = result.id_ingresos;
 
       } else if (subtipo_modulo === "Ahorro") {
         const { monto, descripcion, meta, fecha_registro, fecha_meta, id_categoria } = datos;
-        const [result] = await connection.query(
-          `INSERT INTO AHORROS (ID_entrada, ID_categoria, Monto, Descripcion, Meta, Fecha_registro, Fecha_meta)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO ahorros (id_entrada, id_categoria, monto, descripcion, meta, fecha_registro, fecha_meta)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           RETURNING id_ahorros`,
           [ID_entrada, id_categoria || null, monto, descripcion || null, meta || null, fecha_registro || null, fecha_meta || null]
         );
-        ID_detalle = result.insertId;
+        ID_detalle = result.id_ahorros;
       }
 
     } else {
       // 2b. Insertar en SALIDA
-      const [salida] = await connection.query(
-        `INSERT INTO SALIDA (ID_movimiento) VALUES (?)`,
+      const { rows: [salida] } = await connection.query(
+        `INSERT INTO salida (id_movimiento) VALUES ($1) RETURNING id_salida`,
         [ID_movimiento]
       );
-      const ID_salida = salida.insertId;
+      const ID_salida = salida.id_salida;
 
       if (subtipo_modulo === "Gasto") {
         const { monto, descripcion, fecha_registro, id_categoria, id_dependientes } = datos;
-        const [result] = await connection.query(
-          `INSERT INTO GASTOS (ID_salida, ID_categoria, Monto, Descripcion, Fecha_registro, ID_dependientes)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO gastos (id_salida, id_categoria, monto, descripcion, fecha_registro, id_dependientes)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           RETURNING id_gastos`,
           [ID_salida, id_categoria || null, monto, descripcion || null, fecha_registro || null, id_dependientes || null]
         );
-        ID_detalle = result.insertId;
+        ID_detalle = result.id_gastos;
 
       } else if (subtipo_modulo === "Imprevisto") {
         const { monto, causa, fecha_registro, id_categoria, id_dependientes } = datos;
-        const [result] = await connection.query(
-          `INSERT INTO IMPREVISTOS (ID_salida, ID_categoria, Monto, Causa, Fecha_registro, ID_dependientes)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO imprevistos (id_salida, id_categoria, monto, causa, fecha_registro, id_dependientes)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           RETURNING id_imprevistos`,
           [ID_salida, id_categoria || null, monto, causa || null, fecha_registro || null, id_dependientes || null]
         );
-        ID_detalle = result.insertId;
+        ID_detalle = result.id_imprevistos;
 
       } else if (subtipo_modulo === "Deuda") {
         const { monto, fuente, descripcion, cuotas_total, fecha_inicio, fecha_fin, id_categoria } = datos;
-        const [result] = await connection.query(
-          `INSERT INTO DEUDAS (ID_salida, ID_categoria, Monto, Fuente, Descripcion, Cuotas_total, Fecha_inicio, Fecha_fin)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO deudas (id_salida, id_categoria, monto, fuente, descripcion, cuotas_total, fecha_inicio, fecha_fin)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           RETURNING id_deudas`,
           [ID_salida, id_categoria || null, monto, fuente || null, descripcion || null, cuotas_total || null, fecha_inicio || null, fecha_fin || null]
         );
-        ID_detalle = result.insertId;
+        ID_detalle = result.id_deudas;
       }
     }
 
     // 3. Confirmar la transacción
-    await connection.commit();
-
-   
-    // if (subtipo_modulo === "Ingreso") {
-    //   await actualizarIngresoReal(ID_usuario);
-    // } else if (subtipo_modulo === "Gasto") {
-    //   await verificarUmbralGastos(ID_usuario);
-    // } else if (subtipo_modulo === "Imprevisto") {
-    //   await verificarUmbralImprevistos(ID_usuario);
-    // }
+    await connection.query("COMMIT");
 
     if (subtipo_modulo === "Ingreso") {
-      await actualizarIngresoReal(ID_usuario);   // ahora llama a la versión importada, sin connection → usa pool internamente
+      await actualizarIngresoReal(ID_usuario);   // versión importada desde presupuestosController, sin connection → usa pool internamente
     } else if (subtipo_modulo === "Gasto") {
       await verificarUmbralGastos(ID_usuario);
     } else if (subtipo_modulo === "Imprevisto") {
@@ -185,14 +183,13 @@ const crearMovimiento = async (req, res) => {
 
   } catch (error) {
     // Evita llamar a rollback si la conexión falló antes de iniciar la transacción
-    if (connection) await connection.rollback();
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en crearMovimiento:", error.message);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
     if (connection) connection.release();
   }
 };
-
 
 // <==&&==·········· INGRESOS ··········==&&==>
 
