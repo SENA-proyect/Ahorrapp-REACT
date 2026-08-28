@@ -33,7 +33,7 @@
 {
   "Nombre": "juan",
   "Apellido": "medina",
-  "Email": "juanma@gmail.com",
+  "Email": "juanma1608g@gmail.com",
   "Password_hash": "123"
 }
 ```
@@ -62,7 +62,7 @@
 
 ```json
 {
-  "Email": "juanma1608@gmail.com",
+  "Email": "juanma1608g@gmail.com",
   "Password_hash": "123"
 }
 ```
