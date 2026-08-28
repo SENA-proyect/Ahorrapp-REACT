@@ -17,15 +17,15 @@ const crearNotificacion = async ({
     const activa = await preferenciaActiva(ID_usuario, Tipo);
     if (!activa) return null;
 
-    const [result] = await pool.query(
-      `INSERT INTO NOTIFICACIONES (ID_usuario, Tipo, Entidad_tipo, Entidad_id, Mensaje)
-       VALUES (?, ?, ?, ?, ?)`,
+    const { rows: result } = await pool.query(
+      `INSERT INTO notificaciones (id_usuario, tipo, entidad_tipo, entidad_id, mensaje)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id_notificacion`,
       [ID_usuario, Tipo, Entidad_tipo, Entidad_id, Mensaje.trim()]
     );
 
-    return result.insertId;
+    return result[0].id_notificacion;
   } catch (error) {
-
     console.error("Error en crearNotificacion:", error.message);
     return null;
   }
@@ -40,9 +40,9 @@ const crearNotificacion = async ({
 // ─────────────────────────────────────────────────────────────
 const existeNotificacionEntidad = async (ID_usuario, Tipo, Entidad_tipo, Entidad_id) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT ID_notificacion FROM NOTIFICACIONES
-       WHERE ID_usuario = ? AND Tipo = ? AND Entidad_tipo = ? AND Entidad_id = ?
+    const { rows } = await pool.query(
+      `SELECT id_notificacion FROM notificaciones
+       WHERE id_usuario = $1 AND tipo = $2 AND entidad_tipo = $3 AND entidad_id = $4
        LIMIT 1`,
       [ID_usuario, Tipo, Entidad_tipo, Entidad_id]
     );
@@ -58,9 +58,9 @@ const existeNotificacionEntidad = async (ID_usuario, Tipo, Entidad_tipo, Entidad
 // ─────────────────────────────────────────────────────────────
 const preferenciaActiva = async (ID_usuario, Tipo) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT Activa FROM PREFERENCIAS_NOTIFICACION
-       WHERE ID_usuario = ? AND Tipo = ?
+    const { rows } = await pool.query(
+      `SELECT activa AS "Activa" FROM preferencias_notificacion
+       WHERE id_usuario = $1 AND tipo = $2
        LIMIT 1`,
       [ID_usuario, Tipo]
     );
@@ -71,7 +71,6 @@ const preferenciaActiva = async (ID_usuario, Tipo) => {
     return true; 
   }
 };
-
 // ─────────────────────────────────────────────────────────────
 //  getPreferencias
 // ─────────────────────────────────────────────────────────────
@@ -94,12 +93,12 @@ const verificarUmbralGastos = async (ID_usuario) => {
     const { Fecha_inicio: fi, Fecha_fin: ff, Monto_gastos } = periodo;
     if (!Monto_gastos || Number(Monto_gastos) <= 0) return;
 
-    const [[gas]] = await pool.query(
-      `SELECT COALESCE(SUM(g.Monto), 0) AS total
-       FROM GASTOS g
-       JOIN SALIDA s      ON g.ID_salida      = s.ID_salida
-       JOIN MOVIMIENTOS m ON s.ID_movimiento  = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND g.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: [gas] } = await pool.query(
+      `SELECT COALESCE(SUM(g.monto), 0)::float AS total
+       FROM gastos g
+       JOIN salida s      ON g.id_salida      = s.id_salida
+       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
+       WHERE m.id_usuario = $1 AND g.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 
@@ -134,12 +133,12 @@ const verificarUmbralImprevistos = async (ID_usuario) => {
     const { Fecha_inicio: fi, Fecha_fin: ff, Monto_imprevistos } = periodo;
     if (!Monto_imprevistos || Number(Monto_imprevistos) <= 0) return;
 
-    const [[imp]] = await pool.query(
-      `SELECT COALESCE(SUM(i.Monto), 0) AS total
-       FROM IMPREVISTOS i
-       JOIN SALIDA s      ON i.ID_salida      = s.ID_salida
-       JOIN MOVIMIENTOS m ON s.ID_movimiento  = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: [imp] } = await pool.query(
+      `SELECT COALESCE(SUM(i.monto), 0)::float AS total
+       FROM imprevistos i
+       JOIN salida s      ON i.id_salida      = s.id_salida
+       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
+       WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 
@@ -176,17 +175,17 @@ const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
     const { Fecha_inicio: fi, Fecha_fin: ff, Monto_imprevistos, ID_periodo } = periodo;
     if (!Monto_imprevistos || Number(Monto_imprevistos) <= 0) return;
 
-    const [[imp]] = await pool.query(
-      `SELECT COALESCE(SUM(i.Monto), 0) AS total
-       FROM IMPREVISTOS i
-       JOIN SALIDA s      ON i.ID_salida      = s.ID_salida
-       JOIN MOVIMIENTOS m ON s.ID_movimiento  = m.ID_movimiento
-       WHERE m.ID_usuario = ? AND i.Fecha_registro BETWEEN ? AND ?`,
+    const { rows: [imp] } = await pool.query(
+      `SELECT COALESCE(SUM(i.monto), 0)::float AS total
+       FROM imprevistos i
+       JOIN salida s      ON i.id_salida      = s.id_salida
+       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
+       WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 
     const porcentaje = (Number(imp.total) / Number(Monto_imprevistos)) * 100;
-    if (porcentaje >= UMBRAL_IMPREVISTOS_NO_USADO) return; // sí se usó razonablemente
+    if (porcentaje >= UMBRAL_IMPREVISTOS_NO_USADO) return;
 
     const yaExiste = await existeNotificacionEntidad(
       ID_usuario, "sugerencia", "periodo_imprevistos_no_usado", ID_periodo
@@ -215,7 +214,7 @@ const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) 
     if (Number(montoAcumulado) < metaMonto) return;
 
     const yaExiste = await existeNotificacionEntidad(
-      ID_usuario, "alerta_presupuesto", "ahorro_meta", ahorro.ID_ahorros
+      ID_usuario, "alerta_presupuesto", "ahorro_meta", ahorro.id_ahorros
     );
     if (yaExiste) return;
 
@@ -226,7 +225,7 @@ const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) 
       Tipo: "alerta_presupuesto",
       Mensaje: `¡Felicidades! Alcanzaste ${descripcion}.`,
       Entidad_tipo: "ahorro_meta",
-      Entidad_id: ahorro.ID_ahorros,
+      Entidad_id: ahorro.id_ahorros,
     });
   } catch (error) {
     console.error("Error en verificarMetaAhorroAlcanzada:", error.message);
@@ -234,8 +233,8 @@ const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) 
 };
 
 const getPreferencias = async (ID_usuario) => {
-  const [rows] = await pool.query(
-    `SELECT Tipo, Activa FROM PREFERENCIAS_NOTIFICACION WHERE ID_usuario = ?`,
+  const { rows } = await pool.query(
+    `SELECT tipo AS "Tipo", activa AS "Activa" FROM preferencias_notificacion WHERE id_usuario = $1`,
     [ID_usuario]
   );
 
@@ -250,16 +249,17 @@ const getPreferencias = async (ID_usuario) => {
 // ─────────────────────────────────────────────────────────────
 //  setPreferencia
 // ─────────────────────────────────────────────────────────────
+// CAMBIO ESTRUCTURAL
 const setPreferencia = async (ID_usuario, Tipo, Activa) => {
   if (!TIPOS_NOTIFICACION.includes(Tipo)) {
     throw new Error(`Tipo de notificación inválido: ${Tipo}`);
   }
 
   await pool.query(
-    `INSERT INTO PREFERENCIAS_NOTIFICACION (ID_usuario, Tipo, Activa)
-     VALUES (?, ?, ?)
-     ON DUPLICATE KEY UPDATE Activa = ?`,
-    [ID_usuario, Tipo, Activa, Activa]
+    `INSERT INTO preferencias_notificacion (id_usuario, tipo, activa)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (id_usuario, tipo) DO UPDATE SET activa = EXCLUDED.activa`,
+    [ID_usuario, Tipo, Activa]
   );
 };
 
