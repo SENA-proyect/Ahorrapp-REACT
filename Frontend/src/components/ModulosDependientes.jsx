@@ -243,13 +243,15 @@ const Dependientes = () => {
               <label className={labelCls}>Nombre *</label>
               <input className={inputCls} type="text" name="Nombre" value={formDatos.Nombre} onChange={handleChange} required maxLength={NOMBRE_MAX_LENGTH} disabled={guardando} placeholder="Nombre del dependiente" />
 
+
               <label className={labelCls}>Relación *</label>
-              <select className={selectCls} style={{ colorScheme: 'dark' }} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
-                <option value="">Selecciona una relación</option>
+              <select className={`${selectCls} [&>option]:bg-zinc-800`} style={{ colorScheme: 'dark' }} name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}>
+                <option value="" className="text-zinc-500">Selecciona una relación</option>
                 {RELACIONES.map(r => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>
+              
 
               <label className={labelCls}>Ocupación</label>
               <input className={inputCls} type="text" name="Ocupacion" value={formDatos.Ocupacion} onChange={handleChange} maxLength={OCUPACION_MAX_LENGTH} disabled={guardando} placeholder="Ocupación del dependiente" />
@@ -258,7 +260,8 @@ const Dependientes = () => {
               <input className={inputCls} type="date" name="Fecha_nacimiento" value={formDatos.Fecha_nacimiento} onChange={handleChange} required max={HOY_ISO} disabled={guardando} />
 
               <label className={labelCls}>Peso Económico</label>
-              <select className={selectCls} style={{ colorScheme: 'dark' }} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} disabled={guardando}>
+              {/* <select className= name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}> */}
+              <select className={`${selectCls} [&>option]:bg-zinc-800`} style={{ colorScheme: 'dark' }} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} rquired disabled={guardando}>
                 {PESO_VALORES_VALIDOS.map(p => (
                   <option key={p} value={p}>{p} - {PESO_LABELS[p]}</option>
                 ))}
