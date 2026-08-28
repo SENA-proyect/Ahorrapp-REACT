@@ -9,21 +9,21 @@ const DIAS_AVISO_DEUDA = 5;
 // ─────────────────────────────────────────────────────────────
 const revisarDeudasPorVencer = async () => {
   try {
-    const [deudas] = await pool.query(
+    const { rows: deudas } = await pool.query(
       `SELECT
-         d.ID_deudas,
-         d.Descripcion,
-         d.Monto,
-         d.Fecha_fin,
-         m.ID_usuario
-       FROM DEUDAS d
-       INNER JOIN SALIDA s      ON d.ID_salida     = s.ID_salida
-       INNER JOIN MOVIMIENTOS m ON s.ID_movimiento = m.ID_movimiento
-       WHERE d.Estado = 'pendiente'
-         AND d.Cuotas_pagadas < d.Cuotas_total
-         AND d.Fecha_fin IS NOT NULL
-         AND d.Fecha_fin >= CURDATE()
-         AND d.Fecha_fin <= DATE_ADD(CURDATE(), INTERVAL ? DAY)`,
+         d.id_deudas AS "ID_deudas",
+         d.descripcion AS "Descripcion",
+         d.monto AS "Monto",
+         d.fecha_fin AS "Fecha_fin",
+         m.id_usuario AS "ID_usuario"
+       FROM deudas d
+       INNER JOIN salida s      ON d.id_salida     = s.id_salida
+       INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+       WHERE d.estado = 'pendiente'
+         AND d.cuotas_pagadas < d.cuotas_total
+         AND d.fecha_fin IS NOT NULL
+         AND d.fecha_fin >= CURRENT_DATE
+         AND d.fecha_fin <= CURRENT_DATE + make_interval(days => $1::int)`,
       [DIAS_AVISO_DEUDA]
     );
 
