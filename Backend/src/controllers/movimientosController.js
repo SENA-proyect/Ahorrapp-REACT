@@ -1,3 +1,5 @@
+const { actualizarIngresoReal } = require("../controllers/PresupuestosController"); //! linea agregada para prueba local
+
 const pool = require("../db/connection");
 const {
   verificarUmbralGastos,
@@ -158,8 +160,16 @@ const crearMovimiento = async (req, res) => {
     await connection.commit();
 
    
+    // if (subtipo_modulo === "Ingreso") {
+    //   await actualizarIngresoReal(ID_usuario);
+    // } else if (subtipo_modulo === "Gasto") {
+    //   await verificarUmbralGastos(ID_usuario);
+    // } else if (subtipo_modulo === "Imprevisto") {
+    //   await verificarUmbralImprevistos(ID_usuario);
+    // }
+
     if (subtipo_modulo === "Ingreso") {
-      await actualizarIngresoReal(ID_usuario);
+      await actualizarIngresoReal(ID_usuario);   // ahora llama a la versión importada, sin connection → usa pool internamente
     } else if (subtipo_modulo === "Gasto") {
       await verificarUmbralGastos(ID_usuario);
     } else if (subtipo_modulo === "Imprevisto") {
@@ -653,33 +663,33 @@ const deleteDeudas = async (req, res) => {
 //  HELPER: actualiza Ingreso_real del período activo
 //  Se llama internamente tras registrar un ingreso nuevo
 // ─────────────────────────────────────────────────────────────
-const actualizarIngresoReal = async (ID_usuario) => {
-  const { rows: periodo } = await pool.query(
-    `SELECT id_periodo, fecha_inicio, fecha_fin
-     FROM   periodos_presupuesto
-     WHERE  id_usuario = $1 AND estado = 'abierto'
-     LIMIT  1`,
-    [ID_usuario]
-  );
-  if (!periodo.length) return;
+// const actualizarIngresoReal = async (ID_usuario) => {
+//   const { rows: periodo } = await pool.query(
+//     `SELECT id_periodo, fecha_inicio, fecha_fin
+//      FROM   periodos_presupuesto
+//      WHERE  id_usuario = $1 AND estado = 'abierto'
+//      LIMIT  1`,
+//     [ID_usuario]
+//   );
+//   if (!periodo.length) return;
 
-  const { id_periodo: ID_periodo, fecha_inicio: Fecha_inicio, fecha_fin: Fecha_fin } = periodo[0];
+//   const { id_periodo: ID_periodo, fecha_inicio: Fecha_inicio, fecha_fin: Fecha_fin } = periodo[0];
 
-  const { rows: [{ total }] } = await pool.query(
-    `SELECT COALESCE(SUM(i.monto), 0)::float AS total
-     FROM   ingresos i
-     JOIN   entrada e     ON i.id_entrada    = e.id_entrada
-     JOIN   movimientos m ON e.id_movimiento = m.id_movimiento
-     WHERE  m.id_usuario     = $1
-       AND  i.fecha_registro BETWEEN $2 AND $3`,
-    [ID_usuario, Fecha_inicio, Fecha_fin]
-  );
+//   const { rows: [{ total }] } = await pool.query(
+//     `SELECT COALESCE(SUM(i.monto), 0)::float AS total
+//      FROM   ingresos i
+//      JOIN   entrada e     ON i.id_entrada    = e.id_entrada
+//      JOIN   movimientos m ON e.id_movimiento = m.id_movimiento
+//      WHERE  m.id_usuario     = $1
+//        AND  i.fecha_registro BETWEEN $2 AND $3`,
+//     [ID_usuario, Fecha_inicio, Fecha_fin]
+//   );
 
-  await pool.query(
-    `UPDATE periodos_presupuesto SET ingreso_real = $1 WHERE id_periodo = $2`,
-    [total, ID_periodo]
-  );
-};
+//   await pool.query(
+//     `UPDATE periodos_presupuesto SET ingreso_real = $1 WHERE id_periodo = $2`,
+//     [total, ID_periodo]
+//   );
+// };
 
 // ─────────────────────────────────────────────────────────────
 //  PATCH /movimientos/deudas/:id/abonar
