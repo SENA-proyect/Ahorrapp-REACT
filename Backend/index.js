@@ -39,12 +39,13 @@ app.use(express.json());
 // RUTAS
 // ================================
 app.use("/api/ai", aiRoutes);
-app.use("/api/alphaVantageRoutes", alphaVantageRoutes);
+// app.use("/api/alphaVantageRoutes", alphaVantageRoutes);
+app.use("/api", alphaVantageRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/dependientes", dependientesRoutes);
-app.use("api/exportRoutes", exportRoutes);
+app.use("/api/exportRoutes", exportRoutes);
 app.use("/api/movimientos", movimientosRoutes);
 app.use("/api/noticias", noticiasRoutes);
 app.use("/api", NotificacionesRoutes);
