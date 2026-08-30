@@ -1,3 +1,13 @@
+--? NOTAS
+--! 1 --------------------------------------------------------------
+--* EN MySQL los nombres de diversos atributos estan entan en mayusculas, esto no es un error
+--* debido a que tanto en el backend como en el frontend se tienen las referencias a corde la DB
+--* pero a causa de un bug con "dependientes" y a la migracion a PG (PostgreSQL), decidi manejar
+--* diversos valores en minuscula, caso tal con "ID_dependientes" que ahora en el codigo es "id_dependientes"
+--! 2 --------------------------------------------------------------
+--* actualmente existen dos versiones de db, la de mysql (archivo actual) identificada como
+--* schema.sql y la de postgres/supabase identificada como "supabase.sql"
+
 -- 1. Creamos la base de datos definiendo el idioma de una vez
 CREATE DATABASE IF NOT EXISTS `SEproyectoNA`
 CHARACTER SET utf8mb4

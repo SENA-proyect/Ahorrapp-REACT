@@ -99,7 +99,7 @@ const CampoDependiente = ({ inputCls, dependientes, value, onChange, placeholder
     >
       <option value="">{placeholder}</option>
       {dependientes.map(d => (
-        <option key={d.ID_dependientes} value={d.ID_dependientes}>{d.Nombre}</option>
+        <option key={d.id_dependientes} value={d.id_dependientes}>{d.Nombre}</option>
       ))}
     </select>
   </>

@@ -154,7 +154,7 @@ const getQueryConfig = (tipo) => {
       join: '',
       userField: 'dependientes.ID_usuario',
       dateField: null,
-      selectFields: 'dependientes.ID_dependientes, dependientes.Nombre, dependientes.Relacion, dependientes.Ocupacion, dependientes.Fecha_nacimiento, dependientes.Peso_economico'
+      selectFields: 'dependientes.id_dependientes, dependientes.Nombre, dependientes.Relacion, dependientes.Ocupacion, dependientes.Fecha_nacimiento, dependientes.Peso_economico'
     }
   };
   return configs[tipo];

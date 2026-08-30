@@ -56,8 +56,8 @@ export default function ModulosGastos() {
       id: g.id, monto: String(g.monto),
       descripcion: g.descripcion || '',
       fecha_registro: g.fecha ? g.fecha.slice(0, 10) : '',
-      id_categoria: g.ID_categoria || '',
-      ID_dependientes: g.ID_dependientes || '',
+      id_categoria: g.id_categoria || '',
+      id_dependientes: g.id_dependientes || '',
     })
   }
 
@@ -78,7 +78,7 @@ export default function ModulosGastos() {
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
           id_categoria: modalEditar.id_categoria || null,
-          id_dependientes: modalEditar.ID_dependientes || null,
+          id_dependientes: modalEditar.id_dependientes || null,
         }),
       })
       const data = await res.json()
@@ -110,7 +110,7 @@ export default function ModulosGastos() {
 
   const nombreDep = (id) => {
     if (!id) return null
-    const dep = dependientes.find(d => String(d.ID_dependientes) === String(id))
+    const dep = dependientes.find(d => String(d.id_dependientes) === String(id))
     return dep?.Nombre || null
   }
 
@@ -176,8 +176,8 @@ export default function ModulosGastos() {
                           <p className="font-bold text-white truncate">{g.descripcion || 'Sin descripción'}</p>
                           <p className="text-xs text-zinc-500 mt-0.5">{fmtFecha(g.fecha)}</p>
                           {g.categoria && <p className="text-xs text-zinc-500 mt-1">📂 {g.categoria}</p>}
-                          {nombreDep(g.ID_dependientes) && (
-                            <p className="text-xs text-blue-400 mt-1">👤 {nombreDep(g.ID_dependientes)}</p>
+                          {nombreDep(g.id_dependientes) && (
+                            <p className="text-xs text-blue-400 mt-1">👤 {nombreDep(g.id_dependientes)}</p>
                           )}
                         </div>
                         <p className="shrink-0 text-base font-black text-red-400">{fmt(g.monto)}</p>
@@ -206,7 +206,7 @@ export default function ModulosGastos() {
                           <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(g.fecha)}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300 max-w-[200px] truncate">{g.descripcion || '—'}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300">{g.categoria || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-blue-400">{nombreDep(g.ID_dependientes) || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-blue-400">{nombreDep(g.id_dependientes) || '—'}</td>
                           <td className="px-4 py-3 text-sm font-extrabold text-red-400">{fmt(g.monto)}</td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
@@ -263,13 +263,13 @@ export default function ModulosGastos() {
             <select
               className={selectCls}
               style={{ colorScheme: 'dark' }}
-              name="ID_dependientes"
-              value={modalEditar.ID_dependientes}
+              name="id_dependientes"
+              value={modalEditar.iddependientes}
               onChange={handleChange}
             >
               <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Ninguno (gasto propio)</option>
               {dependientes.map(d => (
-                <option key={d.ID_dependientes} value={d.ID_dependientes} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
+                <option key={d.id_dependientes} value={d.id_dependientes} style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>
                   {d.Nombre}
                 </option>
               ))}

@@ -82,7 +82,7 @@ export default function PanelDependientes() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {dependientes.map((dependiente) => (
                 <div
-                  key={dependiente.ID_dependientes}
+                  key={dependiente.id_dependientes}
                   className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex flex-col gap-4"
                 >
                   {/* Encabezado de la card: avatar, nombre, relación */}
@@ -92,7 +92,7 @@ export default function PanelDependientes() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-[#f4f1e8]">{dependiente.Nombre}</p>
-                      <p className="text-xs text-[#7d8aa8]">ID {dependiente.ID_dependientes}</p>
+                      <p className="text-xs text-[#7d8aa8]">ID {dependiente.id_dependientes}</p>
                     </div>
                     <span className="ml-auto text-xs font-medium px-2.5 py-1 rounded-md bg-[#85b7eb]/10 text-[#85b7eb]">
                       {dependiente.Relacion}

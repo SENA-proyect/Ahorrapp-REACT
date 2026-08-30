@@ -78,7 +78,7 @@ export default function ModuloAhorros() {
       meta: a.meta || '', descripcion: a.descripcion || '',
       fecha_registro: a.fecha ? a.fecha.slice(0, 10) : '',
       fecha_meta: a.fecha_meta ? a.fecha_meta.slice(0, 10) : '',
-      id_categoria: a.ID_categoria || '',
+      id_categoria: a.id_categoria || '',
     })
   }
 

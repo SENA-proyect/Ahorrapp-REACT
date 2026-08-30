@@ -13,7 +13,7 @@ const getDependientes = async (req, res) => {
   try {
     const { rows: results } = await pool.query(
       `SELECT 
-        id_dependientes AS "ID_dependientes",
+        id_dependientes,
         nombre AS "Nombre",
         relacion AS "Relacion",
         ocupacion AS "Ocupacion",
@@ -46,7 +46,7 @@ const addDependiente = async (req, res) => {
        RETURNING id_dependientes`,
       [ID_usuario, Nombre, Relacion, Ocupacion || null, Fecha_nacimiento, Peso_economico || null]
     );
-    res.status(201).json({ message: 'Dependiente agregado', id: result[0].id_dependientes });
+    res.status(201).json({ message: 'Dependiente agregado', id_dependientes: result[0].id_dependientes });
   } catch (err) {
     console.error('Error al agregar dependiente:', err);
     res.status(500).json({ error: 'Error al agregar dependiente' });

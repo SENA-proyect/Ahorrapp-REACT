@@ -86,7 +86,7 @@ const Dependientes = () => {
         const res = await fetch(`/api/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
         if (res.ok) {
           mostrarToast('Dependiente actualizado correctamente')
-          setDependientes(dependientes.map(d => d.ID_dependientes === editandoId ? { ...payload, ID_dependientes: editandoId } : d))
+          setDependientes(dependientes.map(d => d.id_dependientes === editandoId ? { ...payload, id_dependientes: editandoId } : d))
         }
         else { const data = await res.json(); alert(data.error || 'Error al actualizar') }
       } else {
@@ -94,7 +94,7 @@ const Dependientes = () => {
         const data = await res.json()
         if (res.ok) {
           mostrarToast('Dependiente registrado correctamente')
-          setDependientes([...dependientes, { ...payload, ID_dependientes: data.id }])
+          setDependientes([...dependientes, { ...payload, id_dependientes: data.id }])
         }
         else alert(data.error || 'Error al guardar')
       }
@@ -108,7 +108,7 @@ const Dependientes = () => {
 
   const handleEditar = d => {
     setFormDatos({ Nombre: d.Nombre, Relacion: d.Relacion, Ocupacion: d.Ocupacion || '', Fecha_nacimiento: d.Fecha_nacimiento ? d.Fecha_nacimiento.split('T')[0] : '', Peso_economico: String(d.Peso_economico ?? '3') })
-    setEditandoId(d.ID_dependientes)
+    setEditandoId(d.id_dependientes)
     setMostrarModal(true)
   }
 
@@ -118,7 +118,7 @@ const Dependientes = () => {
       const res = await fetch(`/api/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         mostrarToast('Dependiente eliminado correctamente')
-        setDependientes(dependientes.filter(d => d.ID_dependientes !== id))
+        setDependientes(dependientes.filter(d => d.id_dependientes !== id))
       }
       else alert('Error al eliminar el dependiente')
     } catch (error) {
@@ -181,7 +181,7 @@ const Dependientes = () => {
           ) : (
             <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
               {dependientes.map(dep => (
-                <div key={dep.ID_dependientes}
+                <div key={dep.id_dependientes}
                   className="rounded-2xl p-[18px] border border-white/[0.09] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
                   style={{ background: 'rgba(255,255,255,0.05)' }}>
 
@@ -213,7 +213,7 @@ const Dependientes = () => {
                       Editar
                     </button>
                     <button
-                      onClick={() => handleEliminar(dep.ID_dependientes)}
+                      onClick={() => handleEliminar(dep.id_dependientes)}
                       className="flex-1 py-1.5 rounded-lg text-xs font-bold cursor-pointer border border-red-400/50 bg-red-400/10 text-[#f87171] hover:bg-red-400/[0.22] transition-colors duration-150">
                       Eliminar
                     </button>

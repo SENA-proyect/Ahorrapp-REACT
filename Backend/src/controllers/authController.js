@@ -550,7 +550,7 @@ const getTodosDependientesAdmin = async (req, res) => {
 
     const { rows } = await pool.query(`
       SELECT
-        d.id_dependientes AS "ID_dependientes",
+        d.id_dependientes AS "id_dependientes",
         d.nombre AS "Nombre",
         d.relacion AS "Relacion",
         d.ocupacion AS "Ocupacion",
