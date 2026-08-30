@@ -56,7 +56,7 @@ export default function BolsaWidget() {
   // TRM
   // ─────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch('https://localhost:3000/api/bolsa/trm/usd-cop')
+    fetch('http://localhost:3000/api/bolsa/trm/usd-cop')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.trm) {
