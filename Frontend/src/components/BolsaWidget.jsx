@@ -78,7 +78,7 @@ export default function BolsaWidget() {
       await Promise.all(
         lista.map(async (accion) => {
           const res = await fetch(
-            `https://localhost:3000/api/bolsa/${accion.symbol}`
+            `http://localhost:3000/api/bolsa/${accion.symbol}`
           )
 
           const data = await res.json()
