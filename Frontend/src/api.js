@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:3000/api";
+// const API_URL = "http://localhost:3000/api";
+const API_URL = "https://ahorrapp-react.onrender.com/api";
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const authHeaders = () => ({

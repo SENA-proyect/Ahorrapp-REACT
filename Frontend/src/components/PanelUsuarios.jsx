@@ -33,7 +33,8 @@ export default function PanelUsuarios() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:3000/api/auth/PanelUsuarios",
+        // "http://localhost:3000/api/auth/PanelUsuarios",
+        "https://ahorrapp-react.onrender.com/api/auth/PanelUsuarios",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -83,7 +84,8 @@ export default function PanelUsuarios() {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:3000/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
+        // `http://localhost:3000/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
+        `https://ahorrapp-react.onrender.com/api/auth/PanelUsuarios/${usuariosSeleccionado.ID_usuario}`,
         {
           method: 'PUT',
           headers: {
@@ -128,7 +130,8 @@ export default function PanelUsuarios() {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:3000/api/auth/PanelUsuarios/${id}`,
+          // `http://localhost:3000/api/auth/PanelUsuarios/${id}`,
+          `https://ahorrapp-react.onrender.com/api/auth/PanelUsuarios/${id}`,
           {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
