@@ -11,7 +11,7 @@ const {
   eliminarNotificacion,
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
-} = require("../controllers/notificacionescontroller");
+} = require("../controllers/Notificacionescontroller");
 
 router.use(verifyToken);
 
