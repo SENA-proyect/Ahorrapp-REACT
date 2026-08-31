@@ -152,6 +152,7 @@ export default function PanelUsuarios() {
     }
   };
 
+  
   // Helper para iniciales del avatar, ej: "Maria Rodriguez" -> "MR"
   const getIniciales = (nombre, apellido) => {
     const inicialNombre = nombre ? nombre.charAt(0) : '';
