@@ -816,5 +816,64 @@ const abonarAhorro = async (req, res) => {
     if (connection) connection.release();
   }
 };
+const getCalendario = async (req, res) => {
+  try {
+    console.log('Entró a Calendario');
+
+
+    const { desde, hasta } = req.query;
+
+
+    const fechaInicio = desde || '2026-01-01';
+    const fechaFin = hasta || '2026-12-31';
+
+
+    const { rows } = await pool.query(`
+      SELECT
+        Fecha_registro AS "fecha",
+        'ingreso' AS "tipo"
+      FROM ingresos
+      WHERE Fecha_registro BETWEEN $1 AND $2
+      UNION ALL
+      SELECT
+        Fecha_registro AS "fecha",
+        'gasto' AS "tipo"
+      FROM gastos
+      WHERE Fecha_registro BETWEEN $1 AND $2
+      UNION ALL
+      SELECT
+        Fecha_registro AS "fecha",
+        'imprevisto' AS "tipo"
+      FROM imprevistos
+      WHERE Fecha_registro BETWEEN $1 AND $2
+      UNION ALL
+      SELECT
+        Fecha_registro AS "fecha",
+        'ahorro' AS "tipo"
+      FROM ahorros
+      WHERE Fecha_registro BETWEEN $1 AND $2
+      ORDER BY "fecha"
+    `, [fechaInicio, fechaFin]);
+
+
+    console.log('Movimientos del calendario encontrados:', rows);
+
+
+    return res.json({
+      ok: true,
+      calendario: rows,
+    });
+
+
+  } catch (error) {
+    console.error('Error al obtener el calendario:', error);
+
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al obtener el calendario'
+    });
+  }
+};
 
 module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas, getMovimientos, abonarDeuda, abonarAhorro };

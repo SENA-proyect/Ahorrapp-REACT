@@ -452,4 +452,19 @@ export const getTodosDependientesAdmin = async () => {
   const data = await res.json();
 
   return data.dependientes ?? data;
+
+
+}
+export const getCalendario = async () => {
+  const response = await fetch(`${API_URL}/auth/calendario`, {
+    method: "GET",
+    headers: authHeaders(),
+  }); 
+  if (!response.ok) {
+    throw new Error("Error al obtener el calendario");
+  }
+
+
+  const data = await response.json();
+  return data.calendario ?? [];
 };

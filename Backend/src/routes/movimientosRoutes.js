@@ -21,6 +21,7 @@ const {
   getMovimientos,
   abonarDeuda,
   abonarAhorro,
+  getCalendario,
 } = require("../controllers/movimientosController");
 
 
@@ -43,5 +44,6 @@ router.delete("/ahorros/:id", verifyToken, deleteAhorros);
 router.delete("/gastos/:id", verifyToken, deleteGastos);
 router.delete("/imprevistos/:id", verifyToken, deleteImprevistos);
 router.delete("/deudas/:id", verifyToken, deleteDeudas);
+router.get("/calendario", verifyToken, getCalendario);
 
 module.exports = router;
