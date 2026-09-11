@@ -749,6 +749,18 @@ const actualizarIngresoReal = async (ID_usuario, connection) => {
 };
 
 
+// Wrapper HTTP: adapta el helper interno actualizarIngresoReal(ID_usuario, connection)
+// a la firma (req, res) que espera Express. El helper original se sigue usando
+// tal cual desde movimientosController.js (llamada interna, no vía HTTP).
+const actualizarIngresoRealHandler = async (req, res) => {
+  try {
+    await actualizarIngresoReal(req.usuario.id);
+    res.status(200).json({ ok: true, mensaje: 'Ingreso real actualizado correctamente' });
+  } catch (err) {
+    res.status(500).json({ ok: false, mensaje: 'Error al actualizar ingreso real', error: err.message });
+  }
+};
+
 module.exports = {
     //* Perfiles
     listarPerfiles,
@@ -763,5 +775,6 @@ module.exports = {
     listarPeriodos,
     obtenerPeriodoActivo,
     ajustarIngresoPeriodo,
-    actualizarIngresoReal
+    actualizarIngresoReal,
+    actualizarIngresoRealHandler
 };

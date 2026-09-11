@@ -13,7 +13,7 @@ const {
     listarPeriodos,
     obtenerPeriodoActivo,
     ajustarIngresoPeriodo,
-    actualizarIngresoReal
+    actualizarIngresoRealHandler
 } = require("../controllers/PresupuestosController");
 
 // ── Perfiles de presupuesto ──────────────────────────────────
@@ -23,7 +23,7 @@ router.get   ("/periodos/activo",          verifyToken, obtenerPeriodoActivo);
 router.post  ("/periodos/abrir",           verifyToken, abrirPeriodo);
 router.put   ("/periodos/cerrar",          verifyToken, cerrarPeriodo);
 router.patch ("/periodos/ajustar-ingreso", verifyToken, ajustarIngresoPeriodo);
-router.patch ("/periodos/actualizar-ingreso", verifyToken, actualizarIngresoReal);
+router.patch ("/periodos/actualizar-ingreso", verifyToken, actualizarIngresoRealHandler);
 router.get   ("/:id",                      verifyToken, obtenerPerfil);
 router.post  ("/",                         verifyToken, crearPerfil);
 router.put   ("/:id",                      verifyToken, editarPerfil);
