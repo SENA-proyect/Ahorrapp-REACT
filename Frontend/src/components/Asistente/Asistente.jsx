@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../../styles/asistente.css';
-import { getResumenFinancieroBreve } from '../../api';
+import { getResumenFinancieroBreve, API_URL } from '../../services/api';
 
 const Asistente = () => {
   const [visible, setVisible] = useState(false);
@@ -27,7 +27,7 @@ const Asistente = () => {
     try {
       const contextoFinanciero = await getResumenFinancieroBreve();
 
-      const response = await fetch('/api/ai/chat', {
+      const response = await fetch(`${API_URL}/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
