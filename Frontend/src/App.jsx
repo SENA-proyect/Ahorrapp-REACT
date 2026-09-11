@@ -1,58 +1,58 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './components/AuthContext.jsx';
-import { ToastProvider } from './components/ToastContext.jsx';
-import { NotificacionesProvider } from './components/NotificacionesContext.jsx';
-import { ProtectedRoute } from './components/ProtectedRoute.jsx';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { NotificacionesProvider } from './context/NotificacionesContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 
 
 // ====================================================
-// Componentes públicos
+// Páginas públicas
 // ====================================================
-import ConfirmacionCambioContrasena from './components/IngresoNuevaContrasena.jsx'
-import Index from './components/Index.jsx';
-import Login from './components/Login.jsx';
-import OlvidarContrasena from './components/OlvidarContrasena.jsx';
-import VerificacionCorreo from './components/VerificacionCorreo.jsx';
-import IngresoNuevaContrasena from './components/IngresoNuevaContrasena.jsx';
+import ConfirmacionCambioContrasena from './pages/ConfirmacionCambioContrasena.jsx'
+import Index from './pages/Index.jsx';
+import Login from './pages/Login.jsx';
+import OlvidarContrasena from './pages/OlvidarContrasena.jsx';
+import VerificacionCorreo from './pages/VerificacionCorreo.jsx';
+import IngresoNuevaContrasena from './pages/IngresoNuevaContrasena.jsx';
 
 // ====================================================
-// Componentes protegidos (requieren sesión)
+// Páginas protegidas (requieren sesión)
 // ====================================================
-import Dashboard from './components/Dashboard.jsx';
-import IndexLogeado from './components/IndexLogeado.jsx'
-import ModuloAhorros from './components/ModuloAhorros.jsx';
-import ModuloDeudas from './components/ModuloDeudas.jsx';
-import ModuloImprevistos from './components/ModuloImprevistos.jsx';
-import ModulosCategorias from './components/ModulosCategorias.jsx';
-import ModulosDependientes from './components/ModulosDependientes.jsx';
-import ModulosGastos from './components/ModulosGastos.jsx';
-import ModulosIngresos from './components/ModulosIngresos.jsx';
-import VMIDependientes from './components/VM_I-Dependientes.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import IndexLogeado from './pages/IndexLogeado.jsx'
+import ModuloAhorros from './pages/ModuloAhorros.jsx';
+import ModuloDeudas from './pages/ModuloDeudas.jsx';
+import ModuloImprevistos from './pages/ModuloImprevistos.jsx';
+import ModulosCategorias from './pages/ModulosCategorias.jsx';
+import ModulosDependientes from './pages/ModulosDependientes.jsx';
+import ModulosGastos from './pages/ModulosGastos.jsx';
+import ModulosIngresos from './pages/ModulosIngresos.jsx';
 import Asistente from './components/Asistente/Asistente';
-import Noticias from './components/Noticias';
-import Export from "./components/exportar.jsx"
-import ModulosPresupuestos from './components/ModulosPresupuestos.jsx'
-import Configuracion from './components/Configuracion.jsx'
+import Noticias from './pages/Noticias.jsx';
+import Export from "./pages/exportar.jsx"
+import ModulosPresupuestos from './pages/ModulosPresupuestos.jsx'
+import Configuracion from './pages/Configuracion.jsx'
+import Reportes from './pages/reportes.jsx'
 
 // ______________________________________________________________________________________________________________________________________________________________________
 // ruta del archivo corregida debido a actualizacion de la logica al registrar un movimiento para los modulos financieros
 // import FormMovimiento from './components/movimientos/FormMovimientos.jsx';
-import Modalnuevomovimiento from './components/Modalnuevomovimiento.jsx';
+import Modalnuevomovimiento from './components/Modalnuevomovimiento';
 // ______________________________________________________________________________________________________________________________________________________________________
 
 
 // ====================================================
-// Componentes de ADMIN (requieren admin o superuser)
+// Páginas de ADMIN (requieren admin o superuser)
 // ====================================================
-import PanelAdmin from './components/PanelAdmin.jsx';
-import PanelDependientes from './components/PanelDependientes.jsx';
-import PanelHistorial from './components/PanelHistorial.jsx';
-import PanelMovimientos from './components/PanelMovimientos.jsx';
-import PanelUsuarios from './components/PanelUsuarios.jsx';
+import PanelAdmin from './pages/PanelAdmin.jsx';
+import PanelDependientes from './pages/PanelDependientes.jsx';
+import PanelHistorial from './pages/PanelHistorial.jsx';
+import PanelMovimientos from './pages/PanelMovimientos.jsx';
+import PanelUsuarios from './pages/PanelUsuarios.jsx';
 
-// Componente para acceso denegado
-import Unauthorized from './components/Unauthorized.jsx';
+// Página de acceso denegado
+import Unauthorized from './pages/Unauthorized.jsx';
 
 // Muestra el Asistente solo si hay sesión activa, sin redirigir nunca la URL
 function AsistenteFlotante() {
@@ -167,15 +167,15 @@ function App() {
             } 
           />
           
-          <Route 
-            path="/VM_I-Dependientes" 
+          <Route
+            path="/Reportes"
             element={
               <ProtectedRoute>
-                <VMIDependientes />
+                <Reportes />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           <Route 
             path="/noticias" 
             element={
