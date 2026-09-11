@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useNotificaciones } from './NotificacionesContext'
+import { useNotificaciones } from '../context/NotificacionesContext'
 
 const navItems = [
   { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
@@ -13,7 +13,8 @@ const navItems = [
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
   { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
   { href: '/Noticias', emoji: '📰', label: 'Noticias' },
-  // { href: '/Exportar', emoji: '📈', label: 'Reportes' },
+  { href: '/Reportes', emoji: '📈', label: 'Reportes' },
+  { href: '/exportar', emoji: '📤', label: 'Exportar' },
 ]
 
 export default function HeaderModulos({ section = 'Dashboard' }) {
@@ -52,7 +53,7 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
   const handleLogout = () => { 
     localStorage.clear();
     sessionStorage.clear();
-    window.location.replace('/login');
+    window.location.replace('/Login');
   }
   return (
     <header className="relative z-10 w-full flex flex-col items-center pt-4 sm:pt-5">

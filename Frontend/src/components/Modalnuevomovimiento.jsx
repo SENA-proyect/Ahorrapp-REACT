@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { getCategorias, getDependientes } from '../api'
-import { useToast } from './ToastContext'
-import { useNotificaciones } from './NotificacionesContext'
+import { getCategorias, getDependientes } from '../services/api'
+import { useToast } from '../context/ToastContext'
+import { useNotificaciones } from '../context/NotificacionesContext'
 
 // const API = 'http://localhost:3000/api/movimientos'
 const API = 'https://ahorrapp-react.onrender.com/api/movimientos'

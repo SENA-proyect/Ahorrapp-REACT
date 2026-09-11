@@ -6,9 +6,9 @@ import {
   marcarTodasNotificacionesLeidas,
   archivarNotificacion,
   eliminarNotificacion,
-} from '../api'
-import { useToast } from './ToastContext'
-import { useNotificaciones } from './NotificacionesContext'
+} from '../services/api'
+import { useToast } from '../context/ToastContext'
+import { useNotificaciones } from '../context/NotificacionesContext'
 
 const ICONO_POR_TIPO = {
   sistema: '⚙️',

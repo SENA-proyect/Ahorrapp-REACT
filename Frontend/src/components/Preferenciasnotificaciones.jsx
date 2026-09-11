@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { getPreferenciasNotificacion, actualizarPreferenciasNotificacion } from '../api'
-import { useToast } from './ToastContext'
+import { getPreferenciasNotificacion, actualizarPreferenciasNotificacion } from '../services/api'
+import { useToast } from '../context/ToastContext'
 
 const INFO_TIPOS = {
   sistema: {
