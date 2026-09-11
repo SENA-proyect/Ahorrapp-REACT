@@ -1,0 +1,120 @@
+/* ============================================================
+   ESTILOS GLOBALES
+   Clases reutilizadas en 2 o más vistas (modales informativos,
+   paneles de administración). Los estilos muy puntuales de una
+   sola vista se quedan dentro de esa vista, como ya estaban.
+   ============================================================ */
+
+/* ── Modal genérico (usado por los modales de info: Dashboard,
+      Actividad, Dependientes) ─────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 16, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #0d1526;
+  border: 1px solid rgba(224, 184, 85, 0.15);
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+  color: #f4f1e8;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.modal h2.h2Modal {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #e0b855;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.modal p {
+  font-size: 0.9rem;
+  color: #b7c0d8;
+  line-height: 1.5;
+}
+
+.modal hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 1rem 0;
+}
+
+.modal ul {
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.modal ul li {
+  font-size: 0.85rem;
+  color: #cdd5e8;
+}
+
+.btn-modal {
+  width: 100%;
+  padding: 0.9rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #080c18;
+  background: linear-gradient(135deg, #e0b855, #c9a84c);
+  transition: opacity 0.2s ease;
+}
+
+.btn-modal:hover {
+  opacity: 0.9;
+}
+
+/* ── Contenedores de paneles informativos (PanelHistorial y
+      similares) ───────────────────────────────────────────── */
+.inf-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  color: #f4f1e8;
+}
+
+.inf-container h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+.inf-listas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.general-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+}
+
+.general-card p {
+  font-size: 0.85rem;
+  color: #c3cadd;
+  margin: 0.15rem 0;
+}
+
+.log-card .txt-accion {
+  color: #e0b855;
+  font-weight: 600;
+}
