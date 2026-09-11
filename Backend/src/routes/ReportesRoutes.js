@@ -3,31 +3,113 @@ const router = express.Router();
 
 const {
   getReporteResumen,
-  getReporteGastosPorCategoria,
-  getReporteMovimientos
+  getGastosPorCategoria,
+  getGastosPorDependiente,
+  getIngresosPorCategoria,
+  getIngresosPorFuente,
+  getReporteAhorros,
+  getReporteDeudas,
+  getImprevistosPorCategoria,
+  getReporteFondoEmergencia,
+  getReportePresupuesto,
+  getEvolucionTemporal,
+  getEstadoAhorros,
+  getEstadoDeudas,
+  getEstadoFondoEmergencia
 } = require("../controllers/ReportesController");
-
 const authMiddleware = require("../middleware/authMiddleware");
 
-// Resumen financiero
+
 router.get(
   "/resumen",
   authMiddleware,
   getReporteResumen
 );
 
-// Gastos por categoría
+
 router.get(
-  "/gastos-categoria",
+  "/gastos/categorias",
   authMiddleware,
-  getReporteGastosPorCategoria
+  getGastosPorCategoria
 );
 
-// Movimientos del período
+
 router.get(
-  "/movimientos",
+  "/gastos/dependientes",
   authMiddleware,
-  getReporteMovimientos
+  getGastosPorDependiente
+);
+
+
+router.get(
+  "/ingresos/categorias",
+  authMiddleware,
+  getIngresosPorCategoria
+);
+
+
+router.get(
+  "/ingresos/fuentes",
+  authMiddleware,
+  getIngresosPorFuente
+);
+
+
+router.get(
+  "/ahorros",
+  authMiddleware,
+  getReporteAhorros
+);
+
+
+router.get(
+  "/deudas",
+  authMiddleware,
+  getReporteDeudas
+);
+
+
+router.get(
+  "/imprevistos/categorias",
+  authMiddleware,
+  getImprevistosPorCategoria
+);
+
+
+router.get(
+  "/fondo-emergencia",
+  authMiddleware,
+  getReporteFondoEmergencia
+);
+
+router.get(
+  "/presupuesto/:id_periodo",
+  authMiddleware,
+  getReportePresupuesto
+);
+
+router.get(
+  "/evolucion",
+  authMiddleware,
+  getEvolucionTemporal
+);
+
+router.get(
+  "/ahorros/estado",
+  authMiddleware,
+  getEstadoAhorros
+);
+
+router.get(
+  "/deudas/estado",
+  authMiddleware,
+  getEstadoDeudas
+);
+
+router.get(
+  "/fondo-emergencia/estado",
+  authMiddleware,
+  getEstadoFondoEmergencia
 );
 
 module.exports = router;
