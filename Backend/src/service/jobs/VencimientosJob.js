@@ -20,7 +20,7 @@ const revisarDeudasPorVencer = async () => {
        INNER JOIN salida s      ON d.id_salida     = s.id_salida
        INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
        WHERE d.estado = 'pendiente'
-         AND d.cuotas_pagadas < d.cuotas_total
+         AND (d.cuotas_total IS NULL OR d.cuotas_pagadas < d.cuotas_total)
          AND d.fecha_fin IS NOT NULL
          AND d.fecha_fin >= CURRENT_DATE
          AND d.fecha_fin <= CURRENT_DATE + make_interval(days => $1::int)`,
