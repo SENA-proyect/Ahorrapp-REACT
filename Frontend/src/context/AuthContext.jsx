@@ -1,4 +1,4 @@
-// src/AuthContext.jsx
+// src/context/AuthContext.jsx
 import { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -27,6 +27,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
   };
 
   const value = {

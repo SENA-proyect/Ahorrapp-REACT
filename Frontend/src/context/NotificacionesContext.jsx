@@ -1,7 +1,7 @@
-// src/components/NotificacionesContext.jsx
+// src/context/NotificacionesContext.jsx
 import { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from './AuthContext';
-import { getNoLeidasCount, getNotificaciones } from '../api';
+import { useAuth } from '../context/AuthContext';
+import { getNoLeidasCount, getNotificaciones } from '../services/api';
 
 const NotificacionesContext = createContext();
 
