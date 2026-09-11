@@ -493,3 +493,190 @@ export const getTodosDependientesAdmin = async () => {
 
   return data.dependientes ?? data;
 };
+
+
+// ── Reportes ────────────────────────────────────────────────────────────────
+
+const paramsFechaReporte = (fechaInicio, fechaFin) => {
+  const params = new URLSearchParams();
+
+  if (fechaInicio) {
+    params.append("fecha_inicio", fechaInicio);
+  }
+
+  if (fechaFin) {
+    params.append("fecha_fin", fechaFin);
+  }
+
+  return params.toString();
+};
+
+export const getReporteResumen = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/resumen${query ? `?${query}` : ""}`
+  );
+};
+
+export const getReporteGastosCategorias = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/gastos/categorias${query ? `?${query}` : ""}`
+  );
+};
+
+export const getReporteGastosDependientes = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/gastos/dependientes${query ? `?${query}` : ""}`
+  );
+};
+
+export const getReporteIngresosCategorias = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/ingresos/categorias${query ? `?${query}` : ""}`
+  );
+};
+
+export const getReporteIngresosFuentes = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/ingresos/fuentes${query ? `?${query}` : ""}`
+  );
+};
+
+export const getReporteAhorros = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/ahorros${query ? `?${query}` : ""}`
+  );
+};
+
+export const getEstadoAhorros = async () => {
+  return fetchJSON(`${API_URL}/reportes/ahorros/estado`);
+};
+
+export const getReporteDeudas = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/deudas${query ? `?${query}` : ""}`
+  );
+};
+
+export const getEstadoDeudas = async () => {
+  return fetchJSON(`${API_URL}/reportes/deudas/estado`);
+};
+
+export const getReporteImprevistosCategorias = async (
+  fechaInicio,
+  fechaFin
+) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/imprevistos/categorias${query ? `?${query}` : ""}`
+  );
+};
+
+export const getReporteFondoEmergencia = async (
+  fechaInicio,
+  fechaFin
+) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/fondo-emergencia${query ? `?${query}` : ""}`
+  );
+};
+
+export const getEstadoFondoEmergencia = async () => {
+  return fetchJSON(`${API_URL}/reportes/fondo-emergencia/estado`);
+};
+
+export const getReportePresupuesto = async (idPeriodo) => {
+  if (!idPeriodo) return null;
+
+  return fetchJSON(
+    `${API_URL}/reportes/presupuesto/${idPeriodo}`
+  );
+};
+
+export const getReporteEvolucion = async (fechaInicio, fechaFin) => {
+  const query = paramsFechaReporte(fechaInicio, fechaFin);
+
+  return fetchJSON(
+    `${API_URL}/reportes/evolucion${query ? `?${query}` : ""}`
+  );
+};
+
+export const obtenerInformeCompleto = async ({
+  fechaInicio,
+  fechaFin,
+  idPeriodo = null,
+}) => {
+  const [
+    resumen,
+    gastosCategoria,
+    gastosDependiente,
+    ingresosCategoria,
+    ingresosFuente,
+    ahorros,
+    deudas,
+    imprevistosCategoria,
+    fondoEmergencia,
+    evolucion,
+    estadoAhorros,
+    estadoDeudas,
+    estadoFondoEmergencia,
+  ] = await Promise.all([
+    getReporteResumen(fechaInicio, fechaFin),
+    getReporteGastosCategorias(fechaInicio, fechaFin),
+    getReporteGastosDependientes(fechaInicio, fechaFin),
+    getReporteIngresosCategorias(fechaInicio, fechaFin),
+    getReporteIngresosFuentes(fechaInicio, fechaFin),
+    getReporteAhorros(fechaInicio, fechaFin),
+    getReporteDeudas(fechaInicio, fechaFin),
+    getReporteImprevistosCategorias(fechaInicio, fechaFin),
+    getReporteFondoEmergencia(fechaInicio, fechaFin),
+    getReporteEvolucion(fechaInicio, fechaFin),
+    getEstadoAhorros(),
+    getEstadoDeudas(),
+    getEstadoFondoEmergencia(),
+  ]);
+
+  let presupuesto = null;
+
+  if (idPeriodo) {
+    presupuesto = await getReportePresupuesto(idPeriodo);
+  }
+
+  return {
+    resumen,
+    gastosCategoria,
+    gastosDependiente,
+    ingresosCategoria,
+    ingresosFuente,
+    ahorros,
+    deudas,
+    imprevistosCategoria,
+    fondoEmergencia,
+    evolucion,
+    estadoAhorros,
+    estadoDeudas,
+    estadoFondoEmergencia,
+    presupuesto,
+    periodo: {
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      id_periodo: idPeriodo,
+    },
+  };
+};
