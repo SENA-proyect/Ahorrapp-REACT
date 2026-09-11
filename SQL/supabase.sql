@@ -373,6 +373,26 @@ CREATE TABLE IF NOT EXISTS entrada (
         ON DELETE CASCADE
 );
 
+-- VALIDACIÓN: solo movimientos con tipo_flujo = 'Entrada' pueden tener fila en 'entrada'
+CREATE OR REPLACE FUNCTION validar_flujo_entrada()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM movimientos m
+        WHERE m.id_movimiento = NEW.id_movimiento
+          AND m.tipo_flujo = 'Entrada'
+    ) THEN
+        RAISE EXCEPTION 'El movimiento % no tiene tipo_flujo = Entrada', NEW.id_movimiento;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validar_flujo_entrada ON entrada;
+CREATE TRIGGER trg_validar_flujo_entrada
+BEFORE INSERT OR UPDATE ON entrada
+FOR EACH ROW EXECUTE FUNCTION validar_flujo_entrada();
+
 
 -- 2. TABLA AHORROS
 CREATE TABLE IF NOT EXISTS ahorros (
@@ -383,14 +403,17 @@ CREATE TABLE IF NOT EXISTS ahorros (
     monto_acumulado DECIMAL(15,2) NOT NULL DEFAULT 0.00,
     descripcion VARCHAR(255),
     meta VARCHAR(100),
-    fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+    fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE, 
     fecha_meta DATE,
 
     CONSTRAINT chk_monto
-        CHECK (monto >= 0),
+    CHECK (monto > 0),
 
     CONSTRAINT chk_acumulado
-        CHECK (monto_acumulado >= 0),
+    CHECK (
+        monto_acumulado >= 0
+        AND monto_acumulado <= monto
+    ),
 
     CONSTRAINT chk_fechas
         CHECK (
@@ -407,23 +430,42 @@ CREATE TABLE IF NOT EXISTS ahorros (
         ON DELETE SET NULL
 );
 
+-- VALIDACIÓN: la entrada referenciada debe pertenecer a un movimiento subtipo 'Ahorro'
+CREATE OR REPLACE FUNCTION validar_subtipo_ahorros()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM entrada e
+        JOIN movimientos m ON m.id_movimiento = e.id_movimiento
+        WHERE e.id_entrada = NEW.id_entrada
+          AND m.subtipo_modulo = 'Ahorro'
+    ) THEN
+        RAISE EXCEPTION 'La entrada % no corresponde a un movimiento subtipo Ahorro', NEW.id_entrada;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validar_subtipo_ahorros ON ahorros;
+CREATE TRIGGER trg_validar_subtipo_ahorros
+BEFORE INSERT OR UPDATE ON ahorros
+FOR EACH ROW EXECUTE FUNCTION validar_subtipo_ahorros();
+
 -- 3. TABLA ABONOS_AHORRO
 CREATE TABLE IF NOT EXISTS abonos_ahorro (
     id_abono SERIAL PRIMARY KEY,
     id_ahorros INT NOT NULL,
-    id_usuario INT NOT NULL,
     monto DECIMAL(15,2) NOT NULL,
     fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
 
     CONSTRAINT chk_abono_monto
         CHECK (monto > 0),
 
+        
+
     FOREIGN KEY (id_ahorros)
         REFERENCES ahorros(id_ahorros)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuarios(id_usuario)
         ON DELETE CASCADE
 );
 
@@ -438,7 +480,7 @@ CREATE TABLE IF NOT EXISTS ingresos (
     fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
 
     CONSTRAINT chk_monto_ingreso
-        CHECK (monto >= 0),
+        CHECK (monto > 0),
 
     FOREIGN KEY (id_entrada)
         REFERENCES entrada(id_entrada)
@@ -449,6 +491,28 @@ CREATE TABLE IF NOT EXISTS ingresos (
         ON DELETE SET NULL
 );
 
+-- VALIDACIÓN: la entrada referenciada debe pertenecer a un movimiento subtipo 'Ingreso'
+CREATE OR REPLACE FUNCTION validar_subtipo_ingresos()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM entrada e
+        JOIN movimientos m ON m.id_movimiento = e.id_movimiento
+        WHERE e.id_entrada = NEW.id_entrada
+          AND m.subtipo_modulo = 'Ingreso'
+    ) THEN
+        RAISE EXCEPTION 'La entrada % no corresponde a un movimiento subtipo Ingreso', NEW.id_entrada;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validar_subtipo_ingresos ON ingresos;
+CREATE TRIGGER trg_validar_subtipo_ingresos
+BEFORE INSERT OR UPDATE ON ingresos
+FOR EACH ROW EXECUTE FUNCTION validar_subtipo_ingresos();
+
 -- ÍNDICES DE RENDIMIENTO
 CREATE INDEX IF NOT EXISTS idx_ahorros_entrada
 ON ahorros (id_entrada);
@@ -458,9 +522,6 @@ ON ahorros (id_categoria);
 
 CREATE INDEX IF NOT EXISTS idx_abonos_ahorro
 ON abonos_ahorro (id_ahorros);
-
-CREATE INDEX IF NOT EXISTS idx_abonos_usuario
-ON abonos_ahorro (id_usuario);
 
 CREATE INDEX IF NOT EXISTS idx_ingresos_entrada
 ON ingresos (id_entrada);
@@ -502,6 +563,26 @@ CREATE TABLE IF NOT EXISTS salida (
         ON DELETE CASCADE
 );
 
+-- VALIDACIÓN: solo movimientos con tipo_flujo = 'Salida' pueden tener fila en 'salida'
+CREATE OR REPLACE FUNCTION validar_flujo_salida()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM movimientos m
+        WHERE m.id_movimiento = NEW.id_movimiento
+          AND m.tipo_flujo = 'Salida'
+    ) THEN
+        RAISE EXCEPTION 'El movimiento % no tiene tipo_flujo = Salida', NEW.id_movimiento;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validar_flujo_salida ON salida;
+CREATE TRIGGER trg_validar_flujo_salida
+BEFORE INSERT OR UPDATE ON salida
+FOR EACH ROW EXECUTE FUNCTION validar_flujo_salida();
+
 -- 3. TABLA GASTOS
 CREATE TABLE IF NOT EXISTS gastos (
     id_gastos SERIAL PRIMARY KEY,
@@ -513,7 +594,7 @@ CREATE TABLE IF NOT EXISTS gastos (
     fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
 
     CONSTRAINT chk_monto_gasto
-        CHECK (monto >= 0),
+        CHECK (monto > 0),
 
     FOREIGN KEY (id_salida)
         REFERENCES salida(id_salida)
@@ -527,6 +608,28 @@ CREATE TABLE IF NOT EXISTS gastos (
         REFERENCES dependientes(id_dependientes)
         ON DELETE SET NULL
 );
+
+-- VALIDACIÓN: la salida referenciada debe pertenecer a un movimiento subtipo 'Gasto'
+CREATE OR REPLACE FUNCTION validar_subtipo_gastos()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM salida s
+        JOIN movimientos m ON m.id_movimiento = s.id_movimiento
+        WHERE s.id_salida = NEW.id_salida
+          AND m.subtipo_modulo = 'Gasto'
+    ) THEN
+        RAISE EXCEPTION 'La salida % no corresponde a un movimiento subtipo Gasto', NEW.id_salida;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validar_subtipo_gastos ON gastos;
+CREATE TRIGGER trg_validar_subtipo_gastos
+BEFORE INSERT OR UPDATE ON gastos
+FOR EACH ROW EXECUTE FUNCTION validar_subtipo_gastos();
 
 -- 4. TABLA IMPREVISTOS
 CREATE TABLE IF NOT EXISTS imprevistos (
@@ -539,7 +642,7 @@ CREATE TABLE IF NOT EXISTS imprevistos (
     fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
 
     CONSTRAINT chk_monto_imprevisto
-        CHECK (monto >= 0),
+        CHECK (monto > 0),
 
     FOREIGN KEY (id_salida)
         REFERENCES salida(id_salida)
@@ -553,6 +656,28 @@ CREATE TABLE IF NOT EXISTS imprevistos (
         REFERENCES dependientes(id_dependientes)
         ON DELETE SET NULL
 );
+
+-- VALIDACIÓN: la salida referenciada debe pertenecer a un movimiento subtipo 'Imprevisto'
+CREATE OR REPLACE FUNCTION validar_subtipo_imprevistos()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM salida s
+        JOIN movimientos m ON m.id_movimiento = s.id_movimiento
+        WHERE s.id_salida = NEW.id_salida
+          AND m.subtipo_modulo = 'Imprevisto'
+    ) THEN
+        RAISE EXCEPTION 'La salida % no corresponde a un movimiento subtipo Imprevisto', NEW.id_salida;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validar_subtipo_imprevistos ON imprevistos;
+CREATE TRIGGER trg_validar_subtipo_imprevistos
+BEFORE INSERT OR UPDATE ON imprevistos
+FOR EACH ROW EXECUTE FUNCTION validar_subtipo_imprevistos();
 
 -- 5. TABLA DEUDAS
 CREATE TABLE IF NOT EXISTS deudas (
@@ -600,6 +725,54 @@ CREATE TABLE IF NOT EXISTS deudas (
         REFERENCES categorias(id_categoria)
         ON DELETE SET NULL
 );
+
+-- VALIDACIÓN: la salida referenciada debe pertenecer a un movimiento subtipo 'Deuda'
+CREATE OR REPLACE FUNCTION validar_subtipo_deudas()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM salida s
+        JOIN movimientos m ON m.id_movimiento = s.id_movimiento
+        WHERE s.id_salida = NEW.id_salida
+          AND m.subtipo_modulo = 'Deuda'
+    ) THEN
+        RAISE EXCEPTION 'La salida % no corresponde a un movimiento subtipo Deuda', NEW.id_salida;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validar_subtipo_deudas ON deudas;
+CREATE TRIGGER trg_validar_subtipo_deudas
+BEFORE INSERT OR UPDATE ON deudas
+FOR EACH ROW EXECUTE FUNCTION validar_subtipo_deudas();
+
+-- ========================================================================
+-- 1. TABLA ABONOS DE DEUDA
+-- Registra cada pago realizado sobre una deuda.
+-- ========================================================================
+
+CREATE TABLE IF NOT EXISTS abonos_deuda (
+    id_abono_deuda SERIAL PRIMARY KEY,
+    id_deudas INT NOT NULL,
+    cuotas INT NOT NULL DEFAULT 1,
+    monto DECIMAL(15,2) NOT NULL,
+    fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+    descripcion VARCHAR(255),
+
+    CONSTRAINT chk_abono_deuda_cuotas
+        CHECK (cuotas > 0),
+
+    CONSTRAINT chk_abono_deuda_monto
+        CHECK (monto > 0),
+
+    FOREIGN KEY (id_deudas)
+        REFERENCES deudas(id_deudas)
+        ON DELETE CASCADE
+);
+
+
 
 -- ÍNDICES DE RENDIMIENTO
 CREATE INDEX IF NOT EXISTS idx_gastos_salida
@@ -683,11 +856,26 @@ CREATE TABLE IF NOT EXISTS presupuestos (
     CONSTRAINT chk_porcentaje_emergencia
         CHECK (porcentaje_emergencia BETWEEN 0 AND 100),
 
+    
+    CONSTRAINT chk_porcentajes_total
+        CHECK (
+            porcentaje_gastos
+            + porcentaje_deudas
+            + porcentaje_imprevistos
+            + porcentaje_ahorros
+            + porcentaje_emergencia = 100
+        ),          
+
 
     FOREIGN KEY (id_usuario)
         REFERENCES usuarios(id_usuario)
         ON DELETE CASCADE
 );
+
+-- ÍNDICE ÚNICO: solo un presupuesto activo por usuario a la vez
+CREATE UNIQUE INDEX IF NOT EXISTS idx_presupuesto_activo_unico
+ON presupuestos (id_usuario)
+WHERE activo = TRUE;
 
 -- 3. FUNCIÓN Y TRIGGER PARA ACTUALIZAR fecha_actualizacion
 CREATE OR REPLACE FUNCTION actualizar_fecha_presupuesto()
@@ -759,6 +947,7 @@ CREATE TABLE IF NOT EXISTS periodos_presupuesto (
 
     CONSTRAINT chk_emergencia_pos
         CHECK (monto_emergencia >= 0),
+      
 
     FOREIGN KEY (id_presupuesto)
         REFERENCES presupuestos(id_presupuesto)
@@ -862,3 +1051,122 @@ ON notificaciones (id_usuario, leida, archivada);
 
 CREATE INDEX IF NOT EXISTS idx_notif_entidad
 ON notificaciones (entidad_tipo, entidad_id, tipo);
+
+-- ===============================================================
+-- TABLA DE FONDOS DE EMERGENCIA
+-- ===============================================================
+
+CREATE TABLE IF NOT EXISTS fondos_emergencia (
+    id_fondo SERIAL PRIMARY KEY,
+    id_usuario INT NOT NULL UNIQUE,
+    meta DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
+    fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_meta_fondo_emergencia
+        CHECK (meta >= 0),
+
+    FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON DELETE CASCADE
+);
+-- ========================================================================
+-- 3. ENUM PARA LOS MOVIMIENTOS DEL FONDO DE EMERGENCIA
+-- ========================================================================
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_type
+        WHERE typname = 'tipo_movimiento_fondo_enum'
+    ) THEN
+        CREATE TYPE tipo_movimiento_fondo_enum AS ENUM (
+            'aporte',
+            'retiro'
+        );
+    END IF;
+END
+$$;
+
+
+-- ========================================================================
+-- 4. TABLA MOVIMIENTOS DEL FONDO DE EMERGENCIA
+-- Registra aportes y retiros del fondo.
+-- ========================================================================
+
+CREATE TABLE IF NOT EXISTS movimientos_fondo_emergencia (
+    id_movimiento_fondo SERIAL PRIMARY KEY,
+    id_fondo INT NOT NULL,
+    tipo tipo_movimiento_fondo_enum NOT NULL,
+    monto DECIMAL(15,2) NOT NULL,
+    fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+    descripcion VARCHAR(255),
+
+    CONSTRAINT chk_monto_movimiento_fondo
+        CHECK (monto > 0),
+
+    FOREIGN KEY (id_fondo)
+        REFERENCES fondos_emergencia(id_fondo)
+        ON DELETE CASCADE
+);
+
+
+-- ========================================================================
+-- ÍNDICES DE RENDIMIENTO
+-- ========================================================================
+
+CREATE INDEX IF NOT EXISTS idx_abonos_deuda_deuda
+ON abonos_deuda (id_deudas);
+
+CREATE INDEX IF NOT EXISTS idx_abonos_deuda_fecha
+ON abonos_deuda (fecha_registro);
+
+CREATE INDEX IF NOT EXISTS idx_fondos_emergencia_usuario
+ON fondos_emergencia (id_usuario);
+
+CREATE INDEX IF NOT EXISTS idx_movimientos_fondo_fondo
+ON movimientos_fondo_emergencia (id_fondo);
+
+CREATE INDEX IF NOT EXISTS idx_movimientos_fondo_fecha
+ON movimientos_fondo_emergencia (fecha_registro);
+
+CREATE INDEX IF NOT EXISTS idx_movimientos_fondo_tipo
+ON movimientos_fondo_emergencia (tipo);
+
+
+-- ========================================================================
+-- SEGURIDAD: ROW LEVEL SECURITY (RLS)
+-- ========================================================================
+-- Se activa RLS en todas las tablas expuestas por Supabase (requisito de
+-- seguridad de Supabase/PostgREST). NO se crean políticas permisivas para
+-- 'anon' ni 'authenticated': como el sistema usa autenticación propia
+-- (tabla usuarios + password_hash, no auth.users de Supabase), el backend
+-- debe conectarse con la service_role key, que por defecto IGNORA RLS.
+-- Esto bloquea cualquier acceso directo desde el frontend con la anon key.
+-- Si en el futuro el frontend necesita leer/escribir directo vía la API
+-- de Supabase, habría que crear políticas específicas basadas en un
+-- esquema de autenticación compatible (ej. auth.uid()).
+
+ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rol ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usuarios_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categorias ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dependientes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE movimientos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE entrada ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ahorros ENABLE ROW LEVEL SECURITY;
+ALTER TABLE abonos_ahorro ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ingresos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE salida ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gastos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE imprevistos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deudas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE abonos_deuda ENABLE ROW LEVEL SECURITY;
+ALTER TABLE presupuestos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE periodos_presupuesto ENABLE ROW LEVEL SECURITY;
+ALTER TABLE historial ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notificaciones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE preferencias_notificacion ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fondos_emergencia ENABLE ROW LEVEL SECURITY;
+ALTER TABLE movimientos_fondo_emergencia ENABLE ROW LEVEL SECURITY;

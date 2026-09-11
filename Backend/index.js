@@ -13,6 +13,8 @@ const movimientosRoutes = require("./src/routes/movimientosRoutes");
 const noticiasRoutes = require("./src/routes/noticiasRoutes");
 const NotificacionesRoutes = require("./src/routes/NotificacionesRoutes");
 const PresupuestosRoutes = require("./src/routes/PresupuestosRoutes");
+const fondoEmergenciaRoutes = require("./src/routes/fondoemergenciaRoutes");
+const reportesRoutes = require("./src/routes/ReportesRoutes");
 
 
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
@@ -50,8 +52,8 @@ app.use("/api/movimientos", movimientosRoutes);
 app.use("/api/noticias", noticiasRoutes);
 app.use("/api", NotificacionesRoutes);
 app.use("/api/presupuestos", PresupuestosRoutes);
-
-
+app.use("/api/fondo-emergencia", fondoEmergenciaRoutes);
+app.use("/api/reportes", reportesRoutes);
 // ================================
 // RUTA DE PRUEBA
 // ================================

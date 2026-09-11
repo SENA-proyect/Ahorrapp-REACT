@@ -104,24 +104,58 @@ const crearMovimiento = async (req, res) => {
 
       if (subtipo_modulo === "Ingreso") {
         const { monto, descripcion, fuente, fecha_registro, id_categoria } = datos;
-        const { rows: [result] } = await connection.query(
-          `INSERT INTO ingresos (id_entrada, id_categoria, monto, descripcion, fuente, fecha_registro)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           RETURNING id_ingresos`,
-          [ID_entrada, id_categoria || null, monto, descripcion || null, fuente || null, fecha_registro || null]
-        );
-        ID_detalle = result.id_ingresos;
 
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO ingresos (
+            id_entrada,
+            id_categoria,
+            monto,
+            descripcion,
+            fuente,
+            fecha_registro
+          )
+          VALUES ($1, $2, $3, $4, $5, COALESCE($6, CURRENT_DATE))
+          RETURNING id_ingresos`,
+          [
+            ID_entrada,
+            id_categoria || null,
+            monto,
+            descripcion || null,
+            fuente || null,
+            fecha_registro
+          ]
+        );
+
+        ID_detalle = result.id_ingresos;
       } else if (subtipo_modulo === "Ahorro") {
         const { monto, descripcion, meta, fecha_registro, fecha_meta, id_categoria } = datos;
+
         const { rows: [result] } = await connection.query(
-          `INSERT INTO ahorros (id_entrada, id_categoria, monto, descripcion, meta, fecha_registro, fecha_meta)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
-           RETURNING id_ahorros`,
-          [ID_entrada, id_categoria || null, monto, descripcion || null, meta || null, fecha_registro || null, fecha_meta || null]
+          `INSERT INTO ahorros (
+            id_entrada,
+            id_categoria,
+            monto,
+            descripcion,
+            meta,
+            fecha_registro,
+            fecha_meta
+          )
+          VALUES ($1, $2, $3, $4, $5, COALESCE($6, CURRENT_DATE), $7)
+          RETURNING id_ahorros`,
+          [
+            ID_entrada,
+            id_categoria || null,
+            monto,
+            descripcion || null,
+            meta || null,
+            fecha_registro,
+            fecha_meta || null
+          ]
         );
+
         ID_detalle = result.id_ahorros;
       }
+      
 
     } else {
       // 2b. Insertar en SALIDA
@@ -133,32 +167,99 @@ const crearMovimiento = async (req, res) => {
 
       if (subtipo_modulo === "Gasto") {
         const { monto, descripcion, fecha_registro, id_categoria, id_dependientes } = datos;
-        const { rows: [result] } = await connection.query(
-          `INSERT INTO gastos (id_salida, id_categoria, monto, descripcion, fecha_registro, id_dependientes)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           RETURNING id_gastos`,
-          [ID_salida, id_categoria || null, monto, descripcion || null, fecha_registro || null, id_dependientes || null]
-        );
-        ID_detalle = result.id_gastos;
 
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO gastos (
+            id_salida,
+            id_categoria,
+            monto,
+            descripcion,
+            fecha_registro,
+            id_dependientes
+          )
+          VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE), $6)
+          RETURNING id_gastos`,
+          [
+            ID_salida,
+            id_categoria || null,
+            monto,
+            descripcion || null,
+            fecha_registro,
+            id_dependientes || null
+          ]
+        );
+
+        ID_detalle = result.id_gastos;
       } else if (subtipo_modulo === "Imprevisto") {
         const { monto, causa, fecha_registro, id_categoria, id_dependientes } = datos;
-        const { rows: [result] } = await connection.query(
-          `INSERT INTO imprevistos (id_salida, id_categoria, monto, causa, fecha_registro, id_dependientes)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           RETURNING id_imprevistos`,
-          [ID_salida, id_categoria || null, monto, causa || null, fecha_registro || null, id_dependientes || null]
-        );
-        ID_detalle = result.id_imprevistos;
 
-      } else if (subtipo_modulo === "Deuda") {
-        const { monto, fuente, descripcion, cuotas_total, fecha_inicio, fecha_fin, id_categoria } = datos;
         const { rows: [result] } = await connection.query(
-          `INSERT INTO deudas (id_salida, id_categoria, monto, fuente, descripcion, cuotas_total, fecha_inicio, fecha_fin)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-           RETURNING id_deudas`,
-          [ID_salida, id_categoria || null, monto, fuente || null, descripcion || null, cuotas_total || null, fecha_inicio || null, fecha_fin || null]
+          `INSERT INTO imprevistos (
+            id_salida,
+            id_categoria,
+            monto,
+            causa,
+            fecha_registro,
+            id_dependientes
+          )
+          VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE), $6)
+          RETURNING id_imprevistos`,
+          [
+            ID_salida,
+            id_categoria || null,
+            monto,
+            causa || null,
+            fecha_registro,
+            id_dependientes || null
+          ]
         );
+
+        ID_detalle = result.id_imprevistos;
+      } else if (subtipo_modulo === "Deuda") {
+        const {
+          monto,
+          fuente,
+          descripcion,
+          cuotas_total,
+          fecha_inicio,
+          fecha_fin,
+          id_categoria
+        } = datos;
+
+        if (!fuente || !fuente.trim()) {
+          await connection.query("ROLLBACK");
+
+          return res.status(400).json({
+            ok: false,
+            mensaje: "La fuente de la deuda es requerida",
+          });
+        }
+
+        const { rows: [result] } = await connection.query(
+          `INSERT INTO deudas (
+            id_salida,
+            id_categoria,
+            monto,
+            fuente,
+            descripcion,
+            cuotas_total,
+            fecha_inicio,
+            fecha_fin
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          RETURNING id_deudas`,
+          [
+            ID_salida,
+            id_categoria || null,
+            monto,
+            fuente,
+            descripcion || null,
+            cuotas_total || null,
+            fecha_inicio || null,
+            fecha_fin || null
+          ]
+        );
+
         ID_detalle = result.id_deudas;
       }
     }
@@ -693,53 +794,155 @@ const deleteDeudas = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 const abonarDeuda = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  const { id }     = req.params;
-  const cuotas     = parseInt(req.body.cuotas) || 1;
+  const { id } = req.params;
 
-  if (cuotas < 1)
-    return res.status(400).json({ ok: false, mensaje: "El número de cuotas debe ser >= 1" });
+  const cuotas = parseInt(req.body.cuotas) || 1;
+  const descripcion = req.body.descripcion || null;
+
+  if (cuotas < 1) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El número de cuotas debe ser >= 1",
+    });
+  }
+
+  let connection;
 
   try {
-    const { rows: [deuda] } = await pool.query(
-      `SELECT d.id_deudas, d.cuotas_total, d.cuotas_pagadas, d.estado
-       FROM   deudas d
-       JOIN   salida s      ON d.id_salida     = s.id_salida
-       JOIN   movimientos m ON s.id_movimiento = m.id_movimiento
-       WHERE  d.id_deudas = $1 AND m.id_usuario = $2`,
+    connection = await pool.connect();
+
+    await connection.query("BEGIN");
+
+    // Buscar la deuda y verificar que pertenezca al usuario
+    const { rows: [deuda] } = await connection.query(
+      `
+      SELECT
+        d.id_deudas,
+        d.monto,
+        d.cuotas_total,
+        d.cuotas_pagadas,
+        d.estado
+      FROM deudas d
+      INNER JOIN salida s
+        ON d.id_salida = s.id_salida
+      INNER JOIN movimientos m
+        ON s.id_movimiento = m.id_movimiento
+      WHERE d.id_deudas = $1
+        AND m.id_usuario = $2
+      FOR UPDATE
+      `,
       [id, ID_usuario]
     );
 
-    if (!deuda)
-      return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
-    if (deuda.estado === "pagada")
-      return res.status(409).json({ ok: false, mensaje: "Esta deuda ya está pagada" });
+    if (!deuda) {
+      await connection.query("ROLLBACK");
 
-    const nuevasCuotas = deuda.cuotas_pagadas + cuotas;
+      return res.status(404).json({
+        ok: false,
+        mensaje: "Deuda no encontrada",
+      });
+    }
 
-    if (deuda.cuotas_total !== null && nuevasCuotas > deuda.cuotas_total)
+    // Verificar si ya está pagada
+    if (deuda.estado === "pagada") {
+      await connection.query("ROLLBACK");
+
+      return res.status(409).json({
+        ok: false,
+        mensaje: "Esta deuda ya está pagada",
+      });
+    }
+
+    const cuotasPagadasActuales = Number(deuda.cuotas_pagadas);
+    const nuevasCuotas = cuotasPagadasActuales + cuotas;
+
+    // Evitar superar el total de cuotas
+    if (
+      deuda.cuotas_total !== null &&
+      nuevasCuotas > Number(deuda.cuotas_total)
+    ) {
+      await connection.query("ROLLBACK");
+
       return res.status(400).json({
         ok: false,
-        mensaje: `Quedan ${deuda.cuotas_total - deuda.cuotas_pagadas} cuota(s) por pagar.`
+        mensaje: `Quedan ${
+          Number(deuda.cuotas_total) - cuotasPagadasActuales
+        } cuota(s) por pagar.`,
       });
+    }
 
-    const nuevoEstado = deuda.cuotas_total !== null && nuevasCuotas >= deuda.cuotas_total
-      ? "pagada" : "pendiente";
+    // Calcular el valor del abono según el número de cuotas
+    let montoAbono;
 
-    await pool.query(
-      `UPDATE deudas SET cuotas_pagadas = $1, estado = $2 WHERE id_deudas = $3`,
+    if (deuda.cuotas_total !== null) {
+      montoAbono =
+        (Number(deuda.monto) / Number(deuda.cuotas_total)) * cuotas;
+    } else {
+      await connection.query("ROLLBACK");
+
+      return res.status(400).json({
+        ok: false,
+        mensaje: "Esta deuda no tiene un número total de cuotas definido.",
+      });
+    }
+
+    // Registrar el histórico del abono
+    await connection.query(
+      `
+      INSERT INTO abonos_deuda
+        (id_deudas, cuotas, monto, descripcion)
+      VALUES
+        ($1, $2, $3, $4)
+      `,
+      [id, cuotas, montoAbono, descripcion]
+    );
+
+    // Actualizar el estado actual de la deuda
+    const nuevoEstado =
+      nuevasCuotas >= Number(deuda.cuotas_total)
+        ? "pagada"
+        : "pendiente";
+
+    await connection.query(
+      `
+      UPDATE deudas
+      SET cuotas_pagadas = $1,
+          estado = $2
+      WHERE id_deudas = $3
+      `,
       [nuevasCuotas, nuevoEstado, id]
     );
 
-    res.status(200).json({
+    await connection.query("COMMIT");
+
+    return res.status(200).json({
       ok: true,
-      mensaje: nuevoEstado === "pagada" ? "Deuda pagada completamente" : "Cuota registrada",
+      mensaje:
+        nuevoEstado === "pagada"
+          ? "Deuda pagada completamente"
+          : "Cuota registrada",
       cuotas_pagadas: nuevasCuotas,
-      cuotas_total:   deuda.cuotas_total,
-      estado:         nuevoEstado,
+      cuotas_total: deuda.cuotas_total,
+      monto_abono: montoAbono,
+      estado: nuevoEstado,
     });
+
   } catch (error) {
-    console.error("Error en abonarDeuda:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+    if (connection) {
+      await connection.query("ROLLBACK");
+    }
+
+    console.error("Error en abonarDeuda:", error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: "Error interno del servidor",
+    });
+
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };
 // ─────────────────────────────────────────────────────────────
@@ -747,70 +950,199 @@ const abonarDeuda = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 const abonarAhorro = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  const { id }     = req.params;
-  const monto      = parseFloat(req.body.monto);
+  const ID_ahorro = req.params.id;
+  const { monto } = req.body;
 
-  if (!monto || monto <= 0)
-    return res.status(400).json({ ok: false, mensaje: "El monto del abono debe ser mayor a 0" });
+  if (!monto || Number(monto) <= 0) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El monto del abono debe ser mayor a 0"
+    });
+  }
 
-  let connection;
+  const connection = await pool.connect();
+
   try {
-    connection = await pool.connect();
     await connection.query("BEGIN");
 
-    const { rows: [ahorro] } = await connection.query(
-      `SELECT a.id_ahorros, a.monto AS meta_monto, a.meta AS meta_nombre
-       FROM   ahorros a
-       JOIN   entrada e     ON a.id_entrada    = e.id_entrada
-       JOIN   movimientos m ON e.id_movimiento = m.id_movimiento
-       WHERE  a.id_ahorros = $1 AND m.id_usuario = $2`,
-      [id, ID_usuario]
+    const { rows } = await connection.query(
+      `
+      SELECT
+        a.id_ahorros,
+        a.monto AS meta_monto,
+        a.monto_acumulado
+      FROM ahorros a
+      INNER JOIN entrada e
+        ON a.id_entrada = e.id_entrada
+      INNER JOIN movimientos m
+        ON e.id_movimiento = m.id_movimiento
+      WHERE a.id_ahorros = $1
+        AND m.id_usuario = $2
+      FOR UPDATE
+      `,
+      [ID_ahorro, ID_usuario]
     );
 
-    if (!ahorro) {
+    if (rows.length === 0) {
       await connection.query("ROLLBACK");
-      return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
+
+      return res.status(404).json({
+        ok: false,
+        mensaje: "Ahorro no encontrado"
+      });
+    }
+
+    const ahorro = rows[0];
+
+    const meta = Number(ahorro.meta_monto);
+    const acumuladoActual = Number(ahorro.monto_acumulado);
+    const aporte = Number(monto);
+
+    const restante = meta - acumuladoActual;
+
+    if (restante <= 0) {
+      await connection.query("ROLLBACK");
+
+      return res.status(400).json({
+        ok: false,
+        mensaje: "La meta de ahorro ya fue alcanzada"
+      });
+    }
+
+    if (aporte > restante) {
+      await connection.query("ROLLBACK");
+
+      return res.status(400).json({
+        ok: false,
+        mensaje: `El aporte máximo permitido es ${restante}`
+      });
     }
 
     await connection.query(
-      `INSERT INTO abonos_ahorro (id_ahorros, id_usuario, monto, fecha_registro)
-       VALUES ($1, $2, $3, CURRENT_DATE)`,
-      [id, ID_usuario, monto]
+      `
+      INSERT INTO abonos_ahorro
+        (id_ahorros, monto)
+      VALUES
+        ($1, $2)
+      `,
+      [ID_ahorro, aporte]
     );
 
-    const { rows: [{ total }] } = await connection.query(
-      `SELECT COALESCE(SUM(monto), 0)::float AS total
-       FROM abonos_ahorro
-       WHERE id_ahorros = $1`,
-      [id]
-    );
-
-    const nuevoAcumulado = Math.min(Number(total), Number(ahorro.meta_monto));
-    const metaAlcanzada  = nuevoAcumulado >= Number(ahorro.meta_monto);
+    const nuevoAcumulado = acumuladoActual + aporte;
 
     await connection.query(
-      `UPDATE ahorros SET monto_acumulado = $1 WHERE id_ahorros = $2`,
-      [nuevoAcumulado, id]
+      `
+      UPDATE ahorros
+      SET monto_acumulado = $1
+      WHERE id_ahorros = $2
+      `,
+      [nuevoAcumulado, ID_ahorro]
     );
 
     await connection.query("COMMIT");
 
-    await verificarMetaAhorroAlcanzada(ID_usuario, ahorro, nuevoAcumulado);
-
-    res.status(200).json({
-      ok:              true,
-      mensaje:         metaAlcanzada ? "Meta de ahorro alcanzada" : "Abono registrado",
-      monto_acumulado: nuevoAcumulado,
-      meta_monto:      ahorro.meta_monto,
-      progreso:        parseFloat(((nuevoAcumulado / ahorro.meta_monto) * 100).toFixed(2)),
-      meta_alcanzada:  metaAlcanzada,
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Abono registrado correctamente",
+      acumulado: nuevoAcumulado,
+      meta: meta,
+      progreso: (nuevoAcumulado / meta) * 100,
+      meta_alcanzada: nuevoAcumulado >= meta
     });
+
   } catch (error) {
-    if (connection) await connection.query("ROLLBACK");
-    console.error("Error en abonarAhorro:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+    await connection.query("ROLLBACK");
+
+    console.error("Error en abonarAhorro:", error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: "Error interno del servidor"
+    });
+
   } finally {
-    if (connection) connection.release();
+    connection.release();
   }
 };
-module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas, getMovimientos, abonarDeuda, abonarAhorro };
+
+const getAbonosAhorro = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT
+        aa.id_abono,
+        aa.id_ahorros,
+        aa.monto,
+        aa.fecha_registro
+      FROM abonos_ahorro aa
+      INNER JOIN ahorros a
+        ON aa.id_ahorros = a.id_ahorros
+      INNER JOIN entrada e
+        ON a.id_entrada = e.id_entrada
+      INNER JOIN movimientos m
+        ON e.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+      ORDER BY aa.fecha_registro DESC, aa.id_abono DESC
+      `,
+      [ID_usuario]
+    );
+
+    return res.status(200).json({
+      ok: true,
+      datos: rows
+    });
+
+  } catch (error) {
+    console.error("Error obteniendo abonos de ahorro:", error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: "Error interno del servidor"
+    });
+  }
+};
+
+const getAbonosDeuda = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT
+        ad.id_abono_deuda,
+        ad.id_deudas,
+        ad.cuotas,
+        ad.monto,
+        ad.fecha_registro,
+        ad.descripcion
+      FROM abonos_deuda ad
+      INNER JOIN deudas d
+        ON ad.id_deudas = d.id_deudas
+      INNER JOIN salida s
+        ON d.id_salida = s.id_salida
+      INNER JOIN movimientos m
+        ON s.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
+      ORDER BY ad.fecha_registro DESC, ad.id_abono_deuda DESC
+      `,
+      [ID_usuario]
+    );
+
+    return res.status(200).json({
+      ok: true,
+      datos: rows
+    });
+
+  } catch (error) {
+    console.error("Error obteniendo abonos de deuda:", error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: "Error interno del servidor"
+    });
+  }
+};
+
+module.exports = { crearMovimiento, getIngresos, getAhorros, getGastos, getImprevistos, getDeudas, getAbonosAhorro, getAbonosDeuda, updateAhorros, updateDeudas, updateGastos, updateImprevistos, updateIngresos, deleteIngresos, deleteAhorros, deleteGastos, deleteImprevistos, deleteDeudas, getMovimientos, abonarDeuda, abonarAhorro };
