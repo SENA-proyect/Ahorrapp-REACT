@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { resetPassword } from "../api";
+import { resetPassword } from "../services/api";
 
 export default function RestablecerContra() {
   const [showNew, setShowNew] = useState(false);

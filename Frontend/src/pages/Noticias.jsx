@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "../styles/noticias.css"
+import { API_URL } from "../services/api"
 
 
 export default function Noticias() {
@@ -57,7 +58,7 @@ export default function Noticias() {
       setError(null);
 
       try {
-        const res = await fetch(`/api/noticias?categoria=${categoria}&pagina=${pag}`, {
+        const res = await fetch(`${API_URL}/noticias?categoria=${categoria}&pagina=${pag}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

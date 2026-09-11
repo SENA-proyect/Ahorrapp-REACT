@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { verifyResetCode, forgotPassword } from "../api";
+import { verifyResetCode, forgotPassword } from "../services/api";
 
 export default function VerificacionCorreo() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);

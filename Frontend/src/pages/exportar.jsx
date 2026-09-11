@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { exportarDatos, getHistorialExportaciones, eliminarExportacion } from '../api';
+import { exportarDatos, getHistorialExportaciones, eliminarExportacion } from '../services/api';
 
 const Exportar = () => {
   const navigate = useNavigate();

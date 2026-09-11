@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { forgotPassword } from "../api";
+import { forgotPassword } from "../services/api";
 
 export default function OlvidarContra() {
   const [email, setEmail] = useState("");

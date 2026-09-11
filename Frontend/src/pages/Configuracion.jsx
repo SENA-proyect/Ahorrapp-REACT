@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import HeaderModulos from './HeaderModulos'
-import Historialnotificaciones from './Historialnotificaciones'
-import Preferenciasnotificaciones from './Preferenciasnotificaciones'
+import HeaderModulos from '../components/HeaderModulos'
+import Historialnotificaciones from '../components/Historialnotificaciones'
+import Preferenciasnotificaciones from '../components/Preferenciasnotificaciones'
 
 const SECCIONES = [
   { id: 'notificaciones', label: 'Notificaciones', emoji: '🔔' },

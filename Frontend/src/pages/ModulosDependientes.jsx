@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import HeaderModulos from './HeaderModulos'
-import { useToast } from './ToastContext'
-import { useNotificaciones } from './NotificacionesContext'
+import HeaderModulos from '../components/HeaderModulos'
+import InfoDependientes from '../components/modals/InfoDependientes'
+import { useToast } from '../context/ToastContext'
+import { useNotificaciones } from '../context/NotificacionesContext'
+import { API_URL } from '../services/api'
 
 
 let usuario = null
@@ -40,13 +42,14 @@ const Dependientes = () => {
 
   const [dependientes, setDependientes] = useState([])
   const [mostrarModal, setMostrarModal] = useState(false)
+  const [mostrarInfo, setMostrarInfo] = useState(false)
   const [editandoId,   setEditandoId]   = useState(null)
   const [formDatos,    setFormDatos]    = useState(FORM_VACIO)
   // evita doble envío del formulario (doble clic / doble submit)
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
-    fetch('/api/dependientes', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/dependientes`, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => setDependientes(Array.isArray(data) ? data : []))
       .catch(err => console.error('Error cargando dependientes:', err))
@@ -83,18 +86,18 @@ const Dependientes = () => {
     setGuardando(true)
     try {
       if (editandoId) {
-        const res = await fetch(`/api/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+        const res = await fetch(`${API_URL}/dependientes/${editandoId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
         if (res.ok) {
           mostrarToast('Dependiente actualizado correctamente')
           setDependientes(dependientes.map(d => d.id_dependientes === editandoId ? { ...payload, id_dependientes: editandoId } : d))
         }
         else { const data = await res.json(); alert(data.error || 'Error al actualizar') }
       } else {
-        const res = await fetch('/api/dependientes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
+        const res = await fetch(`${API_URL}/dependientes`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
         const data = await res.json()
         if (res.ok) {
           mostrarToast('Dependiente registrado correctamente')
-          setDependientes([...dependientes, { ...payload, id_dependientes: data.id }])
+          setDependientes([...dependientes, { ...payload, id_dependientes: data.id_dependientes }])
         }
         else alert(data.error || 'Error al guardar')
       }
@@ -115,7 +118,7 @@ const Dependientes = () => {
   const handleEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este dependiente?')) return
     try {
-      const res = await fetch(`/api/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      const res = await fetch(`${API_URL}/dependientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) {
         mostrarToast('Dependiente eliminado correctamente')
         setDependientes(dependientes.filter(d => d.id_dependientes !== id))
@@ -135,6 +138,17 @@ const Dependientes = () => {
 
       {/* HEADER */}
       <HeaderModulos section="dependientes" />
+
+      <button
+        type="button"
+        onClick={() => setMostrarInfo(true)}
+        aria-label="Acerca de este módulo"
+        className="self-end mr-4 sm:mr-10 -mb-1 w-7 h-7 flex items-center justify-center rounded-full border border-white/10 text-white/50 text-xs hover:text-amber-400 hover:border-amber-400/50 transition-colors"
+      >
+        ℹ
+      </button>
+
+      {mostrarInfo && <InfoDependientes onClose={() => setMostrarInfo(false)} />}
 
       <hr className="my-1 border-none h-px"
         style={{ background: 'linear-gradient(to right, transparent, #fbbf24, transparent)' }} />

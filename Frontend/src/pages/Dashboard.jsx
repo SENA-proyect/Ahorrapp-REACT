@@ -3,10 +3,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   AreaChart, Area,
 } from 'recharts'
-import HeaderModulos from './HeaderModulos'
-import BolsaWidget from './BolsaWidget'
-import { getDashboardData, getPresupuestoVsEjecutado, getFlujoPorSemana } from '../api'
-import { useAuth } from './AuthContext'
+import HeaderModulos from '../components/HeaderModulos'
+import BolsaWidget from '../components/BolsaWidget'
+import InfoDashboard from '../components/modals/InfoDashboard'
+import { getDashboardData, getPresupuestoVsEjecutado, getFlujoPorSemana } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 // ── Tooltip personalizado para la gráfica de barras ──────────
 const TooltipPresupuesto = ({ active, payload, label }) => {
@@ -70,6 +71,7 @@ export default function Dashboard() {
   const [flujoData, setFlujoData]             = useState([])
   const [loadingPresupuesto, setLoadingPresupuesto] = useState(true)
   const [loadingFlujo, setLoadingFlujo]             = useState(true)
+  const [mostrarInfo, setMostrarInfo] = useState(false)
 
   useEffect(() => {
     getDashboardData()
@@ -135,6 +137,17 @@ export default function Dashboard() {
       }}
     >
       <HeaderModulos section="Dashboard" />
+
+      <button
+        type="button"
+        onClick={() => setMostrarInfo(true)}
+        aria-label="Acerca de este módulo"
+        className="self-end mr-4 sm:mr-10 -mb-1 w-7 h-7 flex items-center justify-center rounded-full border border-white/10 text-white/50 text-xs hover:text-amber-400 hover:border-amber-400/50 transition-colors"
+      >
+        ℹ
+      </button>
+
+      {mostrarInfo && <InfoDashboard onClose={() => setMostrarInfo(false)} />}
 
       <hr className="my-1 border-0 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 

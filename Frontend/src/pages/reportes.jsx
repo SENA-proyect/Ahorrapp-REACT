@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { obtenerInformeCompleto } from "../../api";
-import { generarReportePDF } from "../../utils/generarreportepdf";
+import { obtenerInformeCompleto } from "../services/api";
+import { generarReportePDF } from "../utils/generarreportepdf";
 
 const formatearCOP = (valor) => {
   return new Intl.NumberFormat("es-CO", {

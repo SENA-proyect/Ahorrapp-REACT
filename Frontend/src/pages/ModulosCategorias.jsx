@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import HeaderModulos from './HeaderModulos'
-import { useToast } from './ToastContext'
-import { useNotificaciones } from './NotificacionesContext'
+import HeaderModulos from '../components/HeaderModulos'
+import { useToast } from '../context/ToastContext'
+import { useNotificaciones } from '../context/NotificacionesContext'
 // activar SOLO si se utilizan mas adelante
 // import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -16,7 +16,7 @@ import {
   getAhorrosPorCategoria,
   getImprevistosPorCategoria,
   getDeudasPorCategoria,
-} from '../api'
+} from '../services/api'
 
 
 // Límites de validación para los campos del formulario de categorías.
