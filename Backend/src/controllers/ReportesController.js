@@ -1256,19 +1256,6 @@ const getEvolucionTemporal = async (req, res) => {
 
       ingresos AS (
         SELECT
-        SUM(
-            (
-              COALESCE(i.total, 0)
-              - COALESCE(g.total, 0)
-              - COALESCE(imp.total, 0)
-              - COALESCE(a.total, 0)
-              - COALESCE(d.total, 0)
-              - COALESCE(fe.aportes, 0)
-              + COALESCE(fe.retiros, 0)
-            )
-          ) OVER (
-            ORDER BY f.fecha
-          )::numeric AS balance_acumulado
           i.fecha_registro AS fecha,
           COALESCE(SUM(i.monto), 0) AS total
         FROM ingresos i
@@ -1373,51 +1360,65 @@ const getEvolucionTemporal = async (req, res) => {
         WHERE fe.id_usuario = $1
           AND mfe.fecha_registro BETWEEN $2 AND $3
         GROUP BY mfe.fecha_registro
+      ),
+
+      diario AS (
+        SELECT
+          f.fecha,
+
+          COALESCE(i.total, 0)::numeric AS ingresos,
+          COALESCE(g.total, 0)::numeric AS gastos,
+          COALESCE(imp.total, 0)::numeric AS imprevistos,
+          COALESCE(a.total, 0)::numeric AS ahorros,
+          COALESCE(d.total, 0)::numeric AS pagos_deudas,
+
+          COALESCE(fe.aportes, 0)::numeric AS aportes_emergencia,
+          COALESCE(fe.retiros, 0)::numeric AS retiros_emergencia,
+
+          (
+            COALESCE(i.total, 0)
+            - COALESCE(g.total, 0)
+            - COALESCE(imp.total, 0)
+            - COALESCE(a.total, 0)
+            - COALESCE(d.total, 0)
+            - COALESCE(fe.aportes, 0)
+            + COALESCE(fe.retiros, 0)
+          )::numeric AS balance
+
+        FROM fechas f
+
+        LEFT JOIN ingresos i
+          ON f.fecha = i.fecha
+
+        LEFT JOIN gastos g
+          ON f.fecha = g.fecha
+
+        LEFT JOIN imprevistos imp
+          ON f.fecha = imp.fecha
+
+        LEFT JOIN ahorros a
+          ON f.fecha = a.fecha
+
+        LEFT JOIN deudas d
+          ON f.fecha = d.fecha
+
+        LEFT JOIN fondo_emergencia fe
+          ON f.fecha = fe.fecha
       )
 
       SELECT
-        f.fecha,
-
-        COALESCE(i.total, 0)::numeric AS ingresos,
-        COALESCE(g.total, 0)::numeric AS gastos,
-        COALESCE(imp.total, 0)::numeric AS imprevistos,
-        COALESCE(a.total, 0)::numeric AS ahorros,
-        COALESCE(d.total, 0)::numeric AS pagos_deudas,
-
-        COALESCE(fe.aportes, 0)::numeric AS aportes_emergencia,
-        COALESCE(fe.retiros, 0)::numeric AS retiros_emergencia,
-
-        (
-          COALESCE(i.total, 0)
-          - COALESCE(g.total, 0)
-          - COALESCE(imp.total, 0)
-          - COALESCE(a.total, 0)
-          - COALESCE(d.total, 0)
-          - COALESCE(fe.aportes, 0)
-          + COALESCE(fe.retiros, 0)
-        )::numeric AS balance
-
-      FROM fechas f
-
-      LEFT JOIN ingresos i
-        ON f.fecha = i.fecha
-
-      LEFT JOIN gastos g
-        ON f.fecha = g.fecha
-
-      LEFT JOIN imprevistos imp
-        ON f.fecha = imp.fecha
-
-      LEFT JOIN ahorros a
-        ON f.fecha = a.fecha
-
-      LEFT JOIN deudas d
-        ON f.fecha = d.fecha
-
-      LEFT JOIN fondo_emergencia fe
-        ON f.fecha = fe.fecha
-
-      ORDER BY f.fecha ASC
+        fecha,
+        ingresos,
+        gastos,
+        imprevistos,
+        ahorros,
+        pagos_deudas,
+        aportes_emergencia,
+        retiros_emergencia,
+        balance,
+        SUM(balance) OVER (ORDER BY fecha)::numeric AS balance_acumulado
+      FROM diario
+      ORDER BY fecha ASC
       `,
       [ID_usuario, fecha_inicio, fecha_fin]
     );

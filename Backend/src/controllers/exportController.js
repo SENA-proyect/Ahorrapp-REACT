@@ -1,4 +1,4 @@
-﻿const db = require('../db/connection');
+const pool = require('../db/connection');
 const PDFDocument = require('pdfkit');
 
 
@@ -8,8 +8,8 @@ const PDFDocument = require('pdfkit');
 // ============================================================
 
 /**
- * Registra una acción en la tabla HISTORIAL usando una conexión existente (transacción).
- * @param {Connection} connection - Conexión activa con transacción iniciada
+ * Registra una acción en la tabla historial usando una conexión existente (transacción).
+ * @param {import('pg').PoolClient} connection - Conexión activa con transacción iniciada
  * @param {number} userId - ID del usuario que realiza la acción
  * @param {string} accion - Descripción breve de la acción (ej: 'EXPORTAR_REPORTE')
  * @param {string} detalles - Detalles adicionales (ej: 'Tipo: PDF, Formato: movimientos')
@@ -17,19 +17,20 @@ const PDFDocument = require('pdfkit');
  */
 const registrarEnHistorial = async (connection, userId, accion, detalles) => {
   const sqlHistorial = `
-    INSERT INTO HISTORIAL (ID_usuario, accion, detalles, fecha)
-    VALUES (?, ?, ?, NOW())
+    INSERT INTO historial (id_usuario, accion, detalles, fecha)
+    VALUES ($1, $2, $3, NOW())
+    RETURNING id_historial
   `;
-  const [result] = await connection.execute(sqlHistorial, [
+  const { rows } = await connection.query(sqlHistorial, [
     userId,
     accion,
     detalles
   ]);
-  return result.insertId;
+  return rows[0].id_historial;
 };
 
 // ============================================================
-// HELPERS: Generación de Archivos (existentes)
+// HELPERS: Generación de Archivos (sin cambios)
 // ============================================================
 
 // Helper: Escapa valores para CSV
@@ -126,35 +127,36 @@ const generatePDF = (data, tipo) => {
 };
 
 // Configuración de consultas según tipo de dato
+// (nombres de tabla/columna en minúscula, tal como quedaron en el nuevo schema de Supabase)
 const getQueryConfig = (tipo) => {
   const configs = {
     ingresos: {
       table: 'ingresos',
-      join: 'INNER JOIN entrada ON ingresos.ID_entrada = entrada.ID_entrada INNER JOIN movimientos ON entrada.ID_movimiento = movimientos.ID_movimiento',
-      userField: 'movimientos.ID_usuario',
-      dateField: 'ingresos.Fecha_registro',
-      selectFields: 'ingresos.ID_ingresos, ingresos.Monto, ingresos.Descripcion, ingresos.Fuente, ingresos.Fecha_registro'
+      join: 'INNER JOIN entrada ON ingresos.id_entrada = entrada.id_entrada INNER JOIN movimientos ON entrada.id_movimiento = movimientos.id_movimiento',
+      userField: 'movimientos.id_usuario',
+      dateField: 'ingresos.fecha_registro',
+      selectFields: 'ingresos.id_ingresos, ingresos.monto, ingresos.descripcion, ingresos.fuente, ingresos.fecha_registro'
     },
     gastos: {
       table: 'gastos',
-      join: 'INNER JOIN salida ON gastos.ID_salida = salida.ID_salida INNER JOIN movimientos ON salida.ID_movimiento = movimientos.ID_movimiento',
-      userField: 'movimientos.ID_usuario',
-      dateField: 'gastos.Fecha_registro',
-      selectFields: 'gastos.ID_gastos, gastos.Monto, gastos.Descripcion, gastos.Fecha_registro'
+      join: 'INNER JOIN salida ON gastos.id_salida = salida.id_salida INNER JOIN movimientos ON salida.id_movimiento = movimientos.id_movimiento',
+      userField: 'movimientos.id_usuario',
+      dateField: 'gastos.fecha_registro',
+      selectFields: 'gastos.id_gastos, gastos.monto, gastos.descripcion, gastos.fecha_registro'
     },
     movimientos: {
       table: 'movimientos',
       join: '',
-      userField: 'movimientos.ID_usuario',
+      userField: 'movimientos.id_usuario',
       dateField: null,
-      selectFields: 'movimientos.ID_movimiento, movimientos.Tipo_Flujo, movimientos.Subtipo_Modulo'
+      selectFields: 'movimientos.id_movimiento, movimientos.tipo_flujo, movimientos.subtipo_modulo'
     },
     dependientes: {
       table: 'dependientes',
       join: '',
-      userField: 'dependientes.ID_usuario',
+      userField: 'dependientes.id_usuario',
       dateField: null,
-      selectFields: 'dependientes.id_dependientes, dependientes.Nombre, dependientes.Relacion, dependientes.Ocupacion, dependientes.Fecha_nacimiento, dependientes.Peso_economico'
+      selectFields: 'dependientes.id_dependientes, dependientes.nombre, dependientes.relacion, dependientes.ocupacion, dependientes.fecha_nacimiento, dependientes.peso_economico'
     }
   };
   return configs[tipo];
@@ -190,25 +192,25 @@ exports.exportarDatos = async (req, res) => {
       return res.status(400).json({ error: 'Tipo de datos no soportado' });
     }
 
-    // Construir consulta SQL
+    // Construir consulta SQL (placeholders numerados $1, $2... como exige pg)
     let sql = `SELECT ${config.selectFields} FROM ${config.table}`;
     
     if (config.join) {
       sql += ` ${config.join}`;
     }
-    
-    sql += ` WHERE ${config.userField} = ?`;
+
     let params = [userId];
+    sql += ` WHERE ${config.userField} = $${params.length}`;
 
     // Agregar filtros de fecha si aplica
     if (config.dateField) {
       if (fechaInicio) {
-        sql += ` AND ${config.dateField} >= ?`;
         params.push(fechaInicio);
+        sql += ` AND ${config.dateField} >= $${params.length}`;
       }
       if (fechaFin) {
-        sql += ` AND ${config.dateField} <= ?`;
         params.push(fechaFin);
+        sql += ` AND ${config.dateField} <= $${params.length}`;
       }
       sql += ` ORDER BY ${config.dateField} DESC`;
     }
@@ -216,12 +218,12 @@ exports.exportarDatos = async (req, res) => {
     // ==============================================
     // INICIAR TRANSACCIÓN para registro atómico
     // ==============================================
-    connection = await db.getConnection();
-    await connection.beginTransaction();
+    connection = await pool.connect();
+    await connection.query('BEGIN');
 
     try {
       // Ejecutar consulta principal
-      const [rows] = await connection.execute(sql, params);
+      const { rows } = await connection.query(sql, params);
 
       // Nombre del archivo
       const filename = `reporte_financiero_${new Date().toISOString().slice(0, 10)}`;
@@ -245,7 +247,7 @@ exports.exportarDatos = async (req, res) => {
       );
 
       // CONFIRMAR TRANSACCIÓN antes de enviar respuesta
-      await connection.commit();
+      await connection.query('COMMIT');
 
       // Respuesta según formato
       if (formato === 'json') {
@@ -272,7 +274,7 @@ exports.exportarDatos = async (req, res) => {
 
     } catch (queryError) {
       //ROLLBACK en caso de error en la consulta o historial
-      await connection.rollback();
+      await connection.query('ROLLBACK');
       throw queryError;
     }
 
@@ -282,14 +284,18 @@ exports.exportarDatos = async (req, res) => {
     // Registrar error en historial si la conexión está disponible
     if (connection) {
       try {
-        await connection.rollback(); // Asegurar que no hay transacción huérfana
+        // Aseguramos que no haya una transacción huérfana abierta.
+        // Si el ROLLBACK de arriba ya cerró la transacción, este ROLLBACK
+        // adicional es un no-op seguro en Postgres.
+        await connection.query('ROLLBACK').catch(() => {});
+        await connection.query('BEGIN');
         const errorHistorial = JSON.stringify({
           tipo_reporte: req.body?.tipo || 'desconocido',
           formato: req.body?.formato || 'desconocido',
           error: err.message
         });
         await registrarEnHistorial(connection, req.usuario?.id, 'ERROR_EXPORTAR', errorHistorial);
-        await connection.commit();
+        await connection.query('COMMIT');
       } catch (logError) {
         console.error('Error al registrar fallo en historial:', logError);
       }
@@ -316,22 +322,24 @@ exports.obtenerExportaciones = async (req, res) => {
     const offset = (page - 1) * limit;
     const { tipo, formato } = req.query;
 
-    let sql = 'SELECT ID_historial, accion, detalles, fecha FROM HISTORIAL WHERE ID_usuario = ?';
+    let sql = 'SELECT id_historial, accion, detalles, fecha FROM historial WHERE id_usuario = $1';
     const params = [userId];
 
     if (tipo) {
-      sql += ' AND detalles LIKE ?';
       params.push(`%"tipo_reporte":"${tipo}"%`);
+      sql += ` AND detalles LIKE $${params.length}`;
     }
     if (formato) {
-      sql += ' AND detalles LIKE ?';
       params.push(`%"formato":"${formato}"%`);
+      sql += ` AND detalles LIKE $${params.length}`;
     }
 
-    sql += ' ORDER BY fecha DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    params.push(limit);
+    sql += ` ORDER BY fecha DESC LIMIT $${params.length}`;
+    params.push(offset);
+    sql += ` OFFSET $${params.length}`;
 
-    const [rows] = await db.execute(sql, params);
+    const { rows } = await pool.query(sql, params);
     return res.json(rows);
   } catch (err) {
     console.error('❌ Error al obtener exportaciones:', err);
@@ -351,12 +359,12 @@ exports.eliminarExportacion = async (req, res) => {
       return res.status(400).json({ error: 'ID de exportación inválido' });
     }
 
-    const [result] = await db.execute(
-      'DELETE FROM HISTORIAL WHERE ID_historial = ? AND ID_usuario = ?',
+    const result = await pool.query(
+      'DELETE FROM historial WHERE id_historial = $1 AND id_usuario = $2',
       [id, userId]
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Exportación no encontrada o no pertenece al usuario' });
     }
 

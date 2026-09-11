@@ -970,7 +970,8 @@ const abonarAhorro = async (req, res) => {
       SELECT
         a.id_ahorros,
         a.monto AS meta_monto,
-        a.monto_acumulado
+        a.monto_acumulado,
+        a.meta AS meta_nombre
       FROM ahorros a
       INNER JOIN entrada e
         ON a.id_entrada = e.id_entrada
@@ -1040,6 +1041,8 @@ const abonarAhorro = async (req, res) => {
     );
 
     await connection.query("COMMIT");
+
+    await verificarMetaAhorroAlcanzada(ID_usuario, ahorro, nuevoAcumulado);
 
     return res.status(200).json({
       ok: true,

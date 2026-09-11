@@ -17,7 +17,7 @@ const {
   getEstadoDeudas,
   getEstadoFondoEmergencia
 } = require("../controllers/ReportesController");
-const authMiddleware = require("../middleware/authMiddleware");
+const { verifyToken: authMiddleware } = require("../middlewares/authMiddleware");
 
 
 router.get(

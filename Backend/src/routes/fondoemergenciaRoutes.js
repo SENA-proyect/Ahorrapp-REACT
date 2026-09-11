@@ -10,7 +10,7 @@ const {
   getMovimientosFondoEmergencia
 } = require("../controllers/fondoemergenciaController");
 
-const authMiddleware = require("../middlewares/authMiddleware");
+const { verifyToken: authMiddleware } = require("../middlewares/authMiddleware");
 
 // Obtener fondo de emergencia
 router.get(

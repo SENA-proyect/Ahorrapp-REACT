@@ -145,7 +145,10 @@ const getPresupuestoVsEjecutado = async (req, res) => {
     const { rows: [ahoReal] } = await pool.query(
       `SELECT COALESCE(SUM(aa.monto), 0)::float AS total
       FROM abonos_ahorro aa
-      WHERE aa.id_usuario = $1
+      JOIN ahorros a ON aa.id_ahorros = a.id_ahorros
+      JOIN entrada e ON a.id_entrada = e.id_entrada
+      JOIN movimientos m ON e.id_movimiento = m.id_movimiento
+      WHERE m.id_usuario = $1
         AND aa.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
