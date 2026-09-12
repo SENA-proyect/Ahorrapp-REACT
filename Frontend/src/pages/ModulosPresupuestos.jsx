@@ -47,7 +47,17 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
   const suma = ['gastos', 'deudas', 'imprevistos', 'ahorros', 'emergencia']
     .reduce((a, k) => a + (parseFloat(form[k]) || 0), 0)
 
-  const handleChange = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
+  // const handleChange = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
+  // Dentro de FormPerfil — bloquea el día de corte a 1–28 mientras escribís
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    if (name === 'dia_corte') {
+      let v = value.replace(/\D/g, '')
+      if (v !== '') v = String(Math.min(31, Math.max(1, Number(v))))
+      return setForm(p => ({ ...p, dia_corte: v }))
+    }
+    setForm(p => ({ ...p, [name]: value }))
+  }
 
   return (
     <div className="flex flex-col gap-1">
@@ -58,7 +68,7 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
       <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
 
       <label className={labelCls}>Día de corte (1–31)</label>
-      <input className={inputCls} type="number" name="dia_corte" min="1" max="28" value={form.dia_corte} onChange={handleChange} />
+      <input className={inputCls} type="number" name="dia_corte" min="1" max="31" value={form.dia_corte} onChange={handleChange} />
 
       <p className={`${labelCls} mb-2`}>Distribución del presupuesto (%)</p>
 
@@ -140,10 +150,19 @@ export default function ModuloPresupuestos() {
   const perfilActivo = useMemo(() => perfiles.find(p => p.Activo), [perfiles])
 
   // ── Activar perfil ──
+  // const handleActivar = async (id) => {
+  //   try {
+  //     await activarPerfil(id)
+  //     cargar()
+  //   } catch (e) { alert(e.message) }
+  // }
+
   const handleActivar = async (id) => {
     try {
       await activarPerfil(id)
-      cargar()
+      const per = await getPeriodoActivo().catch(() => null)
+      await cargar()
+      if (!per?.data) { setIngresoInput(''); setErrorModal(null); setModalAbrirPer(true) }
     } catch (e) { alert(e.message) }
   }
 
