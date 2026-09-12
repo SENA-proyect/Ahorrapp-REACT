@@ -61,5 +61,25 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
 
 </details>
 
+<details>
+
+<summary><b>Ver detalles del modulo de imprevistos y errores</b></summary>
+
+### MODULO IMPREVISTOS
+
+* Todo bien durante la primera revicion
+
+</details>
+
+<details>
+
+<summary><b>Ver detalles del modulo de ahorros y errores</b></summary>
+
+### MODULO AHORROS
+
+* 
+
+</details>
+
 ## SIGUE PENDIENTE
 * El primer punto de dependientes
