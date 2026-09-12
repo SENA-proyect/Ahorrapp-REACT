@@ -391,6 +391,9 @@ export default function ModuloPresupuestos() {
                         </div>
                         {p.Descripcion && <p className="text-xs text-zinc-500 mt-0.5 truncate">{p.Descripcion}</p>}
                         <p className="text-xs text-zinc-500 mt-1">Corte día {p.Dia_corte} — G:{p.Porcentaje_gastos}% D:{p.Porcentaje_deudas}% I:{p.Porcentaje_imprevistos}% A:{p.Porcentaje_ahorros}% E:{p.Porcentaje_emergencia}%</p>
+                        {p.Activo && periodo && (
+                          <p className="text-[0.7rem] text-amber-400/80 mt-1">🔒 Tiene un período abierto — ciérralo para poder editarlo</p>
+                        )}
                       </div>
                       <div className="flex gap-2 flex-wrap shrink-0">
                         {!p.Activo && (
@@ -405,8 +408,11 @@ export default function ModuloPresupuestos() {
                             Abrir período
                           </button>
                         )}
-                        <button onClick={() => { setErrorModal(null); setModalEditar(p) }}
-                          className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-blue-400/50 bg-blue-400/10 text-blue-400 hover:bg-blue-400/20 transition-colors">
+                        <button
+                          onClick={() => { setErrorModal(null); setModalEditar(p) }}
+                          disabled={p.Activo && !!periodo}
+                          title={p.Activo && periodo ? 'Cierra el período abierto antes de editar este perfil' : undefined}
+                          className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-blue-400/50 bg-blue-400/10 text-blue-400 hover:bg-blue-400/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-400/10">
                           Editar
                         </button>
                         {!p.Activo && (

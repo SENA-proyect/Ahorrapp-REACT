@@ -1,4 +1,5 @@
 # RESTRUCTURACION
+
 ### DASHBOARD
 La vista presenta errores con algunos endpoints tales como:
 · GET /api/dashboard/flujo-semanal
@@ -6,15 +7,24 @@ La vista presenta errores con algunos endpoints tales como:
 · GET /api/dashboard/resumen
 Originalmente pensaba que era un error de conexion debido a un error 300 pero ya revise ese punto, seguire en la busqueda de alguna brecha de me de alguna idea de donde se pudo originar el error
 
+<details>
+<summary><b>📋 Ver detalles de Presupuestos y Errores</b></summary>
+
 ### PRESUPUESTOS
-· Doble click inecesario al momento de abrir y activar un periodo, lo mejor es implementar la logica de que al "activar" el periodo se habra inmediatamente la modal del ingreso estimado.
+* Doble click innecesario al momento de abrir y activar un periodo. Lo mejor es implementar la lógica de que al "activar" el periodo se abra inmediatamente la modal del ingreso estimado.
 
 `ERRORES`
-· Intente registrar el dia de corte con dia "32", me salio el siguiente mensaje:
+* Intenté registrar el día de corte con día "32", me salió el siguiente mensaje:
 
-Failed to load resource: the server responded with a status of 409 ()
+  ```bash
+  Failed to load resource: the server responded with a status of 409 ()
+  ```
 
-al hacerle click para tener mas informacion me notifico lo siguiente:
-{"ok":false,"mensaje":"Acceso denegado, token no proporcionado"}
+  Al hacerle click para tener más información me notificó lo siguiente:
+  ```json
+  {"ok":false,"mensaje":"Acceso denegado, token no proporcionado"}
+  ```
 
-·El dia de corte permite poner dia superiores a 31, no existen meses que duren 32 dias
+* El día de corte permite poner días superiores a 31. No existen meses que duren 32 días.
+
+</details>
