@@ -70,8 +70,8 @@ export default function ModulosGastos() {
 
   const guardar = async () => {
     setErrorModal(null)
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0)
-      return setErrorModal('El monto debe ser mayor a 0')
+    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 49)
+      return setErrorModal('El monto debe ser de al menos 50')
     setGuardando(true)
     const token = localStorage.getItem('token')
     try {
@@ -243,7 +243,7 @@ export default function ModulosGastos() {
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
             <label className={labelCls}>Monto *</label>
-            <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
+            <input className={inputCls} type="number" name="monto" min="50" step="0.01" value={modalEditar.monto} onChange={handleChange} />
 
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
@@ -269,7 +269,7 @@ export default function ModulosGastos() {
               className={selectCls}
               style={{ colorScheme: 'dark' }}
               name="id_dependientes"
-              value={modalEditar.iddependientes}
+              value={modalEditar.id_dependientes}
               onChange={handleChange}
             >
               <option value="" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Ninguno (gasto propio)</option>

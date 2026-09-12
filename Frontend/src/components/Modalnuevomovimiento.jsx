@@ -56,8 +56,8 @@ const buildDatos = (subtipo, form) => {
 
 // ── Validaciones por subtipo ──────────────────────────────────
 const validar = (subtipo, form) => {
-  if (!form.monto || isNaN(form.monto) || Number(form.monto) <= 0)
-    return 'El monto debe ser un número mayor a 0'
+  if (!form.monto || isNaN(form.monto) || Number(form.monto) < 50)
+    return 'El monto mínimo permitido es $50'
   if (subtipo === 'Deuda' && !form.fuente?.trim())
     return 'La fuente de la deuda es obligatoria'
   if (subtipo === 'Deuda' && form.fecha_fin && form.fecha_inicio && form.fecha_fin < form.fecha_inicio)
@@ -198,7 +198,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-400">$</span>
             <input
               className={`${inputCls} pl-7 text-base font-bold`}
-              type="number" name="monto" min="0" step="0.01"
+              type="number" name="monto" min="50" step="0.01"
               placeholder="0" autoFocus
               value={form.monto} onChange={handleChange}
             />

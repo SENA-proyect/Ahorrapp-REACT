@@ -24,6 +24,7 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
   ```json
   {"ok":false,"mensaje":"Acceso denegado, token no proporcionado"}
   ```
+  
 
 * El día de corte permite poner días superiores a 31. No existen meses que duren 32 días.
 * Al tener un periodo activo y querer activar otro sin cerrar el periodo ocurre un error 409
@@ -77,9 +78,46 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
 
 ### MODULO AHORROS
 
-* 
+* Cuando pague el valor exacto de una deuda esta sigue apareciendo en el mismo apartado y no en uno de "meta alcanzada" o algo por el estilo, lo ideal seria implementar una vista similar a como se maneja en deudas
+
+* cuando ya termine de pagar la deuda me sigue apareciendo el boton de abonar, puedo abrir el modal de abonar y registrar un nuevo abono pero al querer guardar el abono me surge un error (ya documentado en el apartado de errores, segundo error registrado)
+
+
+`ERRORES`
+* Fui a editar un ahorro y tuve el siguiente error:
+```json
+{"ok":false,"mensaje":"Acceso denegado, token no proporcionado"}
+```
+La consola me dice lo siguiente
+```body
+Failed to load resource: the server responded with a status of 500 ()
+```
+* Fui a registrar $500.000 en un abono que el cupo maximo era de $432.000 y me arrojo el siguiente error
+```json
+{"ok":false,"mensaje":"Acceso denegado, token no proporcionado"}
+```
+la consola dice lo siguiente
+```body
+Failed to load resource: the server responded with a status of 400 ()
+```
+</details>
+
+<details>
+
+<summary><b>Ver detalles del modulo de gastos y errores</b></summary>
+
+### MODULO GASTOS
+
+* El formulario de editar no trae los datos completos, el apartado de dependientes simplemente lo olvida y no lo trae consigo
+
+* El formulario de registrar y editar me permiten registrar un gasto por 4 pesos (el valor minimo en colombia es la moneda de 50)
+
+* A pesar de que el formulario de editar no lleva el valor del dependiente (en caso de que este registrado) si no muevo nada y simplemente acepto los cambios se conserva el valor del dependiente a pesar de que visualmente en el formulario este apartado aparecia como gasto propio
+
+
 
 </details>
 
 ## SIGUE PENDIENTE
 * El primer punto de dependientes
+* Todo el apartado de Ahorros
