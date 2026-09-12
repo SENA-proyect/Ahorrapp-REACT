@@ -49,5 +49,15 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
 
 </details>
 
+<details>
+
+<summary><b>Ver detalles del modulo de deudas y errores</b></summary>
+
+### MODULO DEUDAS
+
+* Me permite editar una deuda ya pagada, modificando el numero de cuotas pagadas, si modifico esto la deuda sigue apareciendo como pagada a pesar de que por dar un ejemplo tengo 4/5 deudas pagadas
+
+</details>
+
 ## SIGUE PENDIENTE
 * El primer punto de dependientes

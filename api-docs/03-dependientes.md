@@ -22,7 +22,7 @@ Un "dependiente" es una persona a cargo del usuario (hijo, familiar, etc.) que p
     "Nombre": "Pedro",
     "Relacion": "Hijo",
     "Ocupacion": "Estudiante",
-    "Fecha_nacimiento": "2015-03-10T00:00:00.000Z",
+    "Fecha_nacimiento": "2015-03-10",
     "Peso_economico": 3
   }
 ]

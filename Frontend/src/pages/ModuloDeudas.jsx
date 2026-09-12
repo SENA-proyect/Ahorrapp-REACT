@@ -130,6 +130,13 @@ export default function ModuloDeudas() {
     const cp = Number(modalEditar.cuotas_pagadas)
     const ct = modalEditar.cuotas_total ? Number(modalEditar.cuotas_total) : null
     if (ct !== null && cp > ct) return setErrorModal('Las cuotas pagadas no pueden superar el total')
+
+    // Si hay cuotas_total definido, el estado se deriva de las cuotas (fuente de verdad),
+    // ignorando lo que diga el select manual de Estado.
+    const estadoFinal = ct !== null
+      ? (cp >= ct ? 'pagada' : 'pendiente')
+      : modalEditar.estado
+
     setGuardando(true)
     const token = localStorage.getItem('token')
     try {
@@ -138,7 +145,7 @@ export default function ModuloDeudas() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           monto: Number(modalEditar.monto), fuente: modalEditar.fuente.trim(),
-          descripcion: modalEditar.descripcion || null, estado: modalEditar.estado,
+          descripcion: modalEditar.descripcion || null, estado: estadoFinal,
           cuotas_pagadas: cp, cuotas_total: ct,
           fecha_inicio: modalEditar.fecha_inicio || null,
           fecha_fin: modalEditar.fecha_fin || null,
