@@ -116,6 +116,21 @@ Failed to load resource: the server responded with a status of 400 ()
 
 </details>
 
+<details>
+
+<summary><b>Ver detalles del modulo de ingresos y errores</b></summary>
+
+### MODULO INGRESOS
+
+* Todo bien, ningun error durante la primera revicion
+</details>
+
 ## SIGUE PENDIENTE
 * El primer punto de dependientes
 * Todo el apartado de Ahorros
+
+<details>
+
+<summary><b>Ver detalles dey errores</b></summary>
+
+</details>
