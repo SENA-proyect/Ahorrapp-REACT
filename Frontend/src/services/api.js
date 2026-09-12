@@ -192,6 +192,9 @@ export const deshabilitarCategoria = (id) =>
 export const habilitarCategoria = (id) =>
   fetchJSON(`${API_URL}/categorias/${id}/habilitar`, { method: "PATCH" });
 
+export const eliminarCategoria = (id) =>
+  fetchJSON(`${API_URL}/categorias/${id}`, { method: "DELETE" });
+
 // ── Notificaciones ────────────────────────────────────────────────────────────
 export const getNotificaciones = async (params = {}) => {
   const query = new URLSearchParams(params).toString();

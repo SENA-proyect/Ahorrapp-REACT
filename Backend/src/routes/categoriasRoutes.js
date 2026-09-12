@@ -12,6 +12,7 @@ const {
   actualizarCategoria,
   deshabilitarCategoria,
   habilitarCategoria,
+  eliminarCategoria
 } = require("../controllers/categoriasController");
 
 router.get("/", verifyToken, getCategorias);
@@ -24,5 +25,6 @@ router.post("/", verifyToken, crearCategoria);
 router.put("/:id", verifyToken, actualizarCategoria);
 router.patch("/:id/deshabilitar", verifyToken, deshabilitarCategoria);
 router.patch("/:id/habilitar", verifyToken, habilitarCategoria);
+router.delete("/:id", verifyToken, eliminarCategoria);
 
 module.exports = router;

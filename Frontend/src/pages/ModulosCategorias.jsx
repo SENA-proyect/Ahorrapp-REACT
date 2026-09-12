@@ -11,6 +11,7 @@ import {
   editarCategoria,
   deshabilitarCategoria,
   habilitarCategoria,
+  eliminarCategoria,
   getGastosPorCategoria,
   getIngresosPorCategoria,
   getAhorrosPorCategoria,
@@ -113,6 +114,10 @@ export default function ModuloCategorias() {
     if (descripcion.length > DESCRIPCION_MAX_LENGTH) {
       return alert(`La descripción no puede superar los ${DESCRIPCION_MAX_LENGTH} caracteres`)
     }
+    const yaExiste = categorias.some(
+      c => c.nombre.trim().toLowerCase() === nombre.toLowerCase()
+    )
+    if (yaExiste) return alert('Ya existe una categoría con ese nombre (activa o deshabilitada)')    
     if (guardando) return // evita doble envío si ya hay una petición en curso
 
     setGuardando(true)
@@ -165,6 +170,10 @@ export default function ModuloCategorias() {
     if (descripcion.length > DESCRIPCION_MAX_LENGTH) {
       return alert(`La descripción no puede superar los ${DESCRIPCION_MAX_LENGTH} caracteres`)
     }
+    const yaExiste = categorias.some(
+      c => c.id !== categoriaEdit.id && c.nombre.trim().toLowerCase() === nombre.toLowerCase()
+    )
+    if (yaExiste) return alert('Ya existe una categoría con ese nombre (activa o deshabilitada)')
     if (guardando) return // evita doble envío si ya hay una petición en curso
 
     setGuardando(true)
@@ -223,6 +232,22 @@ export default function ModuloCategorias() {
       }
     } catch (error) {
       alert(error.message || 'Error al habilitar la categoría')
+    }
+    
+  }
+
+  const handleEliminar = async id => {
+    if (!window.confirm('¿Eliminar esta categoría permanentemente? Esta acción no se puede deshacer.')) return
+    try {
+      const respuesta = await eliminarCategoria(id)
+      if (respuesta.ok) {
+        mostrarToast('Categoría eliminada')
+        setCategorias(prev => prev.filter(c => c.id !== id))
+      } else {
+        alert(respuesta.mensaje || 'Error al eliminar la categoría')
+      }
+    } catch (error) {
+      alert(error.message || 'Error al eliminar la categoría')
     }
   }
 
@@ -412,12 +437,20 @@ export default function ModuloCategorias() {
                     <article key={cat.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                       <p className="text-sm font-bold text-zinc-500 line-through">{cat.nombre}</p>
                       <p className="mt-1 text-sm text-zinc-600">{cat.descripcion || 'Sin descripción'}</p>
+                      <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => handleHabilitar(cat.id)}
-                        className="mt-4 w-full rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-400"
+                        className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-1.5 text-xs font-bold text-emerald-400"
                       >
                         Habilitar
                       </button>
+                      <button
+                        onClick={() => handleEliminar(cat.id)}
+                        className="ml-2 rounded-lg border border-red-400/40 bg-red-400/10 px-4 py-1.5 text-xs font-bold text-red-400"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
                     </article>
                   ))}
                 </div>
@@ -435,6 +468,12 @@ export default function ModuloCategorias() {
                               className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-1.5 text-xs font-bold text-emerald-400"
                             >
                               Habilitar
+                            </button>
+                            <button
+                              onClick={() => handleEliminar(cat.id)}
+                              className="ml-2 rounded-lg border border-red-400/40 bg-red-400/10 px-4 py-1.5 text-xs font-bold text-red-400"
+                            >
+                              Eliminar
                             </button>
                           </td>
                         </tr>

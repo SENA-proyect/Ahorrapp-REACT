@@ -453,6 +453,35 @@ const habilitarCategoria = async (req, res) => {
   }
 };
 
+// controllers/categoriasController.js
+const eliminarCategoria = async (req, res) => {
+  const id_usuario = req.usuario.id;
+  const { id } = req.params;
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT id_categoria, activa FROM categorias
+       WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
+      [id, id_usuario]
+    );
+
+    if (rows.length === 0) {
+      return res.status(403).json({ ok: false, mensaje: "No tienes permiso para eliminar esta categoria" });
+    }
+    if (rows[0].activa) {
+      return res.status(409).json({ ok: false, mensaje: "Solo puedes eliminar categorías deshabilitadas" });
+    }
+
+    await pool.query("DELETE FROM categorias WHERE id_categoria = $1", [id]);
+    return res.status(200).json({ ok: true, mensaje: "Categoria eliminada" });
+  } catch (error) {
+    console.error("Error en eliminarCategoria:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
+// agregar "eliminarCategoria" al module.exports
+
 module.exports = {
   getCategorias,
   getGastosPorCategoria,
@@ -464,4 +493,5 @@ module.exports = {
   actualizarCategoria,
   deshabilitarCategoria,
   habilitarCategoria,
+  eliminarCategoria
 };

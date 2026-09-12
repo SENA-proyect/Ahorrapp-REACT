@@ -35,5 +35,7 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
 
 ### CATEGORIAS
 
+* Me permite registrar varias categorias con el mismo nombre
+* No me da la opcion de eliminar una categoria personalizada incluso ya estando deshabilitada
 
 </details>
