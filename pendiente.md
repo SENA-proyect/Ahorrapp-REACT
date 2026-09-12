@@ -114,8 +114,6 @@ Failed to load resource: the server responded with a status of 400 ()
 
 * A pesar de que el formulario de editar no lleva el valor del dependiente (en caso de que este registrado) si no muevo nada y simplemente acepto los cambios se conserva el valor del dependiente a pesar de que visualmente en el formulario este apartado aparecia como gasto propio
 
-
-
 </details>
 
 ## SIGUE PENDIENTE
