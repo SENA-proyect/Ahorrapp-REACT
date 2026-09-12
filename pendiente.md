@@ -39,3 +39,15 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
 * No me da la opcion de eliminar una categoria personalizada incluso ya estando deshabilitada
 
 </details>
+
+<details>
+
+<summary><b>Ver detalles de dependientes y errores</b></summary>
+
+### DEPENDIENTES
+* Definir bien como va funcionar la parte del "peso economico"
+
+</details>
+
+## SIGUE PENDIENTE
+* El primer punto de dependientes

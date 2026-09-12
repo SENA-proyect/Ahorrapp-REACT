@@ -117,7 +117,7 @@ export default function ModuloCategorias() {
     const yaExiste = categorias.some(
       c => c.nombre.trim().toLowerCase() === nombre.toLowerCase()
     )
-    if (yaExiste) return alert('Ya existe una categoría con ese nombre (activa o deshabilitada)')    
+    if (yaExiste) return alert('Ya existe una categoría con ese nombre (si esta deshabilitada considera habilitarla)')    
     if (guardando) return // evita doble envío si ya hay una petición en curso
 
     setGuardando(true)
