@@ -12,9 +12,9 @@ const navItems = [
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
   { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
-  { href: '/Noticias', emoji: '📰', label: 'Noticias' },
   { href: '/Reportes', emoji: '📈', label: 'Reportes' },
-  { href: '/exportar', emoji: '📤', label: 'Exportar' },
+  { href: '/Noticias', emoji: '📰', label: 'Noticias' },
+  // { href: '/exportar', emoji: '📤', label: 'Exportar' },
 ]
 
 export default function HeaderModulos({ section = 'Dashboard' }) {
@@ -47,8 +47,8 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
 
   const navButtonClass = isActive =>
     isActive
-      ? 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-bold text-amber-300 bg-amber-400/20 border border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.4)] transition-all'
-      : 'w-full md:w-auto flex items-center gap-2 px-4 py-3 md:px-3 md:py-2 rounded-xl md:rounded-[10px] text-left font-semibold text-white bg-white/10 border border-white/5 hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)] transition-all'
+      ? 'w-full md:w-auto flex items-center gap-1.5 px-4 py-3 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 rounded-xl md:rounded-[10px] text-left font-bold text-amber-300 bg-amber-400/20 border border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.4)] transition-all whitespace-nowrap'
+      : 'w-full md:w-auto flex items-center gap-1.5 px-4 py-3 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 rounded-xl md:rounded-[10px] text-left font-semibold text-white bg-white/10 border border-white/5 hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)] transition-all whitespace-nowrap'
 
   const handleLogout = () => { 
     localStorage.clear();
@@ -159,7 +159,7 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
         </div>
 
         {/* <ul className="hidden flex-wrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base"> */}
-        <ul className="hidden flex-nowrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base">
+        <ul className="hidden flex-wrap items-center justify-center gap-x-2 gap-y-2 pb-2 text-sm md:flex lg:gap-x-3 lg:gap-y-3 lg:text-base">
           {navItems.map(item => {
             const isActive = location.pathname === item.href
 

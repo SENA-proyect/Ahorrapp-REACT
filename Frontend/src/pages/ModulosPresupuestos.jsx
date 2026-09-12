@@ -35,7 +35,7 @@ const BarraEjecucion = ({ label, presupuestado, ejecutado, color }) => {
 }
 
 // Formulario de perfil (crear / editar)
-const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '28', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
+const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '1', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
 
 function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
   const [form, setForm] = useState(inicial || DEFAULTS)
@@ -53,7 +53,7 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
       <label className={labelCls}>Descripción</label>
       <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
 
-      <label className={labelCls}>Día de corte (1–28)</label>
+      <label className={labelCls}>Día de corte (1–31)</label>
       <input className={inputCls} type="number" name="dia_corte" min="1" max="28" value={form.dia_corte} onChange={handleChange} />
 
       <p className={`${labelCls} mb-2`}>Distribución del presupuesto (%)</p>

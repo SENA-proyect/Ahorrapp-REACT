@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { obtenerInformeCompleto } from "../services/api";
 import { generarReportePDF } from "../utils/generarreportepdf";
+import HeaderModulos from "../components/HeaderModulos";
 
 const formatearCOP = (valor) => {
   return new Intl.NumberFormat("es-CO", {
@@ -134,7 +135,16 @@ export default function Reportes() {
   const resumen = informe?.resumen ?? {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
+    <div
+      className="min-h-screen w-full text-white overflow-x-hidden"
+      style={{
+        background:
+          'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)',
+      }}
+    >
+      <HeaderModulos section="Reportes" />
+      <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+
       <div className="mx-auto max-w-7xl px-6 py-8">
 
         {/* Encabezado */}

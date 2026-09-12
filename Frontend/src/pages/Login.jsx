@@ -171,7 +171,7 @@ export default function Login() {
     setCargando(true);
 
     try {
-      const { registerUser } = await import("../api");
+      const { registerUser } = await import("../services/api");
       const respuesta = await registerUser({
         Nombre: nombre,
         Apellido: apellido,
