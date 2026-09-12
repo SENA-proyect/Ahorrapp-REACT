@@ -57,6 +57,8 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
 
 * Me permite editar una deuda ya pagada, modificando el numero de cuotas pagadas, si modifico esto la deuda sigue apareciendo como pagada a pesar de que por dar un ejemplo tengo 4/5 deudas pagadas
 
+* Elimine la opcion de que el usuario pueda seleccionar el estado de la deuda (pagada/pendiente) con el fin de evitar errores de logica, el backend se encarga de llenar este campo automaticamente en base a las cuotas pagadas
+
 </details>
 
 ## SIGUE PENDIENTE

@@ -414,7 +414,7 @@ export default function ModuloDeudas() {
             <label className={labelCls}>Descripción</label>
             <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
-            <label className={labelCls}>Estado</label>
+            {/* <label className={labelCls}>Estado</label>
             <select
               className={selectCls}
               style={{ colorScheme: 'dark' }}
@@ -424,7 +424,7 @@ export default function ModuloDeudas() {
             >
               <option value="pendiente" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Pendiente</option>
               <option value="pagada" style={{ backgroundColor: '#1f2937', color: '#f4f4f5' }}>Pagada</option>
-            </select>
+            </select> */}
 
             <label className={labelCls}>Cuotas pagadas</label>
             <input className={inputCls} type="number" name="cuotas_pagadas" min="0" step="1" value={modalEditar.cuotas_pagadas} onChange={handleChange} />
