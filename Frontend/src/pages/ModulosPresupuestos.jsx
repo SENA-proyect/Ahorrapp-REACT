@@ -130,10 +130,13 @@ export default function ModuloPresupuestos() {
   const [modalAjustar,  setModalAjustar]  = useState(false)
   const [confirmarId,   setConfirmarId]   = useState(null)
   const [confirmarCierre, setConfirmarCierre] = useState(false)
+  const [confirmarCambio, setConfirmarCambio] = useState(null) // id del perfil a activar, pendiente de cerrar período actual
+  const [cambiandoPerfil, setCambiandoPerfil] = useState(false)
   const [ingresoInput,  setIngresoInput]  = useState('')
   const [guardando,     setGuardando]     = useState(false)
   const [eliminando,    setEliminando]    = useState(false)
   const [errorModal,    setErrorModal]    = useState(null)
+  
 
   const cargar = async () => {
     setCargando(true)
@@ -157,13 +160,34 @@ export default function ModuloPresupuestos() {
   //   } catch (e) { alert(e.message) }
   // }
 
+ // ── Activar perfil ──
   const handleActivar = async (id) => {
+    if (periodo) { setConfirmarCambio(id); return }
     try {
       await activarPerfil(id)
       const per = await getPeriodoActivo().catch(() => null)
       await cargar()
       if (!per?.data) { setIngresoInput(''); setErrorModal(null); setModalAbrirPer(true) }
     } catch (e) { alert(e.message) }
+  }
+
+  // ── Cerrar período actual + activar otro perfil, en un solo paso ──
+  const handleCambiarPerfil = async () => {
+    if (!confirmarCambio) return
+    setCambiandoPerfil(true)
+    try {
+      await cerrarPeriodo()
+      await activarPerfil(confirmarCambio)
+      await cargar()
+      setConfirmarCambio(null)
+      setIngresoInput('')
+      setErrorModal(null)
+      setModalAbrirPer(true)
+    } catch (e) {
+      alert(e.message)
+    } finally {
+      setCambiandoPerfil(false)
+    }
   }
 
   // ── Eliminar perfil ──
@@ -539,6 +563,33 @@ export default function ModuloPresupuestos() {
           </div>
         </div>
       )}
+
+      {/* Modal Cambiar de perfil (cierra período actual + activa otro) */}
+      {confirmarCambio && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <div className="w-full max-w-[420px] rounded-[20px] p-7 border border-amber-400/25 shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
+            style={{ background: 'rgba(15,23,42,0.97)' }}>
+            <h4 className="text-lg font-extrabold text-amber-400 mb-2">🔁 ¿Cambiar de perfil?</h4>
+            <p className="text-sm text-zinc-400">
+              Tienes un período activo en <strong className="text-zinc-200">{perfilActivo?.Nombre}</strong>.
+              Para activar este otro perfil, primero hay que <strong className="text-zinc-200">cerrar el período actual</strong>
+              {' '}. Después podrás abrir uno nuevo con el perfil elegido.
+            </p>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button onClick={() => setConfirmarCambio(null)} disabled={cambiandoPerfil}
+                className="px-5 py-2.5 rounded-[10px] text-sm font-bold bg-transparent text-zinc-400 border border-white/[0.15] hover:bg-white/[0.07] transition-colors">
+                Cancelar
+              </button>
+              <button onClick={handleCambiarPerfil} disabled={cambiandoPerfil}
+                className="px-5 py-2.5 rounded-[10px] text-sm font-bold text-[#0f172a] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}>
+                {cambiandoPerfil ? 'Cambiando...' : 'Cerrar período y cambiar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

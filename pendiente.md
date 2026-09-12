@@ -8,7 +8,7 @@ La vista presenta errores con algunos endpoints tales como:
 Originalmente pensaba que era un error de conexion debido a un error 300 pero ya revise ese punto, seguire en la busqueda de alguna brecha de me de alguna idea de donde se pudo originar el error
 
 <details>
-<summary><b>📋 Ver detalles de Presupuestos y Errores</b></summary>
+<summary><b>Ver detalles de Presupuestos y Errores</b></summary>
 
 ### PRESUPUESTOS
 * Doble click innecesario al momento de abrir y activar un periodo. Lo mejor es implementar la lógica de que al "activar" el periodo se abra inmediatamente la modal del ingreso estimado.
@@ -26,5 +26,14 @@ Originalmente pensaba que era un error de conexion debido a un error 300 pero ya
   ```
 
 * El día de corte permite poner días superiores a 31. No existen meses que duren 32 días.
+* Al tener un periodo activo y querer activar otro sin cerrar el periodo ocurre un error 409
+</details>
+
+<details>
+
+<summary><b>Ver detalles de categorias y errores</b></summary>
+
+### CATEGORIAS
+
 
 </details>
