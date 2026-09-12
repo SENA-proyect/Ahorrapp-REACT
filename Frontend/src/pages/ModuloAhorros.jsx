@@ -10,7 +10,11 @@ import { useNotificaciones } from '../context/NotificacionesContext'
 const API = 'https://ahorrapp-react.onrender.com/api/movimientos'
 
 const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
-const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
+const fmtFecha = (f) => {
+  if (!f) return '—'
+  const [y, m, d] = f.slice(0, 10).split('-')
+  return `${d}/${m}/${y}`
+}
 
 const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-red-400/60 focus:ring-2 focus:ring-red-400/20'
 const selectCls = inputCls 
@@ -57,7 +61,7 @@ export default function ModuloAhorros() {
   const cargar = () => {
     setCargando(true)
     const token = localStorage.getItem('token')
-    fetch(`${API}/ahorros`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API}/ahorros`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
       .then(r => r.json())
       .then(d => { if (Array.isArray(d)) setAhorros(d) })
       .catch(() => {})

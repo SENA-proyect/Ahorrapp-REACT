@@ -23,7 +23,10 @@ const NOMBRE_MAX_LENGTH = 80
 const OCUPACION_MAX_LENGTH = 80
 const PESO_VALORES_VALIDOS = [1, 2, 3, 4, 5]
 // Fecha máxima permitida: hoy (un dependiente no puede haber nacido en el futuro)
-const HOY_ISO = new Date().toISOString().split('T')[0]
+const HOY_ISO = (() => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+})()
 
 const FORM_VACIO = { Nombre: '', Relacion: '', Ocupacion: '', Fecha_nacimiento: '', Peso_economico: '3' }
 
@@ -49,7 +52,7 @@ const Dependientes = () => {
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
-    fetch(`${API_URL}/dependientes`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/dependientes`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
       .then(res => res.json())
       .then(data => setDependientes(Array.isArray(data) ? data : []))
       .catch(err => console.error('Error cargando dependientes:', err))
@@ -275,7 +278,7 @@ const Dependientes = () => {
 
               <label className={labelCls}>Peso Económico</label>
               {/* <select className= name="Relacion" value={formDatos.Relacion} onChange={handleChange} required disabled={guardando}> */}
-              <select className={`${selectCls} [&>option]:bg-zinc-800`} style={{ colorScheme: 'dark' }} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} rquired disabled={guardando}>
+              <select className={`${selectCls} [&>option]:bg-zinc-800`} style={{ colorScheme: 'dark' }} name="Peso_economico" value={formDatos.Peso_economico} onChange={handleChange} required disabled={guardando}>
                 {PESO_VALORES_VALIDOS.map(p => (
                   <option key={p} value={p}>{p} - {PESO_LABELS[p]}</option>
                 ))}

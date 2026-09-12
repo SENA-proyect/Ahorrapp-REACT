@@ -9,7 +9,7 @@ const authHeaders = () => ({
 });
 
 const fetchJSON = async (url, options = {}) => {
-  const res = await fetch(url, { headers: authHeaders(), ...options });
+  const res = await fetch(url, { headers: authHeaders(), cache: "no-store", ...options });
   if (!res.ok) throw new Error(`HTTPS ${res.status}`);
   return res.json();
 };
@@ -19,6 +19,7 @@ const fetchJSON = async (url, options = {}) => {
 const fetchPublicJSON = async (url, options = {}) => {
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
+    cache: "no-store",
     ...options,
   });
 
@@ -126,6 +127,7 @@ export const getCategorias = async () => {
 export const getGastosPorCategoria = async () => {
   const response = await fetch(`${API_URL}/categorias/gastos`, {
     headers: authHeaders(),
+    cache: "no-store",
   });
 
   const data = await response.json();
@@ -135,6 +137,7 @@ export const getGastosPorCategoria = async () => {
 export const getIngresosPorCategoria = async () => {
   const response = await fetch(`${API_URL}/categorias/ingresos`, {
     headers: authHeaders(),
+    cache: "no-store",
   });
 
   const data = await response.json();
@@ -144,6 +147,7 @@ export const getIngresosPorCategoria = async () => {
 export const getAhorrosPorCategoria = async () => {
   const response = await fetch(`${API_URL}/categorias/ahorros`, {
     headers: authHeaders(),
+    cache: "no-store",
   });
 
   const data = await response.json();
@@ -153,6 +157,7 @@ export const getAhorrosPorCategoria = async () => {
 export const getImprevistosPorCategoria = async () => {
   const response = await fetch(`${API_URL}/categorias/imprevistos`, {
     headers: authHeaders(),
+    cache: "no-store",
   });
 
   const data = await response.json();
@@ -162,6 +167,7 @@ export const getImprevistosPorCategoria = async () => {
 export const getDeudasPorCategoria = async () => {
   const response = await fetch(`${API_URL}/categorias/deudas`, {
     headers: authHeaders(),
+    cache: "no-store",
   });
 
   const data = await response.json();
@@ -394,6 +400,7 @@ export const getHistorialExportaciones = async (params = {}) => {
 
   const response = await fetch(`${API_URL}/exportar?${query}`, {
     headers: authHeaders(),
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -412,6 +419,7 @@ export const eliminarExportacion = async (id) => {
   const response = await fetch(`${API_URL}/exportar/${id}`, {
     method: "DELETE",
     headers: authHeaders(),
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -446,8 +454,9 @@ export const getUsuariosPanelAdmin = async () => {
   const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer `,
     },
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -463,8 +472,9 @@ export const getDependientesPanelAdmin = async () => {
   const response = await fetch(`${API_URL}/auth/dependientes/PanelAdmin`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer `,
     },
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -481,8 +491,9 @@ export const getTodosDependientesAdmin = async () => {
   const res = await fetch(`${API_URL}/auth/PanelDependientes`, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer `,
     },
+    cache: 'no-store',
   });
 
   if (!res.ok) {

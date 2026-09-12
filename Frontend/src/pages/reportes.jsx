@@ -50,6 +50,15 @@ const InfoItem = ({ titulo, disponible }) => {
 export default function Reportes() {
   const navigate = useNavigate();
 
+  // Formatea una fecha usando sus componentes LOCALES (evita el desfase
+  // de día que produce toISOString(), que convierte a UTC).
+  const toLocalISODate = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
   const fechaActual = new Date();
   const primerDiaMes = new Date(
     fechaActual.getFullYear(),
@@ -58,11 +67,11 @@ export default function Reportes() {
   );
 
   const [fechaInicio, setFechaInicio] = useState(
-    primerDiaMes.toISOString().split("T")[0]
+    toLocalISODate(primerDiaMes)
   );
 
   const [fechaFin, setFechaFin] = useState(
-    fechaActual.toISOString().split("T")[0]
+    toLocalISODate(fechaActual)
   );
 
   const [idPeriodo, setIdPeriodo] = useState("");

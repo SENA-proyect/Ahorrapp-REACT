@@ -61,6 +61,7 @@ export default function Noticias() {
       try {
         const res = await fetch(`${API_URL}/noticias?categoria=${categoria}&pagina=${pag}`, {
           headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
         });
 
         if (!res.ok) {

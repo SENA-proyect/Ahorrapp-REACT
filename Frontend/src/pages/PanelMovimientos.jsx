@@ -139,7 +139,9 @@ export default function PanelMovimientos() {
                       ${Number(movimiento.monto).toLocaleString('es-CO', { minimumFractionDigits: 2 })}
                     </p>
                     <p className="text-xs text-[#7d8aa8] mt-1">
-                      {movimiento.fecha ? new Date(movimiento.fecha).toLocaleDateString('es-CO') : 'N/A'}
+                      {movimiento.fecha
+                        ? movimiento.fecha.slice(0, 10).split('-').reverse().join('/')
+                        : 'N/A'}
                     </p>
                   </div>
 
@@ -165,7 +167,7 @@ export default function PanelMovimientos() {
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-[#9aa6c4]">Fecha meta</span>
                       <span className="text-[#f4f1e8]">
-                        {new Date(movimiento.fecha_meta).toLocaleDateString('es-CO')}
+                        {movimiento.fecha_meta.slice(0, 10).split('-').reverse().join('/')}
                       </span>
                     </div>
                   )}

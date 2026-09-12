@@ -14,6 +14,7 @@ const navItems = [
   { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
   { href: '/Reportes', emoji: '📈', label: 'Reportes' },
   { href: '/Noticias', emoji: '📰', label: 'Noticias' },
+  
   // { href: '/exportar', emoji: '📤', label: 'Exportar' },
 ]
 
@@ -158,7 +159,6 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
           )}
         </div>
 
-        {/* <ul className="hidden flex-wrap items-center justify-center gap-3 pb-2 text-sm md:flex lg:gap-4 lg:text-base"> */}
         <ul className="hidden flex-wrap items-center justify-center gap-x-2 gap-y-2 pb-2 text-sm md:flex lg:gap-x-3 lg:gap-y-3 lg:text-base">
           {navItems.map(item => {
             const isActive = location.pathname === item.href

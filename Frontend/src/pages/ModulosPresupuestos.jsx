@@ -8,7 +8,11 @@ import {
 import HeaderModulos from '../components/HeaderModulos'
 
 const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
-const fmtFecha = (f) => f ? new Date(f).toLocaleDateString('es-CO') : '—'
+const fmtFecha = (f) => {
+  if (!f) return '—'
+  const [y, m, d] = f.slice(0, 10).split('-')
+  return `${d}/${m}/${y}`
+}
 
 const inputCls  = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20'
 const labelCls  = 'mt-3.5 block text-[0.72rem] font-bold uppercase tracking-[0.06em] text-zinc-400'
@@ -35,7 +39,7 @@ const BarraEjecucion = ({ label, presupuestado, ejecutado, color }) => {
 }
 
 // Formulario de perfil (crear / editar)
-const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '1', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
+const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '28', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
 
 function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
   const [form, setForm] = useState(inicial || DEFAULTS)

@@ -39,6 +39,7 @@ export default function PanelUsuarios() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          cache: 'no-store',
         }
       );
 
@@ -85,7 +86,7 @@ export default function PanelUsuarios() {
       const token = localStorage.getItem('token');
       const response = await fetch(
         // `http://localhost:3000/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
-        `https://ahorrapp-react.onrender.com/api/auth/PanelUsuarios/${usuariosSeleccionado.ID_usuario}`,
+        `https://ahorrapp-react.onrender.com/api/auth/PanelUsuarios/${usuarioSeleccionado.ID_usuario}`,
         {
           method: 'PUT',
           headers: {
