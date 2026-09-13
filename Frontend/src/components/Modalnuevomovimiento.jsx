@@ -60,10 +60,10 @@ const validar = (subtipo, form) => {
     return 'El monto mínimo permitido es $50'
   if (subtipo === 'Deuda' && !form.fuente?.trim())
     return 'La fuente de la deuda es obligatoria'
-  if (subtipo === 'Deuda' && form.fecha_fin && form.fecha_inicio && form.fecha_fin < form.fecha_inicio)
-    return 'La fecha de fin no puede ser anterior a la de inicio'
-  if (subtipo === 'Ahorro' && form.fecha_meta && form.fecha_registro && form.fecha_meta < form.fecha_registro)
-    return 'La fecha meta no puede ser anterior a la de registro'
+  if (subtipo === 'Deuda' && form.fecha_fin && form.fecha_inicio && form.fecha_fin <= form.fecha_inicio)
+    return 'La fecha de fin no puede ser anterior ni igual a la de inicio'
+  if (subtipo === 'Ahorro' && form.fecha_meta && form.fecha_registro && form.fecha_meta <= form.fecha_registro)
+    return 'La fecha meta no puede ser anterior ni igual a la de registro'
   if (subtipo === 'Deuda' && form.cuotas_total && (isNaN(form.cuotas_total) || Number(form.cuotas_total) <= 0))
     return 'El número de cuotas debe ser mayor a 0'
   return null

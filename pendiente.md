@@ -1,12 +1,5 @@
 # RESTRUCTURACION
 
-### DASHBOARD
-La vista presenta errores con algunos endpoints tales como:
-· GET /api/dashboard/flujo-semanal
-· GET /api/dashboard/presupuesto-vs-ejecutado
-· GET /api/dashboard/resumen
-Originalmente pensaba que era un error de conexion debido a un error 300 pero ya revise ese punto, seguire en la busqueda de alguna brecha de me de alguna idea de donde se pudo originar el error
-
 <details>
 <summary><b>Ver detalles de Presupuestos y Errores</b></summary>
 
@@ -143,12 +136,75 @@ Failed to load resource: the server responded with a status of 400 ()
 
 * Me arroja un error 400 al momento de querer obtener un reporte, esto es debido a que no tengo creado la logia del frontend respecto al fondo de emergencia
 
+* El apartado del ID del presupuesto no es tan claro, lo mejor es modificar ese campo a una lista desgplegable con los presupuestos que tiene el usuario
+
+* No toma los datos del estado actual del fondo de emergencia
+
+* Al descargar el PDF este no toma los datos y se muestra vacio con los valores en 0%
+
+</details>
+
+<details>
+
+<summary><b>Ver detalles del panel de administrador y errores</b></summary>
+
+## PANEL DE ADMINISTRADOR (GENERAL)
+
+* En el archivo `PanelAdmin` no se toman los datos de la informacion de usuarios ni dependientes registrados en el sistema, la actividad reciente tambien se refleja como un campo vacio
+
+### PANELUSUARIO
+
+* En el formulario para editar la informacion de un usuario me permite cambiarle el nombre y apellido por numeros ademas de no tener renstricciones en el campo del correo, permitiendome poner correos inexistentes como "nose@gnail.com"
+
+### PANELDEPENDIENTES
+ 
+* Las cards traen buena informacion pero en el campo de fecha registra de la siguiente manera `2026-09-12T00:00:00.000Z`, siendo un formato inecesario, basta con el mes, dia y año
+
+* Aunque dice a quien le pertenece el dependiente (por nombre del usuario) seria util tambien agregar el ID con el cual esta registrado el usuario que registro al respectivo dependiente
+
+### PANELHISTORIAL
+
+* Es un archivo vacio, simplemente sale el mensaje de que no se pudo cargar el historial
+
+### PANELMOVIMIENTOS
+
+* Da informacion util pero no especifica a quien le pertenece esa informacion ademas de que son "movimientos" generales respecto a los modulos financieros, esta informacio seria mucho mas util en un apartado de "configuracion" en el cual solo traiga la informacion del usuario logueado con fines de llevar un registro de sus acciones (que el usuario pueda visualizar si lo desea), actualmente ya existe un archivo "configuracion.jsx" En el cual se puede dar esta informacion
+
+* Relacionado al punto anterior, la vista de movimientos con respecto al panel de usuario seria mas util si registrara el movimiento de los admin y superuser en el sentido de saber si eliminaron algun usuario, algun dependiente del usuario o modificaron el rol de algun usuario 
+
+
+</details>
+
+<details>
+
+<summary><b>Ver detalles de Configuracion y errores</b></summary>
+
+### CONFIGURACION
+
+* Es un archivo bien construido pero existen camps deshabilitados los serian utiles agregarles tales como:
+  * 1- Campo para visualizar los movimientos respecto a los modulos financieros realizados por el usuario
+  * 2- Campo para editar los datos del usuario como modificar su informacion personal (Nombre, apellido u cualquier otro campo registrado en la DB), Tambien podra modificar la contraseña y deshabilitar su cuenta (que le informe al usuario que despues de un lapso de 30 dias su cuenta sera eliminada con todos los datos en ella)
+  * 3- Un boton que solo puedan acceder los usuarios con rol id 2 y 3 (admin y superuser respectivamente), los usuarios con rol 1 no podran visualizar este boton
+
+</details>
+
+<details>
+
+<summary><b>Ver detalles de dashboard y errores</b></summary>
+
+### DASHBOARD
+
+* No esta trayendo los datos del campo de emergencia
+
 </details>
 
 ## SIGUE PENDIENTE
 * El primer punto de dependientes
-* Todo el apartado de Ahorros
 * Todo de noticias
+* Todo lo de reportes
+* Todo con respecto al panel de administrador
+* Todo con respecto al archivo de configuracion
+* Todo con respecto a la Dashboard
 
 <details>
 

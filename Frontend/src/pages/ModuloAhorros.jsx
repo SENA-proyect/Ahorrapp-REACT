@@ -39,6 +39,8 @@ const BarraProgreso = ({ acumulado, meta }) => {
   )
 }
 
+const estaCompletado = (a) => Number(a.monto_acumulado) >= Number(a.monto) && Number(a.monto) > 0
+
 export default function ModuloAhorros() {
   const navigate = useNavigate()
   const usuario  = useMemo(() => { try { return JSON.parse(localStorage.getItem('usuario')) } catch { return null } }, [])
@@ -57,6 +59,7 @@ export default function ModuloAhorros() {
   const [abonando,    setAbonando]    = useState(false)
   const [errorModal,  setErrorModal]  = useState(null)
   const [montoAbono,  setMontoAbono]  = useState('')
+  const [mostrarCompletados, setMostrarCompletados] = useState(false)
 
   const cargar = () => {
     setCargando(true)
@@ -74,6 +77,8 @@ export default function ModuloAhorros() {
   }, [])
 
   const total = useMemo(() => ahorros.reduce((a, i) => a + Number(i.monto || 0), 0), [ahorros])
+  const activos     = useMemo(() => ahorros.filter(a => !estaCompletado(a)), [ahorros])
+  const completados = useMemo(() => ahorros.filter(a =>  estaCompletado(a)), [ahorros])
 
   const abrirEditar = (a) => {
     setErrorModal(null)
@@ -97,19 +102,42 @@ export default function ModuloAhorros() {
 
   const guardar = async () => {
     setErrorModal(null)
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0)
+    
+    // 1. Corrección: Comparación segura de fechas transformándolas a objetos Date
+    if (modalEditar.fecha_meta && modalEditar.fecha_registro) {
+      const fechaMeta = new Date(modalEditar.fecha_meta)
+      const fechaRegistro = new Date(modalEditar.fecha_registro)
+      
+      if (fechaMeta <= fechaRegistro) {
+        return setErrorModal('La fecha meta no puede ser la misma o anterior a la de registro')
+      }
+    }
+    
+    // 2. Optimización: Guardamos el número en una constante para no repetir Number() e isNaN()
+    const monto = Number(modalEditar.monto)
+    if (isNaN(monto) || monto <= 0) {
       return setErrorModal('El monto debe ser mayor a 0')
-    if (modalEditar.fecha_meta && modalEditar.fecha_registro && modalEditar.fecha_meta < modalEditar.fecha_registro)
-      return setErrorModal('La fecha meta no puede ser anterior a la de registro')
+    }
+    
+    const montoAcumulado = Number(modalEditar.monto_acumulado) || 0
+    if (monto < montoAcumulado) {
+      return setErrorModal(`La meta no puede ser menor a lo ya acumulado (${fmt(montoAcumulado)})`)
+    }
+    
+    // El flujo de carga está perfecto aquí
     setGuardando(true)
     const token = localStorage.getItem('token')
+    
     try {
-      const res  = await fetch(`${API}/ahorros/${modalEditar.id}`, {
+      const res = await fetch(`${API}/ahorros/${modalEditar.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({
-          monto: Number(modalEditar.monto),
-          monto_acumulado: Number(modalEditar.monto_acumulado) || 0,
+          monto: monto,
+          monto_acumulado: montoAcumulado,
           meta: modalEditar.meta || null,
           descripcion: modalEditar.descripcion || null,
           fecha_registro: modalEditar.fecha_registro || null,
@@ -117,23 +145,49 @@ export default function ModuloAhorros() {
           id_categoria: modalEditar.id_categoria || null,
         }),
       })
-      const data = await res.json()
+      
+      // 3. Recomendación UX: Manejar respuestas si el backend no devuelve un JSON válido
+      let data = {}
+      try {
+        data = await res.json()
+      } catch {
+        // Por si el servidor responde un error 500 en texto plano u HTML
+      }
+      
       if (res.ok) {
         mostrarToast('Ahorro actualizado correctamente')
         revisarAhora()
         setModalEditar(null)
         cargar()
+      } else {
+        setErrorModal(data.mensaje || 'Error al guardar')
       }
-      else setErrorModal(data.mensaje || 'Error al guardar')
-    } catch { setErrorModal('Error al conectar con el servidor') }
-    finally { setGuardando(false) }
+    } catch { 
+      setErrorModal('Error al conectar con el servidor') 
+    } finally { 
+      setGuardando(false) 
+    }
   }
+
 
   const hacerAbono = async () => {
     setErrorModal(null)
     const monto = parseFloat(montoAbono)
-    if (!monto || monto <= 0) return setErrorModal('El monto del abono debe ser mayor a 0')
+    
+    // 1. Corrección: Validar explícitamente si es NaN o menor/igual a cero
+    if (isNaN(monto) || monto <= 0) {
+      return setErrorModal('El monto del abono debe ser mayor a 0')
+    }
+    
+    // El estado de carga se enciende JUSTO antes de operar y validar con la API
     setAbonando(true)
+    
+    const cupoDisponible = Number(modalAbonar.monto) - Number(modalAbonar.monto_acumulado)
+    if (monto > cupoDisponible) {
+      setAbonando(false) // <-- Corrección: Apagar carga antes del return
+      return setErrorModal(`El abono no puede superar el cupo disponible (${fmt(cupoDisponible)})`)
+    }
+    
     try {
       const data = await abonarAhorro(modalAbonar.id, monto)
       if (data.ok) {
@@ -141,11 +195,16 @@ export default function ModuloAhorros() {
         revisarAhora()
         setModalAbonar(null)
         cargar()
+      } else {
+        setErrorModal(data.mensaje || 'Error al abonar')
       }
-      else setErrorModal(data.mensaje || 'Error al abonar')
-    } catch { setErrorModal('Error al conectar con el servidor') }
-    finally { setAbonando(false) }
+    } catch { 
+      setErrorModal('Error al conectar con el servidor') 
+    } finally { 
+      setAbonando(false) // Esto cubre el flujo del try/catch perfectamente
+    }
   }
+
 
   const eliminar = async () => {
     setEliminando(true)
@@ -197,7 +256,7 @@ export default function ModuloAhorros() {
 
           <div className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b border-white/[0.08]">
             <h3 className="text-base font-extrabold text-amber-400">📋 Módulo de Ahorros</h3>
-            <span className="text-xs text-zinc-600">{ahorros.length} registro{ahorros.length !== 1 ? 's' : ''}</span>
+            <span className="text-xs text-zinc-600">{activos.length} registro{activos.length !== 1 ? 's' : ''}</span>
           </div>
 
           <div className="p-4 sm:p-5">
@@ -213,11 +272,17 @@ export default function ModuloAhorros() {
                   Registrar primer ahorro
                 </button>
               </div>
+            ) : activos.length === 0 ? (
+              <div className="py-12 flex flex-col items-center gap-3 text-center">
+                <span className="text-4xl">🎉</span>
+                <p className="text-zinc-300 text-sm font-semibold">¡Alcanzaste todas tus metas activas!</p>
+                <p className="text-zinc-500 text-xs">Revisá la sección de "Metas Alcanzadas" más abajo.</p>
+              </div>
             ) : (
               <>
                 {/* Mobile cards */}
                 <div className="flex flex-col gap-3 md:hidden">
-                  {ahorros.map(a => (
+                  {activos.map(a => (
                     <article key={a.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -249,7 +314,7 @@ export default function ModuloAhorros() {
                       </tr>
                     </thead>
                     <tbody>
-                      {ahorros.map(a => (
+                      {activos.map(a => (
                         <tr key={a.id} className="border-b border-white/5 hover:bg-white/[0.04] transition-colors">
                           <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(a.fecha)}</td>
                           <td className="px-4 py-3 text-sm text-zinc-300">
@@ -278,6 +343,81 @@ export default function ModuloAhorros() {
             )}
           </div>
         </section>
+
+        {/* Metas alcanzadas (colapsable) */}
+        {completados.length > 0 && (
+          <section className="w-full rounded-2xl border border-white/10 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
+            style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)' }}>
+            <button onClick={() => setMostrarCompletados(p => !p)}
+              className="w-full flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b border-white/[0.08] hover:bg-white/[0.03] transition-colors">
+              <h3 className="text-base font-extrabold text-emerald-400">✓ Metas Alcanzadas</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-zinc-600">{completados.length} registro{completados.length !== 1 ? 's' : ''}</span>
+                <span className="text-zinc-500 text-sm">{mostrarCompletados ? '▲' : '▼'}</span>
+              </div>
+            </button>
+            {mostrarCompletados && (
+              <div className="p-4 sm:p-5">
+                {/* Mobile cards */}
+                <div className="flex flex-col gap-3 md:hidden">
+                  {completados.map(a => (
+                    <article key={a.id} className="rounded-xl border border-emerald-400/20 bg-emerald-400/[0.04] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-white truncate">🎉 {a.meta || 'Sin meta'}</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">{fmtFecha(a.fecha)}</p>
+                          {a.descripcion && <p className="text-xs text-zinc-400 mt-1 truncate">{a.descripcion}</p>}
+                          <BarraProgreso acumulado={a.monto_acumulado} meta={a.monto} />
+                        </div>
+                        <p className="shrink-0 text-base font-black text-emerald-400">{fmt(a.monto)}</p>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button onClick={() => abrirEditar(a)} className="rounded-lg border border-blue-400/50 bg-blue-400/10 py-2 text-xs font-bold text-blue-400 hover:bg-blue-400/20 transition-colors">Editar</button>
+                        <button onClick={() => setConfirmarId(a.id)} className="rounded-lg border border-red-400/50 bg-red-400/10 py-2 text-xs font-bold text-red-400 hover:bg-red-400/20 transition-colors">Eliminar</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full min-w-[900px] border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        {['Fecha', 'Meta / Objetivo', 'Categoría', 'Progreso', 'Meta fecha', 'Monto', 'Acciones'].map(col => (
+                          <th key={col} className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500">{col}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {completados.map(a => (
+                        <tr key={a.id} className="border-b border-white/5 hover:bg-emerald-400/[0.03] transition-colors">
+                          <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(a.fecha)}</td>
+                          <td className="px-4 py-3 text-sm text-zinc-300">
+                            <p className="font-semibold text-white">🎉 {a.meta || '—'}</p>
+                            {a.descripcion && <p className="text-xs text-zinc-500 truncate max-w-[160px]">{a.descripcion}</p>}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-300">{a.categoria || '—'}</td>
+                          <td className="px-4 py-3 min-w-[160px]">
+                            <BarraProgreso acumulado={a.monto_acumulado} meta={a.monto} />
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-300">{fmtFecha(a.fecha_meta)}</td>
+                          <td className="px-4 py-3 text-sm font-extrabold text-emerald-400">{fmt(a.monto)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <button onClick={() => abrirEditar(a)} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-400/50 bg-blue-400/10 text-blue-400 hover:bg-blue-400/20 transition-colors">Editar</button>
+                              <button onClick={() => setConfirmarId(a.id)} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-red-400/50 bg-red-400/10 text-red-400 hover:bg-red-400/20 transition-colors">Eliminar</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
       </main>
 
       <footer className="w-full px-4 py-6 text-center font-mono text-[0.7rem] text-zinc-600">
