@@ -153,6 +153,16 @@ const getPresupuestoVsEjecutado = async (req, res) => {
       [ID_usuario, fi, ff]
     );
 
+    const { rows: [emeReal] } = await pool.query(
+      `SELECT COALESCE(SUM(mfe.monto), 0)::float AS total
+      FROM movimientos_fondo_emergencia mfe
+      JOIN fondos_emergencia fe ON mfe.id_fondo = fe.id_fondo
+      WHERE fe.id_usuario = $1
+        AND mfe.tipo = 'aporte'
+        AND mfe.fecha_registro BETWEEN $2 AND $3`,
+      [ID_usuario, fi, ff]
+    );
+
     const pct = (eje, pre) =>
       pre > 0 ? parseFloat(((eje / pre) * 100).toFixed(1)) : 0;
 
@@ -188,9 +198,9 @@ const getPresupuestoVsEjecutado = async (req, res) => {
       {
         categoria:     "Emergencia",
         presupuestado: Number(periodo.Monto_emergencia),
-        ejecutado:     0, 
-        disponible:    Number(periodo.Monto_emergencia),
-        porcentaje:    0,
+        ejecutado:     Number(emeReal.total),
+        disponible:    Number(periodo.Monto_emergencia) - Number(emeReal.total),
+        porcentaje:    pct(Number(emeReal.total), Number(periodo.Monto_emergencia)),
       },
     ];
 
