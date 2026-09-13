@@ -9,6 +9,14 @@ const ROLES = [
   { id: 3, nombre: 'superuser' },
 ];
 
+// Solo letras (con tildes/ñ), espacios, apóstrofes y guiones. Nada de números o símbolos raros.
+const NOMBRE_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
+// Validación de formato de correo razonable (no verifica que el dominio exista realmente).
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+// Evita que se puedan escribir dígitos u otros símbolos no permitidos mientras se tipea
+const limpiarTextoNombre = (valor) => valor.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, '');
+
 export default function PanelUsuarios() {
   const { user } = useAuth();
   const esSuperusuario = user?.roles?.includes('superuser');
@@ -77,6 +85,21 @@ export default function PanelUsuarios() {
 
     if (!nombre || !apellido || !email) {
       setError('Completa todos los campos');
+      return;
+    }
+
+    if (!NOMBRE_REGEX.test(nombre.trim())) {
+      setError('El nombre solo puede contener letras');
+      return;
+    }
+
+    if (!NOMBRE_REGEX.test(apellido.trim())) {
+      setError('El apellido solo puede contener letras');
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(email.trim())) {
+      setError('Ingresa un correo electrónico válido');
       return;
     }
 
@@ -322,7 +345,7 @@ export default function PanelUsuarios() {
                 <input
                   type="text"
                   value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
+                  onChange={(e) => setNombre(limpiarTextoNombre(e.target.value))}
                   className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 />
               </div>
@@ -332,7 +355,7 @@ export default function PanelUsuarios() {
                 <input
                   type="text"
                   value={apellido}
-                  onChange={(e) => setApellido(e.target.value)}
+                  onChange={(e) => setApellido(limpiarTextoNombre(e.target.value))}
                   className="w-full px-3 py-2 border border-[#1c2942] bg-[#080c18] rounded-lg text-sm text-[#f4f1e8] focus:outline-none focus:border-[#e0b855]/50"
                 />
               </div>

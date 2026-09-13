@@ -71,7 +71,10 @@ const obtenerArray = (objeto, posiblesClaves = []) => {
     return objeto;
   }
 
-  for (const clave of posiblesClaves) {
+  // "datos" es la clave real que usa el backend en TODOS los reportes por
+  // categoría/fuente/etc. Se revisa siempre primero, además de cualquier
+  // otra clave específica que se haya pasado.
+  for (const clave of ["datos", ...posiblesClaves]) {
     if (Array.isArray(objeto?.[clave])) {
       return objeto[clave];
     }
@@ -688,6 +691,7 @@ const generarResumen = (
       titulo: "Ingresos",
       valor: formatoCOP(
         valorPrimero(resumen, [
+          "ingresos",
           "totalIngresos",
           "total_ingresos",
         ])
@@ -698,6 +702,7 @@ const generarResumen = (
       titulo: "Gastos",
       valor: formatoCOP(
         valorPrimero(resumen, [
+          "gastos",
           "totalGastos",
           "total_gastos",
         ])
@@ -708,6 +713,7 @@ const generarResumen = (
       titulo: "Ahorros",
       valor: formatoCOP(
         valorPrimero(resumen, [
+          "ahorros",
           "totalAhorros",
           "total_ahorros",
         ])
@@ -718,6 +724,7 @@ const generarResumen = (
       titulo: "Deudas",
       valor: formatoCOP(
         valorPrimero(resumen, [
+          "pagos_deudas",
           "totalDeudas",
           "total_deudas",
         ])
@@ -728,6 +735,7 @@ const generarResumen = (
       titulo: "Imprevistos",
       valor: formatoCOP(
         valorPrimero(resumen, [
+          "imprevistos",
           "totalImprevistos",
           "total_imprevistos",
         ])

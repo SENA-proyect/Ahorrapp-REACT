@@ -42,6 +42,12 @@ export default function PanelDependientes() {
     return nombre ? nombre.charAt(0).toUpperCase() : '?';
   };
 
+  // Helper para mostrar solo día/mes/año, sin la hora ni la 'Z' del ISO string
+  const formatearFecha = (fechaISO) => {
+    if (!fechaISO) return 'N/A';
+    return fechaISO.slice(0, 10).split('-').reverse().join('/');
+  };
+
   return (
     <div className="min-h-screen bg-[#080c18]">
 
@@ -110,7 +116,10 @@ export default function PanelDependientes() {
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
                       <span className="text-sm text-[#9aa6c4]">
-                        Dependiente de <span className="text-[#f4f1e8]">{dependiente.usuario_nombre}</span>
+                        Dependiente de{' '}
+                        <span className="text-[#f4f1e8]">{dependiente.usuario_nombre}</span>
+                        {' '}
+                        <span className="text-[#7d8aa8]">(ID {dependiente.ID_usuario})</span>
                       </span>
                     </div>
 
@@ -132,7 +141,7 @@ export default function PanelDependientes() {
                         <line x1="3" y1="10" x2="21" y2="10" />
                       </svg>
                       <span className="text-sm text-[#9aa6c4]">
-                        {dependiente.Fecha_nacimiento}
+                        {formatearFecha(dependiente.Fecha_nacimiento)}
                       </span>
                     </div>
                   </div>

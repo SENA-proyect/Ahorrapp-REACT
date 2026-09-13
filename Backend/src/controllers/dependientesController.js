@@ -5,6 +5,7 @@
 //! Preguntar que carajos hizo el responsable de esta vista
 
 const pool = require('../db/connection');
+const { registrarHistorial } = require('./historialController');
 
 // ── GET: Obtener dependientes del usuario autenticado ──────
 const getDependientes = async (req, res) => {
@@ -95,6 +96,13 @@ const deleteDependiente = async (req, res) => {
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Dependiente no encontrado' });
     }
+
+    await registrarHistorial(
+      ID_usuario,
+      'Eliminó un dependiente',
+      `Dependiente eliminado: ID ${id}`
+    );
+
     res.json({ message: 'Dependiente eliminado' });
   } catch (err) {
     console.error('Error al eliminar dependiente:', err);

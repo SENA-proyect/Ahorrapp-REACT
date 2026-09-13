@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendResetCodeEmail } = require("../service/MailService");
+const { registrarHistorial } = require("./historialController");
 require("dotenv").config();
 
 // ── Helper de errores ────────────────────────────────────────────────────────
@@ -460,6 +461,12 @@ const actualizarRolUsuario = async (req, res) => {
       [ID_rol, id]
     );
 
+    await registrarHistorial(
+      req.usuario.id,
+      "Actualizó el rol de un usuario",
+      `Usuario ID ${id} → nuevo rol: ${rolExiste[0].ID_rol}`
+    );
+
     return res.status(200).json({
       ok: true,
       mensaje: "Rol actualizado exitosamente",
@@ -499,6 +506,12 @@ const deleteUsuario = async (req, res) => {
       [id]
     );
 
+    await registrarHistorial(
+      req.usuario.id,
+      "Eliminó un usuario",
+      `Usuario eliminado: ID ${id}`
+    );
+
     return res.status(200).json({
       ok: true,
       mensaje: "Usuario eliminado exitosamente",
@@ -529,7 +542,7 @@ const getUsuariosPanelAdmin = async (req, res) => {
 const getDependientesPanelAdmin = async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT COUNT(*) AS "totalDependientes" FROM dependientes'
+      'SELECT COUNT(*)::int AS "totalDependientes" FROM dependientes'
     );
     res.json ({
       totalDependientes: rows.length > 0 ? rows [0].totalDependientes : 0,
