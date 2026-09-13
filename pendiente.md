@@ -200,7 +200,6 @@ Failed to load resource: the server responded with a status of 400 ()
 
 ## SIGUE PENDIENTE
 * El primer punto de dependientes
-* Todo con respecto a la Dashboard
 * Todo lo de reportes
 * Todo de noticias
 * Todo con respecto al panel de administrador

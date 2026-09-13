@@ -258,6 +258,9 @@ export const activarPerfil = (id) =>
   fetchJSON(`${API_URL}/presupuestos/${id}/activar`, { method: "PUT" });
  
 // ── Períodos ──────────────────────────────────────────────────────────────────
+export const getPeriodos = (pagina = 1, limite = 50) =>
+  fetchJSON(`${API_URL}/presupuestos/periodos?pagina=${pagina}&limite=${limite}`);
+
 export const getPeriodoActivo = () =>
   fetchJSON(`${API_URL}/presupuestos/periodos/activo`);
  
@@ -667,6 +670,14 @@ export const obtenerInformeCompleto = async ({
   fechaFin,
   idPeriodo = null,
 }) => {
+  // Cada llamada se protege individualmente: si una falla (ej. el usuario
+  // todavía no tiene fondo de emergencia creado -> 404), esa sección queda
+  // en null en vez de tumbar el informe completo.
+  const seguro = (promesa) => promesa.catch((e) => {
+    console.warn('Sección del informe no disponible:', e.message);
+    return null;
+  });
+
   const [
     resumen,
     gastosCategoria,
@@ -683,25 +694,25 @@ export const obtenerInformeCompleto = async ({
     estadoDeudas,
     estadoFondoEmergencia,
   ] = await Promise.all([
-    getReporteResumen(fechaInicio, fechaFin),
-    getReporteGastosCategorias(fechaInicio, fechaFin),
-    getReporteGastosDependientes(fechaInicio, fechaFin),
-    getReporteIngresosCategorias(fechaInicio, fechaFin),
-    getReporteIngresosFuentes(fechaInicio, fechaFin),
-    getReporteAhorros(fechaInicio, fechaFin),
-    getReporteDeudas(fechaInicio, fechaFin),
-    getReporteImprevistosCategorias(fechaInicio, fechaFin),
-    getReporteFondoEmergencia(fechaInicio, fechaFin),
-    getReporteEvolucion(fechaInicio, fechaFin),
-    getEstadoAhorros(),
-    getEstadoDeudas(),
-    getEstadoFondoEmergencia(),
+    seguro(getReporteResumen(fechaInicio, fechaFin)),
+    seguro(getReporteGastosCategorias(fechaInicio, fechaFin)),
+    seguro(getReporteGastosDependientes(fechaInicio, fechaFin)),
+    seguro(getReporteIngresosCategorias(fechaInicio, fechaFin)),
+    seguro(getReporteIngresosFuentes(fechaInicio, fechaFin)),
+    seguro(getReporteAhorros(fechaInicio, fechaFin)),
+    seguro(getReporteDeudas(fechaInicio, fechaFin)),
+    seguro(getReporteImprevistosCategorias(fechaInicio, fechaFin)),
+    seguro(getReporteFondoEmergencia(fechaInicio, fechaFin)),
+    seguro(getReporteEvolucion(fechaInicio, fechaFin)),
+    seguro(getEstadoAhorros()),
+    seguro(getEstadoDeudas()),
+    seguro(getEstadoFondoEmergencia()),
   ]);
 
   let presupuesto = null;
 
   if (idPeriodo) {
-    presupuesto = await getReportePresupuesto(idPeriodo);
+    presupuesto = await seguro(getReportePresupuesto(idPeriodo));
   }
 
   return {

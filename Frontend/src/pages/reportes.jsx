@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { obtenerInformeCompleto } from "../services/api";
+import { obtenerInformeCompleto, getPeriodos } from "../services/api";
 import { generarReportePDF } from "../utils/generarreportepdf";
 import HeaderModulos from "../components/HeaderModulos";
 
@@ -75,6 +75,38 @@ export default function Reportes() {
   );
 
   const [idPeriodo, setIdPeriodo] = useState("");
+  const [periodos, setPeriodos] = useState([]);
+  const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
+
+  useEffect(() => {
+    getPeriodos()
+      .then((res) => setPeriodos(res?.data ?? []))
+      .catch(() => setPeriodos([]))
+      .finally(() => setCargandoPeriodos(false));
+  }, []);
+
+  // Un renglón por presupuesto (no uno por cada período histórico): de
+  // cada presupuesto se elige el período "abierto" si hay uno, o si no,
+  // el cerrado más reciente (por fecha_fin).
+  const presupuestosUnicos = useMemo(() => {
+    const porPresupuesto = new Map();
+
+    for (const p of periodos) {
+      const actual = porPresupuesto.get(p.ID_presupuesto);
+      if (!actual) {
+        porPresupuesto.set(p.ID_presupuesto, p);
+        continue;
+      }
+      const actualGana =
+        actual.Estado === "abierto" ||
+        (p.Estado !== "abierto" && actual.Fecha_fin >= p.Fecha_fin);
+      if (!actualGana) porPresupuesto.set(p.ID_presupuesto, p);
+    }
+
+    return [...porPresupuesto.values()].sort((a, b) =>
+      a.Perfil_nombre.localeCompare(b.Perfil_nombre)
+    );
+  }, [periodos]);
 
   const [informe, setInforme] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -214,17 +246,28 @@ export default function Reportes() {
 
             <div>
               <label className="mb-2 block text-sm text-gray-400">
-                ID del periodo de presupuesto
+                Presupuesto
               </label>
 
-              <input
-                type="number"
-                min="1"
+              <select
                 value={idPeriodo}
                 onChange={(e) => setIdPeriodo(e.target.value)}
-                placeholder="Opcional"
-                className="w-full rounded-xl border border-white/10 bg-gray-900 px-4 py-3 text-white outline-none placeholder:text-gray-600 focus:border-amber-400"
-              />
+                disabled={cargandoPeriodos}
+                className="w-full rounded-xl border border-white/10 bg-gray-900 px-4 py-3 text-white outline-none focus:border-amber-400 disabled:opacity-50"
+              >
+                <option value="">
+                  {cargandoPeriodos ? "Cargando..." : "Ninguno (opcional)"}
+                </option>
+                {presupuestosUnicos.map((p) => (
+                  <option key={p.ID_presupuesto} value={p.ID_periodo}>
+                    {p.Perfil_nombre} — {p.Fecha_inicio?.slice(0, 10)} → {p.Fecha_fin?.slice(0, 10)}
+                    {p.Estado === "abierto" ? " (en curso)" : " (último cerrado)"}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs text-gray-500">
+                Se usará el período abierto de ese presupuesto, o si no hay uno, el último cerrado.
+              </p>
             </div>
 
           </div>
@@ -459,6 +502,29 @@ export default function Reportes() {
                   Se encontró información para el periodo de presupuesto
                   seleccionado.
                 </p>
+              </section>
+            )}
+
+            {/* Estado actual del fondo de emergencia */}
+            {informe.estadoFondoEmergencia?.data && (
+              <section className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6">
+                <h2 className="text-xl font-semibold text-white">
+                  Fondo de emergencia
+                </h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <ResumenCard
+                    titulo="Saldo actual"
+                    valor={formatearCOP(informe.estadoFondoEmergencia.data.saldo_actual)}
+                  />
+                  <ResumenCard
+                    titulo="Meta"
+                    valor={formatearCOP(informe.estadoFondoEmergencia.data.meta)}
+                  />
+                  <ResumenCard
+                    titulo="Progreso"
+                    valor={`${Number(informe.estadoFondoEmergencia.data.porcentaje_meta || 0).toFixed(1)}%`}
+                  />
+                </div>
               </section>
             )}
 
