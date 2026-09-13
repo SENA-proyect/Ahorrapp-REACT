@@ -778,9 +778,9 @@ const getImprevistosPorCategoria = async (req, res) => {
    9. FONDO DE EMERGENCIA
 ========================================================= */
 
+// ── Reporte del Fondo de Emergencia (con rango de fechas) ──────────────────
 const getReporteFondoEmergencia = async (req, res) => {
   const ID_usuario = req.usuario.id;
-
   const { fecha_inicio, fecha_fin } = req.query;
 
   if (!validarFechas(fecha_inicio, fecha_fin)) {
@@ -791,50 +791,22 @@ const getReporteFondoEmergencia = async (req, res) => {
   }
 
   try {
-
     const { rows: [fondo] } = await pool.query(
       `
       SELECT
         fe.id_fondo,
         fe.meta,
-
-        COALESCE(
-          SUM(
-            CASE
-              WHEN mfe.tipo = 'aporte'
-              THEN mfe.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS aportes,
-
-        COALESCE(
-          SUM(
-            CASE
-              WHEN mfe.tipo = 'retiro'
-              THEN mfe.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS retiros
-
+        COALESCE(SUM(CASE WHEN mfe.tipo = 'aporte' THEN mfe.monto ELSE 0 END), 0) AS aportes,
+        COALESCE(SUM(CASE WHEN mfe.tipo = 'retiro' THEN mfe.monto ELSE 0 END), 0) AS retiros
       FROM fondos_emergencia fe
-
       LEFT JOIN movimientos_fondo_emergencia mfe
         ON fe.id_fondo = mfe.id_fondo
         AND mfe.fecha_registro BETWEEN $2 AND $3
-
       WHERE fe.id_usuario = $1
-
-      GROUP BY
-        fe.id_fondo,
-        fe.meta
+      GROUP BY fe.id_fondo, fe.meta
       `,
       [ID_usuario, fecha_inicio, fecha_fin]
     );
-
 
     if (!fondo) {
       return res.status(404).json({
@@ -843,19 +815,13 @@ const getReporteFondoEmergencia = async (req, res) => {
       });
     }
 
-
     const aportes = Number(fondo.aportes);
     const retiros = Number(fondo.retiros);
     const meta = Number(fondo.meta);
 
     return res.status(200).json({
       ok: true,
-
-      periodo: {
-        fecha_inicio,
-        fecha_fin
-      },
-
+      periodo: { fecha_inicio, fecha_fin },
       resumen: {
         aportes,
         retiros,
@@ -865,13 +831,63 @@ const getReporteFondoEmergencia = async (req, res) => {
     });
 
   } catch (error) {
-
     console.error("Error generando reporte del fondo:", error);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
 
-    return res.status(500).json({
-      ok: false,
-      mensaje: "Error interno del servidor"
+// ── Estado actual del Fondo de Emergencia (sin rango de fechas) ────────────
+const getEstadoFondoEmergencia = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT
+        fe.id_fondo,
+        fe.meta,
+        fe.fecha_creacion,
+        COALESCE(SUM(CASE WHEN mfe.tipo = 'aporte' THEN mfe.monto ELSE 0 END), 0) AS aportes,
+        COALESCE(SUM(CASE WHEN mfe.tipo = 'retiro' THEN mfe.monto ELSE 0 END), 0) AS retiros
+      FROM fondos_emergencia fe
+      LEFT JOIN movimientos_fondo_emergencia mfe
+        ON fe.id_fondo = mfe.id_fondo
+      WHERE fe.id_usuario = $1
+      GROUP BY fe.id_fondo, fe.meta, fe.fecha_creacion
+      `,
+      [ID_usuario]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: "El usuario no tiene fondo de emergencia"
+      });
+    }
+
+    const fondo = rows[0];
+    const meta = Number(fondo.meta);
+    const aportes = Number(fondo.aportes);
+    const retiros = Number(fondo.retiros);
+    const saldoActual = Math.max(0, aportes - retiros);
+    const porcentajeMeta = meta > 0 ? (saldoActual / meta) * 100 : 0;
+
+    return res.status(200).json({
+      ok: true,
+      data: {
+        id_fondo: fondo.id_fondo,
+        meta,
+        aportes,
+        retiros,
+        saldo_actual: saldoActual,
+        porcentaje_meta: porcentajeMeta,
+        fecha_creacion: fondo.fecha_creacion
+      }
     });
+
+  } catch (error) {
+    console.error("Error obteniendo estado del fondo de emergencia:", error);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   }
 };
 
@@ -1708,108 +1724,6 @@ const getEstadoDeudas = async (req, res) => {
   }
 };
 
-const getEstadoFondoEmergencia = async (req, res) => {
-  const ID_usuario = req.usuario.id;
-
-  try {
-    const { rows } = await pool.query(
-      `
-      SELECT
-        fe.id_fondo,
-        fe.meta,
-        fe.fecha_creacion,
-
-        COALESCE(
-          SUM(
-            CASE
-              WHEN mfe.tipo = 'aporte'
-              THEN mfe.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS aportes,
-
-        COALESCE(
-          SUM(
-            CASE
-              WHEN mfe.tipo = 'retiro'
-              THEN mfe.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS retiros
-
-      FROM fondos_emergencia fe
-
-      LEFT JOIN movimientos_fondo_emergencia mfe
-        ON fe.id_fondo = mfe.id_fondo
-
-      WHERE fe.id_usuario = $1
-
-      GROUP BY
-        fe.id_fondo,
-        fe.meta,
-        fe.fecha_creacion
-      `,
-      [ID_usuario]
-    );
-
-    if (!rows.length) {
-      return res.status(404).json({
-        ok: false,
-        mensaje: "El usuario no tiene fondo de emergencia"
-      });
-    }
-
-    const fondo = rows[0];
-
-    const meta = Number(fondo.meta);
-    const aportes = Number(fondo.aportes);
-    const retiros = Number(fondo.retiros);
-
-    const saldoActual = Math.max(
-      0,
-      aportes - retiros
-    );
-
-    const porcentajeMeta =
-      meta > 0
-        ? (saldoActual / meta) * 100
-        : 0;
-
-    return res.status(200).json({
-      ok: true,
-
-      data: {
-        id_fondo: fondo.id_fondo,
-
-        meta,
-
-        aportes,
-        retiros,
-
-        saldo_actual: saldoActual,
-
-        porcentaje_meta: porcentajeMeta,
-
-        fecha_creacion: fondo.fecha_creacion
-      }
-    });
-
-  } catch (error) {
-    console.error(
-      "Error obteniendo estado del fondo de emergencia:",
-      error
-    );
-
-    return res.status(500).json({
-      ok: false,
-      mensaje: "Error interno del servidor"
-    });
-  }
-};
 
 /* =========================================================
    EXPORTACIONES

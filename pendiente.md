@@ -125,9 +125,30 @@ Failed to load resource: the server responded with a status of 400 ()
 * Todo bien, ningun error durante la primera revicion
 </details>
 
+<details>
+
+<summary><b>Ver detalles de noticias y errores</b></summary>
+
+### NOTICIAS
+
+* La paleta de colores con la navbar de economia, finanzas, dolar empleo y todos no cumple con la paleta de colores del proyecto
+
+</details>
+
+<details>
+
+<summary><b>Ver detalles de reportes y errores</b></summary>
+
+### REPORTES
+
+* Me arroja un error 400 al momento de querer obtener un reporte, esto es debido a que no tengo creado la logia del frontend respecto al fondo de emergencia
+
+</details>
+
 ## SIGUE PENDIENTE
 * El primer punto de dependientes
 * Todo el apartado de Ahorros
+* Todo de noticias
 
 <details>
 

@@ -192,9 +192,6 @@ export const deshabilitarCategoria = (id) =>
 export const habilitarCategoria = (id) =>
   fetchJSON(`${API_URL}/categorias/${id}/habilitar`, { method: "PATCH" });
 
-export const eliminarCategoria = (id) =>
-  fetchJSON(`${API_URL}/categorias/${id}`, { method: "DELETE" });
-
 // ── Notificaciones ────────────────────────────────────────────────────────────
 export const getNotificaciones = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
@@ -615,6 +612,37 @@ export const getEstadoFondoEmergencia = async () => {
   return fetchJSON(`${API_URL}/reportes/fondo-emergencia/estado`);
 };
 
+// ── Fondo de Emergencia (CRUD propio, distinto del módulo de Reportes) ─────
+export const getFondoEmergencia = () =>
+  fetchJSON(`${API_URL}/fondo-emergencia`);
+
+export const crearFondoEmergencia = (meta) =>
+  fetchJSON(`${API_URL}/fondo-emergencia`, {
+    method: "POST",
+    body: JSON.stringify({ meta }),
+  });
+
+export const actualizarMetaFondoEmergencia = (meta) =>
+  fetchJSON(`${API_URL}/fondo-emergencia/meta`, {
+    method: "PUT",
+    body: JSON.stringify({ meta }),
+  });
+
+export const registrarAporteFondo = (monto, descripcion) =>
+  fetchJSON(`${API_URL}/fondo-emergencia/aporte`, {
+    method: "POST",
+    body: JSON.stringify({ monto, descripcion }),
+  });
+
+export const registrarRetiroFondo = (monto, descripcion) =>
+  fetchJSON(`${API_URL}/fondo-emergencia/retiro`, {
+    method: "POST",
+    body: JSON.stringify({ monto, descripcion }),
+  });
+
+export const getMovimientosFondoEmergencia = () =>
+  fetchJSON(`${API_URL}/fondo-emergencia/movimientos`);
+
 export const getReportePresupuesto = async (idPeriodo) => {
   if (!idPeriodo) return null;
 
@@ -631,6 +659,9 @@ export const getReporteEvolucion = async (fechaInicio, fechaFin) => {
   );
 };
 
+export const eliminarCategoria = (id) =>
+  fetchJSON(`${API_URL}/categorias/${id}`, { method: "DELETE" });
+
 export const obtenerInformeCompleto = async ({
   fechaInicio,
   fechaFin,
@@ -640,6 +671,7 @@ export const obtenerInformeCompleto = async ({
     resumen,
     gastosCategoria,
     gastosDependiente,
+    eliminarCategoria,
     ingresosCategoria,
     ingresosFuente,
     ahorros,
@@ -677,6 +709,7 @@ export const obtenerInformeCompleto = async ({
     gastosCategoria,
     gastosDependiente,
     ingresosCategoria,
+    eliminarCategoria,
     ingresosFuente,
     ahorros,
     deudas,

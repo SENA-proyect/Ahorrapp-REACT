@@ -8,13 +8,13 @@ const navItems = [
   { href: '/ModulosGastos', emoji: '💸', label: 'Gastos' },
   { href: '/ModuloAhorros', emoji: '🎯', label: 'Ahorrar' },
   { href: '/ModuloImprevistos', emoji: '🛡️', label: 'Imprevistos' },
+  { href: '/ModuloFondoEmergencia', emoji: '🆘', label: 'Fondo Emergencia' },
   { href: '/ModuloDeudas', emoji: '💳', label: 'Deudas' },
   { href: '/ModulosDependientes', emoji: '👩‍👧‍👦', label: 'Dependientes' },
   { href: '/ModulosCategorias', emoji: '🧩', label: 'Categorias' },
   { href: '/ModulosPresupuestos', emoji: '📋', label: 'Presupuestos' },
-  { href: '/Reportes', emoji: '📈', label: 'Reportes' },
   { href: '/Noticias', emoji: '📰', label: 'Noticias' },
-  
+  { href: '/Reportes', emoji: '📈', label: 'Reportes' },
   // { href: '/exportar', emoji: '📤', label: 'Exportar' },
 ]
 

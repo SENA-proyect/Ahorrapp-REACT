@@ -112,9 +112,9 @@ export default function Noticias() {
     <hr className="my-1 h-px border-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
     <div className="noticias-container">
-      <button type="button" className="btn-volver-atras" onClick={handleVolverAtras}>
-        ← Volver atrás
-      </button>
+      {/* <button type="button" className="btn-volver-atras" onClick={handleVolverAtras}> */}
+        {/* ← Volver atrás */}
+      {/* </button> */}
 
       <div className="noticias-header">
         <div>

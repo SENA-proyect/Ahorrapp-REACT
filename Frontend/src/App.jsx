@@ -24,13 +24,14 @@ import IndexLogeado from './pages/IndexLogeado.jsx'
 import ModuloAhorros from './pages/ModuloAhorros.jsx';
 import ModuloDeudas from './pages/ModuloDeudas.jsx';
 import ModuloImprevistos from './pages/ModuloImprevistos.jsx';
+import ModuloFondoEmergencia from './pages/Modulofondoemergencia.jsx';
 import ModulosCategorias from './pages/ModulosCategorias.jsx';
 import ModulosDependientes from './pages/ModulosDependientes.jsx';
 import ModulosGastos from './pages/ModulosGastos.jsx';
 import ModulosIngresos from './pages/ModulosIngresos.jsx';
 import Asistente from './components/Asistente/Asistente';
 import Noticias from './pages/Noticias.jsx';
-// import Export from "./pages/exportar.jsx"
+import Export from "./pages/exportar.jsx"
 import ModulosPresupuestos from './pages/ModulosPresupuestos.jsx'
 import Configuracion from './pages/Configuracion.jsx'
 import Reportes from './pages/reportes.jsx'
@@ -130,6 +131,15 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          <Route
+            path="/ModuloFondoEmergencia"
+            element={
+              <ProtectedRoute>
+                <ModuloFondoEmergencia />
+              </ProtectedRoute>
+            }
+          />
           
           <Route 
             path="/ModulosCategorias" 
@@ -185,14 +195,14 @@ function App() {
             } 
           />
 
-          {/* <Route 
+          <Route 
             path="/exportar" 
             element={
               <ProtectedRoute>
                 <Export />
               </ProtectedRoute>
             } 
-          /> */}
+          />
 
           <Route
             path="/ModulosPresupuestos"
