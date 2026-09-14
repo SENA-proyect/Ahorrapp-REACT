@@ -57,8 +57,7 @@ app.use("/api/fondo-emergencia", fondoemergenciaRoutes);
 app.use("/api/reportes", ReportesRoutes);
 app.use("/api/historial", historialRoutes);
 
-iniciarEliminacionCuentasJob();
-iniciarVencimientosJob();
+
 
 // ================================
 // RUTA DE PRUEBA
@@ -75,10 +74,11 @@ app.get("/", (req, res) => {
 // SERVIDOR
 // ================================
 
-// const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// app.listen(PORT, "0.0.0.0", () => {
-//     console.log(`Servidor AhorrApp ejecutándose en el puerto ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Servidor AhorrApp ejecutándose en el puerto ${PORT}`);
 
-//     iniciarVencimientosJob();
-// });
+    iniciarEliminacionCuentasJob();
+    iniciarVencimientosJob();
+});
