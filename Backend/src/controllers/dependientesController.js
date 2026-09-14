@@ -5,7 +5,7 @@
 //! Preguntar que carajos hizo el responsable de esta vista
 
 const pool = require('../db/connection');
-const { registrarHistorial } = require('./historialController');
+const { registrarHistorial } = require('./Historialcontroller');
 
 // ── GET: Obtener dependientes del usuario autenticado ──────
 const getDependientes = async (req, res) => {

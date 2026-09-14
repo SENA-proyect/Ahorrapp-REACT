@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendResetCodeEmail } = require("../service/MailService");
-const { registrarHistorial } = require("./historialController");
+const { registrarHistorial } = require("./Historialcontroller");
 require("dotenv").config();
 
 // ── Helper de errores ────────────────────────────────────────────────────────
