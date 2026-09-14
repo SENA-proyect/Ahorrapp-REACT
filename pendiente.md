@@ -198,15 +198,53 @@ Failed to load resource: the server responded with a status of 400 ()
 
 </details>
 
+<details>
+
+<summary><b>Ver detalles del reporte PDF</b></summary>
+
+## PDF GENERAL
+
+* Ahi apartados que estan muy pegados de uno a otro, se que depende de la informacion existente en el sistema pero lo mejor seria manejar cada apartado con un salto de pagina 
+
+## APARTADO DE INGRESOS
+
+* Estan las graficas tanto para categorias como para la fuente, la idea es que solo aparezca una para no saturar de informacion y la grafica que siempre prevalecera sera la de categorias. En caso de que un ingreso no tenga categoria ahi si se mostrara su respectiva grafica y tambien la tabla informativa como ya se esta haciendo con categorias
+
+## APARTADO DE GASTOS
+
+* Falta la tabla informativa para el apartado de dependientes, ademas tambien seria util que en la parte de dependientes se vea la grafica de "gastos propios", siendo informacion que podria ser util al momento de realizar comparaciones por parte del usuario
+
+## APARTADO DE AHORROS
+
+* En la tabla informativa el formato que esta capturando en "fecha" esta mal, deberia ser solo el dia, mes y año
+
+## APARTADO DE DEUDAS
+
+* caso similar al de ahorros con respecto a las fechas
+* No aparecen los abonos (cuotas) que se han pagado a una deuda
+* No esta el apartado para las deudas ya pagadas
+
+## APARTADO DE IMPREVISTOS
+
+* falta la tabla informativa
+
+## APARTADO DE PRESUPUESTOS
+
+* No aparece informacion, no se si se deba a informacion inexistente por mi parte (lo dudo) o un mal llamado al endpoint
+
+## APARTADO DE EVOLUCION TEMPORAL
+
+* No es claro, muestra la grafica pero no es lo suficientemente intuitivo
+
+
+</details>
+
 ## SIGUE PENDIENTE
 * El primer punto de dependientes
-* Todo lo de reportes
 * Todo de noticias
-* Todo con respecto al panel de administrador
 
-
-<details>
+<!-- <details>
 
 <summary><b>Ver detalles dey errores</b></summary>
 
-</details>
+</details> -->

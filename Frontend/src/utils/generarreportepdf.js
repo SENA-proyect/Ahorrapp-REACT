@@ -66,6 +66,32 @@ const texto = (valor, fallback = "—") => {
   return String(valor);
 };
 
+// Formatea una fecha como DD/MM/YYYY sin pasar por conversiones de zona
+// horaria (evita el desfase de un día y el "String(Date)" ilegible que
+// se generaba al usar texto() directo sobre columnas DATE de la base).
+const formatoFecha = (valor, fallback = "—") => {
+  if (valor === null || valor === undefined || valor === "") {
+    return fallback;
+  }
+
+  // Columnas DATE de postgres llegan como objeto Date (vía el driver pg).
+  if (valor instanceof Date) {
+    const d = String(valor.getUTCDate()).padStart(2, "0");
+    const m = String(valor.getUTCMonth() + 1).padStart(2, "0");
+    const y = valor.getUTCFullYear();
+    return `${d}/${m}/${y}`;
+  }
+
+  // Strings tipo "2026-09-11" o "2026-09-11T00:00:00.000Z".
+  const match = String(valor).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const [, y, m, d] = match;
+    return `${d}/${m}/${y}`;
+  }
+
+  return String(valor);
+};
+
 const obtenerArray = (objeto, posiblesClaves = []) => {
   if (Array.isArray(objeto)) {
     return objeto;
@@ -537,6 +563,50 @@ const graficoLinea = (
     chartBottom
   );
 
+  // ── Etiquetas de escala (máximo / mínimo) para dar contexto de los
+  // valores, y una línea de referencia en 0 si el balance cruza a
+  // negativo, para que se entienda de un vistazo si hubo días en rojo.
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(...COLORS.textMuted);
+
+  doc.text(
+    formatoCOP(maximo),
+    x,
+    chartTop - 2
+  );
+
+  doc.text(
+    formatoCOP(minimo),
+    x,
+    chartBottom + 4
+  );
+
+  if (minimo < 0 && maximo > 0) {
+    const posicionCero =
+      chartBottom -
+      ((0 - minimo) / rango) * (height - 22);
+
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.2);
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(x, posicionCero, x + chartWidth, posicionCero);
+    doc.setLineDashPattern([], 0);
+  }
+
+  // ── Fecha del primer y último punto, para ubicar el rango temporal
+  // sin tener que adivinar a qué corresponde cada extremo de la línea.
+  const primerFecha = datos[0]?.fecha;
+  const ultimaFecha = datos[datos.length - 1]?.fecha;
+
+  if (primerFecha) {
+    doc.text(formatoFecha(primerFecha), x, chartBottom + 9);
+  }
+  if (ultimaFecha) {
+    const ancho = doc.getTextWidth(formatoFecha(ultimaFecha));
+    doc.text(formatoFecha(ultimaFecha), x + chartWidth - ancho, chartBottom + 9);
+  }
+
   let anterior = null;
 
   datos.forEach((item, index) => {
@@ -862,6 +932,13 @@ const generarIngresos = (
       ),
     }));
 
+  // La gráfica de "por fuente" solo se muestra si existen ingresos sin
+  // categoría asignada - para esos casos, la fuente es el único dato
+  // útil disponible. Si todo tiene categoría, no se satura con las dos.
+  const hayIngresosSinCategoria = datosCategorias.some(
+    (item) => item.nombre === "Sin categoría" && item.valor > 0
+  );
+
   if (datosCategorias.length) {
     graficoBarras(
       doc,
@@ -869,12 +946,12 @@ const generarIngresos = (
       datosCategorias,
       PAGE.marginLeft,
       y,
-      85,
+      hayIngresosSinCategoria ? 85 : 170,
       60
     );
   }
 
-  if (datosFuentes.length) {
+  if (hayIngresosSinCategoria && datosFuentes.length) {
     graficoBarras(
       doc,
       "Ingresos por fuente",
@@ -909,6 +986,31 @@ const generarIngresos = (
         anchos: [65, 30],
       }
     );
+  }
+
+  if (hayIngresosSinCategoria) {
+    const filasFuentes = datosFuentes
+      .slice(0, 8)
+      .map((item) => ({
+        valores: [
+          item.nombre,
+          formatoCOP(item.valor),
+        ],
+      }));
+
+    if (filasFuentes.length) {
+      y = tabla(
+        doc,
+        ["Fuente", "Total"],
+        filasFuentes,
+        PAGE.marginLeft,
+        y + 5,
+        95,
+        {
+          anchos: [65, 30],
+        }
+      );
+    }
   }
 
   return y + 5;
@@ -1030,6 +1132,29 @@ const generarGastos = (
     );
   }
 
+  if (datosDependientes.length) {
+    const filasDependientes = datosDependientes
+      .slice(0, 8)
+      .map((item) => ({
+        valores: [
+          item.nombre,
+          formatoCOP(item.valor),
+        ],
+      }));
+
+    y = tabla(
+      doc,
+      ["Dependiente", "Total"],
+      filasDependientes,
+      PAGE.marginLeft,
+      y + 5,
+      95,
+      {
+        anchos: [65, 30],
+      }
+    );
+  }
+
   return y + 5;
 };
 
@@ -1084,7 +1209,7 @@ const generarAhorros = (
             item.total
         ),
 
-        texto(
+        formatoFecha(
           item.fecha_registro ??
             item.fecha
         ),
@@ -1201,7 +1326,8 @@ const generarDeudas = (
     .slice(0, 10)
     .map((item) => ({
       valores: [
-        item.descripcion ??
+        item.fuente ??
+          item.descripcion ??
           item.nombre ??
           "Deuda",
 
@@ -1211,7 +1337,9 @@ const generarDeudas = (
             item.total_pagado
         ),
 
-        texto(
+        texto(item.cuotas, "1"),
+
+        formatoFecha(
           item.fecha_registro ??
             item.fecha
         ),
@@ -1221,18 +1349,26 @@ const generarDeudas = (
   if (filas.length) {
     y = tabla(
       doc,
-      ["Deuda", "Pago", "Fecha"],
+      ["Deuda", "Pago", "Cuotas", "Fecha"],
       filas,
       PAGE.marginLeft,
       y,
       182,
       {
-        anchos: [85, 55, 42],
+        anchos: [70, 45, 25, 42],
       }
     );
   }
 
-  if (estados.length) {
+  const pendientes = estados.filter(
+    (item) => item.estado !== "pagada"
+  );
+
+  const pagadas = estados.filter(
+    (item) => item.estado === "pagada"
+  );
+
+  if (pendientes.length) {
     y += 4;
 
     doc.setFont("helvetica", "bold");
@@ -1247,7 +1383,7 @@ const generarDeudas = (
 
     y += 8;
 
-    estados
+    pendientes
       .slice(0, 7)
       .forEach((item) => {
         const total =
@@ -1273,8 +1409,8 @@ const generarDeudas = (
         y = barraProgreso(
           doc,
           texto(
-            item.descripcion ??
-              item.nombre ??
+            item.fuente ??
+              item.descripcion ??
               "Deuda"
           ),
           progreso,
@@ -1283,6 +1419,37 @@ const generarDeudas = (
           180
         );
       });
+  }
+
+  if (pagadas.length) {
+    y = asegurarEspacio(doc, y, 20 + pagadas.length * 6, 1);
+
+    y += 6;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...COLORS.success);
+
+    doc.text(
+      "Deudas pagadas en su totalidad",
+      PAGE.marginLeft,
+      y
+    );
+
+    y += 7;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...COLORS.text);
+
+    pagadas.slice(0, 10).forEach((item) => {
+      doc.text(
+        `✓  ${texto(item.fuente ?? item.descripcion ?? "Deuda")} — ${formatoCOP(item.monto_total)}`,
+        PAGE.marginLeft,
+        y
+      );
+      y += 6;
+    });
   }
 
   return y + 5;
@@ -1340,6 +1507,29 @@ const generarImprevistos = (
       y,
       180,
       70
+    );
+
+    y += 5;
+
+    const filas = datos
+      .slice(0, 8)
+      .map((item) => ({
+        valores: [
+          item.nombre,
+          formatoCOP(item.valor),
+        ],
+      }));
+
+    y = tabla(
+      doc,
+      ["Categoría", "Total"],
+      filas,
+      PAGE.marginLeft,
+      y,
+      95,
+      {
+        anchos: [65, 30],
+      }
     );
   } else {
     doc.setFontSize(9);
@@ -1498,27 +1688,23 @@ const generarPresupuesto = (
     y
   );
 
-  const categorias =
-    obtenerArray(
-      presupuesto.categorias,
-      ["data", "detalle", "resultados"]
-    );
+  // presupuesto.categorias es un OBJETO keyed por categoría
+  // ({gastos:{...}, deudas:{...}, ...}), no un array - hay que convertirlo.
+  const categoriasObj = presupuesto.categorias || {};
 
-  const datos =
-    categorias.map((item) => ({
-      nombre:
-        item.nombre ??
-        item.categoria ??
-        "Categoría",
+  const NOMBRES = {
+    gastos: "Gastos",
+    deudas: "Deudas",
+    imprevistos: "Imprevistos",
+    ahorros: "Ahorros",
+    emergencia: "Fondo de emergencia",
+  };
 
-      planeado: numero(
-        item.planeado
-      ),
-
-      ejecutado: numero(
-        item.ejecutado
-      ),
-    }));
+  const datos = Object.entries(categoriasObj).map(([clave, item]) => ({
+    nombre: NOMBRES[clave] ?? clave,
+    planeado: numero(item?.planeado),
+    ejecutado: numero(item?.ejecutado),
+  }));
 
   if (datos.length) {
     const filas = datos
@@ -1774,12 +1960,18 @@ export const generarReportePDF = async (
    * GASTOS
    */
 
-  y = asegurarEspacio(
+  agregarPiePagina(
     doc,
-    y,
-    100,
     numeroPagina
   );
+
+  doc.addPage();
+
+  numeroPagina++;
+
+  fondoPagina(doc);
+
+  y = PAGE.marginTop;
 
   y = generarGastos(
     doc,
@@ -1791,12 +1983,18 @@ export const generarReportePDF = async (
    * AHORROS
    */
 
-  y = asegurarEspacio(
+  agregarPiePagina(
     doc,
-    y,
-    85,
     numeroPagina
   );
+
+  doc.addPage();
+
+  numeroPagina++;
+
+  fondoPagina(doc);
+
+  y = PAGE.marginTop;
 
   y = generarAhorros(
     doc,
@@ -1831,12 +2029,18 @@ export const generarReportePDF = async (
    * IMPREVISTOS
    */
 
-  y = asegurarEspacio(
+  agregarPiePagina(
     doc,
-    y,
-    75,
     numeroPagina
   );
+
+  doc.addPage();
+
+  numeroPagina++;
+
+  fondoPagina(doc);
+
+  y = PAGE.marginTop;
 
   y = generarImprevistos(
     doc,
@@ -1848,12 +2052,18 @@ export const generarReportePDF = async (
    * FONDO DE EMERGENCIA
    */
 
-  y = asegurarEspacio(
+  agregarPiePagina(
     doc,
-    y,
-    85,
     numeroPagina
   );
+
+  doc.addPage();
+
+  numeroPagina++;
+
+  fondoPagina(doc);
+
+  y = PAGE.marginTop;
 
   y = generarFondoEmergencia(
     doc,
@@ -1888,12 +2098,18 @@ export const generarReportePDF = async (
    * EVOLUCIÓN
    */
 
-  y = asegurarEspacio(
+  agregarPiePagina(
     doc,
-    y,
-    105,
     numeroPagina
   );
+
+  doc.addPage();
+
+  numeroPagina++;
+
+  fondoPagina(doc);
+
+  y = PAGE.marginTop;
 
   y = generarEvolucion(
     doc,
