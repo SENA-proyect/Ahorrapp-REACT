@@ -17,7 +17,7 @@ const fondoemergenciaRoutes = require("./src/routes/fondoemergenciaRoutes");
 const ReportesRoutes = require("./src/routes/ReportesRoutes");
 const historialRoutes = require("./src/routes/Historialroutes");
 
-const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacionCuentasJob");
+const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacioncuentasJob");
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
 
 const app = express();
