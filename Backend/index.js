@@ -17,8 +17,7 @@ const fondoemergenciaRoutes = require("./src/routes/fondoemergenciaRoutes");
 const ReportesRoutes = require("./src/routes/ReportesRoutes");
 const historialRoutes = require("./src/routes/Historialroutes");
 
-
-
+const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacionCuentasJob");
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
 
 const app = express();
@@ -58,6 +57,9 @@ app.use("/api/fondo-emergencia", fondoemergenciaRoutes);
 app.use("/api/reportes", ReportesRoutes);
 app.use("/api/historial", historialRoutes);
 
+iniciarEliminacionCuentasJob();
+iniciarVencimientosJob();
+
 // ================================
 // RUTA DE PRUEBA
 // ================================
@@ -73,10 +75,10 @@ app.get("/", (req, res) => {
 // SERVIDOR
 // ================================
 
-const PORT = process.env.PORT || 3000;
+// const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor AhorrApp ejecutándose en el puerto ${PORT}`);
+// app.listen(PORT, "0.0.0.0", () => {
+//     console.log(`Servidor AhorrApp ejecutándose en el puerto ${PORT}`);
 
-    iniciarVencimientosJob();
-});
+//     iniciarVencimientosJob();
+// });

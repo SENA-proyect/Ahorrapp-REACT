@@ -119,12 +119,12 @@ export default function PanelAdmin() {
             <h1 className="text-2xl font-semibold text-[#f4f1e8]">Panel de administrador</h1>
             <p className="text-sm text-[#7d8aa8] mt-1">Resumen general del sistema</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-[#1a2438] border border-[#2a3a5a] flex items-center justify-center">
+          {/* <div className="w-10 h-10 rounded-full bg-[#1a2438] border border-[#2a3a5a] flex items-center justify-center">
             <svg className="w-5 h-5 text-[#e0b855]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
-          </div>
+          </div> */}
         </header>
 
         {/* Tarjetas de estadisticas */}
@@ -164,7 +164,7 @@ export default function PanelAdmin() {
         </section>
 
         {/* Actividad reciente */}
-        <section className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex-1">
+        {/* <section className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex-1">
           <h2 className="text-base font-semibold text-[#f4f1e8] mb-4">Actividad reciente</h2>
 
           {cargandoActividad ? (
@@ -191,7 +191,7 @@ export default function PanelAdmin() {
               ))}
             </ul>
           )}
-        </section>
+        </section> */}
 
       </main>
     </div>

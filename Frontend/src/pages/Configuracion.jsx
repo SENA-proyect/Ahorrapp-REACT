@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import HeaderModulos from '../components/HeaderModulos'
 import Historialnotificaciones from '../components/Historialnotificaciones'
 import Preferenciasnotificaciones from '../components/Preferenciasnotificaciones'
+import MisMovimientos from '../components/Mismovimientos'
+import MiCuenta from '../components/Micuenta'
+import { useAuth } from '../context/AuthContext'
 
 const SECCIONES = [
   { id: 'notificaciones', label: 'Notificaciones', emoji: '🔔' },
   { id: 'preferencias', label: 'Preferencias', emoji: '🎛️' },
-  // { id: 'cuenta', label: 'Mi cuenta', emoji: '👤', proximamente: true },
+  { id: 'movimientos', label: 'Mis movimientos', emoji: '📊' },
+  { id: 'cuenta', label: 'Mi cuenta', emoji: '👤' },
 ]
 
 export default function Configuracion() {
+  const { hasRole } = useAuth()
+  const puedeVerPanelAdmin = hasRole('admin') || hasRole('superuser')
   const [searchParams] = useSearchParams()
   const tabInicial = searchParams.get('tab')
   const [seccionActiva, setSeccionActiva] = useState(
@@ -28,6 +34,17 @@ export default function Configuracion() {
       style={{ background: 'radial-gradient(ellipse at 30% 20%, #1e3a5f 10%, #0f172a 60%, #1a0f2e 100%)' }}>
 
       <HeaderModulos section="configuración" />
+
+      {puedeVerPanelAdmin && (
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8 pt-4 flex justify-end">
+          <Link
+            to="/PanelAdmin"
+            className="inline-flex items-center gap-2 text-sm font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 rounded-xl px-4 py-2 transition-colors duration-200"
+          >
+            🛠️ Panel de administración
+          </Link>
+        </div>
+      )}
 
       <hr className="my-1 border-none h-px"
         style={{ background: 'linear-gradient(to right, transparent, #fbbf24, transparent)' }} />
@@ -70,6 +87,8 @@ export default function Configuracion() {
             style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(16px)' }}>
             {seccionActiva === 'notificaciones' && <Historialnotificaciones />}
             {seccionActiva === 'preferencias' && <Preferenciasnotificaciones />}
+            {seccionActiva === 'movimientos' && <MisMovimientos />}
+            {seccionActiva === 'cuenta' && <MiCuenta />}
           </section>
         </div>
       </main>
