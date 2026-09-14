@@ -593,6 +593,39 @@ const getTodosDependientesAdmin = async (req, res) => {
 };
 
 
+// ── PUT /mi-cuenta/desactivar (autoservicio, cualquier usuario) ─────────────
+const desactivarCuentaPropia = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+
+  try {
+    const fechaEliminacion = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 días
+
+    await pool.query(
+      `UPDATE usuarios
+       SET activo = FALSE, fecha_eliminacion_programada = $1
+       WHERE id_usuario = $2`,
+      [fechaEliminacion, ID_usuario]
+    );
+
+    const fechaLegible = fechaEliminacion.toISOString().slice(0, 10);
+
+    await registrarHistorial(
+      ID_usuario,
+      "Desactivó su cuenta",
+      `La cuenta quedará eliminada de forma permanente el ${fechaLegible} si no se reactiva antes`
+    );
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: `Tu cuenta ha sido desactivada. Si no la reactivas antes, será eliminada de forma permanente el ${fechaLegible}.`,
+      fecha_eliminacion_programada: fechaEliminacion,
+    });
+
+  } catch (error) {
+    return handleServerError(res, error, "Error al desactivar la cuenta");
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -606,4 +639,6 @@ module.exports = {
   getDependientesPanelAdmin, 
   getTodosDependientesAdmin,
   actualizarRolUsuario,
+  desactivarCuentaPropia,
+
 };

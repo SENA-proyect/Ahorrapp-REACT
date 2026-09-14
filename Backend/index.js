@@ -15,6 +15,8 @@ const NotificacionesRoutes = require("./src/routes/NotificacionesRoutes");
 const PresupuestosRoutes = require("./src/routes/PresupuestosRoutes");
 const fondoemergenciaRoutes = require("./src/routes/fondoemergenciaRoutes");
 const ReportesRoutes = require("./src/routes/ReportesRoutes");
+const historialRoutes = require("./src/routes/Historialroutes");
+
 
 
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
@@ -54,6 +56,8 @@ app.use("/api", NotificacionesRoutes);
 app.use("/api/presupuestos", PresupuestosRoutes);
 app.use("/api/fondo-emergencia", fondoemergenciaRoutes);
 app.use("/api/reportes", ReportesRoutes);
+app.use("/api/historial", historialRoutes);
+
 // ================================
 // RUTA DE PRUEBA
 // ================================

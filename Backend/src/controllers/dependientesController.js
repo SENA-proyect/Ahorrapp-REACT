@@ -110,4 +110,38 @@ const deleteDependiente = async (req, res) => {
   }
 };
 
-module.exports = { getDependientes, addDependiente, updateDependiente, deleteDependiente };
+// ── DELETE (admin): Eliminar el dependiente de cualquier usuario ───────────
+// A diferencia de deleteDependiente, esta no filtra por id_usuario porque
+// la ejecuta un admin/superuser sobre el dependiente de OTRO usuario.
+const deleteDependienteAdmin = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { rows: existe } = await pool.query(
+      `SELECT id_dependientes, nombre AS "Nombre", id_usuario AS "ID_usuario"
+       FROM dependientes WHERE id_dependientes = $1`,
+      [id]
+    );
+
+    if (existe.length === 0) {
+      return res.status(404).json({ error: 'Dependiente no encontrado' });
+    }
+
+    const dependiente = existe[0];
+
+    await pool.query('DELETE FROM dependientes WHERE id_dependientes = $1', [id]);
+
+    await registrarHistorial(
+      req.usuario.id,
+      'Eliminó el dependiente de un usuario',
+      `Dependiente "${dependiente.Nombre}" (ID ${id}) perteneciente al usuario ID ${dependiente.ID_usuario}`
+    );
+
+    res.json({ message: 'Dependiente eliminado por el administrador' });
+  } catch (err) {
+    console.error('Error al eliminar dependiente (admin):', err);
+    res.status(500).json({ error: 'Error al eliminar dependiente' });
+  }
+};
+
+module.exports = { getDependientes, addDependiente, updateDependiente, deleteDependiente, deleteDependienteAdmin };

@@ -457,7 +457,7 @@ export const getUsuariosPanelAdmin = async () => {
   const response = await fetch(`${API_URL}/auth/usuarios/PanelAdmin`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer `,
+      Authorization: `Bearer ${token}`,
     },
     cache: "no-store",
   });
@@ -475,7 +475,7 @@ export const getDependientesPanelAdmin = async () => {
   const response = await fetch(`${API_URL}/auth/dependientes/PanelAdmin`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer `,
+      Authorization: `Bearer ${token}`,
     },
     cache: "no-store",
   });
@@ -494,7 +494,7 @@ export const getTodosDependientesAdmin = async () => {
   const res = await fetch(`${API_URL}/auth/PanelDependientes`, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer `,
+      Authorization: `Bearer ${token}`,
     },
     cache: 'no-store',
   });
@@ -507,6 +507,31 @@ export const getTodosDependientesAdmin = async () => {
 
   return data.dependientes ?? data;
 };
+
+// Eliminar el dependiente de cualquier usuario (solo admin/superuser)
+export const eliminarDependienteAdmin = (id) =>
+  fetchJSON(`${API_URL}/dependientes/admin/${id}`, {
+    method: 'DELETE',
+  });
+
+// ── Historial de acciones ─────────────────────────────────────────────────────
+// Historial completo del sistema (solo admin/superuser)
+export const getHistorial = async () => {
+  const data = await fetchJSON(`${API_URL}/historial`);
+  return data.historial ?? [];
+};
+
+// Historial propio del usuario logueado (para Configuración)
+export const getHistorialPropio = async () => {
+  const data = await fetchJSON(`${API_URL}/historial/propio`);
+  return data.historial ?? [];
+};
+
+// Desactivar la propia cuenta (autoservicio, con eliminación programada a 30 días)
+export const desactivarCuentaPropia = () =>
+  fetchJSON(`${API_URL}/auth/mi-cuenta/desactivar`, {
+    method: 'PUT',
+  });
 
 
 // ── Reportes ────────────────────────────────────────────────────────────────

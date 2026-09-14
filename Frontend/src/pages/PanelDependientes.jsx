@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { eliminarDependienteAdmin } from '../services/api';
 
 export default function PanelDependientes() {
   const [dependientes, setDependientes] = useState([]);
@@ -46,6 +47,18 @@ export default function PanelDependientes() {
   const formatearFecha = (fechaISO) => {
     if (!fechaISO) return 'N/A';
     return fechaISO.slice(0, 10).split('-').reverse().join('/');
+  };
+
+  const handleBorrar = async (id) => {
+    if (!window.confirm('¿Seguro deseas eliminar a este dependiente?')) return;
+
+    try {
+      await eliminarDependienteAdmin(id);
+      setDependientes((prev) => prev.filter((d) => d.id_dependientes !== id));
+    } catch (err) {
+      console.error(err);
+      setError('Error al eliminar el dependiente');
+    }
   };
 
   return (
@@ -144,6 +157,20 @@ export default function PanelDependientes() {
                         {formatearFecha(dependiente.Fecha_nacimiento)}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="border-t border-[#1c2942] pt-3">
+                    <button
+                      onClick={() => handleBorrar(dependiente.id_dependientes)}
+                      className="w-full flex items-center justify-center gap-2 border border-red-900/40 text-red-300 hover:bg-red-900/20 rounded-lg py-2 text-sm font-medium transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                      Borrar
+                    </button>
                   </div>
                 </div>
               ))}

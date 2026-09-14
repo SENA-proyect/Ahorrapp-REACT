@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getHistorialExportaciones } from '../services/api'
+import { getHistorial } from '../services/api'
 import InfoActividad from '../components/modals/InfoActividad'
 
 export default function PanelHistorial() {
@@ -9,8 +9,8 @@ export default function PanelHistorial() {
   const [mostrarInfo, setMostrarInfo] = useState(false)
 
   useEffect(() => {
-    getHistorialExportaciones()
-      .then((data) => setHistorial(data.historial ?? data ?? []))
+    getHistorial()
+      .then((data) => setHistorial(data ?? []))
       .catch((err) => {
         console.error('Error cargando historial:', err)
         setError('No se pudo cargar el historial')
@@ -48,6 +48,7 @@ export default function PanelHistorial() {
               historial.map((log) => (
                 <div className="general-card log-card" key={log.id_historial}>
                   <p><strong>Fecha:</strong> {log.fecha ? new Date(log.fecha).toLocaleString('es-ES') : 'N/A'}</p>
+                  <p><strong>Usuario:</strong> {log.usuario_nombre} {log.usuario_apellido || ''} <span style={{ opacity: 0.6 }}>(ID {log.ID_usuario})</span></p>
                   <p><strong>Acción:</strong> <span className="txt-accion">{log.accion}</span></p>
                   <p><strong>Detalles:</strong> <em>{log.detalles || 'Sin detalles'}</em></p>
                 </div>
