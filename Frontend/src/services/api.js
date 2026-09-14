@@ -533,6 +533,20 @@ export const desactivarCuentaPropia = () =>
     method: 'PUT',
   });
 
+// Editar mis propios datos (nombre, apellido, email)
+export const actualizarMiPerfil = (datos) =>
+  fetchJSON(`${API_URL}/auth/mi-perfil`, {
+    method: 'PUT',
+    body: JSON.stringify(datos),
+  });
+
+// Cambiar mi propia contraseña
+export const cambiarMiPassword = (passwordActual, passwordNueva) =>
+  fetchJSON(`${API_URL}/auth/mi-cuenta/password`, {
+    method: 'PUT',
+    body: JSON.stringify({ passwordActual, passwordNueva }),
+  });
+
 
 // ── Reportes ────────────────────────────────────────────────────────────────
 

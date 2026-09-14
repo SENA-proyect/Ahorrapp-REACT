@@ -626,6 +626,128 @@ const desactivarCuentaPropia = async (req, res) => {
   }
 };
 
+const NOMBRE_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+// ── PUT /mi-perfil (autoservicio: editar mis propios datos) ─────────────────
+const actualizarMiPerfil = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { Nombre, Apellido, Email } = req.body;
+
+  if (!Nombre || !Apellido || !Email) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "Completa todos los campos",
+    });
+  }
+
+  if (!NOMBRE_REGEX.test(Nombre.trim()) || !NOMBRE_REGEX.test(Apellido.trim())) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "El nombre y el apellido solo pueden contener letras",
+    });
+  }
+
+  if (!EMAIL_REGEX.test(Email.trim())) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "Ingresa un correo electrónico válido",
+    });
+  }
+
+  try {
+    // El correo debe seguir siendo único, pero sin chocar consigo mismo
+    const { rows: correoEnUso } = await pool.query(
+      'SELECT id_usuario AS "ID_usuario" FROM usuarios WHERE email = $1 AND id_usuario <> $2',
+      [Email, ID_usuario]
+    );
+
+    if (correoEnUso.length > 0) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: "Ese correo ya está en uso por otra cuenta",
+      });
+    }
+
+    await pool.query(
+      `UPDATE usuarios
+       SET nombre = $1, apellido = $2, email = $3
+       WHERE id_usuario = $4`,
+      [Nombre, Apellido, Email, ID_usuario]
+    );
+
+    await registrarHistorial(ID_usuario, "Actualizó sus datos personales");
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Tus datos se actualizaron correctamente",
+    });
+
+  } catch (error) {
+    return handleServerError(res, error, "Error al actualizar tus datos");
+  }
+};
+
+// ── PUT /mi-cuenta/password (autoservicio: cambiar mi contraseña) ───────────
+const cambiarMiPassword = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { passwordActual, passwordNueva } = req.body;
+
+  if (!passwordActual || !passwordNueva) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "Todos los campos son requeridos",
+    });
+  }
+
+  if (passwordNueva.length < 8) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "La nueva contraseña debe tener al menos 8 caracteres",
+    });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT password_hash FROM usuarios WHERE id_usuario = $1',
+      [ID_usuario]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: "Usuario no encontrado",
+      });
+    }
+
+    const passwordValida = await bcrypt.compare(passwordActual, rows[0].password_hash);
+
+    if (!passwordValida) {
+      return res.status(401).json({
+        ok: false,
+        mensaje: "La contraseña actual es incorrecta",
+      });
+    }
+
+    const nuevoHash = await bcrypt.hash(passwordNueva, 10);
+
+    await pool.query(
+      "UPDATE usuarios SET password_hash = $1 WHERE id_usuario = $2",
+      [nuevoHash, ID_usuario]
+    );
+
+    await registrarHistorial(ID_usuario, "Cambió su contraseña");
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Contraseña actualizada correctamente",
+    });
+
+  } catch (error) {
+    return handleServerError(res, error, "Error al cambiar la contraseña");
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -640,5 +762,6 @@ module.exports = {
   getTodosDependientesAdmin,
   actualizarRolUsuario,
   desactivarCuentaPropia,
-
+  actualizarMiPerfil,
+  cambiarMiPassword,
 };

@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getUsuariosPanelAdmin, getDependientesPanelAdmin } from '../services/api';
+import { getUsuariosPanelAdmin, getDependientesPanelAdmin, getHistorial } from '../services/api';
 
 export default function PanelAdmin() {
   const [usuarios, setUsuarios] = useState({ totalUsuarios: 0 });
   const [dependientes, setDependientes] = useState({ totalDependientes: 0 });
+  const [actividad, setActividad] = useState([]);
+  const [cargandoActividad, setCargandoActividad] = useState(true);
 
   useEffect(() => {
     const cargarUsuarios = async () => {
@@ -32,6 +34,21 @@ export default function PanelAdmin() {
     cargarDependientes();
   }, []);
 
+  useEffect(() => {
+    const cargarActividad = async () => {
+      try {
+        const data = await getHistorial();
+        setActividad(data.slice(0, 8));
+      } catch (error) {
+        console.error('Error al obtener actividad reciente:', error);
+      } finally {
+        setCargandoActividad(false);
+      }
+    };
+
+    cargarActividad();
+  }, []);
+
   const linksNav = [
     { to: '/PanelUsuarios', label: 'Panel de Usuarios', icon: (
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
@@ -48,14 +65,6 @@ export default function PanelAdmin() {
       <>
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
-      </>
-    ) },
-    { to: '/PanelMovimientos', label: 'Panel de Movimientos', icon: (
-      <>
-        <polyline points="16 3 21 8 16 13" />
-        <line x1="21" y1="8" x2="9" y2="8" />
-        <polyline points="8 21 3 16 8 11" />
-        <line x1="3" y1="16" x2="15" y2="16" />
       </>
     ) },
   ];
@@ -154,13 +163,34 @@ export default function PanelAdmin() {
 
         </section>
 
-        {/* Bloque inferior, listo para tabla o lista de actividad */}
+        {/* Actividad reciente */}
         <section className="bg-[#0d1526] border border-[#1c2942] rounded-xl p-5 flex-1">
           <h2 className="text-base font-semibold text-[#f4f1e8] mb-4">Actividad reciente</h2>
-          <p className="text-sm text-[#9aa6c4]">
-            Aqui puedes mapear una lista de movimientos, registros recientes u otra
-            informacion proveniente de tu API.
-          </p>
+
+          {cargandoActividad ? (
+            <p className="text-sm text-[#9aa6c4]">Cargando actividad...</p>
+          ) : actividad.length === 0 ? (
+            <p className="text-sm text-[#9aa6c4]">No hay actividad registrada todavía.</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {actividad.map((item) => (
+                <li key={item.id_historial} className="flex items-start justify-between gap-4 border-b border-[#1c2942] pb-3 last:border-none last:pb-0">
+                  <div>
+                    <p className="text-sm text-[#f4f1e8]">
+                      <span className="font-medium">{item.usuario_nombre} {item.usuario_apellido || ''}</span>
+                      {' '}<span className="text-[#9aa6c4]">— {item.accion}</span>
+                    </p>
+                    {item.detalles && (
+                      <p className="text-xs text-[#7d8aa8] mt-1">{item.detalles}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#7d8aa8] whitespace-nowrap">
+                    {new Date(item.fecha).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
       </main>

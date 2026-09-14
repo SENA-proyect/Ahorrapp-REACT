@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
-    fecha_eliminacion_programada TIMESTAMP NULL,
+    fecha_eliminacion_programada TIMESTAMP NULL
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

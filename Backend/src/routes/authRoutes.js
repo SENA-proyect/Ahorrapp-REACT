@@ -11,6 +11,8 @@ const {
   deleteUsuario,
   actualizarRolUsuario,
   desactivarCuentaPropia,
+  actualizarMiPerfil,
+  cambiarMiPassword,
 } = require("../controllers/authController");
 
 const { verifyToken, requireRole } = require("../middlewares/authMiddleware");
@@ -33,5 +35,9 @@ router.put("/PanelUsuarios/:id/rol",  verifyToken, requireRole(["superuser"]), a
 
 // Autoservicio: el propio usuario desactiva su cuenta (cualquier rol)
 router.put("/mi-cuenta/desactivar",   verifyToken, desactivarCuentaPropia);
+
+// Autoservicio: editar mis propios datos y cambiar mi contraseña
+router.put("/mi-perfil",              verifyToken, actualizarMiPerfil);
+router.put("/mi-cuenta/password",     verifyToken, cambiarMiPassword);
 
 module.exports = router;
