@@ -31,7 +31,7 @@ import ModulosGastos from './pages/ModulosGastos.jsx';
 import ModulosIngresos from './pages/ModulosIngresos.jsx';
 import Asistente from './components/Asistente/Asistente';
 import Noticias from './pages/Noticias.jsx';
-import Export from "./pages/exportar.jsx"
+// import Export from "./pages/exportar.jsx"
 import ModulosPresupuestos from './pages/ModulosPresupuestos.jsx'
 import Configuracion from './pages/Configuracion.jsx'
 import Reportes from './pages/reportes.jsx'
@@ -195,14 +195,14 @@ function App() {
             } 
           />
 
-          <Route 
+          {/* <Route 
             path="/exportar" 
             element={
               <ProtectedRoute>
                 <Export />
               </ProtectedRoute>
             } 
-          />
+          /> */}
 
           <Route
             path="/ModulosPresupuestos"

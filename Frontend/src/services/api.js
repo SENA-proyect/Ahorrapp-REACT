@@ -292,7 +292,6 @@ export const abonarAhorro = (id, monto) =>
     body: JSON.stringify({ monto }),
   });
  
-
 // ── Resumen financiero (para el Asistente) ────────────────────────────────────
 export const getResumenFinancieroBreve = async () => {
   try {
@@ -343,100 +342,101 @@ export const getResumenFinancieroBreve = async () => {
   }
 };
 
-// ── Exportar Datos ────────────────────────────────────────────────────────────
-export const exportarDatos = async (payload, { onError, onDone } = {}) => {
-  try {
-    const res = await fetch(`${API_URL}/exportar`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify(payload),
-    });
+// ── Exportar Datos (funciones desactivadas por el momento) ────────────────────────────────────────────────────────────
+// export const exportarDatos = async (payload, { onError, onDone } = {}) => {
+//   try {
+//     const res = await fetch(`${API_URL}/exportar`, {
+//       method: "POST",
+//       headers: authHeaders(),
+//       body: JSON.stringify(payload),
+//     });
 
-    if (!res.ok) {
-      const { error } = await res.json();
-      throw new Error(error ?? "Error al exportar datos");
-    }
+//     if (!res.ok) {
+//       const { error } = await res.json();
+//       throw new Error(error ?? "Error al exportar datos");
+//     }
 
-    const contentType = res.headers.get("Content-Type") ?? "";
-    const contentDisposition = res.headers.get("Content-Disposition") ?? "";
-    const match = contentDisposition.match(/filename\"?=\"?([^;\"]+)/i);
-    const filename = match?.[1]?.trim() ?? `reporte_financiero.${payload.formato}`;
+//     const contentType = res.headers.get("Content-Type") ?? "";
+//     const contentDisposition = res.headers.get("Content-Disposition") ?? "";
+//     const match = contentDisposition.match(/filename\"?=\"?([^;\"]+)/i);
+//     const filename = match?.[1]?.trim() ?? `reporte_financiero.${payload.formato}`;
 
-    const blob = await res.blob();
+//     const blob = await res.blob();
 
-    // Detectar respuesta corrupta (JSON/HTML cuando se esperaba binario)
-    const isExpectedType =
-      contentType.includes("application/pdf") ||
-      contentType.includes("text/csv") ||
-      payload.formato === "json";
+//     // Detectar respuesta corrupta (JSON/HTML cuando se esperaba binario)
+//     const isExpectedType =
+//       contentType.includes("application/pdf") ||
+//       contentType.includes("text/csv") ||
+//       payload.formato === "json";
 
-    if (!isExpectedType) {
-      const text = await blob.text().catch(() => "");
-      try {
-        const { error } = JSON.parse(text);
-        throw new Error(error ?? "Respuesta inesperada del servidor");
-      } catch {
-        if (text) throw new Error(text.slice(0, 200));
-      }
-    }
+//     if (!isExpectedType) {
+//       const text = await blob.text().catch(() => "");
+//       try {
+//         const { error } = JSON.parse(text);
+//         throw new Error(error ?? "Respuesta inesperada del servidor");
+//       } catch {
+//         if (text) throw new Error(text.slice(0, 200));
+//       }
+//     }
 
-    const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement("a"), { href: url, download: filename });
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-      a.remove();
-    }, 0);
+//     const url = URL.createObjectURL(blob);
+//     const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+//     document.body.appendChild(a);
+//     a.click();
+//     setTimeout(() => {
+//       URL.revokeObjectURL(url);
+//       a.remove();
+//     }, 0);
 
-    onDone?.();
-  } catch (error) {
-    console.error("Error en exportarDatos:", error);
-    onError?.(error.message);
-    throw error;
-  }
-};
+//     onDone?.();
+//   } catch (error) {
+//     console.error("Error en exportarDatos:", error);
+//     onError?.(error.message);
+//     throw error;
+//   }
+// };
 
-// ── Historial de Exportaciones ───────────────────────────────────────────────
-export const getHistorialExportaciones = async (params = {}) => {
-  const query = new URLSearchParams(params).toString();
+//// ── Historial de Exportaciones ───────────────────────────────────────────────
+// export const getHistorialExportaciones = async (params = {}) => {
+//   const query = new URLSearchParams(params).toString();
 
-  const response = await fetch(`${API_URL}/exportar?${query}`, {
-    headers: authHeaders(),
-    cache: "no-store",
-  });
+//   const response = await fetch(`${API_URL}/exportar?${query}`, {
+//     headers: authHeaders(),
+//     cache: "no-store",
+//   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+//   if (!response.ok) {
+//     const errorData = await response.json().catch(() => ({}));
 
-    throw new Error(
-      errorData.error || "Error al obtener historial de exportaciones"
-    );
-  }
+//     throw new Error(
+//       errorData.error || "Error al obtener historial de exportaciones"
+//     );
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-// ── Eliminar Exportación del Historial ───────────────────────────────────────
-export const eliminarExportacion = async (id) => {
-  const response = await fetch(`${API_URL}/exportar/${id}`, {
-    method: "DELETE",
-    headers: authHeaders(),
-    cache: "no-store",
-  });
+// // ── Eliminar Exportación del Historial ───────────────────────────────────────
+// export const eliminarExportacion = async (id) => {
+//   const response = await fetch(`${API_URL}/exportar/${id}`, {
+//     method: "DELETE",
+//     headers: authHeaders(),
+//     cache: "no-store",
+//   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+//   if (!response.ok) {
+//     const errorData = await response.json().catch(() => ({}));
 
-    throw new Error(
-      errorData.error || "Error al eliminar exportación"
-    );
-  }
+//     throw new Error(
+//       errorData.error || "Error al eliminar exportación"
+//     );
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
 // ── Ingresos / Gastos ─────────────────────────────────────────────────────────
+
 export const getIngresos = async () => {
   const movimientos = await getMovimientos();
   return movimientos.filter(m =>
@@ -487,7 +487,7 @@ export const getDependientesPanelAdmin = async () => {
   return response.json(); 
 }
 
-// Todos los dependientes para admin
+// dependientes para admin
 export const getTodosDependientesAdmin = async () => {
   const token = localStorage.getItem('token');
 
@@ -721,7 +721,6 @@ export const obtenerInformeCompleto = async ({
     resumen,
     gastosCategoria,
     gastosDependiente,
-    eliminarCategoria,
     ingresosCategoria,
     ingresosFuente,
     ahorros,
@@ -759,7 +758,6 @@ export const obtenerInformeCompleto = async ({
     gastosCategoria,
     gastosDependiente,
     ingresosCategoria,
-    eliminarCategoria,
     ingresosFuente,
     ahorros,
     deudas,

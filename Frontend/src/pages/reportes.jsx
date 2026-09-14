@@ -173,7 +173,10 @@ export default function Reportes() {
     }
   };
 
-  const resumen = informe?.resumen ?? {};
+  // informe.resumen es el sobre completo que devuelve el backend
+  // ({ok, periodo, resumen:{...}, deudas:{...}}) - los valores reales
+  // están un nivel más adentro.
+  const resumen = informe?.resumen?.resumen ?? {};
 
   return (
     <div
@@ -337,8 +340,8 @@ export default function Reportes() {
                 <ResumenCard
                   titulo="Ingresos"
                   valor={formatearCOP(
-                    resumen.totalIngresos ??
-                      resumen.total_ingresos ??
+                    resumen.ingresos ??
+                      resumen.totalIngresos ??
                       0
                   )}
                 />
@@ -346,8 +349,8 @@ export default function Reportes() {
                 <ResumenCard
                   titulo="Gastos"
                   valor={formatearCOP(
-                    resumen.totalGastos ??
-                      resumen.total_gastos ??
+                    resumen.gastos ??
+                      resumen.totalGastos ??
                       0
                   )}
                 />
@@ -355,8 +358,8 @@ export default function Reportes() {
                 <ResumenCard
                   titulo="Ahorros"
                   valor={formatearCOP(
-                    resumen.totalAhorros ??
-                      resumen.total_ahorros ??
+                    resumen.ahorros ??
+                      resumen.totalAhorros ??
                       0
                   )}
                 />
@@ -364,8 +367,8 @@ export default function Reportes() {
                 <ResumenCard
                   titulo="Deudas"
                   valor={formatearCOP(
-                    resumen.totalDeudas ??
-                      resumen.total_deudas ??
+                    resumen.pagos_deudas ??
+                      resumen.totalDeudas ??
                       0
                   )}
                 />
@@ -373,8 +376,8 @@ export default function Reportes() {
                 <ResumenCard
                   titulo="Imprevistos"
                   valor={formatearCOP(
-                    resumen.totalImprevistos ??
-                      resumen.total_imprevistos ??
+                    resumen.imprevistos ??
+                      resumen.totalImprevistos ??
                       0
                   )}
                 />

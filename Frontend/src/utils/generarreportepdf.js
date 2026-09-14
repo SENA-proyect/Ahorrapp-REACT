@@ -676,8 +676,10 @@ const generarResumen = (
   informe,
   y
 ) => {
+  // informe.resumen es el sobre completo del backend ({ok, periodo,
+  // resumen:{...}}) - los valores reales están un nivel más adentro.
   const resumen =
-    informe.resumen || {};
+    informe.resumen?.resumen || {};
 
   y = tituloSeccion(
     doc,
@@ -1381,10 +1383,10 @@ const generarFondoEmergencia = (
   );
 
   const periodo =
-    informe.fondoEmergencia || {};
+    informe.fondoEmergencia?.resumen || {};
 
   const estado =
-    informe.estadoFondoEmergencia || {};
+    informe.estadoFondoEmergencia?.data || {};
 
   const aportes = numero(
     periodo.aportes ??

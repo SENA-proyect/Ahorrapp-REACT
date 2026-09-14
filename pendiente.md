@@ -203,7 +203,6 @@ Failed to load resource: the server responded with a status of 400 ()
 * Todo lo de reportes
 * Todo de noticias
 * Todo con respecto al panel de administrador
-* Todo con respecto al archivo de configuracion
 
 
 <details>
