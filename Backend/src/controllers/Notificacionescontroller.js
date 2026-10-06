@@ -240,6 +240,7 @@ const registrarPushToken = async (req, res) => {
 };
 
 module.exports = {
+  testNotificacion,
   getNotificaciones,
   getNoLeidasCount,
   marcarLeida,
