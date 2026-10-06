@@ -13,7 +13,6 @@ const {
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
   registrarPushToken,
-  testNotificacion,
 } = require("../controllers/Notificacionescontroller");
 
 router.use(verifyToken);
