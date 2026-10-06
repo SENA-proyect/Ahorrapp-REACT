@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { verifyToken } = require("../middlewares/authMiddleware");
+const { testNotificacion } = require("../controllers/Notificacionescontroller");
 const {
   getNotificaciones,
   getNoLeidasCount,
@@ -11,6 +12,8 @@ const {
   eliminarNotificacion,
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
+  registrarPushToken,
+  testNotificacion,
 } = require("../controllers/Notificacionescontroller");
 
 router.use(verifyToken);
@@ -26,5 +29,12 @@ router.delete("/notificaciones/:id", eliminarNotificacion);
 // ── Preferencias ──────────────────────────────────────────────
 router.get("/preferencias-notificacion", getPreferenciasUsuario);
 router.put("/preferencias-notificacion", actualizarPreferenciasUsuario);
+
+// ── Push tokens ──────────────────────────────────────────────
+router.post("/push-tokens", registrarPushToken);
+
+
+//--Ruta de prueba para crear notificaciones
+router.post("/notificaciones/test", testNotificacion);
 
 module.exports = router;

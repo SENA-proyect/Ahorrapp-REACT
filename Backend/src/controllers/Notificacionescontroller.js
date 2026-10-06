@@ -1,13 +1,23 @@
 const pool = require("../db/connection");
+const { crearNotificacion } = require("../service/NotificacionesService");
 const {
   getPreferencias,
   setPreferencia,
   TIPOS_NOTIFICACION,
 } = require("../service/NotificacionesService")
 
-// ─────────────────────────────────────────────────────────────
-//  GET /api/notificaciones
-// ─────────────────────────────────────────────────────────────
+const testNotificacion = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+
+  const id = await crearNotificacion({
+    ID_usuario,
+    Tipo: "sistema",
+    Mensaje: "Esta es una notificación de prueba 🚀",
+  });
+
+  return res.status(200).json({ ok: true, id_notificacion: id });
+};
+
 const getNotificaciones = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { leida, archivada } = req.query;
@@ -67,9 +77,6 @@ const getNotificaciones = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  GET /api/notificaciones/no-leidas/count
-// ─────────────────────────────────────────────────────────────
 const getNoLeidasCount = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
@@ -87,9 +94,6 @@ const getNoLeidasCount = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  PATCH /api/notificaciones/:id/leer
-// ─────────────────────────────────────────────────────────────
 const marcarLeida = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
@@ -112,9 +116,6 @@ const marcarLeida = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  PATCH /api/notificaciones/leer-todas
-// ─────────────────────────────────────────────────────────────
 const marcarTodasLeidas = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
@@ -132,9 +133,6 @@ const marcarTodasLeidas = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  PATCH /api/notificaciones/:id/archivar
-// ─────────────────────────────────────────────────────────────
 const archivarNotificacion = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
@@ -157,9 +155,6 @@ const archivarNotificacion = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  DELETE /api/notificaciones/:id
-// ─────────────────────────────────────────────────────────────
 const eliminarNotificacion = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
@@ -181,9 +176,6 @@ const eliminarNotificacion = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  GET /api/preferencias-notificacion
-// ─────────────────────────────────────────────────────────────
 const getPreferenciasUsuario = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
@@ -196,10 +188,6 @@ const getPreferenciasUsuario = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  PUT /api/preferencias-notificacion
-//  Body esperado: { preferencias: [{ tipo, activa }, ...] }
-// ─────────────────────────────────────────────────────────────
 const actualizarPreferenciasUsuario = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { preferencias } = req.body;
@@ -228,6 +216,29 @@ const actualizarPreferenciasUsuario = async (req, res) => {
   }
 };
 
+const registrarPushToken = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { fcm_token, plataforma } = req.body;
+
+  if (!fcm_token || !plataforma) {
+    return res.status(400).json({ ok: false, mensaje: "fcm_token y plataforma son requeridos" });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO push_tokens (id_usuario, fcm_token, plataforma)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (fcm_token) DO UPDATE SET id_usuario = $1, plataforma = $3`,
+      [ID_usuario, fcm_token, plataforma]
+    );
+
+    return res.status(200).json({ ok: true, mensaje: "Token registrado" });
+  } catch (error) {
+    console.error("Error en registrarPushToken:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
 module.exports = {
   getNotificaciones,
   getNoLeidasCount,
@@ -237,4 +248,5 @@ module.exports = {
   eliminarNotificacion,
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
+  registrarPushToken,
 };
