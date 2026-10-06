@@ -20,3 +20,5 @@ npm-debug.log*
 .DS_Store
 
 certs/
+
+Backend/src/config/ahorrapp-5b863-firebase-adminsdk-fbsvc-1ce24efa5c.json
