@@ -13,7 +13,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "https://ahorrapp-react-pkj9.onrender.com",
+        target: "https://manuel-4zg4.onrender.com",
         changeOrigin: true,
         secure: false,
       },
