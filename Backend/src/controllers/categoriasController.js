@@ -34,6 +34,15 @@
 //// -------------------------------------------------------------
 const pool = require("../db/connection");
 
+// Mantiene los límites de la interfaz también en solicitudes directas a la API.
+function validarCategoria(nombre, descripcion) {
+  if (typeof nombre !== "string" || !nombre.trim()) return "El nombre es obligatorio";
+  if (nombre.trim().length < 2 || nombre.trim().length > 50) return "El nombre debe tener entre 2 y 50 caracteres";
+  if (descripcion != null && typeof descripcion !== "string") return "La descripción debe ser texto";
+  if (descripcion?.trim().length > 200) return "La descripción no puede superar los 200 caracteres";
+  return null;
+}
+
 // ── GET todas las categorías (sistema + las del usuario) ────────────────────
 const getCategorias = async (req, res) => {
   const id_usuario = req.usuario.id;
@@ -347,18 +356,33 @@ const crearCategoria = async (req, res) => {
   const id_usuario = req.usuario.id;
   const { nombre, descripcion } = req.body;
 
-  if (!nombre?.trim()) {
-    return res.status(400).json({ ok: false, mensaje: "El nombre es obligatorio" });
-  }
+  const errorValidacion = validarCategoria(nombre, descripcion);
+  if (errorValidacion) return res.status(400).json({ ok: false, mensaje: errorValidacion });
 
+  let connection;
   try {
-    const { rows: result } = await pool.query(
+    connection = await pool.connect();
+    await connection.query("BEGIN");
+    // Serializa cambios de nombres para que dos solicitudes no creen duplicados.
+    await connection.query("LOCK TABLE categorias IN SHARE ROW EXCLUSIVE MODE");
+    const { rows: duplicadas } = await connection.query(
+      `SELECT id_categoria FROM categorias
+       WHERE (es_global = TRUE OR id_usuario = $1)
+         AND LOWER(BTRIM(nombre)) = LOWER(BTRIM($2))`,
+      [id_usuario, nombre.trim()]
+    );
+    if (duplicadas.length) {
+      await connection.query("ROLLBACK");
+      return res.status(409).json({ ok: false, mensaje: "Ya existe una categoría con ese nombre (activa o deshabilitada)" });
+    }
+    const { rows: result } = await connection.query(
       `INSERT INTO categorias (id_usuario, nombre, descripcion, activa, sistema, es_global)
        VALUES ($1, $2, $3, TRUE, FALSE, FALSE)
        RETURNING id_categoria`,
       [id_usuario, nombre.trim(), descripcion?.trim() || null]
     );
 
+    await connection.query("COMMIT");
     return res.status(201).json({
       ok: true,
       mensaje: "Categoria creada exitosamente",
@@ -366,8 +390,11 @@ const crearCategoria = async (req, res) => {
     });
 
   } catch (error) {
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en crearCategoria:", error.message);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  } finally {
+    connection?.release();
   }
 };
 
@@ -377,31 +404,49 @@ const actualizarCategoria = async (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion } = req.body;
 
-  if (!nombre?.trim()) {
-    return res.status(400).json({ ok: false, mensaje: "El nombre es obligatorio" });
-  }
+  const errorValidacion = validarCategoria(nombre, descripcion);
+  if (errorValidacion) return res.status(400).json({ ok: false, mensaje: errorValidacion });
 
+  let connection;
   try {
-
-    const { rows } = await pool.query(
+    connection = await pool.connect();
+    await connection.query("BEGIN");
+    await connection.query("LOCK TABLE categorias IN SHARE ROW EXCLUSIVE MODE");
+    const { rows } = await connection.query(
       `SELECT id_categoria FROM categorias
-      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
+      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE AND sistema = FALSE`,
       [id, id_usuario]
     );
 
     if (rows.length === 0) {
+      await connection.query("ROLLBACK");
       return res.status(403).json({ ok: false, mensaje: "No tienes permiso para editar esta categoria" });
     }
 
-    await pool.query(
+    const { rows: duplicadas } = await connection.query(
+      `SELECT id_categoria FROM categorias
+       WHERE (es_global = TRUE OR id_usuario = $1)
+         AND LOWER(BTRIM(nombre)) = LOWER(BTRIM($2))
+         AND id_categoria <> $3`,
+      [id_usuario, nombre.trim(), id]
+    );
+    if (duplicadas.length) {
+      await connection.query("ROLLBACK");
+      return res.status(409).json({ ok: false, mensaje: "Ya existe una categoría con ese nombre (activa o deshabilitada)" });
+    }
+    await connection.query(
       "UPDATE categorias SET nombre = $1, descripcion = $2 WHERE id_categoria = $3",
       [nombre.trim(), descripcion?.trim() || null, id]
     );
 
+    await connection.query("COMMIT");
     return res.status(200).json({ ok: true, mensaje: "Categoria actualizada exitosamente" });
   } catch (error) {
+    if (connection) await connection.query("ROLLBACK");
     console.error("Error en actualizarCategoria:", error.message);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  } finally {
+    connection?.release();
   }
 };
 
@@ -412,7 +457,7 @@ const deshabilitarCategoria = async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id_categoria FROM categorias
-      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
+      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE AND sistema = FALSE`,
       [id, id_usuario]
     );
 
@@ -420,7 +465,12 @@ const deshabilitarCategoria = async (req, res) => {
       return res.status(403).json({ ok: false, mensaje: "No tienes permiso para deshabilitar esta categoria" });
     }
 
-    await pool.query("UPDATE categorias SET activa = FALSE WHERE id_categoria = $1", [id]);
+    const result = await pool.query(
+      `UPDATE categorias SET activa = FALSE
+       WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE AND sistema = FALSE`,
+      [id, id_usuario]
+    );
+    if (!result.rowCount) return res.status(403).json({ ok: false, mensaje: "No tienes permiso para deshabilitar esta categoria" });
 
     return res.status(200).json({ ok: true, mensaje: "Categoria deshabilitada" });
   } catch (error) {
@@ -436,7 +486,7 @@ const habilitarCategoria = async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id_categoria FROM categorias
-      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
+      WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE AND sistema = FALSE`,
       [id, id_usuario]
     );
 
@@ -444,7 +494,12 @@ const habilitarCategoria = async (req, res) => {
       return res.status(403).json({ ok: false, mensaje: "No tienes permiso para habilitar esta categoria" });
     }
 
-    await pool.query("UPDATE categorias SET activa = TRUE WHERE id_categoria = $1", [id]);
+    const result = await pool.query(
+      `UPDATE categorias SET activa = TRUE
+       WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE AND sistema = FALSE`,
+      [id, id_usuario]
+    );
+    if (!result.rowCount) return res.status(403).json({ ok: false, mensaje: "No tienes permiso para habilitar esta categoria" });
 
     return res.status(200).json({ ok: true, mensaje: "Categoria habilitada" });
   } catch (error) {
@@ -461,7 +516,7 @@ const eliminarCategoria = async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id_categoria, activa FROM categorias
-       WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE`,
+       WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE AND sistema = FALSE`,
       [id, id_usuario]
     );
 
@@ -472,7 +527,12 @@ const eliminarCategoria = async (req, res) => {
       return res.status(409).json({ ok: false, mensaje: "Solo puedes eliminar categorías deshabilitadas" });
     }
 
-    await pool.query("DELETE FROM categorias WHERE id_categoria = $1", [id]);
+    const result = await pool.query(
+      `DELETE FROM categorias
+       WHERE id_categoria = $1 AND id_usuario = $2 AND es_global = FALSE AND sistema = FALSE AND activa = FALSE`,
+      [id, id_usuario]
+    );
+    if (!result.rowCount) return res.status(409).json({ ok: false, mensaje: "La categoría cambió; recarga e inténtalo nuevamente" });
     return res.status(200).json({ ok: true, mensaje: "Categoria eliminada" });
   } catch (error) {
     console.error("Error en eliminarCategoria:", error.message);

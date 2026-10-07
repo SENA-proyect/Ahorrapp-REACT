@@ -8,6 +8,16 @@
 
 Una categoría puede ser **global** (`es_global = true`, compartida por todos los usuarios, del sistema) o **propia del usuario** (`es_global = false`). Solo se pueden editar/deshabilitar/habilitar categorías propias.
 
+## Restricciones RF-15
+
+- Editar, deshabilitar, habilitar y eliminar requieren propiedad, `es_global=false` y `sistema=false`. Una categoría del sistema está protegida aunque no sea global; se responde `403`.
+- Crear y editar rechazan con `409` nombres repetidos entre las categorías propias y globales, incluidas las deshabilitadas. La comparación ignora mayúsculas y espacios exteriores. Al editar se excluye la propia categoría.
+- El nombre debe ser texto de 2 a 50 caracteres y la descripción opcional admite hasta 200 caracteres; errores de validación devuelven `400`.
+- `DELETE /api/categorias/:id` solo permite categorías propias deshabilitadas. Una categoría activa devuelve `409`.
+- `POST /api/movimientos` rechaza con `400` categorías inexistentes, ajenas, deshabilitadas o con identificador inválido antes de guardar el movimiento. La categoría continúa siendo opcional.
+
+Estas restricciones se implementan en el código del backend; su disponibilidad en un servidor depende de desplegar esa versión.
+
 ---
 
 ## 1. 🔒 Listar categorías

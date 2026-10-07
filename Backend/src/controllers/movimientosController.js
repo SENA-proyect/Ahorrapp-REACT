@@ -75,6 +75,11 @@ const crearMovimiento = async (req, res) => {
     return res.status(400).json({ ok: false, mensaje: "Subtipo inválido para Salida" });
   }
 
+  if (datos.id_categoria !== undefined && datos.id_categoria !== null && datos.id_categoria !== "" &&
+      (!/^\d+$/.test(String(datos.id_categoria)) || !Number.isSafeInteger(Number(datos.id_categoria)) || Number(datos.id_categoria) <= 0)) {
+    return res.status(400).json({ ok: false, mensaje: "La categoría debe tener un identificador válido" });
+  }
+
   // 2. Apertura de conexión e inicio de la transacción
   let connection;
 
@@ -82,6 +87,21 @@ const crearMovimiento = async (req, res) => {
     connection = await pool.connect();
     const ID_usuario = req.usuario.id;
     await connection.query("BEGIN");
+
+    // Una categoría debe existir, ser visible y estar activa antes de guardar.
+    // FOR SHARE impide deshabilitarla o eliminarla mientras se crea el movimiento.
+    if (datos.id_categoria !== undefined && datos.id_categoria !== null && datos.id_categoria !== "") {
+      const { rows: categorias } = await connection.query(
+        `SELECT id_categoria, activa FROM categorias
+         WHERE id_categoria = $1 AND (es_global = TRUE OR id_usuario = $2)
+         FOR SHARE`,
+        [datos.id_categoria, ID_usuario]
+      );
+      if (!categorias.length || !categorias[0].activa) {
+        await connection.query("ROLLBACK");
+        return res.status(400).json({ ok: false, mensaje: "La categoría no existe, no está disponible o está deshabilitada" });
+      }
+    }
 
     // 1. Insertar en MOVIMIENTOS
     const { rows: [movimiento] } = await connection.query(

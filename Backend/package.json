@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test:rf15": "node tests/rf15.cjs",
     "dev": "nodemon index.js",
     "start": "node index.js"
   },
