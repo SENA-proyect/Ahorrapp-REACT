@@ -236,7 +236,7 @@ Se añadió una función inyectable únicamente en el constructor de pruebas par
 | `Frontend/package.json`, `Frontend/package-lock.json` | Comando de pruebas y dependencias de desarrollo |
 | Este documento | Diagnóstico, correcciones, evidencia y límites |
 
-**Móvil, repositorio `Juanma-MG21/ahorrapp-movile`, rama de publicación `codex/rf16-cerrar-sesion`:**
+**Móvil, repositorio `Juanma-MG21/ahorrapp-movile`, rama de publicación `David-M`:**
 
 | Archivo | Cambio |
 | --- | --- |
