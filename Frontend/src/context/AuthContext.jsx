@@ -1,34 +1,23 @@
 // src/context/AuthContext.jsx
 import { createContext, useState, useContext, useEffect } from 'react';
+import { clearSession, readSession, watchSession } from '../services/session';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => readSession());
+  const loading = false;
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
-  }, []);
+  useEffect(() => watchSession(setUser), []);
 
   const login = (userData) => {
-    setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    setUser(readSession());
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('usuario');
-    localStorage.removeItem('token');
+    clearSession();
   };
 
   const value = {
