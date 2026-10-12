@@ -83,7 +83,7 @@ const login = async (req, res) => {
     if (rows.length === 0) {
       return res.status(401).json({
         ok: false,
-        mensaje: "Correo o contraseña incorrectos",
+        mensaje: "Correo no encontrado",
       });
     }
 
@@ -97,7 +97,7 @@ const login = async (req, res) => {
     if (!passwordValida) {
       return res.status(401).json({
         ok: false,
-        mensaje: "Correo o contraseña incorrectos",
+        mensaje: "Contraseña incorrecta",
       });
     }
 
