@@ -27,7 +27,11 @@ const app = express();
 // ================================
 
 app.use(cors({
-    origin: true,
+    origin: [
+        "https://localhost:5173"
+        // Aquí posteriormente agregaremos
+        // la URL de producción del frontend
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
