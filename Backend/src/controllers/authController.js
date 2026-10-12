@@ -2,9 +2,12 @@ const pool = require("../db/connection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
 const { sendResetCodeEmail } = require("../service/MailService");
 const { registrarHistorial } = require("./Historialcontroller");
 require("dotenv").config();
+
+const googleOAuthClient = new OAuth2Client();
 
 // ── Helper de errores ────────────────────────────────────────────────────────
 const handleServerError = (res, error, msg) => {
@@ -135,6 +138,127 @@ const login = async (req, res) => {
 
   } catch (error) {
     return handleServerError(res, error, "Error en login");
+  }
+};
+
+// ── POST /google ─────────────────────────────────────────────────────────────
+const loginWithGoogle = async (req, res) => {
+  const { idToken } = req.body ?? {};
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+
+  if (!googleClientId) {
+    return res.status(503).json({
+      ok: false,
+      mensaje: "El inicio de sesión con Google no está configurado",
+    });
+  }
+
+  if (typeof idToken !== "string" || !idToken) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: "No se recibió el token de Google",
+    });
+  }
+
+  let googleUser;
+  try {
+    const ticket = await googleOAuthClient.verifyIdToken({
+      idToken,
+      audience: googleClientId,
+    });
+    googleUser = ticket.getPayload();
+  } catch (_) {
+    return res.status(401).json({
+      ok: false,
+      mensaje: "El token de Google no es válido o expiró",
+    });
+  }
+
+  if (!googleUser?.sub || !googleUser.email || googleUser.email_verified !== true) {
+    return res.status(401).json({
+      ok: false,
+      mensaje: "Google no devolvió una cuenta verificada",
+    });
+  }
+
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+
+    const email = googleUser.email.trim().toLowerCase();
+    const { rows: existingUsers } = await client.query(
+      `SELECT id_usuario, nombre, apellido, email, activo
+       FROM usuarios WHERE LOWER(email) = $1 LIMIT 1`,
+      [email]
+    );
+
+    let user = existingUsers[0];
+    if (user && !user.activo) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({
+        ok: false,
+        mensaje: "La cuenta está desactivada",
+      });
+    }
+
+    if (!user) {
+      const names = (googleUser.name || "Usuario AhorrApp").trim().split(/\s+/);
+      const nombre = googleUser.given_name || names.shift() || "Usuario";
+      const apellido = googleUser.family_name || names.join(" ") || "";
+      const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10);
+      const { rows: insertedUsers } = await client.query(
+        `INSERT INTO usuarios (nombre, apellido, email, password_hash)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id_usuario, nombre, apellido, email, activo`,
+        [nombre, apellido, email, passwordHash]
+      );
+      user = insertedUsers[0];
+
+      await client.query(
+        "INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES ($1, $2)",
+        [user.id_usuario, 1]
+      );
+    }
+
+    const { rows: rolesRows } = await client.query(
+      `SELECT r.cargo AS "Cargo"
+       FROM usuarios_roles ur
+       INNER JOIN rol r ON ur.id_rol = r.id_rol
+       WHERE ur.id_usuario = $1`,
+      [user.id_usuario]
+    );
+    const roles = rolesRows.map((row) => row.Cargo.toLowerCase());
+
+    await client.query("COMMIT");
+
+    const token = jwt.sign(
+      { id: user.id_usuario, roles },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Inicio de sesión con Google exitoso",
+      token,
+      usuario: {
+        id: user.id_usuario,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        email: user.email,
+        roles,
+      },
+    });
+  } catch (error) {
+    if (client) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (_) {}
+    }
+    return handleServerError(res, error, "Error al iniciar sesión con Google");
+  } finally {
+    client?.release();
   }
 };
 
@@ -751,6 +875,7 @@ const cambiarMiPassword = async (req, res) => {
 module.exports = {
   register,
   login,
+  loginWithGoogle,
   forgotPassword,
   verifyResetCode,
   resetPassword,
