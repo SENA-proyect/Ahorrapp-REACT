@@ -5,6 +5,7 @@ import { getCategorias } from '../services/api'
 import HeaderModulos from '../components/HeaderModulos'
 import { useToast } from '../context/ToastContext'
 import { useNotificaciones } from '../context/NotificacionesContext'
+import { validarMonto, validarLongitud, validarNoFutura, primerError, LIMITES, hoyISO } from '../utils/validaciones'
 
 // const API = 'http://localhost:3000/api/movimientos'
 const API = 'https://ahorrapp-react.onrender.com/api/movimientos'
@@ -67,8 +68,13 @@ export default function ModuloIngresos() {
 
   const guardar = async () => {
     setErrorModal(null)
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0)
-      return setErrorModal('El monto debe ser mayor a 0')
+    const err = primerError(
+      validarMonto(modalEditar.monto),
+      validarLongitud(modalEditar.fuente, LIMITES.fuente, 'La fuente'),
+      validarLongitud(modalEditar.descripcion, LIMITES.descripcion, 'La descripción'),
+      validarNoFutura(modalEditar.fecha_registro, 'La fecha'),
+    )
+    if (err) return setErrorModal(err)
     setGuardando(true)
     const token = localStorage.getItem('token')
     try {
@@ -232,10 +238,10 @@ export default function ModuloIngresos() {
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
             <label className={labelCls}>Monto *</label>
-            <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
+            <input className={inputCls} type="number" name="monto" min="0.01" step="0.01" value={modalEditar.monto} onChange={handleChange} />
 
             <label className={labelCls}>Fuente</label>
-            <input className={inputCls} type="text" name="fuente" placeholder="Ej: Salario, Freelance..." value={modalEditar.fuente} onChange={handleChange} />
+            <input className={inputCls} type="text" name="fuente" maxLength={LIMITES.fuente} placeholder="Ej: Salario, Freelance..." value={modalEditar.fuente} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
             <select
@@ -254,10 +260,10 @@ export default function ModuloIngresos() {
             </select>
 
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
             <label className={labelCls}>Fecha</label>
-            <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />
+            <input className={inputCls} type="date" name="fecha_registro" max={hoyISO()} value={modalEditar.fecha_registro} onChange={handleChange} />
 
             {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
 

@@ -5,6 +5,7 @@ import ModalNuevoMovimiento from '../components/Modalnuevomovimiento'
 import HeaderModulos from '../components/HeaderModulos'
 import { useToast } from '../context/ToastContext'
 import { useNotificaciones } from '../context/NotificacionesContext'
+import { validarMonto, validarLongitud, validarCuotas, primerError, LIMITES } from '../utils/validaciones'
 
 // const API = 'http://localhost:3000/api/movimientos'
 const API = 'https://ahorrapp-react.onrender.com/api/movimientos'
@@ -122,9 +123,16 @@ export default function ModuloDeudas() {
 
   const guardar = async () => {
     setErrorModal(null)
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0)
-      return setErrorModal('El monto debe ser mayor a 0')
-    if (!modalEditar.fuente.trim()) return setErrorModal('La fuente es obligatoria')
+    const errCampos = primerError(
+      validarMonto(modalEditar.monto),
+      !modalEditar.fuente.trim() ? 'La fuente es obligatoria' : null,
+      validarLongitud(modalEditar.fuente, LIMITES.fuente, 'La fuente'),
+      validarLongitud(modalEditar.descripcion, LIMITES.descripcion, 'La descripción'),
+      validarCuotas(modalEditar.cuotas_total),
+      (!Number.isInteger(Number(modalEditar.cuotas_pagadas)) || Number(modalEditar.cuotas_pagadas) < 0)
+        ? 'Las cuotas pagadas deben ser un entero mayor o igual a 0' : null,
+    )
+    if (errCampos) return setErrorModal(errCampos)
     if (modalEditar.fecha_fin && modalEditar.fecha_inicio && modalEditar.fecha_fin < modalEditar.fecha_inicio)
       return setErrorModal('La fecha fin no puede ser anterior a la de inicio')
     const cp = Number(modalEditar.cuotas_pagadas)
@@ -135,7 +143,7 @@ export default function ModuloDeudas() {
     // ignorando lo que diga el select manual de Estado.
     const estadoFinal = ct !== null
       ? (cp >= ct ? 'pagada' : 'pendiente')
-      : modalEditar.estado
+      : (cp >= 1 ? 'pagada' : modalEditar.estado) // pago único: 1 cuota pagada = pagada
 
     setGuardando(true)
     const token = localStorage.getItem('token')
@@ -168,6 +176,9 @@ export default function ModuloDeudas() {
     setErrorModal(null)
     const cuotas = parseInt(cuotasAbono)
     if (!cuotas || cuotas < 1) return setErrorModal('El número de cuotas debe ser al menos 1')
+    // Pago único (sin cuotas_total) equivale a 1 cuota. Mismo mensaje que el móvil y el backend.
+    const pendientesAbono = (modalAbonar.cuotas_total ?? 1) - (modalAbonar.cuotas_pagadas ?? 0)
+    if (cuotas > pendientesAbono) return setErrorModal(`Quedan ${pendientesAbono} cuota(s) por pagar.`)
     setAbonando(true)
     try {
       const data = await abonarDeuda(modalAbonar.id, cuotas)
@@ -390,10 +401,10 @@ export default function ModuloDeudas() {
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
             <label className={labelCls}>Fuente *</label>
-            <input className={inputCls} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta..." value={modalEditar.fuente} onChange={handleChange} />
+            <input className={inputCls} type="text" name="fuente" maxLength={LIMITES.fuente} placeholder="Ej: Banco, Tarjeta..." value={modalEditar.fuente} onChange={handleChange} />
 
             <label className={labelCls}>Monto *</label>
-            <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
+            <input className={inputCls} type="number" name="monto" min="0.01" step="0.01" value={modalEditar.monto} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
             <select
@@ -412,7 +423,7 @@ export default function ModuloDeudas() {
             </select>
 
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
             {/* <label className={labelCls}>Estado</label>
             <select

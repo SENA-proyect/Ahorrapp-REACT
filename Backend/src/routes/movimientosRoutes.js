@@ -21,6 +21,8 @@ const {
   getMovimientos,
   abonarDeuda,
   abonarAhorro,
+  getAbonosAhorro,
+  getAbonosDeuda,
 } = require("../controllers/movimientosController");
 
 
@@ -31,6 +33,9 @@ router.get("/ahorros",    verifyToken, getAhorros);
 router.get("/gastos",     verifyToken, getGastos);
 router.get("/imprevistos",verifyToken, getImprevistos);
 router.get("/deudas",     verifyToken, getDeudas);
+// Historial de abonos (RF-04 / RF-07). Se declaran antes de cualquier ruta con :id.
+router.get("/ahorros/abonos", verifyToken, getAbonosAhorro);
+router.get("/deudas/abonos",  verifyToken, getAbonosDeuda);
 router.patch("/deudas/:id/abonar",  verifyToken, abonarDeuda);
 router.patch("/ahorros/:id/abonar", verifyToken, abonarAhorro);
 router.put("/ingresos/:id", verifyToken, updateIngresos);
