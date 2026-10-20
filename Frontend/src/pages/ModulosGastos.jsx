@@ -5,9 +5,12 @@ import ModalNuevoMovimiento from '../components/Modalnuevomovimiento'
 import HeaderModulos from '../components/HeaderModulos'
 import { useToast } from '../context/ToastContext'
 import { useNotificaciones } from '../context/NotificacionesContext'
+import { validarMonto, validarLongitud, validarNoFutura, primerError, LIMITES, MONTO_MINIMO_GASTO, hoyISO } from '../utils/validaciones'
 
 // const API = 'http://localhost:3000/api/movimientos'
+
 const API = 'https://ahorrapp-react-gia9.onrender.com/api/movimientos'
+
 
 const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
 const fmtFecha = (f) => {
@@ -70,8 +73,12 @@ export default function ModulosGastos() {
 
   const guardar = async () => {
     setErrorModal(null)
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 49)
-      return setErrorModal('El monto debe ser de al menos 50')
+    const err = primerError(
+      validarMonto(modalEditar.monto, { minimo: MONTO_MINIMO_GASTO }),
+      validarLongitud(modalEditar.descripcion, LIMITES.descripcion, 'La descripción'),
+      validarNoFutura(modalEditar.fecha_registro, 'La fecha'),
+    )
+    if (err) return setErrorModal(err)
     setGuardando(true)
     const token = localStorage.getItem('token')
     try {
@@ -246,7 +253,7 @@ export default function ModulosGastos() {
             <input className={inputCls} type="number" name="monto" min="50" step="0.01" value={modalEditar.monto} onChange={handleChange} />
 
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
             <select
@@ -281,7 +288,7 @@ export default function ModulosGastos() {
             </select> 
 
             <label className={labelCls}>Fecha</label>
-            <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />
+            <input className={inputCls} type="date" name="fecha_registro" max={hoyISO()} value={modalEditar.fecha_registro} onChange={handleChange} />
 
             {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
 

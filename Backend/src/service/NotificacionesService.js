@@ -161,7 +161,7 @@ const verificarUmbralImprevistos = async (ID_usuario) => {
     await crearNotificacion({
       ID_usuario,
       Tipo: "alerta_presupuesto",
-      Mensaje: `Has usado el ${porcentaje.toFixed(0)}% de tu fondo de imprevistos en este período.`,
+      Mensaje: `Has usado el ${porcentaje.toFixed(0)}% de tu porción de imprevistos en este período.`,
       Entidad_tipo: "periodo_imprevistos",
       Entidad_id: periodo.ID_periodo,
     });
@@ -197,7 +197,7 @@ const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
     await crearNotificacion({
       ID_usuario,
       Tipo: "sugerencia",
-      Mensaje: "No usaste casi nada de tu fondo de imprevistos este período. Considera destinar parte de ese dinero a tus ahorros.",
+      Mensaje: "No usaste casi nada de tu porción de imprevistos este período. Considera destinar parte de ese dinero a tus ahorros.",
       Entidad_tipo: "periodo_imprevistos_no_usado",
       Entidad_id: ID_periodo,
     });
