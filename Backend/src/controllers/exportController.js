@@ -322,7 +322,7 @@ exports.obtenerExportaciones = async (req, res) => {
     const offset = (page - 1) * limit;
     const { tipo, formato } = req.query;
 
-    let sql = 'SELECT id_historial, accion, detalles, fecha FROM historial WHERE id_usuario = $1';
+    let sql = "SELECT id_historial, accion, detalles, fecha FROM historial WHERE id_usuario = $1 AND accion NOT LIKE 'RF19:%'";
     const params = [userId];
 
     if (tipo) {
@@ -360,7 +360,7 @@ exports.eliminarExportacion = async (req, res) => {
     }
 
     const result = await pool.query(
-      'DELETE FROM historial WHERE id_historial = $1 AND id_usuario = $2',
+      "DELETE FROM historial WHERE id_historial = $1 AND id_usuario = $2 AND accion NOT LIKE 'RF19:%'",
       [id, userId]
     );
 

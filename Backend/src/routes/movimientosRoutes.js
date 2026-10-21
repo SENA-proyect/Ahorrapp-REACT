@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middlewares/authMiddleware");
+const { capacidades, consultarOperacion } = require('../controllers/sincronizacionController');
 const {
   crearMovimiento,
   getIngresos,
@@ -25,6 +26,8 @@ const {
 
 
 router.post("/",          verifyToken, crearMovimiento);
+router.get('/sincronizacion', verifyToken, capacidades);
+router.get('/sincronizacion/operaciones/:operationId', verifyToken, consultarOperacion);
 router.get("/", verifyToken, getMovimientos); 
 router.get("/ingresos",   verifyToken, getIngresos);
 router.get("/ahorros",    verifyToken, getAhorros);

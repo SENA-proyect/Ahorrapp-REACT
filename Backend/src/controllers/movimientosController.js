@@ -1,11 +1,68 @@
 const { actualizarIngresoReal } = require("../controllers/PresupuestosController"); //! linea agregada para prueba local
 
 const pool = require("../db/connection");
+const operacionesMoviles = require('../service/OperacionesMovilesService');
 const {
   verificarUmbralGastos,
   verificarUmbralImprevistos,
   verificarMetaAhorroAlcanzada,
 } = require ("../service/NotificacionesService");
+
+const identificadorValido = value => /^(?:[1-9]\d*)$/.test(String(value)) && Number.isSafeInteger(Number(value));
+
+// La comprobación y la escritura comparten transacción: una categoría o un
+// dependiente no puede cambiar de estado entre validar y guardar.
+async function editarConReferencias(req, res, tabla, enlace, nombre, escribir) {
+  if (!identificadorValido(req.params.id)) {
+    return res.status(400).json({ ok: false, mensaje: 'Identificador de movimiento inválido' });
+  }
+  let connection;
+  try {
+    connection = await pool.connect();
+    await connection.query('BEGIN');
+    const { rows } = await connection.query(
+      `SELECT detalle.id_${tabla} FROM ${tabla} detalle
+       JOIN ${enlace} e ON detalle.id_${enlace} = e.id_${enlace}
+       JOIN movimientos m ON m.id_movimiento = e.id_movimiento
+       WHERE detalle.id_${tabla} = $1 AND m.id_usuario = $2 FOR UPDATE OF detalle`,
+      [req.params.id, req.usuario.id]);
+    if (!rows.length) {
+      await connection.query('ROLLBACK');
+      return res.status(404).json({ ok: false, mensaje: `${nombre} no encontrado` });
+    }
+    const referencias = [
+      ['id_categoria', 'categorias', 'id_categoria', '(es_global = TRUE OR id_usuario = $2)', 'La categoría no existe, no está disponible o está deshabilitada'],
+      ...(['gastos', 'imprevistos'].includes(tabla)
+        ? [['id_dependientes', 'dependientes', 'id_dependientes', 'id_usuario = $2', 'El dependiente no existe o pertenece a otra cuenta']] : []),
+    ];
+    for (const [campo, destino, clave, visible, mensaje] of referencias) {
+      const value = req.body[campo];
+      if (value == null || value === '') continue;
+      if (!identificadorValido(value)) {
+        await connection.query('ROLLBACK');
+        return res.status(400).json({ ok: false, mensaje });
+      }
+      const { rows: disponibles } = await connection.query(
+        `SELECT ${clave}${campo === 'id_categoria' ? ', activa' : ''} FROM ${destino}
+         WHERE ${clave} = $1 AND ${visible} FOR SHARE`, [value, req.usuario.id]);
+      if (!disponibles.length || (campo === 'id_categoria' && !disponibles[0].activa)) {
+        await connection.query('ROLLBACK');
+        return res.status(400).json({ ok: false, mensaje });
+      }
+    }
+    await escribir(connection);
+    await connection.query('COMMIT');
+    return res.status(200).json({ ok: true, mensaje: `${nombre} actualizado exitosamente` });
+  } catch (error) {
+    if (connection) await connection.query('ROLLBACK');
+    const entradaInvalida = /^(22|23)/.test(error.code || '');
+    if (!entradaInvalida) console.error(`Error al editar ${tabla}:`, error.message);
+    return res.status(entradaInvalida ? 400 : 500).json({ ok: false,
+      mensaje: entradaInvalida ? 'Los datos del movimiento no son válidos' : 'Error interno del servidor' });
+  } finally {
+    connection?.release();
+  }
+}
 
 const getMovimientos = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -55,6 +112,13 @@ const getMovimientos = async (req, res) => {
 const crearMovimiento = async (req, res) => {
   // 1. Validaciones tempranas antes de abrir la conexión a la BD
   const { tipo_flujo, subtipo_modulo, datos } = req.body;
+  const operationId = req.body.operation_id;
+  if (operationId !== undefined && !operacionesMoviles.isOperationId(operationId)) {
+    return res.status(400).json({ ok: false, mensaje: 'Identificador de operación inválido' });
+  }
+  if (!Number.isFinite(Number(datos?.monto)) || Number(datos?.monto) <= 0) {
+    return res.status(400).json({ ok: false, mensaje: 'El monto debe ser mayor que cero' });
+  }
 
   if (!datos?.monto) {
     return res.status(400).json({ ok: false, mensaje: "El campo monto es requerido" });
@@ -82,11 +146,40 @@ const crearMovimiento = async (req, res) => {
 
   // 2. Apertura de conexión e inicio de la transacción
   let connection;
+  let committed = false;
 
   try {
     connection = await pool.connect();
     const ID_usuario = req.usuario.id;
     await connection.query("BEGIN");
+
+    if (operationId !== undefined) {
+      const reserved = await operacionesMoviles.reserve(connection, ID_usuario, operationId,
+        { tipo_flujo, subtipo_modulo, datos });
+      if (reserved.conflict) {
+        await connection.query('ROLLBACK');
+        return res.status(409).json({ ok: false, mensaje: 'El identificador ya corresponde a otros datos' });
+      }
+      if (reserved.response) {
+        await connection.query('COMMIT');
+        committed = true;
+        return res.status(200).json(reserved.response);
+      }
+    }
+
+    if (['Gasto', 'Imprevisto'].includes(subtipo_modulo) && datos.id_dependientes != null && datos.id_dependientes !== '') {
+      if (!identificadorValido(datos.id_dependientes)) {
+        await connection.query('ROLLBACK');
+        return res.status(400).json({ ok: false, mensaje: 'El dependiente debe tener un identificador válido' });
+      }
+      const { rows } = await connection.query(
+        'SELECT id_dependientes FROM dependientes WHERE id_dependientes = $1 AND id_usuario = $2 FOR SHARE',
+        [datos.id_dependientes, ID_usuario]);
+      if (!rows.length) {
+        await connection.query('ROLLBACK');
+        return res.status(400).json({ ok: false, mensaje: 'El dependiente no existe o pertenece a otra cuenta' });
+      }
+    }
 
     // Una categoría debe existir, ser visible y estar activa antes de guardar.
     // FOR SHARE impide deshabilitarla o eliminarla mientras se crea el movimiento.
@@ -284,9 +377,22 @@ const crearMovimiento = async (req, res) => {
       }
     }
 
-    // 3. Confirmar la transacción
+    const respuesta = {
+      ok: true, mensaje: 'Movimiento registrado exitosamente', ID_movimiento, ID_detalle,
+      ...(operationId !== undefined ? { operation_id: operationId } : {}),
+    };
+    if (operationId !== undefined) {
+      await operacionesMoviles.confirm(connection, ID_usuario, operationId, respuesta, { tipo_flujo, subtipo_modulo, datos });
+    }
+    // 3. Confirmar movimiento y deduplicación en la misma transacción.
     await connection.query("COMMIT");
+    committed = true;
+    // Los efectos auxiliares usan pool: devolver esta conexión evita agotar
+    // todas las conexiones cuando varias creaciones terminan al mismo tiempo.
+    connection.release();
+    connection = null;
 
+    try {
     if (subtipo_modulo === "Ingreso") {
       await actualizarIngresoReal(ID_usuario);   // versión importada desde presupuestosController, sin connection → usa pool internamente
     } else if (subtipo_modulo === "Gasto") {
@@ -294,17 +400,15 @@ const crearMovimiento = async (req, res) => {
     } else if (subtipo_modulo === "Imprevisto") {
       await verificarUmbralImprevistos(ID_usuario);
     }
+    } catch (error) {
+      console.error('Movimiento guardado; falló la actualización del resumen:', error.message);
+    }
 
-    return res.status(201).json({
-      ok: true,
-      mensaje: "Movimiento registrado exitosamente",
-      ID_movimiento,
-      ID_detalle,
-    });
+    return res.status(201).json(respuesta);
 
   } catch (error) {
     // Evita llamar a rollback si la conexión falló antes de iniciar la transacción
-    if (connection) await connection.query("ROLLBACK");
+    if (connection && !committed) await connection.query("ROLLBACK");
     console.error("Error en crearMovimiento:", error.message);
     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
   } finally {
@@ -321,7 +425,7 @@ const getIngresos = async (req, res) => {
     const { rows } = await pool.query(
       `SELECT i.id_ingresos AS id, i.monto AS monto, i.descripcion AS descripcion,
               i.fuente AS fuente, i.fecha_registro AS fecha, i.id_categoria,
-              c.nombre AS categoria
+              c.nombre AS categoria, m.id_movimiento AS _rf19_movimiento
        FROM ingresos i
        INNER JOIN entrada e     ON i.id_entrada    = e.id_entrada
        INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
@@ -330,7 +434,7 @@ const getIngresos = async (req, res) => {
        ORDER BY i.fecha_registro DESC`,
       [ID_usuario]
     );
-    res.status(200).json(rows);
+    res.status(200).json(await operacionesMoviles.withOperationIds(pool, ID_usuario, rows));
   } catch (error) {
     console.error("Error en getIngresos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
@@ -342,21 +446,14 @@ const updateIngresos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
   const { monto, descripcion, fuente, fecha_registro, id_categoria } = req.body;
-  try {
-    const result = await pool.query(
+  return editarConReferencias(req, res, 'ingresos', 'entrada', 'Ingreso', async (connection) => {
+    await connection.query(
       `UPDATE ingresos    
           SET monto = $1, descripcion = $2, fuente = $3, fecha_registro = $4, id_categoria = $5
           WHERE id_ingresos = $6 AND id_entrada IN (SELECT id_entrada FROM entrada WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $7))`,
-      [monto, descripcion, fuente, fecha_registro, id_categoria, id, ID_usuario]
+      [monto, descripcion, fuente, fecha_registro, id_categoria || null, id, ID_usuario]
     );
-    if (result.rowCount === 0) {
-      return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
-    }
-    res.status(200).json({ ok: true, mensaje: "Ingreso actualizado exitosamente" });
-  } catch (error) {
-    console.error("Error en updateIngresos:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
+  });
 };
 
 // ── DELETE Ingresos ────────────────────────────────────────────
@@ -410,7 +507,7 @@ async function getAhorros(req, res) {
               a.descripcion AS descripcion, a.meta AS meta,
               a.fecha_registro AS fecha, a.fecha_meta AS fecha_meta,
               a.id_categoria,
-              c.nombre AS categoria
+              c.nombre AS categoria, m.id_movimiento AS _rf19_movimiento
        FROM ahorros a
        INNER JOIN entrada e     ON a.id_entrada    = e.id_entrada
        INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
@@ -419,7 +516,7 @@ async function getAhorros(req, res) {
        ORDER BY a.fecha_registro DESC`,
       [ID_usuario]
     );
-    res.status(200).json(rows);
+    res.status(200).json(await operacionesMoviles.withOperationIds(pool, ID_usuario, rows));
   } catch (error) {
     console.error("Error en getAhorros:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
@@ -432,23 +529,14 @@ const updateAhorros = async (req, res) => {
   const { id } = req.params;
   const { monto, monto_acumulado, descripcion, meta, fecha_registro, fecha_meta, id_categoria } = req.body;
 
-  try {
-    const result = await pool.query(
+  return editarConReferencias(req, res, 'ahorros', 'entrada', 'Ahorro', async (connection) => {
+    await connection.query(
       `UPDATE ahorros
        SET monto = $1, monto_acumulado = $2, descripcion = $3, meta = $4, fecha_registro = $5, fecha_meta = $6, id_categoria = $7
        WHERE id_ahorros = $8 AND id_entrada IN (SELECT id_entrada FROM entrada WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $9))`,
       [monto, monto_acumulado, descripcion, meta, fecha_registro || null, fecha_meta || null, id_categoria || null, id, ID_usuario]
     );
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ ok: false, mensaje: "Ahorro no encontrado" });
-    }
-
-    res.status(200).json({ ok: true, mensaje: "Ahorro actualizado exitosamente" });
-  } catch (error) {
-    console.error("Error en updateAhorros:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
+  });
 };
 
 // ── DELETE Ahorros ─────────────────────────────────────────────
@@ -505,7 +593,7 @@ const getGastos = async (req, res) => {
         g.id_categoria,    
         g.id_dependientes,  
         c.nombre AS categoria,
-        d.nombre AS dependiente
+        d.nombre AS dependiente, m.id_movimiento AS _rf19_movimiento
 
        FROM gastos g
        INNER JOIN salida s       ON g.id_salida      = s.id_salida
@@ -516,7 +604,7 @@ const getGastos = async (req, res) => {
        ORDER BY g.fecha_registro DESC`,
       [ID_usuario]
     );
-    res.status(200).json(rows);
+    res.status(200).json(await operacionesMoviles.withOperationIds(pool, ID_usuario, rows));
   } catch (error) {
     console.error("Error en getGastos:", error.message);
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
@@ -528,21 +616,14 @@ const updateGastos = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
   const { monto, descripcion, fecha_registro, id_categoria, id_dependientes } = req.body;
-  try {
-    const result = await pool.query(
+  return editarConReferencias(req, res, 'gastos', 'salida', 'Gasto', async (connection) => {
+    await connection.query(
       `UPDATE gastos    
           SET monto = $1, descripcion = $2, fecha_registro = $3, id_categoria = $4, id_dependientes = $5
           WHERE id_gastos = $6 AND id_salida IN (SELECT id_salida FROM salida WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $7))`,
-      [monto, descripcion, fecha_registro, id_categoria, id_dependientes, id, ID_usuario]
+      [monto, descripcion, fecha_registro, id_categoria || null, id_dependientes || null, id, ID_usuario]
     );
-    if (result.rowCount === 0) {
-      return res.status(404).json({ ok: false, mensaje: "Gasto no encontrado" });
-    }
-    res.status(200).json({ ok: true, mensaje: "Gasto actualizado exitosamente" });
-  } catch (error) {
-    console.error("Error en updateGastos:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
+  });
 };
 
 // ── DELETE Gastos ────────────────────────────────────────
@@ -616,8 +697,8 @@ const updateImprevistos = async (req, res) => {
   const { id } = req.params;
   const { monto, causa, fecha_registro, id_categoria, id_dependientes } = req.body;
 
-  try {
-    const result = await pool.query(
+  return editarConReferencias(req, res, 'imprevistos', 'salida', 'Imprevisto', async (connection) => {
+    await connection.query(
       `UPDATE imprevistos i
        SET monto = $1, 
            causa = $2, 
@@ -639,15 +720,7 @@ const updateImprevistos = async (req, res) => {
         ID_usuario
       ]
     );
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ ok: false, mensaje: "Imprevisto no encontrado o sin permisos" });
-    }
-    res.status(200).json({ ok: true, mensaje: "Imprevisto actualizado exitosamente" });
-  } catch (error) {
-    console.error("Error en updateImprevistos:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
+  });
 };
 
 // ── DELETE Imprevistos ────────────────────────────────────────
@@ -724,21 +797,14 @@ const updateDeudas = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
   const { monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria } = req.body;
-  try {
-    const result = await pool.query(
+  return editarConReferencias(req, res, 'deudas', 'salida', 'Deuda', async (connection) => {
+    await connection.query(
       `UPDATE deudas    
           SET monto = $1, fuente = $2, descripcion = $3, cuotas_total = $4, cuotas_pagadas = $5, fecha_inicio = $6, fecha_fin = $7, estado = $8, id_categoria = $9
           WHERE id_deudas = $10 AND id_salida IN (SELECT id_salida FROM salida WHERE id_movimiento IN (SELECT id_movimiento FROM movimientos WHERE id_usuario = $11))`,
-      [monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria, id, ID_usuario]
+      [monto, fuente, descripcion, cuotas_total, cuotas_pagadas, fecha_inicio, fecha_fin, estado, id_categoria || null, id, ID_usuario]
     );
-    if (result.rowCount === 0) {
-      return res.status(404).json({ ok: false, mensaje: "Deuda no encontrada" });
-    }
-    res.status(200).json({ ok: true, mensaje: "Deuda actualizada exitosamente" });
-  } catch (error) {
-    console.error("Error en updateDeudas:", error.message);
-    res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
-  }
+  });
 };
 
 // ── DELETE Deudas ─────────────────────────────────────────────

@@ -51,6 +51,7 @@ function load(file) {
   vm.runInNewContext(fs.readFileSync(path.join(root,'Backend/src/controllers',file),'utf8'),{
     module,exports:module.exports,console,
     require(name){
+      if(name.includes('OperacionesMovilesService'))return require('../src/service/OperacionesMovilesService');
       if(name==='../db/connection')return pool;
       if(name.includes('PresupuestosController'))return {actualizarIngresoReal:async()=>{}};
       if(name.includes('NotificacionesService'))return {verificarUmbralGastos:async()=>{},verificarUmbralImprevistos:async()=>{},verificarMetaAhorroAlcanzada:async()=>{}};

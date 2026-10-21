@@ -1,0 +1,637 @@
+{
+  "scope": "HTTP/JWT y PostgreSQL temporales reales, esquema del proyecto con coma corregida solo en la copia; efectos auxiliares controlados; sin producción.",
+  "groups": {
+    "RF-10": {
+      "total": 30,
+      "passed": 30,
+      "failed": 0
+    },
+    "RF-15": {
+      "total": 46,
+      "passed": 46,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "rf": "10",
+      "name": "Crear dependiente con todos los campos",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Persisten los cinco campos",
+      "kind": "funcional",
+      "expected": [
+        "Ana",
+        "Hija",
+        "Estudiante",
+        "2010-01-01",
+        3
+      ],
+      "actual": [
+        "Ana",
+        "Hija",
+        "Estudiante",
+        "2010-01-01",
+        3
+      ],
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Otra cuenta no lista el dependiente",
+      "kind": "funcional",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Otra cuenta no modifica el dependiente",
+      "kind": "funcional",
+      "expected": 404,
+      "actual": 404,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Otra cuenta no elimina el dependiente",
+      "kind": "funcional",
+      "expected": 404,
+      "actual": 404,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Usuario normal no usa eliminación administrativa",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Actualizar dependiente propio",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Rechazo explícito de campo vacío {\"Nombre\":\"\",\"Relacion\":\"Hija\",\"Ocupacion\":\"Estudiante\",\"Fecha_nacimiento\":\"2010-01-01\",\"Peso_economico\":3}",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Rechazo explícito de campo vacío {\"Nombre\":\"Ana\",\"Relacion\":\"\",\"Ocupacion\":\"Estudiante\",\"Fecha_nacimiento\":\"2010-01-01\",\"Peso_economico\":3}",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Nombre y relación no pueden ser solo espacios {\"Nombre\":\"   \",\"Relacion\":\"Hija\",\"Ocupacion\":\"Estudiante\",\"Fecha_nacimiento\":\"2010-01-01\",\"Peso_economico\":3}",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Nombre y relación no pueden ser solo espacios {\"Nombre\":\"Ana\",\"Relacion\":\"   \",\"Ocupacion\":\"Estudiante\",\"Fecha_nacimiento\":\"2010-01-01\",\"Peso_economico\":3}",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso límite permitido 1",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso límite permitido 5",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso inválido 0 da error de validación",
+      "kind": "manejo de errores",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso inválido -1 da error de validación",
+      "kind": "manejo de errores",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso inválido 6 da error de validación",
+      "kind": "manejo de errores",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso inválido 1.5 da error de validación",
+      "kind": "manejo de errores",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso inválido \"abc\" da error de validación",
+      "kind": "manejo de errores",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Peso inválido null da error de validación",
+      "kind": "manejo de errores",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Omitir peso tiene respuesta controlada, sin error interno",
+      "kind": "manejo de errores",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "No se persiste ningún peso fuera de 1 a 5",
+      "kind": "funcional",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Crear gasto con dependiente propio",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Reporte agrupa el gasto de 1000 por dependiente",
+      "kind": "funcional",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Crear gasto rechaza dependiente de otra cuenta",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Editar gasto rechaza dependiente de otra cuenta",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Administrador puede eliminar dependiente ajeno",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Antes de eliminar, el gasto conserva la referencia al titular",
+      "kind": "funcional",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Titular elimina dependiente propio",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Al eliminar dependiente su gasto se conserva sin referencia",
+      "kind": "funcional",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear categoría personalizada",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Rechazar duplicado normalizado",
+      "kind": "funcional",
+      "expected": 409,
+      "actual": 409,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Editar categoría propia",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 1 en PUT ",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 1 en PATCH /deshabilitar",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 1 en PATCH /habilitar",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 1 en DELETE ",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 3 en PUT ",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 3 en PATCH /deshabilitar",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 3 en PATCH /habilitar",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 3 en DELETE ",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 5 en PUT ",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 5 en PATCH /deshabilitar",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 5 en PATCH /habilitar",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Proteger categoría 5 en DELETE ",
+      "kind": "funcional",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Ingreso con categoría propia",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Consulta de categorías por módulo ingresos",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Gasto con categoría propia",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Consulta de categorías por módulo gastos",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Ahorro con categoría propia",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Consulta de categorías por módulo ahorros",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Imprevisto con categoría propia",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Consulta de categorías por módulo imprevistos",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Deuda con categoría propia",
+      "kind": "funcional",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Consulta de categorías por módulo deudas",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "No eliminar categoría activa",
+      "kind": "funcional",
+      "expected": 409,
+      "actual": 409,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Deshabilitar categoría propia",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Ingreso rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Gasto rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Ahorro rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Imprevisto rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Crear Deuda rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Editar Ingreso rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Editar Gasto rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Editar Ahorro rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Editar Imprevisto rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Editar Deuda rechaza categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Deshabilitar conserva los cinco registros",
+      "kind": "funcional",
+      "expected": 5,
+      "actual": 5,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Volver a habilitar",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Eliminar categoría deshabilitada",
+      "kind": "funcional",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Eliminar categoría conserva Ingreso y deja categoría nula",
+      "kind": "funcional",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Eliminar categoría conserva Gasto y deja categoría nula",
+      "kind": "funcional",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Eliminar categoría conserva Ahorro y deja categoría nula",
+      "kind": "funcional",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Eliminar categoría conserva Imprevisto y deja categoría nula",
+      "kind": "funcional",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Eliminar categoría conserva Deuda y deja categoría nula",
+      "kind": "funcional",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "rf": "10",
+      "name": "Consulta sin token dependientes",
+      "kind": "funcional",
+      "expected": 401,
+      "actual": 401,
+      "passed": true
+    },
+    {
+      "rf": "15",
+      "name": "Consulta sin token categorias",
+      "kind": "funcional",
+      "expected": 401,
+      "actual": 401,
+      "passed": true
+    }
+  ]
+}
