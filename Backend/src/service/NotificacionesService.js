@@ -1,5 +1,26 @@
 const pool = require("../db/connection");
 const { getPeriodoActivo } = require("./periodoHelper");
+const admin = require("../config/firebase");
+
+const enviarPush = async (ID_usuario, titulo, mensaje) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT fcm_token FROM push_tokens WHERE id_usuario = $1`,
+      [ID_usuario]
+    );
+
+    if (rows.length === 0) return;
+
+    const tokens = rows.map((r) => r.fcm_token);
+
+    await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: { title: titulo, body: mensaje },
+    });
+  } catch (error) {
+    console.error("Error en enviarPush:", error.message);
+  }
+};
 
 const crearNotificacion = async ({
   ID_usuario,
@@ -24,6 +45,8 @@ const crearNotificacion = async ({
       [ID_usuario, Tipo, Entidad_tipo, Entidad_id, Mensaje.trim()]
     );
 
+    await enviarPush(ID_usuario, "Ahorrapp", Mensaje.trim());
+
     return result[0].id_notificacion;
   } catch (error) {
     console.error("Error en crearNotificacion:", error.message);
@@ -33,10 +56,6 @@ const crearNotificacion = async ({
 
 // ─────────────────────────────────────────────────────────────
 //  existeNotificacionEntidad
-//  Evita duplicados para eventos recurrentes (ej. el cron de
-//  vencimientos corre todos los días: sin este chequeo, generaría
-//  una notificación nueva de la MISMA deuda cada día durante toda
-//  la ventana de aviso).
 // ─────────────────────────────────────────────────────────────
 const existeNotificacionEntidad = async (ID_usuario, Tipo, Entidad_tipo, Entidad_id) => {
   try {

@@ -67,9 +67,6 @@ const getNotificaciones = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  GET /api/notificaciones/no-leidas/count
-// ─────────────────────────────────────────────────────────────
 const getNoLeidasCount = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
@@ -87,9 +84,6 @@ const getNoLeidasCount = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  PATCH /api/notificaciones/:id/leer
-// ─────────────────────────────────────────────────────────────
 const marcarLeida = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
@@ -228,7 +222,31 @@ const actualizarPreferenciasUsuario = async (req, res) => {
   }
 };
 
+const registrarPushToken = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { fcm_token, plataforma } = req.body;
+
+  if (!fcm_token || !plataforma) {
+    return res.status(400).json({ ok: false, mensaje: "fcm_token y plataforma son requeridos" });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO push_tokens (id_usuario, fcm_token, plataforma)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (fcm_token) DO UPDATE SET id_usuario = $1, plataforma = $3`,
+      [ID_usuario, fcm_token, plataforma]
+    );
+
+    return res.status(200).json({ ok: true, mensaje: "Token registrado" });
+  } catch (error) {
+    console.error("Error en registrarPushToken:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
 module.exports = {
+  testNotificacion,
   getNotificaciones,
   getNoLeidasCount,
   marcarLeida,
@@ -237,4 +255,5 @@ module.exports = {
   eliminarNotificacion,
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
+  registrarPushToken,
 };

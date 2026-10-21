@@ -11,6 +11,7 @@ const {
   eliminarNotificacion,
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
+  registrarPushToken,
 } = require("../controllers/Notificacionescontroller");
 
 router.use(verifyToken);
@@ -26,5 +27,12 @@ router.delete("/notificaciones/:id", eliminarNotificacion);
 // ── Preferencias ──────────────────────────────────────────────
 router.get("/preferencias-notificacion", getPreferenciasUsuario);
 router.put("/preferencias-notificacion", actualizarPreferenciasUsuario);
+
+// ── Push tokens ──────────────────────────────────────────────
+router.post("/push-tokens", registrarPushToken);
+
+
+//--Ruta de prueba para crear notificaciones
+router.post("/notificaciones/test", testNotificacion);
 
 module.exports = router;
