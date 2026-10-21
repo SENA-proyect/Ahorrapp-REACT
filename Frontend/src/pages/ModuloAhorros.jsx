@@ -5,6 +5,7 @@ import ModalNuevoMovimiento from '../components/Modalnuevomovimiento'
 import HeaderModulos from '../components/HeaderModulos'
 import { useToast } from '../context/ToastContext'
 import { useNotificaciones } from '../context/NotificacionesContext'
+import { validarMonto, validarLongitud, validarOrdenFechas, primerError, LIMITES } from '../utils/validaciones'
 
 // const API = 'http://localhost:3000/api/movimientos'
 const API = 'https://ahorrapp-react-pkj9.onrender.com/api/movimientos'
@@ -103,15 +104,16 @@ export default function ModuloAhorros() {
   const guardar = async () => {
     setErrorModal(null)
     
-    // 1. Corrección: Comparación segura de fechas transformándolas a objetos Date
-    if (modalEditar.fecha_meta && modalEditar.fecha_registro) {
-      const fechaMeta = new Date(modalEditar.fecha_meta)
-      const fechaRegistro = new Date(modalEditar.fecha_registro)
-      
-      if (fechaMeta <= fechaRegistro) {
-        return setErrorModal('La fecha meta no puede ser la misma o anterior a la de registro')
-      }
-    }
+    // Validaciones compartidas con el móvil y el backend (utils/validaciones)
+    const errCampos = primerError(
+      !modalEditar.meta?.trim() ? 'El nombre de la meta es obligatorio' : null,
+      validarLongitud(modalEditar.meta, LIMITES.meta, 'El nombre de la meta'),
+      validarLongitud(modalEditar.descripcion, LIMITES.descripcion, 'La descripción'),
+      validarMonto(modalEditar.monto, { nombre: 'La meta' }),
+      validarMonto(modalEditar.monto_acumulado, { nombre: 'El monto acumulado', permitirCero: true }),
+      validarOrdenFechas(modalEditar.fecha_registro, modalEditar.fecha_meta, 'La fecha meta no puede ser anterior a la de registro'),
+    )
+    if (errCampos) return setErrorModal(errCampos)
     
     // 2. Optimización: Guardamos el número en una constante para no repetir Number() e isNaN()
     const monto = Number(modalEditar.monto)
@@ -465,7 +467,7 @@ export default function ModuloAhorros() {
             <input className={inputCls} type="number" name="monto_acumulado" min="0" step="0.01" value={modalEditar.monto_acumulado} onChange={handleChange} />
 
             <label className={labelCls}>Meta u objetivo</label>
-            <input className={inputCls} type="text" name="meta" placeholder="Ej: Vacaciones, Fondo de emergencia..." value={modalEditar.meta} onChange={handleChange} />
+            <input className={inputCls} type="text" name="meta" maxLength={LIMITES.meta} placeholder="Ej: Vacaciones, Fondo de emergencia..." value={modalEditar.meta} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
             <select
@@ -484,7 +486,7 @@ export default function ModuloAhorros() {
             </select>
             
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={modalEditar.descripcion} onChange={handleChange} />
 
             <label className={labelCls}>Fecha de registro</label>
             <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />

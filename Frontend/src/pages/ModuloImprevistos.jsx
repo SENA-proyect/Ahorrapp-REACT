@@ -5,6 +5,7 @@ import ModalNuevoMovimiento from '../components/Modalnuevomovimiento'
 import HeaderModulos from '../components/HeaderModulos'
 import { useToast } from '../context/ToastContext'
 import { useNotificaciones } from '../context/NotificacionesContext'
+import { validarMonto, validarLongitud, validarNoFutura, primerError, LIMITES, hoyISO } from '../utils/validaciones'
 
 // const API = 'http://localhost:3000/api/movimientos'
 const API = 'https://ahorrapp-react-pkj9.onrender.com/api/movimientos'
@@ -70,8 +71,13 @@ const abrirEditar = (i) => {
 
   const guardar = async () => {
     setErrorModal(null)
-    if (!modalEditar.monto || isNaN(modalEditar.monto) || Number(modalEditar.monto) <= 0)
-      return setErrorModal('El monto debe ser mayor a 0')
+    const err = primerError(
+      validarMonto(modalEditar.monto),
+      !modalEditar.causa?.trim() ? 'La causa es obligatoria' : null,
+      validarLongitud(modalEditar.causa, LIMITES.causa, 'La causa'),
+      validarNoFutura(modalEditar.fecha_registro, 'La fecha'),
+    )
+    if (err) return setErrorModal(err)
     setGuardando(true)
     const token = localStorage.getItem('token')
     try {
@@ -243,10 +249,10 @@ const abrirEditar = (i) => {
             <p className="text-xs text-zinc-500 mb-2">Modifica los campos que necesites y guarda.</p>
 
             <label className={labelCls}>Monto *</label>
-            <input className={inputCls} type="number" name="monto" min="0" step="0.01" value={modalEditar.monto} onChange={handleChange} />
+            <input className={inputCls} type="number" name="monto" min="0.01" step="0.01" value={modalEditar.monto} onChange={handleChange} />
 
             <label className={labelCls}>Causa</label>
-            <input className={inputCls} type="text" name="causa" placeholder="Ej: Reparación, Emergencia médica..." value={modalEditar.causa} onChange={handleChange} />
+            <input className={inputCls} type="text" name="causa" maxLength={LIMITES.causa} placeholder="Ej: Reparación, Emergencia médica..." value={modalEditar.causa} onChange={handleChange} />
 
             <label className={labelCls}>Categoría</label>
             <select
@@ -282,7 +288,7 @@ const abrirEditar = (i) => {
           
 
             <label className={labelCls}>Fecha</label>
-            <input className={inputCls} type="date" name="fecha_registro" value={modalEditar.fecha_registro} onChange={handleChange} />
+            <input className={inputCls} type="date" name="fecha_registro" max={hoyISO()} value={modalEditar.fecha_registro} onChange={handleChange} />
 
             {errorModal && <p className="mt-3 p-[10px_14px] rounded-[10px] bg-red-400/[0.12] border border-red-400/35 text-red-400 text-[0.8rem] font-semibold">{errorModal}</p>}
 

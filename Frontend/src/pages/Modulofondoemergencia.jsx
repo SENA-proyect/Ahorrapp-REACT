@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import HeaderModulos from '../components/HeaderModulos'
 import { useToast } from '../context/ToastContext'
+import { validarMonto, validarLongitud, primerError, LIMITES } from '../utils/validaciones'
 import {
   getFondoEmergencia,
   crearFondoEmergencia,
@@ -64,7 +65,8 @@ export default function ModuloFondoEmergencia() {
   // ── Crear fondo ──
   const handleCrear = async () => {
     const meta = Number(metaInput)
-    if (!metaInput || Number.isNaN(meta) || meta < 0) return setErrorModal('Ingresa una meta válida')
+    const errMeta = validarMonto(metaInput, { nombre: 'La meta', permitirCero: true })
+    if (errMeta) return setErrorModal(errMeta)
     setGuardando(true)
     try {
       const data = await crearFondoEmergencia(meta)
@@ -80,7 +82,8 @@ export default function ModuloFondoEmergencia() {
   // ── Editar meta ──
   const handleEditarMeta = async () => {
     const meta = Number(metaInput)
-    if (metaInput === '' || Number.isNaN(meta) || meta < 0) return setErrorModal('Ingresa una meta válida')
+    const errMeta = validarMonto(metaInput, { nombre: 'La meta', permitirCero: true })
+    if (errMeta) return setErrorModal(errMeta)
     setGuardando(true)
     try {
       const data = await actualizarMetaFondoEmergencia(meta)
@@ -96,7 +99,11 @@ export default function ModuloFondoEmergencia() {
   // ── Aportar ──
   const handleAporte = async () => {
     const monto = Number(montoInput)
-    if (!montoInput || Number.isNaN(monto) || monto <= 0) return setErrorModal('El monto debe ser mayor a 0')
+    const errAporte = primerError(
+      validarMonto(montoInput),
+      validarLongitud(descInput, LIMITES.descripcion, 'La descripción'),
+    )
+    if (errAporte) return setErrorModal(errAporte)
     setGuardando(true)
     try {
       const data = await registrarAporteFondo(monto, descInput.trim() || null)
@@ -112,7 +119,11 @@ export default function ModuloFondoEmergencia() {
   // ── Retirar ──
   const handleRetiro = async () => {
     const monto = Number(montoInput)
-    if (!montoInput || Number.isNaN(monto) || monto <= 0) return setErrorModal('El monto debe ser mayor a 0')
+    const errRetiro = primerError(
+      validarMonto(montoInput),
+      validarLongitud(descInput, LIMITES.descripcion, 'La descripción'),
+    )
+    if (errRetiro) return setErrorModal(errRetiro)
     if (fondo && monto > Number(fondo.saldo_actual)) return setErrorModal('El retiro no puede ser mayor al saldo disponible')
     setGuardando(true)
     try {
@@ -247,7 +258,7 @@ export default function ModuloFondoEmergencia() {
           <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
             <h4 className="text-lg font-extrabold text-amber-400">🛡️ Crear Fondo de Emergencia</h4>
             <label className={labelCls}>Meta de ahorro *</label>
-            <input className={inputCls} type="number" min="0" placeholder="Ej: 3000000"
+            <input className={inputCls} type="number" min="0" step="0.01" placeholder="Ej: 3000000"
               value={metaInput} onChange={(e) => setMetaInput(e.target.value)} disabled={guardando} />
             {errorModal && <p className="mt-3 text-xs font-semibold text-red-400">{errorModal}</p>}
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -270,7 +281,7 @@ export default function ModuloFondoEmergencia() {
           <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
             <h4 className="text-lg font-extrabold text-amber-400">✏️ Editar meta</h4>
             <label className={labelCls}>Nueva meta *</label>
-            <input className={inputCls} type="number" min="0"
+            <input className={inputCls} type="number" min="0" step="0.01"
               value={metaInput} onChange={(e) => setMetaInput(e.target.value)} disabled={guardando} />
             {errorModal && <p className="mt-3 text-xs font-semibold text-red-400">{errorModal}</p>}
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -293,10 +304,10 @@ export default function ModuloFondoEmergencia() {
           <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-slate-950/95 p-6 shadow-2xl sm:p-7">
             <h4 className="text-lg font-extrabold text-emerald-400">+ Registrar aporte</h4>
             <label className={labelCls}>Monto *</label>
-            <input className={inputCls} type="number" min="0" placeholder="Ej: 100000"
+            <input className={inputCls} type="number" min="0.01" step="0.01" placeholder="Ej: 100000"
               value={montoInput} onChange={(e) => setMontoInput(e.target.value)} disabled={guardando} />
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" placeholder="Opcional"
+            <input className={inputCls} type="text" maxLength={LIMITES.descripcion} placeholder="Opcional"
               value={descInput} onChange={(e) => setDescInput(e.target.value)} disabled={guardando} />
             {errorModal && <p className="mt-3 text-xs font-semibold text-red-400">{errorModal}</p>}
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -320,10 +331,10 @@ export default function ModuloFondoEmergencia() {
             <h4 className="text-lg font-extrabold text-red-400">− Registrar retiro</h4>
             <p className="mt-1 text-xs text-zinc-500">Saldo disponible: {fmt(saldo)}</p>
             <label className={labelCls}>Monto *</label>
-            <input className={inputCls} type="number" min="0" max={saldo} placeholder="Ej: 50000"
+            <input className={inputCls} type="number" min="0.01" step="0.01" max={saldo} placeholder="Ej: 50000"
               value={montoInput} onChange={(e) => setMontoInput(e.target.value)} disabled={guardando} />
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" placeholder="Opcional"
+            <input className={inputCls} type="text" maxLength={LIMITES.descripcion} placeholder="Opcional"
               value={descInput} onChange={(e) => setDescInput(e.target.value)} disabled={guardando} />
             {errorModal && <p className="mt-3 text-xs font-semibold text-red-400">{errorModal}</p>}
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

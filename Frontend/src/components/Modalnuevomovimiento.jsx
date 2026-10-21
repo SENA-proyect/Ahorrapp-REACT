@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { getCategorias, getDependientes } from '../services/api'
 import { useToast } from '../context/ToastContext'
 import { useNotificaciones } from '../context/NotificacionesContext'
+import {
+  validarMonto, validarLongitud, validarCuotas, validarOrdenFechas, validarNoFutura,
+  primerError, LIMITES, MONTO_MINIMO_GASTO, hoyISO,
+} from '../utils/validaciones'
 
 // const API = 'http://localhost:3000/api/movimientos'
 const API = 'https://ahorrapp-react-pkj9.onrender.com/api/movimientos'
@@ -55,18 +59,46 @@ const buildDatos = (subtipo, form) => {
 }
 
 // ── Validaciones por subtipo ──────────────────────────────────
+// Mismas reglas que el backend (service/validaciones.js) y el móvil
+// (core/utils/validaciones.dart). Solo el gasto exige monto mínimo de 50 (RF-03).
 const validar = (subtipo, form) => {
-  if (!form.monto || isNaN(form.monto) || Number(form.monto) < 50)
-    return 'El monto mínimo permitido es $50'
-  if (subtipo === 'Deuda' && !form.fuente?.trim())
-    return 'La fuente de la deuda es obligatoria'
-  if (subtipo === 'Deuda' && form.fecha_fin && form.fecha_inicio && form.fecha_fin <= form.fecha_inicio)
-    return 'La fecha de fin no puede ser anterior ni igual a la de inicio'
-  if (subtipo === 'Ahorro' && form.fecha_meta && form.fecha_registro && form.fecha_meta <= form.fecha_registro)
-    return 'La fecha meta no puede ser anterior ni igual a la de registro'
-  if (subtipo === 'Deuda' && form.cuotas_total && (isNaN(form.cuotas_total) || Number(form.cuotas_total) <= 0))
-    return 'El número de cuotas debe ser mayor a 0'
-  return null
+  const comunes = primerError(
+    validarMonto(form.monto, subtipo === 'Gasto' ? { minimo: MONTO_MINIMO_GASTO } : {}),
+    validarLongitud(form.descripcion, LIMITES.descripcion, 'La descripción'),
+  )
+  if (comunes) return comunes
+
+  switch (subtipo) {
+    case 'Ingreso':
+      return primerError(
+        validarLongitud(form.fuente, LIMITES.fuente, 'La fuente'),
+        validarNoFutura(form.fecha_registro, 'La fecha'),
+      )
+    case 'Gasto':
+      return validarNoFutura(form.fecha_registro, 'La fecha')
+    case 'Imprevisto':
+      return primerError(
+        !form.causa?.trim() ? 'La causa es obligatoria' : null,
+        validarLongitud(form.causa, LIMITES.causa, 'La causa'),
+        validarNoFutura(form.fecha_registro, 'La fecha'),
+      )
+    case 'Ahorro':
+      return primerError(
+        !form.meta?.trim() ? 'El nombre de la meta es obligatorio' : null,
+        validarLongitud(form.meta, LIMITES.meta, 'El nombre de la meta'),
+        validarOrdenFechas(form.fecha_registro, form.fecha_meta, 'La fecha meta no puede ser anterior a la de registro'),
+        form.fecha_meta && form.fecha_meta < hoyISO() ? 'La fecha meta no puede estar en el pasado' : null,
+      )
+    case 'Deuda':
+      return primerError(
+        !form.fuente?.trim() ? 'La fuente de la deuda es obligatoria' : null,
+        validarLongitud(form.fuente, LIMITES.fuente, 'La fuente'),
+        validarCuotas(form.cuotas_total),
+        validarOrdenFechas(form.fecha_inicio, form.fecha_fin, 'La fecha de fin no puede ser anterior a la de inicio'),
+      )
+    default:
+      return null
+  }
 }
 
 // ── Subcomponentes reutilizables (antes duplicados 5x y 2x) ───
@@ -198,7 +230,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-400">$</span>
             <input
               className={`${inputCls} pl-7 text-base font-bold`}
-              type="number" name="monto" min="50" step="0.01"
+              type="number" name="monto" min={subtipo === 'Gasto' ? MONTO_MINIMO_GASTO : 0.01} step="0.01"
               placeholder="0" autoFocus
               value={form.monto} onChange={handleChange}
             />
@@ -208,20 +240,20 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
 
           {subtipo === 'Ingreso' && <>
             <label className={labelCls}>Fuente</label>
-            <input className={inputCls} type="text" name="fuente" placeholder="Ej: Salario, Freelance..." value={form.fuente} onChange={handleChange} />
+            <input className={inputCls} type="text" name="fuente" maxLength={LIMITES.fuente} placeholder="Ej: Salario, Freelance..." value={form.fuente} onChange={handleChange} />
             <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
             <label className={labelCls}>Fecha</label>
-            <input className={inputCls} type="date" name="fecha_registro" value={form.fecha_registro} onChange={handleChange} />
+            <input className={inputCls} type="date" name="fecha_registro" max={hoyISO()} value={form.fecha_registro} onChange={handleChange} />
           </>}
 
           {subtipo === 'Ahorro' && <>
-            <label className={labelCls}>Meta u objetivo</label>
-            <input className={inputCls} type="text" name="meta" placeholder="Ej: Vacaciones, Fondo de emergencia..." value={form.meta} onChange={handleChange} />
+            <label className={labelCls}>Meta u objetivo *</label>
+            <input className={inputCls} type="text" name="meta" maxLength={LIMITES.meta} placeholder="Ej: Vacaciones, Fondo de emergencia..." value={form.meta} onChange={handleChange} />
             <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelCls}>Fecha de registro</label>
@@ -229,7 +261,7 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
               </div>
               <div>
                 <label className={labelCls}>Fecha meta</label>
-                <input className={inputCls} type="date" name="fecha_meta" value={form.fecha_meta} onChange={handleChange} />
+                <input className={inputCls} type="date" name="fecha_meta" min={hoyISO()} value={form.fecha_meta} onChange={handleChange} />
               </div>
             </div>
           </>}
@@ -238,19 +270,19 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
             <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <CampoDependiente inputCls={inputCls} dependientes={dependientes} value={form.id_dependientes} onChange={handleChange} placeholder="Ninguno (gasto propio)" />
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
             <label className={labelCls}>Fecha</label>
-            <input className={inputCls} type="date" name="fecha_registro" value={form.fecha_registro} onChange={handleChange} />
+            <input className={inputCls} type="date" name="fecha_registro" max={hoyISO()} value={form.fecha_registro} onChange={handleChange} />
           </>}
 
           {subtipo === 'Deuda' && <>
             <label className={labelCls}>Fuente *</label>
-            <input className={inputCls} type="text" name="fuente" placeholder="Ej: Banco, Tarjeta de crédito..." value={form.fuente} onChange={handleChange} />
+            <input className={inputCls} type="text" name="fuente" maxLength={LIMITES.fuente} placeholder="Ej: Banco, Tarjeta de crédito..." value={form.fuente} onChange={handleChange} />
             <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <label className={labelCls}>Número de cuotas</label>
             <input className={inputCls} type="number" name="cuotas_total" min="1" step="1" placeholder="Vacío si es pago único" value={form.cuotas_total} onChange={handleChange} />
             <label className={labelCls}>Descripción</label>
-            <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
+            <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcion} placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelCls}>Fecha inicio</label>
@@ -264,12 +296,12 @@ export default function ModalNuevoMovimiento({ subtipo, onCerrar, onGuardado }) 
           </>}
 
           {subtipo === 'Imprevisto' && <>
-            <label className={labelCls}>Causa</label>
-            <input className={inputCls} type="text" name="causa" placeholder="Ej: Reparación, Emergencia médica..." value={form.causa} onChange={handleChange} />
+            <label className={labelCls}>Causa *</label>
+            <input className={inputCls} type="text" name="causa" maxLength={LIMITES.causa} placeholder="Ej: Reparación, Emergencia médica..." value={form.causa} onChange={handleChange} />
             <CampoCategoria inputCls={inputCls} categorias={categorias} value={form.id_categoria} onChange={handleChange} />
             <CampoDependiente inputCls={inputCls} dependientes={dependientes} value={form.id_dependientes} onChange={handleChange} placeholder="Ninguno (imprevisto propio)" />
             <label className={labelCls}>Fecha</label>
-            <input className={inputCls} type="date" name="fecha_registro" value={form.fecha_registro} onChange={handleChange} />
+            <input className={inputCls} type="date" name="fecha_registro" max={hoyISO()} value={form.fecha_registro} onChange={handleChange} />
           </>}
 
           {error && (

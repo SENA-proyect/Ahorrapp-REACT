@@ -19,6 +19,7 @@ const historialRoutes = require("./src/routes/Historialroutes");
 
 const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacioncuentasJob");
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
+const { iniciarUmbralesJob } = require("./src/service/jobs/UmbralesJob");
 
 const app = express();
 
@@ -27,7 +28,12 @@ const app = express();
 // ================================
 
 app.use(cors({
-    origin: true,
+    origin: [
+        "https://localhost:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+        
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -77,4 +83,5 @@ app.listen(PORT, "0.0.0.0", () => {
 
     iniciarEliminacionCuentasJob();
     iniciarVencimientosJob();
+    iniciarUmbralesJob();
 });

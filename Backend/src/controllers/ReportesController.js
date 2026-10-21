@@ -1,24 +1,31 @@
 const pool = require("../db/connection");
+const { normalizarFecha } = require("../service/validaciones");
 
 
 /* =========================================================
    UTILIDADES
 ========================================================= */
 
+// Máximo de días que puede abarcar la evolución temporal (genera una fila
+// por día con generate_series; sin tope, un rango de siglos agotaba la DB).
+const MAX_DIAS_EVOLUCION = 1830; // ~5 años
+
+// Ambas fechas deben venir como AAAA-MM-DD reales (antes bastaba con que
+// `new Date()` las entendiera, y un formato raro llegaba a PostgreSQL y
+// terminaba en error 500) y inicio <= fin.
 const validarFechas = (fechaInicio, fechaFin) => {
-  if (!fechaInicio || !fechaFin) {
-    return false;
-  }
+  const inicio = normalizarFecha(fechaInicio);
+  const fin = normalizarFecha(fechaFin);
 
-  const inicio = new Date(fechaInicio);
-  const fin = new Date(fechaFin);
-
-  if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) {
-    return false;
-  }
+  if (!inicio || !fin) return false;
+  if (typeof fechaInicio !== "string" || typeof fechaFin !== "string") return false;
+  if (fechaInicio.length !== 10 || fechaFin.length !== 10) return false;
 
   return inicio <= fin;
 };
+
+const diasEntre = (fechaInicio, fechaFin) =>
+  Math.round((Date.parse(fechaFin) - Date.parse(fechaInicio)) / 86400000) + 1;
 
 /* =========================================================
    1. RESUMEN FINANCIERO
@@ -1256,6 +1263,13 @@ const getEvolucionTemporal = async (req, res) => {
     return res.status(400).json({
       ok: false,
       mensaje: "Debe proporcionar fecha_inicio y fecha_fin válidas"
+    });
+  }
+
+  if (diasEntre(fecha_inicio, fecha_fin) > MAX_DIAS_EVOLUCION) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: `El rango de la evolución no puede superar ${MAX_DIAS_EVOLUCION} días`
     });
   }
 

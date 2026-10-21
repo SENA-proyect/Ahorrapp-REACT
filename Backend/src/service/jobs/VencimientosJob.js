@@ -13,6 +13,7 @@ const revisarDeudasPorVencer = async () => {
       `SELECT
          d.id_deudas AS "ID_deudas",
          d.descripcion AS "Descripcion",
+         d.fuente AS "Fuente",
          d.monto AS "Monto",
          d.fecha_fin AS "Fecha_fin",
          m.id_usuario AS "ID_usuario"
@@ -39,7 +40,9 @@ const revisarDeudasPorVencer = async () => {
       if (yaExiste) continue;
 
       const fechaFmt = new Date(deuda.Fecha_fin).toLocaleDateString("es-CO");
-      const descripcion = deuda.Descripcion?.trim() || "una deuda";
+      // La descripción es opcional; la fuente (banco/persona) siempre existe.
+      const descripcion =
+        deuda.Descripcion?.trim() || deuda.Fuente?.trim() || "una deuda";
 
       const id = await crearNotificacion({
         ID_usuario: deuda.ID_usuario,
