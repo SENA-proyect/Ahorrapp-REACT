@@ -33,6 +33,6 @@ router.post("/push-tokens", registrarPushToken);
 
 
 //--Ruta de prueba para crear notificaciones
-router.post("/notificaciones/test", testNotificacion);
+// router.post("/notificaciones/test", testNotificacion);
 
 module.exports = router;
