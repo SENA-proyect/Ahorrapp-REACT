@@ -19,7 +19,6 @@ const historialRoutes = require("./src/routes/Historialroutes");
 
 const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacioncuentasJob");
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
-const { iniciarUmbralesJob } = require("./src/service/jobs/UmbralesJob");
 
 const app = express();
 
@@ -29,8 +28,7 @@ const app = express();
 
 app.use(cors({
     origin: [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
+        "https://localhost:5173"
         // Aquí posteriormente agregaremos
         // la URL de producción del frontend
     ],
@@ -83,5 +81,4 @@ app.listen(PORT, "0.0.0.0", () => {
 
     iniciarEliminacionCuentasJob();
     iniciarVencimientosJob();
-    iniciarUmbralesJob();
 });

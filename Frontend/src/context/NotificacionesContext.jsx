@@ -61,28 +61,20 @@ export const NotificacionesProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+
     if (loading || !isAuthenticated) {
       setNoLeidasCount(0);
       ultimoIdVistoRef.current = null; 
       return;
     }
 
+
     ejecutarCiclo();
 
     intervaloRef.current = setInterval(ejecutarCiclo, INTERVALO_POLLING_MS);
 
-    const onFocus = () => ejecutarCiclo();
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') ejecutarCiclo();
-    };
-
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onVisible);
-
     return () => {
       if (intervaloRef.current) clearInterval(intervaloRef.current);
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onVisible);
     };
   }, [isAuthenticated, loading, ejecutarCiclo]);
 
