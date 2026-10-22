@@ -12,7 +12,6 @@ import { validarMonto, validarLongitud, validarCuotas, primerError, LIMITES } fr
 const API = 'https://ahorrapp-react-gia9.onrender.com/api/movimientos'
 
 
-
 const fmt = (n) => `$${Math.round(Number(n)).toLocaleString('es-CO', { maximumFractionDigits: 0 })}`
 const fmtFecha = (f) => {
   if (!f) return '—'

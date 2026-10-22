@@ -11,6 +11,7 @@ import {
 
 const API = 'https://ahorrapp-react-gia9.onrender.com/api/movimientos'
 
+
 // ── Configuración por subtipo ─────────────────────────────────
 const CONFIG = {
   Ingreso:    { tipo_flujo: 'Entrada', label: 'Ingreso',    emoji: '💰', color: 'emerald' },
