@@ -1,3 +1,6 @@
+//? NOTAS
+//* Este archivo cambio la PK por la cual se llamaba originalmente, presupuesto.ID_periodo -> id_presupuesto
+
 const pool = require("../db/connection");
 const { getPeriodoActivo } = require("./periodoHelper");
 const admin = require("../config/firebase");
@@ -54,9 +57,6 @@ const crearNotificacion = async ({
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  existeNotificacionEntidad
-// ─────────────────────────────────────────────────────────────
 const existeNotificacionEntidad = async (ID_usuario, Tipo, Entidad_tipo, Entidad_id) => {
   try {
     const { rows } = await pool.query(
@@ -72,9 +72,6 @@ const existeNotificacionEntidad = async (ID_usuario, Tipo, Entidad_tipo, Entidad
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  preferenciaActiva
-// ─────────────────────────────────────────────────────────────
 const preferenciaActiva = async (ID_usuario, Tipo) => {
   try {
     const { rows } = await pool.query(
@@ -83,34 +80,31 @@ const preferenciaActiva = async (ID_usuario, Tipo) => {
        LIMIT 1`,
       [ID_usuario, Tipo]
     );
-    if (rows.length === 0) return true; // sin preferencia explícita → activa por defecto
+    if (rows.length === 0) return true;
     return Boolean(rows[0].Activa);
   } catch (error) {
     console.error("Error en preferenciaActiva:", error.message);
-    return true; 
+    return true;
   }
 };
-// ─────────────────────────────────────────────────────────────
-//  getPreferencias
-// ─────────────────────────────────────────────────────────────
+
 const TIPOS_NOTIFICACION = ["sistema", "recordatorio", "sugerencia", "alerta_presupuesto"];
 
-// ─────────────────────────────────────────────────────────────
-//  UMBRALES de alerta de presupuesto
-// ─────────────────────────────────────────────────────────────
 const UMBRAL_GASTOS = 85;
 const UMBRAL_IMPREVISTOS = 85;
+const UMBRAL_DEUDAS = 85;
+const UMBRAL_AHORROS = 85; 
+const UMBRAL_EMERGENCIA = 85;
 
-// ─────────────────────────────────────────────────────────────
-//  verificarUmbralGastos
-// ─────────────────────────────────────────────────────────────
+// --- GASTOS ---
 const verificarUmbralGastos = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
     if (!periodo) return;
 
-    const { Fecha_inicio: fi, Fecha_fin: ff, Monto_gastos } = periodo;
-    if (!Monto_gastos || Number(Monto_gastos) <= 0) return;
+    // CAMBIO: Nombres en minúscula según tu BD
+    const { fecha_inicio: fi, fecha_fin: ff, monto_gastos, id_presupuesto } = periodo;
+    if (!monto_gastos || Number(monto_gastos) <= 0) return;
 
     const { rows: [gas] } = await pool.query(
       `SELECT COALESCE(SUM(g.monto), 0)::float AS total
@@ -121,11 +115,11 @@ const verificarUmbralGastos = async (ID_usuario) => {
       [ID_usuario, fi, ff]
     );
 
-    const porcentaje = (Number(gas.total) / Number(Monto_gastos)) * 100;
+    const porcentaje = (Number(gas.total) / Number(monto_gastos)) * 100;
     if (porcentaje < UMBRAL_GASTOS) return;
 
     const yaExiste = await existeNotificacionEntidad(
-      ID_usuario, "alerta_presupuesto", "periodo_gastos", periodo.ID_periodo
+      ID_usuario, "alerta_presupuesto", "periodo_gastos", id_presupuesto
     );
     if (yaExiste) return;
 
@@ -134,23 +128,21 @@ const verificarUmbralGastos = async (ID_usuario) => {
       Tipo: "alerta_presupuesto",
       Mensaje: `Has usado el ${porcentaje.toFixed(0)}% de tu presupuesto de Gastos en este período.`,
       Entidad_tipo: "periodo_gastos",
-      Entidad_id: periodo.ID_periodo,
+      Entidad_id: id_presupuesto,
     });
   } catch (error) {
     console.error("Error en verificarUmbralGastos:", error.message);
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  verificarUmbralImprevistos
-// ─────────────────────────────────────────────────────────────
+// --- IMPREVISTOS ---
 const verificarUmbralImprevistos = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
     if (!periodo) return;
 
-    const { Fecha_inicio: fi, Fecha_fin: ff, Monto_imprevistos } = periodo;
-    if (!Monto_imprevistos || Number(Monto_imprevistos) <= 0) return;
+    const { fecha_inicio: fi, fecha_fin: ff, monto_imprevistos, id_presupuesto } = periodo;
+    if (!monto_imprevistos || Number(monto_imprevistos) <= 0) return;
 
     const { rows: [imp] } = await pool.query(
       `SELECT COALESCE(SUM(i.monto), 0)::float AS total
@@ -161,11 +153,11 @@ const verificarUmbralImprevistos = async (ID_usuario) => {
       [ID_usuario, fi, ff]
     );
 
-    const porcentaje = (Number(imp.total) / Number(Monto_imprevistos)) * 100;
+    const porcentaje = (Number(imp.total) / Number(monto_imprevistos)) * 100;
     if (porcentaje < UMBRAL_IMPREVISTOS) return;
 
     const yaExiste = await existeNotificacionEntidad(
-      ID_usuario, "alerta_presupuesto", "periodo_imprevistos", periodo.ID_periodo
+      ID_usuario, "alerta_presupuesto", "periodo_imprevistos", id_presupuesto
     );
     if (yaExiste) return;
 
@@ -174,25 +166,134 @@ const verificarUmbralImprevistos = async (ID_usuario) => {
       Tipo: "alerta_presupuesto",
       Mensaje: `Has usado el ${porcentaje.toFixed(0)}% de tu porción de imprevistos en este período.`,
       Entidad_tipo: "periodo_imprevistos",
-      Entidad_id: periodo.ID_periodo,
+      Entidad_id: id_presupuesto,
     });
   } catch (error) {
     console.error("Error en verificarUmbralImprevistos:", error.message);
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  verificarImprevistosNoUsados
-//  Se invoca al CERRAR un período. Si la porción de
-//  imprevistos prácticamente no se usó, sugiere redirigir
-//  ese dinero a ahorros (la transferencia la hace el usuario).
-// ─────────────────────────────────────────────────────────────
-const UMBRAL_IMPREVISTOS_NO_USADO = 10; 
+// --- DEUDAS ---
+const verificarUmbralDeudas = async (ID_usuario) => {
+  try {
+    const periodo = await getPeriodoActivo(ID_usuario);
+    if (!periodo) return;
+
+    const { fecha_inicio: fi, fecha_fin: ff, monto_deudas, id_presupuesto } = periodo;
+    if (!monto_deudas || Number(monto_deudas) <= 0) return;
+
+    const { rows: [deu] } = await pool.query(
+      `SELECT COALESCE(SUM(d.monto), 0)::float AS total
+       FROM deudas d
+       JOIN salida s      ON d.id_salida      = s.id_salida
+       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
+       WHERE m.id_usuario = $1 AND d.fecha_registro BETWEEN $2 AND $3`,
+      [ID_usuario, fi, ff]
+    );
+
+    const porcentaje = (Number(deu.total) / Number(monto_deudas)) * 100;
+    if (porcentaje < UMBRAL_DEUDAS) return;
+
+    const yaExiste = await existeNotificacionEntidad(
+      ID_usuario, "alerta_presupuesto", "periodo_deudas", id_presupuesto
+    );
+    if (yaExiste) return;
+
+    await crearNotificacion({
+      ID_usuario,
+      Tipo: "alerta_presupuesto",
+      Mensaje: `Has usado el ${porcentaje.toFixed(0)}% de tu presupuesto destinado a Deudas.`,
+      Entidad_tipo: "periodo_deudas",
+      Entidad_id: id_presupuesto,
+    });
+  } catch (error) {
+    console.error("Error en verificarUmbralDeudas:", error.message);
+  }
+};
+
+// --- AHORROS ---
+const verificarUmbralAhorros = async (ID_usuario) => {
+  try {
+    const periodo = await getPeriodoActivo(ID_usuario);
+    if (!periodo) return;
+
+    const { fecha_inicio: fi, fecha_fin: ff, monto_ahorros, id_presupuesto } = periodo;
+    if (!monto_ahorros || Number(monto_ahorros) <= 0) return;
+
+    const { rows: [aho] } = await pool.query(
+      `SELECT COALESCE(SUM(a.monto), 0)::float AS total
+       FROM ahorros a
+       JOIN salida s      ON a.id_salida      = s.id_salida
+       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
+       WHERE m.id_usuario = $1 AND a.fecha_registro BETWEEN $2 AND $3`,
+      [ID_usuario, fi, ff]
+    );
+
+    const porcentaje = (Number(aho.total) / Number(monto_ahorros)) * 100;
+    if (porcentaje < UMBRAL_AHORROS) return;
+
+    const yaExiste = await existeNotificacionEntidad(
+      ID_usuario, "alerta_presupuesto", "periodo_ahorros", id_presupuesto
+    );
+    if (yaExiste) return;
+
+    await crearNotificacion({
+      ID_usuario,
+      Tipo: "alerta_presupuesto",
+      Mensaje: `Has usado el ${porcentaje.toFixed(0)}% de tu presupuesto destinado a Ahorros.`,
+      Entidad_tipo: "periodo_ahorros",
+      Entidad_id: id_presupuesto,
+    });
+  } catch (error) {
+    console.error("Error en verificarUmbralAhorros:", error.message);
+  }
+};
+
+// --- EMERGENCIA ---
+const verificarUmbralEmergencia = async (ID_usuario) => {
+  try {
+    const periodo = await getPeriodoActivo(ID_usuario);
+    if (!periodo) return;
+
+    const { fecha_inicio: fi, fecha_fin: ff, monto_emergencia, id_presupuesto } = periodo;
+    if (!monto_emergencia || Number(monto_emergencia) <= 0) return;
+
+    const { rows: [eme] } = await pool.query(
+      `SELECT COALESCE(SUM(e.monto), 0)::float AS total
+       FROM emergencia e
+       JOIN salida s      ON e.id_salida      = s.id_salida
+       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
+       WHERE m.id_usuario = $1 AND e.fecha_registro BETWEEN $2 AND $3`,
+      [ID_usuario, fi, ff]
+    );
+
+    const porcentaje = (Number(eme.total) / Number(monto_emergencia)) * 100;
+    if (porcentaje < UMBRAL_EMERGENCIA) return;
+
+    const yaExiste = await existeNotificacionEntidad(
+      ID_usuario, "alerta_presupuesto", "periodo_emergencia", id_presupuesto
+    );
+    if (yaExiste) return;
+
+    await crearNotificacion({
+      ID_usuario,
+      Tipo: "alerta_presupuesto",
+      Mensaje: `Has usado el ${porcentaje.toFixed(0)}% de tu fondo de Emergencia.`,
+      Entidad_tipo: "periodo_emergencia",
+      Entidad_id: id_presupuesto,
+    });
+  } catch (error) {
+    console.error("Error en verificarUmbralEmergencia:", error.message);
+  }
+};
+
+// --- SUGERENCIA IMPREVISTOS NO USADOS ---
+const UMBRAL_IMPREVISTOS_NO_USADO = 10;
 
 const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
   try {
-    const { Fecha_inicio: fi, Fecha_fin: ff, Monto_imprevistos, ID_periodo } = periodo;
-    if (!Monto_imprevistos || Number(Monto_imprevistos) <= 0) return;
+    const { fecha_inicio: fi, fecha_fin: ff, monto_imprevistos, id_presupuesto } = periodo;
+    if (!monto_imprevistos || Number(monto_imprevistos) <= 0) return;
 
     const { rows: [imp] } = await pool.query(
       `SELECT COALESCE(SUM(i.monto), 0)::float AS total
@@ -203,11 +304,11 @@ const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
       [ID_usuario, fi, ff]
     );
 
-    const porcentaje = (Number(imp.total) / Number(Monto_imprevistos)) * 100;
+    const porcentaje = (Number(imp.total) / Number(monto_imprevistos)) * 100;
     if (porcentaje >= UMBRAL_IMPREVISTOS_NO_USADO) return;
 
     const yaExiste = await existeNotificacionEntidad(
-      ID_usuario, "sugerencia", "periodo_imprevistos_no_usado", ID_periodo
+      ID_usuario, "sugerencia", "periodo_imprevistos_no_usado", id_presupuesto
     );
     if (yaExiste) return;
 
@@ -216,16 +317,14 @@ const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
       Tipo: "sugerencia",
       Mensaje: "No usaste casi nada de tu porción de imprevistos este período. Considera destinar parte de ese dinero a tus ahorros.",
       Entidad_tipo: "periodo_imprevistos_no_usado",
-      Entidad_id: ID_periodo,
+      Entidad_id: id_presupuesto,
     });
   } catch (error) {
     console.error("Error en verificarImprevistosNoUsados:", error.message);
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-//  verificarMetaAhorroAlcanzada
-// ─────────────────────────────────────────────────────────────
+// --- META AHORRO ALCANZADA ---
 const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) => {
   try {
     const metaMonto = Number(ahorro.meta_monto);
@@ -265,10 +364,6 @@ const getPreferencias = async (ID_usuario) => {
   }));
 };
 
-// ─────────────────────────────────────────────────────────────
-//  setPreferencia
-// ─────────────────────────────────────────────────────────────
-// CAMBIO ESTRUCTURAL
 const setPreferencia = async (ID_usuario, Tipo, Activa) => {
   if (!TIPOS_NOTIFICACION.includes(Tipo)) {
     throw new Error(`Tipo de notificación inválido: ${Tipo}`);
@@ -290,6 +385,9 @@ module.exports = {
   setPreferencia,
   verificarUmbralGastos,
   verificarUmbralImprevistos,
+  verificarUmbralDeudas,
+  verificarUmbralAhorros,
+  verificarUmbralEmergencia,
   verificarImprevistosNoUsados,
   verificarMetaAhorroAlcanzada,
   TIPOS_NOTIFICACION,
