@@ -34,6 +34,9 @@ router.get("/ahorros",    verifyToken, getAhorros);
 router.get("/gastos",     verifyToken, getGastos);
 router.get("/imprevistos",verifyToken, getImprevistos);
 router.get("/deudas",     verifyToken, getDeudas);
+// Sincronización móvil (RF19). Van antes de cualquier ruta con :id.
+router.get("/sincronizacion", verifyToken, capacidades);
+router.get("/sincronizacion/operaciones/:operationId", verifyToken, consultarOperacion);
 // Historial de abonos (RF-04 / RF-07). Se declaran antes de cualquier ruta con :id.
 router.get("/ahorros/abonos", verifyToken, getAbonosAhorro);
 router.get("/deudas/abonos",  verifyToken, getAbonosDeuda);

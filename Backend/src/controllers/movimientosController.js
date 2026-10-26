@@ -2,6 +2,12 @@ const { actualizarIngresoReal } = require("../controllers/PresupuestosController
 
 const pool = require("../db/connection");
 const {
+  isOperationId,
+  reserve,
+  confirm,
+  withOperationIds,
+} = require("../service/OperacionesMovilesService");
+const {
   verificarUmbralGastos,
   verificarUmbralImprevistos,
   verificarMetaAhorroAlcanzada,
@@ -23,6 +29,17 @@ const {
 // ─────────────────────────────────────────────────────────────
 
 const ERROR_500 = { ok: false, mensaje: "Error interno del servidor" };
+
+// Agrega operation_id (UUID de la app móvil) a las filas ya creadas desde offline.
+// Si falla, el listado se entrega igual: la app también concilia por id.
+const conOperaciones = async (usuario, rows) => {
+  try {
+    return await withOperationIds(pool, usuario, rows);
+  } catch (error) {
+    console.error("No se pudo asociar operation_id:", error.message);
+    return rows.map(({ _rf19_movimiento, ...fila }) => ({ ...fila, operation_id: null }));
+  }
+};
 
 // Texto opcional → string recortado o null.
 const limpiar = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
@@ -233,7 +250,7 @@ const getMovimientos = async (req, res) => {
 //  POST /movimientos
 // ─────────────────────────────────────────────────────────────
 const crearMovimiento = async (req, res) => {
-  const { tipo_flujo, subtipo_modulo, datos } = req.body || {};
+  const { tipo_flujo, subtipo_modulo, datos, operation_id } = req.body || {};
 
   // 1. Validaciones tempranas, ANTES de abrir la conexión a la BD
   if (!datos || typeof datos !== "object") {
@@ -264,6 +281,15 @@ const crearMovimiento = async (req, res) => {
     return res.status(400).json({ ok: false, mensaje: errorDatos });
   }
 
+  // Idempotencia para la app móvil (RF19): con operation_id, un reintento
+  // devuelve la respuesta original en lugar de crear el movimiento otra vez.
+  // Sin operation_id (cliente web) el comportamiento no cambia.
+  const conOperacion = operation_id !== undefined && operation_id !== null;
+  if (conOperacion && !isOperationId(operation_id)) {
+    return res.status(400).json({ ok: false, mensaje: "operation_id inválido" });
+  }
+  const huella = { tipo_flujo, subtipo_modulo, datos };
+
   const monto = aNumero(datos.monto);
   const fechaRegistro = normalizarFecha(datos.fecha_registro); // null → CURRENT_DATE
 
@@ -274,6 +300,22 @@ const crearMovimiento = async (req, res) => {
     connection = await pool.connect();
     const ID_usuario = req.usuario.id;
     await connection.query("BEGIN");
+
+    if (conOperacion) {
+      // Debe ser lo primero de la transacción (fija el aislamiento y bloquea el UUID).
+      const previa = await reserve(connection, ID_usuario, operation_id, huella);
+      if (previa.conflict) {
+        await rollbackSeguro(connection);
+        return res.status(409).json({
+          ok: false,
+          mensaje: "El identificador de operación ya se usó con otros datos.",
+        });
+      }
+      if (previa.response) {
+        await rollbackSeguro(connection);
+        return res.status(200).json({ ...previa.response, operation_id, repetido: true });
+      }
+    }
 
     const { rows: [movimiento] } = await connection.query(
       `INSERT INTO movimientos (id_usuario, tipo_flujo, subtipo_modulo)
@@ -381,6 +423,17 @@ const crearMovimiento = async (req, res) => {
       }
     }
 
+    const respuesta = {
+      ok: true,
+      mensaje: "Movimiento registrado exitosamente",
+      ID_movimiento,
+      ID_detalle,
+    };
+    // Se confirma en la MISMA transacción que el movimiento.
+    if (conOperacion) {
+      await confirm(connection, ID_usuario, operation_id, respuesta, huella);
+    }
+
     await connection.query("COMMIT");
 
     // Efectos posteriores: no deben tumbar una creación ya confirmada.
@@ -392,12 +445,7 @@ const crearMovimiento = async (req, res) => {
       await efectoSeguro(() => verificarUmbralImprevistos(ID_usuario));
     }
 
-    return res.status(201).json({
-      ok: true,
-      mensaje: "Movimiento registrado exitosamente",
-      ID_movimiento,
-      ID_detalle,
-    });
+    return res.status(201).json(conOperacion ? { ...respuesta, operation_id } : respuesta);
   } catch (error) {
     await rollbackSeguro(connection);
     if (responderErrorBD(res, error, "crearMovimiento")) return;
@@ -415,7 +463,7 @@ const getIngresos = async (req, res) => {
     const { rows } = await pool.query(
       `SELECT i.id_ingresos AS id, i.monto AS monto, i.descripcion AS descripcion,
               i.fuente AS fuente, i.fecha_registro AS fecha, i.id_categoria,
-              c.nombre AS categoria
+              c.nombre AS categoria, m.id_movimiento AS _rf19_movimiento
        FROM ingresos i
        INNER JOIN entrada e     ON i.id_entrada    = e.id_entrada
        INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
@@ -424,7 +472,7 @@ const getIngresos = async (req, res) => {
        ORDER BY i.fecha_registro DESC`,
       [ID_usuario]
     );
-    res.status(200).json(rows);
+    res.status(200).json(await conOperaciones(ID_usuario, rows));
   } catch (error) {
     console.error("Error en getIngresos:", error.message);
     res.status(500).json(ERROR_500);
@@ -490,7 +538,7 @@ async function getAhorros(req, res) {
               a.descripcion AS descripcion, a.meta AS meta,
               a.fecha_registro AS fecha, a.fecha_meta AS fecha_meta,
               a.id_categoria,
-              c.nombre AS categoria
+              c.nombre AS categoria, m.id_movimiento AS _rf19_movimiento
        FROM ahorros a
        INNER JOIN entrada e     ON a.id_entrada    = e.id_entrada
        INNER JOIN movimientos m ON e.id_movimiento = m.id_movimiento
@@ -499,7 +547,7 @@ async function getAhorros(req, res) {
        ORDER BY a.fecha_registro DESC`,
       [ID_usuario]
     );
-    res.status(200).json(rows);
+    res.status(200).json(await conOperaciones(ID_usuario, rows));
   } catch (error) {
     console.error("Error en getAhorros:", error.message);
     res.status(500).json(ERROR_500);
@@ -608,7 +656,8 @@ const getGastos = async (req, res) => {
         g.id_categoria,
         g.id_dependientes,
         c.nombre AS categoria,
-        d.nombre AS dependiente
+        d.nombre AS dependiente,
+        m.id_movimiento AS _rf19_movimiento
        FROM gastos g
        INNER JOIN salida s       ON g.id_salida      = s.id_salida
        INNER JOIN movimientos m  ON s.id_movimiento  = m.id_movimiento
@@ -618,7 +667,7 @@ const getGastos = async (req, res) => {
        ORDER BY g.fecha_registro DESC`,
       [ID_usuario]
     );
-    res.status(200).json(rows);
+    res.status(200).json(await conOperaciones(ID_usuario, rows));
   } catch (error) {
     console.error("Error en getGastos:", error.message);
     res.status(500).json(ERROR_500);
