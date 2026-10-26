@@ -67,6 +67,9 @@ const getNotificaciones = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+//  GET /api/notificaciones/no-leidas/count
+// ─────────────────────────────────────────────────────────────
 const getNoLeidasCount = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
@@ -84,6 +87,9 @@ const getNoLeidasCount = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+//  PATCH /api/notificaciones/:id/leer
+// ─────────────────────────────────────────────────────────────
 const marcarLeida = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;

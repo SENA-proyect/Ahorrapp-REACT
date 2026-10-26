@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useNotificaciones } from '../context/NotificacionesContext'
+import { useAuth } from '../context/AuthContext'
 
 const navItems = [
   { href: '/Dashboard', emoji: '📊', label: 'Dashboard' },
@@ -20,6 +21,7 @@ const navItems = [
 
 export default function HeaderModulos({ section = 'Dashboard' }) {
   const navigate = useNavigate()
+  const { logout } = useAuth()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const { noLeidasCount, notificacionPendiente, limpiarNotificacionPendiente } = useNotificaciones()
@@ -52,8 +54,7 @@ export default function HeaderModulos({ section = 'Dashboard' }) {
       : 'w-full md:w-auto flex items-center gap-1.5 px-4 py-3 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 rounded-xl md:rounded-[10px] text-left font-semibold text-white bg-white/10 border border-white/5 hover:-translate-y-px hover:shadow-[0_1px_8px_rgba(255,187,0,0.4)] transition-all whitespace-nowrap'
 
   const handleLogout = () => { 
-    localStorage.clear();
-    sessionStorage.clear();
+    logout();
     window.location.replace('/Login');
   }
   return (

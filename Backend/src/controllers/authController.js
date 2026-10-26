@@ -140,7 +140,7 @@ const login = async (req, res) => {
 
 // ── POST /forgot-password ────────────────────────────────────────────────────
 const forgotPassword = async (req, res) => {
-  const { Email } = req.body;
+  const Email = String(req.body.Email ?? req.body.email ?? '').trim();
 
   if (!Email) {
     return res.status(400).json({
