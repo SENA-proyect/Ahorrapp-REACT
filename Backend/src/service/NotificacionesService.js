@@ -1,5 +1,6 @@
 //? NOTAS
 //* Este archivo cambio la PK por la cual se llamaba originalmente, presupuesto.ID_periodo -> id_presupuesto
+//* realizar pruebas y hablar con el encargado del porque de los cambios
 
 const pool = require("../db/connection");
 const { getPeriodoActivo } = require("./periodoHelper");
