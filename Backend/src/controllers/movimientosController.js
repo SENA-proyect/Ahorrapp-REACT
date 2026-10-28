@@ -4,6 +4,8 @@ const pool = require("../db/connection");
 const {
   verificarUmbralGastos,
   verificarUmbralImprevistos,
+  verificarUmbralDeudas,
+  verificarUmbralAhorros,
   verificarMetaAhorroAlcanzada,
 } = require("../service/NotificacionesService");
 const {
@@ -24,14 +26,11 @@ const {
 
 const ERROR_500 = { ok: false, mensaje: "Error interno del servidor" };
 
-// Texto opcional → string recortado o null.
 const limpiar = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
-// Redondeo a centavos (la DB guarda DECIMAL(15,2)).
 const redondear2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
 const aCentavos = (n) => Math.round(Number(n) * 100);
 
-// ROLLBACK que nunca lanza (la conexión puede estar rota).
 const rollbackSeguro = async (connection) => {
   if (!connection) return;
   try {
@@ -41,8 +40,6 @@ const rollbackSeguro = async (connection) => {
   }
 };
 
-// Efectos posteriores al COMMIT (recalcular ingreso real, alertas...).
-// Un fallo aquí NUNCA debe convertir en error una operación ya confirmada.
 const efectoSeguro = async (fn) => {
   try {
     await fn();
@@ -51,8 +48,6 @@ const efectoSeguro = async (fn) => {
   }
 };
 
-// Valida los datos de un movimiento según su subtipo (creación y edición).
-// Devuelve un mensaje de error o null.
 const validarDatos = (subtipo, d, { esUpdate = false } = {}) => {
   const errMonto = validarMonto(d.monto);
   if (errMonto) return errMonto;
@@ -124,14 +119,12 @@ const validarDatos = (subtipo, d, { esUpdate = false } = {}) => {
   }
 };
 
-// Valida que la deuda editada sea coherente. Devuelve error o null.
 const validarCuotasDeuda = (cuotasPagadas, cuotasTotal) => {
   if (cuotasPagadas !== null) {
     const n = aNumero(cuotasPagadas);
     if (!Number.isInteger(n) || n < 0) {
       return "Las cuotas pagadas deben ser un entero mayor o igual a cero";
     }
-    // Pago único (sin cuotas_total) equivale a 1 cuota.
     const limite = cuotasTotal !== null ? cuotasTotal : 1;
     if (n > limite) {
       return "Las cuotas pagadas no pueden superar el total de cuotas";
@@ -140,9 +133,6 @@ const validarCuotasDeuda = (cuotasPagadas, cuotasTotal) => {
   return null;
 };
 
-// Eliminador genérico: borra el detalle, su fila padre (entrada/salida) y el
-// movimiento, validando que pertenezcan al usuario. Mismo comportamiento que
-// los cinco delete* originales.
 const crearEliminador = ({
   tabla,
   columnaId,
@@ -191,7 +181,7 @@ const crearEliminador = ({
 };
 
 // ─────────────────────────────────────────────────────────────
-//  GET /movimientos  (consolidado para el asistente)
+//  GET /movimientos
 // ─────────────────────────────────────────────────────────────
 const getMovimientos = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -235,7 +225,6 @@ const getMovimientos = async (req, res) => {
 const crearMovimiento = async (req, res) => {
   const { tipo_flujo, subtipo_modulo, datos } = req.body || {};
 
-  // 1. Validaciones tempranas, ANTES de abrir la conexión a la BD
   if (!datos || typeof datos !== "object") {
     return res.status(400).json({ ok: false, mensaje: "El campo datos es requerido" });
   }
@@ -265,9 +254,8 @@ const crearMovimiento = async (req, res) => {
   }
 
   const monto = aNumero(datos.monto);
-  const fechaRegistro = normalizarFecha(datos.fecha_registro); // null → CURRENT_DATE
+  const fechaRegistro = normalizarFecha(datos.fecha_registro);
 
-  // 2. Transacción
   let connection;
 
   try {
@@ -383,13 +371,17 @@ const crearMovimiento = async (req, res) => {
 
     await connection.query("COMMIT");
 
-    // Efectos posteriores: no deben tumbar una creación ya confirmada.
+    // Efectos posteriores al COMMIT: nunca deben tumbar una creación ya confirmada.
     if (subtipo_modulo === "Ingreso") {
       await efectoSeguro(() => actualizarIngresoReal(ID_usuario));
     } else if (subtipo_modulo === "Gasto") {
       await efectoSeguro(() => verificarUmbralGastos(ID_usuario));
     } else if (subtipo_modulo === "Imprevisto") {
       await efectoSeguro(() => verificarUmbralImprevistos(ID_usuario));
+    } else if (subtipo_modulo === "Deuda") {
+      await efectoSeguro(() => verificarUmbralDeudas(ID_usuario));
+    } else if (subtipo_modulo === "Ahorro") {
+      await efectoSeguro(() => verificarUmbralAhorros(ID_usuario));
     }
 
     return res.status(201).json({
@@ -461,7 +453,6 @@ const updateIngresos = async (req, res) => {
       return res.status(404).json({ ok: false, mensaje: "Ingreso no encontrado" });
     }
 
-    // El ingreso real del período activo debe reflejar la edición.
     await efectoSeguro(() => actualizarIngresoReal(ID_usuario));
 
     res.status(200).json({ ok: true, mensaje: "Ingreso actualizado exitosamente" });
@@ -518,8 +509,6 @@ const updateAhorros = async (req, res) => {
   );
   if (errorDatos) return res.status(400).json({ ok: false, mensaje: errorDatos });
 
-  // monto_acumulado es opcional: si no llega se conserva el valor de la DB
-  // (evita que un cliente con datos viejos pise abonos recientes).
   let acumuladoSolicitado = null;
   if (monto_acumulado !== undefined && monto_acumulado !== null && monto_acumulado !== "") {
     const errAcum = validarMonto(monto_acumulado, { nombre: "El monto acumulado", permitirCero: true });
@@ -569,7 +558,6 @@ const updateAhorros = async (req, res) => {
       ]
     );
 
-    // Si el ajuste completa la meta, se notifica igual que con un abono.
     if (aCentavos(nuevoAcumulado) >= aCentavos(nuevoMonto)) {
       await efectoSeguro(() =>
         verificarMetaAhorroAlcanzada(
@@ -579,6 +567,8 @@ const updateAhorros = async (req, res) => {
         )
       );
     }
+
+    await efectoSeguro(() => verificarUmbralAhorros(ID_usuario));
 
     res.status(200).json({ ok: true, mensaje: "Ahorro actualizado exitosamente" });
   } catch (error) {
@@ -593,6 +583,7 @@ const deleteAhorros = crearEliminador({
   padre: "entrada",
   nombre: "Ahorro",
   mensajeOk: "Ahorro eliminado exitosamente",
+  alEliminar: (ID_usuario) => verificarUmbralAhorros(ID_usuario),
 });
 
 // <==&&==·········· GASTOS ··········==&&==>
@@ -803,7 +794,6 @@ const updateDeudas = async (req, res) => {
 
   const cuotasTotal = cuotas_total ? Number(cuotas_total) : null;
 
-  // cuotas_pagadas es opcional: si no llega se conserva el valor de la DB.
   const pagadasSolicitadas =
     cuotas_pagadas === undefined || cuotas_pagadas === null || cuotas_pagadas === ""
       ? null
@@ -829,16 +819,11 @@ const updateDeudas = async (req, res) => {
       ? pagadasSolicitadas
       : Number(actual.cuotas_pagadas);
 
-    // Si se conservan las pagadas hay que revalidar contra el nuevo total.
     const errorCoherencia = validarCuotasDeuda(cuotasPagadas, cuotasTotal);
     if (errorCoherencia) {
       return res.status(400).json({ ok: false, mensaje: errorCoherencia });
     }
 
-    // El estado SIEMPRE se deriva de las cuotas (fuente de verdad):
-    //  - con cuotas_total: pagada ⇔ cuotas_pagadas >= cuotas_total
-    //  - pago único (sin cuotas_total): pagada ⇔ cuotas_pagadas >= 1; con 0 pagadas
-    //    se respeta el estado enviado solo si es 'pagada' (deudas antiguas).
     let estadoFinal;
     if (cuotasTotal !== null) {
       estadoFinal = cuotasPagadas >= cuotasTotal ? "pagada" : "pendiente";
@@ -867,6 +852,9 @@ const updateDeudas = async (req, res) => {
         id,
       ]
     );
+
+    await efectoSeguro(() => verificarUmbralDeudas(ID_usuario));
+
     res.status(200).json({ ok: true, mensaje: "Deuda actualizada exitosamente" });
   } catch (error) {
     if (responderErrorBD(res, error, "updateDeudas")) return;
@@ -880,20 +868,17 @@ const deleteDeudas = crearEliminador({
   padre: "salida",
   nombre: "Deuda",
   mensajeOk: "Deuda eliminada exitosamente",
+  alEliminar: (ID_usuario) => verificarUmbralDeudas(ID_usuario),
 });
 
 // ─────────────────────────────────────────────────────────────
 //  PATCH /movimientos/deudas/:id/abonar
-//  Cada pago equivale a (monto ÷ cuotas_total) × cuotas pagadas.
-//  Una deuda sin cuotas_total es un pago único (1 cuota).
 // ─────────────────────────────────────────────────────────────
 const abonarDeuda = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
   const body = req.body || {};
 
-  // Sin valor → 1 cuota. Con valor debe ser un entero >= 1 (antes "0" o "abc"
-  // se convertían silenciosamente en 1).
   let cuotas = 1;
   if (body.cuotas !== undefined && body.cuotas !== null && body.cuotas !== "") {
     if (!esEnteroPositivo(body.cuotas)) {
@@ -947,8 +932,6 @@ const abonarDeuda = async (req, res) => {
       });
     }
 
-    // Monto acumulado redondeado a centavos: la suma de todos los abonos de
-    // una deuda pagada desde cero es exactamente igual al monto de la deuda.
     const monto = Number(deuda.monto);
     const acumuladoNuevo = redondear2((monto * nuevasCuotas) / cuotasTotal);
     const acumuladoPrevio = redondear2((monto * pagadasActuales) / cuotasTotal);
@@ -968,6 +951,8 @@ const abonarDeuda = async (req, res) => {
     );
 
     await connection.query("COMMIT");
+
+    await efectoSeguro(() => verificarUmbralDeudas(ID_usuario));
 
     return res.status(200).json({
       ok: true,
@@ -1025,7 +1010,6 @@ const abonarAhorro = async (req, res) => {
     const meta = Number(ahorro.meta_monto);
     const acumuladoActual = Number(ahorro.monto_acumulado);
 
-    // Comparación en centavos para evitar errores de coma flotante.
     const restanteCent = aCentavos(meta) - aCentavos(acumuladoActual);
 
     if (restanteCent <= 0) {
@@ -1058,6 +1042,7 @@ const abonarAhorro = async (req, res) => {
     await connection.query("COMMIT");
 
     await efectoSeguro(() => verificarMetaAhorroAlcanzada(ID_usuario, ahorro, nuevoAcumulado));
+    await efectoSeguro(() => verificarUmbralAhorros(ID_usuario));
 
     return res.status(200).json({
       ok: true,
@@ -1078,7 +1063,6 @@ const abonarAhorro = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────
 //  GET /movimientos/ahorros/abonos  y  GET /movimientos/deudas/abonos
-//  Historial de abonos del usuario (RF-04 y RF-07).
 // ─────────────────────────────────────────────────────────────
 const getAbonosAhorro = async (req, res) => {
   const ID_usuario = req.usuario.id;

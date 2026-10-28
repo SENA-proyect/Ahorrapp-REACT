@@ -241,8 +241,8 @@ const verificarUmbralAhorros = async (ID_usuario) => {
     const { rows: [aho] } = await pool.query(
       `SELECT COALESCE(SUM(a.monto), 0)::float AS total
        FROM ahorros a
-       JOIN salida s      ON a.id_salida      = s.id_salida
-       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
+       JOIN entrada e      ON a.id_entrada     = e.id_entrada
+       JOIN movimientos m  ON e.id_movimiento  = m.id_movimiento
        WHERE m.id_usuario = $1 AND a.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
