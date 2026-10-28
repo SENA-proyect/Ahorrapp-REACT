@@ -268,6 +268,7 @@ const verificarUmbralAhorros = async (ID_usuario) => {
 };
 
 // --- EMERGENCIA ---
+// --- EMERGENCIA ---
 const verificarUmbralEmergencia = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
@@ -277,11 +278,15 @@ const verificarUmbralEmergencia = async (ID_usuario) => {
     if (!monto_emergencia || Number(monto_emergencia) <= 0) return;
 
     const { rows: [eme] } = await pool.query(
-      `SELECT COALESCE(SUM(e.monto), 0)::float AS total
-       FROM emergencia e
-       JOIN salida s      ON e.id_salida      = s.id_salida
-       JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
-       WHERE m.id_usuario = $1 AND e.fecha_registro BETWEEN $2 AND $3`,
+      `SELECT COALESCE(
+         SUM(CASE WHEN mfe.tipo = 'aporte' THEN mfe.monto
+                  WHEN mfe.tipo = 'retiro' THEN -mfe.monto
+                  ELSE 0 END
+         ), 0)::float AS total
+       FROM movimientos_fondo_emergencia mfe
+       JOIN fondos_emergencia fe ON mfe.id_fondo = fe.id_fondo
+       WHERE fe.id_usuario = $1
+         AND mfe.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 

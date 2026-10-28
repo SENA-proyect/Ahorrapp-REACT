@@ -5,6 +5,7 @@ const {
   validarMonto,
   validarTexto,
 } = require("../service/validaciones");
+const { verificarUmbralEmergencia } = require("../service/NotificacionesService");
 
 const ERROR_500 = { ok: false, mensaje: "Error interno del servidor" };
 const SIN_FONDO = {
@@ -19,6 +20,15 @@ const rollbackSeguro = async (connection) => {
     await connection.query("ROLLBACK");
   } catch (_) {
     /* conexión ya cerrada */
+  }
+};
+
+// Efectos posteriores al COMMIT: nunca deben tumbar una operación ya confirmada.
+const efectoSeguro = async (fn) => {
+  try {
+    await fn();
+  } catch (error) {
+    console.error("Error en efecto posterior:", error.message);
   }
 };
 
@@ -77,8 +87,6 @@ const crearFondoEmergencia = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const body = req.body || {};
 
-  // Sin meta → 0. Con meta debe ser un número válido >= 0 (antes un texto
-  // inválido se convertía silenciosamente en 0).
   const hayMeta = body.meta !== undefined && body.meta !== null && body.meta !== "";
   if (hayMeta) {
     const errorMeta = validarMonto(body.meta, { nombre: "La meta", permitirCero: true });
@@ -102,7 +110,6 @@ const crearFondoEmergencia = async (req, res) => {
       datos: fondo,
     });
   } catch (error) {
-    // La restricción UNIQUE de id_usuario evita tener más de un fondo por usuario.
     if (error.code === "23505") {
       return res.status(409).json({
         ok: false,
@@ -211,6 +218,8 @@ const registrarAporte = async (req, res) => {
 
     await connection.query("COMMIT");
 
+    await efectoSeguro(() => verificarUmbralEmergencia(ID_usuario));
+
     return res.status(201).json({
       ok: true,
       mensaje: "Aporte registrado correctamente",
@@ -248,10 +257,7 @@ const registrarRetiro = async (req, res) => {
     connection = await pool.connect();
     await connection.query("BEGIN");
 
-    // 1) Se bloquea la fila del fondo. NOTA: la versión anterior combinaba
-    //    GROUP BY + LEFT JOIN + FOR UPDATE en una sola consulta, algo que
-    //    PostgreSQL rechaza ("FOR UPDATE is not allowed with GROUP BY"), por
-    //    lo que todo retiro terminaba en error 500.
+    // 1) Se bloquea la fila del fondo. (Evita el error anterior de GROUP BY + FOR UPDATE)
     const { rows: [fondo] } = await connection.query(
       `SELECT id_fondo FROM fondos_emergencia WHERE id_usuario = $1 FOR UPDATE`,
       [ID_usuario]
@@ -262,8 +268,7 @@ const registrarRetiro = async (req, res) => {
       return res.status(404).json(SIN_FONDO);
     }
 
-    // 2) Con el fondo bloqueado se calcula el saldo (dos retiros simultáneos
-    //    no pueden pasar ambos la validación).
+    // 2) Con el fondo bloqueado se calcula el saldo.
     const { rows: [{ saldo_actual }] } = await connection.query(
       `
       SELECT ${SQL_SALDO} AS saldo_actual
@@ -285,6 +290,8 @@ const registrarRetiro = async (req, res) => {
     const movimiento = await insertarMovimiento(connection, fondo.id_fondo, "retiro", monto, descripcion);
 
     await connection.query("COMMIT");
+
+    await efectoSeguro(() => verificarUmbralEmergencia(ID_usuario));
 
     return res.status(201).json({
       ok: true,
