@@ -30,7 +30,11 @@ const crearNotificacion = async ({
   Entidad_id = null,
 }) => {
   if (!ID_usuario || !Tipo || !Mensaje?.trim()) {
-    console.error("crearNotificacion: faltan campos requeridos", { ID_usuario, Tipo, Mensaje });
+    console.error("crearNotificacion: faltan campos requeridos", {
+      ID_usuario,
+      Tipo,
+      Mensaje,
+    });
     return null;
   }
 
@@ -38,16 +42,33 @@ const crearNotificacion = async ({
     const activa = await preferenciaActiva(ID_usuario, Tipo);
     if (!activa) return null;
 
-    const { rows: result } = await pool.query(
-      `INSERT INTO notificaciones (id_usuario, tipo, entidad_tipo, entidad_id, mensaje)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id_notificacion`,
-      [ID_usuario, Tipo, Entidad_tipo, Entidad_id, Mensaje.trim()]
-    );
+    // Solo aplica ON CONFLICT cuando hay entidad (índice parcial)
+    const usarConflicto = Entidad_tipo !== null && Entidad_id !== null;
+
+    const sql = usarConflicto
+      ? `INSERT INTO notificaciones (id_usuario, tipo, entidad_tipo, entidad_id, mensaje)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (id_usuario, tipo, entidad_tipo, entidad_id)
+         DO NOTHING
+         RETURNING id_notificacion`
+      : `INSERT INTO notificaciones (id_usuario, tipo, entidad_tipo, entidad_id, mensaje)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id_notificacion`;
+
+    const { rows } = await pool.query(sql, [
+      ID_usuario,
+      Tipo,
+      Entidad_tipo,
+      Entidad_id,
+      Mensaje.trim(),
+    ]);
+
+    // Si hubo conflicto, rows viene vacío → no re-enviamos push
+    if (rows.length === 0) return null;
 
     await enviarPush(ID_usuario, "Ahorrapp", Mensaje.trim());
 
-    return result[0].id_notificacion;
+    return rows[0].id_notificacion;
   } catch (error) {
     console.error("Error en crearNotificacion:", error.message);
     return null;
