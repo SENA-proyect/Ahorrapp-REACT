@@ -269,6 +269,7 @@ const verificarUmbralDeudas = async (ID_usuario) => {
 };
 
 // --- AHORROS ---
+c// --- AHORROS ---
 const verificarUmbralAhorros = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
@@ -281,8 +282,9 @@ const verificarUmbralAhorros = async (ID_usuario) => {
 
     if (!monto_ahorros || Number(monto_ahorros) <= 0) return;
 
+    // CORRECCIÓN: Se usa monto_acumulado en lugar de monto
     const { rows: [aho] } = await pool.query(
-      `SELECT COALESCE(SUM(a.monto), 0)::float AS total
+      `SELECT COALESCE(SUM(a.monto_acumulado), 0)::float AS total
        FROM ahorros a
        JOIN entrada e      ON a.id_entrada     = e.id_entrada
        JOIN movimientos m  ON e.id_movimiento  = m.id_movimiento
