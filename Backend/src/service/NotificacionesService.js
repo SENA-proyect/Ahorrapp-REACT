@@ -269,7 +269,6 @@ const verificarUmbralDeudas = async (ID_usuario) => {
 };
 
 // --- AHORROS ---
-c// --- AHORROS ---
 const verificarUmbralAhorros = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
