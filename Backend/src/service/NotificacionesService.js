@@ -117,12 +117,22 @@ const UMBRAL_EMERGENCIA = 85;
 // --- GASTOS ---
 const verificarUmbralGastos = async (ID_usuario) => {
   try {
+    console.log(`\n--- [DEBUG UMBRAL GASTOS] Iniciando para usuario: ${ID_usuario} ---`);
+    
     const periodo = await getPeriodoActivo(ID_usuario);
-    if (!periodo) return;
+    if (!periodo) {
+      console.log("❌ [DEBUG UMBRAL GASTOS]: No hay período activo.");
+      return;
+    }
 
-    // CAMBIO: Nombres en minúscula según tu BD
     const { fecha_inicio: fi, fecha_fin: ff, monto_gastos, id_presupuesto } = periodo;
-    if (!monto_gastos || Number(monto_gastos) <= 0) return;
+    
+    console.log(`ℹ️ [DEBUG UMBRAL GASTOS]: Período ${fi} a ${ff} | Límite: ${monto_gastos} | ID Presupuesto: ${id_presupuesto}`);
+
+    if (!monto_gastos || Number(monto_gastos) <= 0) {
+      console.log("❌ [DEBUG UMBRAL GASTOS]: El monto del presupuesto de gastos es 0 o nulo.");
+      return;
+    }
 
     const { rows: [gas] } = await pool.query(
       `SELECT COALESCE(SUM(g.monto), 0)::float AS total
@@ -134,13 +144,25 @@ const verificarUmbralGastos = async (ID_usuario) => {
     );
 
     const porcentaje = (Number(gas.total) / Number(monto_gastos)) * 100;
-    if (porcentaje < UMBRAL_GASTOS) return;
+    
+    console.log(`📊 [DEBUG UMBRAL GASTOS]: Total gastado en el período: ${gas.total} | Porcentaje: ${porcentaje.toFixed(2)}%`);
+
+    if (porcentaje < UMBRAL_GASTOS) {
+      console.log(`⚠️ [DEBUG UMBRAL GASTOS]: No supera el umbral del ${UMBRAL_GASTOS}%. No se notifica.`);
+      return;
+    }
 
     const yaExiste = await existeNotificacionEntidad(
       ID_usuario, "alerta_presupuesto", "periodo_gastos", id_presupuesto
     );
-    if (yaExiste) return;
+    
+    if (yaExiste) {
+      console.log("⚠️ [DEBUG UMBRAL GASTOS]: Ya existe una notificación para este período. No se duplica.");
+      return;
+    }
 
+    console.log("✅ [DEBUG UMBRAL GASTOS]: Creando notificación...");
+    
     await crearNotificacion({
       ID_usuario,
       Tipo: "alerta_presupuesto",
@@ -148,8 +170,10 @@ const verificarUmbralGastos = async (ID_usuario) => {
       Entidad_tipo: "periodo_gastos",
       Entidad_id: id_presupuesto,
     });
+
+    console.log("✅ [DEBUG UMBRAL GASTOS]: Proceso terminado con éxito.");
   } catch (error) {
-    console.error("Error en verificarUmbralGastos:", error.message);
+    console.error("❌ [DEBUG UMBRAL GASTOS] ERROR FATAL:", error.message);
   }
 };
 
