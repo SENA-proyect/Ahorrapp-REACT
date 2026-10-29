@@ -63,10 +63,11 @@ const crearNotificacion = async ({
 
     const usarConflicto = Entidad_tipo !== null && Entidad_id !== null;
 
+    // AQUÍ ESTÁ LA CORRECCIÓN: Se añade el WHERE que coincide con tu índice único parcial
     const sql = usarConflicto
       ? `INSERT INTO notificaciones (id_usuario, tipo, entidad_tipo, entidad_id, mensaje)
          VALUES ($1, $2, $3, $4, $5)
-         ON CONFLICT (id_usuario, tipo, entidad_tipo, entidad_id)
+         ON CONFLICT (id_usuario, tipo, entidad_tipo, entidad_id) WHERE entidad_tipo IS NOT NULL AND entidad_id IS NOT NULL
          DO NOTHING
          RETURNING id_notificacion`
       : `INSERT INTO notificaciones (id_usuario, tipo, entidad_tipo, entidad_id, mensaje)
