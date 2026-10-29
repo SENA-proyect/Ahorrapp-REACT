@@ -315,6 +315,7 @@ const verificarUmbralAhorros = async (ID_usuario) => {
 };
 
 // --- EMERGENCIA ---
+// --- EMERGENCIA ---
 const verificarUmbralEmergencia = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
@@ -327,6 +328,7 @@ const verificarUmbralEmergencia = async (ID_usuario) => {
 
     if (!monto_emergencia || Number(monto_emergencia) <= 0) return;
 
+    // CORRECCIÓN: Se lee lo insertado en la tabla de movimientos, no la meta
     const { rows: [eme] } = await pool.query(
       `SELECT COALESCE(
          SUM(CASE WHEN mfe.tipo = 'aporte' THEN mfe.monto
@@ -359,7 +361,6 @@ const verificarUmbralEmergencia = async (ID_usuario) => {
     console.error("Error en verificarUmbralEmergencia:", error.message);
   }
 };
-
 // --- SUGERENCIA IMPREVISTOS NO USADOS ---
 const UMBRAL_IMPREVISTOS_NO_USADO = 10;
 
