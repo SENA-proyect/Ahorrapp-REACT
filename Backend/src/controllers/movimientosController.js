@@ -371,11 +371,29 @@ const crearMovimiento = async (req, res) => {
 
     await connection.query("COMMIT");
 
-    // Efectos posteriores al COMMIT: nunca deben tumbar una creación ya confirmada.
+    // ─────────────────────────────────────────────────────────────
+    // LOGS DE DIAGNÓSTICO Y VERIFICACIÓN DE UMBRALES
+    // ─────────────────────────────────────────────────────────────
     if (subtipo_modulo === "Ingreso") {
       await efectoSeguro(() => actualizarIngresoReal(ID_usuario));
     } else if (subtipo_modulo === "Gasto") {
-      await efectoSeguro(() => verificarUmbralGastos(ID_usuario));
+      console.log(`\n--- INICIANDO VERIFICACIÓN DE GASTO ---`);
+      try {
+        // Consultamos directo para ver qué hay en la BD
+        const testPeriodo = await pool.query("SELECT fecha_inicio, fecha_fin, monto_gastos FROM periodos_presupuesto WHERE id_usuario = $1 AND estado = 'abierto'", [ID_usuario]);
+        console.log("1. Datos del período desde BD:", testPeriodo.rows[0]);
+        
+        const testGastos = await pool.query("SELECT SUM(g.monto) as total FROM gastos g JOIN salida s ON g.id_salida = s.id_salida JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1", [ID_usuario]);
+        console.log("2. Suma total de gastos (histórico):", testGastos.rows[0]);
+
+        // Ejecutamos la función real
+        await verificarUmbralGastos(ID_usuario);
+        console.log("3. Función verificarUmbralGastos terminada exitosamente.");
+      } catch (error) {
+        console.error("ERROR AL VERIFICAR UMBRAL:", error.message);
+      }
+      console.log(`--- FIN VERIFICACIÓN ---\n`);
+
     } else if (subtipo_modulo === "Imprevisto") {
       await efectoSeguro(() => verificarUmbralImprevistos(ID_usuario));
     } else if (subtipo_modulo === "Deuda") {
