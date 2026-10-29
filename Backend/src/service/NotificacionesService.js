@@ -13,10 +13,29 @@ const enviarPush = async (ID_usuario, titulo, mensaje) => {
 
     const tokens = rows.map((r) => r.fcm_token);
 
-    await admin.messaging().sendEachForMulticast({
+    const response = await admin.messaging().sendEachForMulticast({
       tokens,
       notification: { title: titulo, body: mensaje },
     });
+
+    // Limpia tokens muertos para no acumular basura
+    const tokensMuertos = [];
+    response.responses.forEach((r, i) => {
+      if (
+        r.error &&
+        (r.error.code === "messaging/registration-token-not-registered" ||
+          r.error.code === "messaging/invalid-registration-token")
+      ) {
+        tokensMuertos.push(tokens[i]);
+      }
+    });
+
+    if (tokensMuertos.length > 0) {
+      await pool.query(
+        `DELETE FROM push_tokens WHERE fcm_token = ANY($1::text[])`,
+        [tokensMuertos]
+      );
+    }
   } catch (error) {
     console.error("Error en enviarPush:", error.message);
   }
@@ -42,7 +61,6 @@ const crearNotificacion = async ({
     const activa = await preferenciaActiva(ID_usuario, Tipo);
     if (!activa) return null;
 
-    // Solo aplica ON CONFLICT cuando hay entidad (índice parcial)
     const usarConflicto = Entidad_tipo !== null && Entidad_id !== null;
 
     const sql = usarConflicto
@@ -63,7 +81,6 @@ const crearNotificacion = async ({
       Mensaje.trim(),
     ]);
 
-    // Si hubo conflicto, rows viene vacío → no re-enviamos push
     if (rows.length === 0) return null;
 
     await enviarPush(ID_usuario, "Ahorrapp", Mensaje.trim());
@@ -75,7 +92,12 @@ const crearNotificacion = async ({
   }
 };
 
-const existeNotificacionEntidad = async (ID_usuario, Tipo, Entidad_tipo, Entidad_id) => {
+const existeNotificacionEntidad = async (
+  ID_usuario,
+  Tipo,
+  Entidad_tipo,
+  Entidad_id
+) => {
   try {
     const { rows } = await pool.query(
       `SELECT id_notificacion FROM notificaciones
@@ -106,36 +128,31 @@ const preferenciaActiva = async (ID_usuario, Tipo) => {
   }
 };
 
-const TIPOS_NOTIFICACION = ["sistema", "recordatorio", "sugerencia", "alerta_presupuesto"];
+const TIPOS_NOTIFICACION = [
+  "sistema",
+  "recordatorio",
+  "sugerencia",
+  "alerta_presupuesto",
+];
 
 const UMBRAL_GASTOS = 85;
 const UMBRAL_IMPREVISTOS = 85;
 const UMBRAL_DEUDAS = 85;
-const UMBRAL_AHORROS = 85; 
+const UMBRAL_AHORROS = 85;
 const UMBRAL_EMERGENCIA = 85;
 
 // --- GASTOS ---
 const verificarUmbralGastos = async (ID_usuario) => {
   try {
-    console.log(`\n--- [DEBUG UMBRAL GASTOS] Iniciando para usuario: ${ID_usuario} ---`);
-    
     const periodo = await getPeriodoActivo(ID_usuario);
+    if (!periodo) return;
 
-    console.log("DEBUG PERIODO REAL:", periodo);
+    const fi = periodo.Fecha_inicio;
+    const ff = periodo.Fecha_fin;
+    const monto_gastos = periodo.Monto_gastos;
+    const id_presupuesto = periodo.ID_presupuesto;
 
-    if (!periodo) {
-      console.log("❌ [DEBUG UMBRAL GASTOS]: No hay período activo.");
-      return;
-    }
-
-    const { fecha_inicio: fi, fecha_fin: ff, monto_gastos, id_presupuesto } = periodo;
-    
-    console.log(`ℹ️ [DEBUG UMBRAL GASTOS]: Período ${fi} a ${ff} | Límite: ${monto_gastos} | ID Presupuesto: ${id_presupuesto}`);
-
-    if (!monto_gastos || Number(monto_gastos) <= 0) {
-      console.log("❌ [DEBUG UMBRAL GASTOS]: El monto del presupuesto de gastos es 0 o nulo.");
-      return;
-    }
+    if (!monto_gastos || Number(monto_gastos) <= 0) return;
 
     const { rows: [gas] } = await pool.query(
       `SELECT COALESCE(SUM(g.monto), 0)::float AS total
@@ -147,25 +164,13 @@ const verificarUmbralGastos = async (ID_usuario) => {
     );
 
     const porcentaje = (Number(gas.total) / Number(monto_gastos)) * 100;
-    
-    console.log(`📊 [DEBUG UMBRAL GASTOS]: Total gastado en el período: ${gas.total} | Porcentaje: ${porcentaje.toFixed(2)}%`);
-
-    if (porcentaje < UMBRAL_GASTOS) {
-      console.log(`⚠️ [DEBUG UMBRAL GASTOS]: No supera el umbral del ${UMBRAL_GASTOS}%. No se notifica.`);
-      return;
-    }
+    if (porcentaje < UMBRAL_GASTOS) return;
 
     const yaExiste = await existeNotificacionEntidad(
       ID_usuario, "alerta_presupuesto", "periodo_gastos", id_presupuesto
     );
-    
-    if (yaExiste) {
-      console.log("⚠️ [DEBUG UMBRAL GASTOS]: Ya existe una notificación para este período. No se duplica.");
-      return;
-    }
+    if (yaExiste) return;
 
-    console.log("✅ [DEBUG UMBRAL GASTOS]: Creando notificación...");
-    
     await crearNotificacion({
       ID_usuario,
       Tipo: "alerta_presupuesto",
@@ -173,10 +178,8 @@ const verificarUmbralGastos = async (ID_usuario) => {
       Entidad_tipo: "periodo_gastos",
       Entidad_id: id_presupuesto,
     });
-
-    console.log("✅ [DEBUG UMBRAL GASTOS]: Proceso terminado con éxito.");
   } catch (error) {
-    console.error("❌ [DEBUG UMBRAL GASTOS] ERROR FATAL:", error.message);
+    console.error("Error en verificarUmbralGastos:", error.message);
   }
 };
 
@@ -186,7 +189,11 @@ const verificarUmbralImprevistos = async (ID_usuario) => {
     const periodo = await getPeriodoActivo(ID_usuario);
     if (!periodo) return;
 
-    const { fecha_inicio: fi, fecha_fin: ff, monto_imprevistos, id_presupuesto } = periodo;
+    const fi = periodo.Fecha_inicio;
+    const ff = periodo.Fecha_fin;
+    const monto_imprevistos = periodo.Monto_imprevistos;
+    const id_presupuesto = periodo.ID_presupuesto;
+
     if (!monto_imprevistos || Number(monto_imprevistos) <= 0) return;
 
     const { rows: [imp] } = await pool.query(
@@ -224,7 +231,11 @@ const verificarUmbralDeudas = async (ID_usuario) => {
     const periodo = await getPeriodoActivo(ID_usuario);
     if (!periodo) return;
 
-    const { fecha_inicio: fi, fecha_fin: ff, monto_deudas, id_presupuesto } = periodo;
+    const fi = periodo.Fecha_inicio;
+    const ff = periodo.Fecha_fin;
+    const monto_deudas = periodo.Monto_deudas;
+    const id_presupuesto = periodo.ID_presupuesto;
+
     if (!monto_deudas || Number(monto_deudas) <= 0) return;
 
     const { rows: [deu] } = await pool.query(
@@ -232,7 +243,7 @@ const verificarUmbralDeudas = async (ID_usuario) => {
        FROM deudas d
        JOIN salida s      ON d.id_salida      = s.id_salida
        JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
-       WHERE m.id_usuario = $1 AND d.fecha_registro BETWEEN $2 AND $3`,
+       WHERE m.id_usuario = $1 AND d.fecha_inicio BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 
@@ -262,7 +273,11 @@ const verificarUmbralAhorros = async (ID_usuario) => {
     const periodo = await getPeriodoActivo(ID_usuario);
     if (!periodo) return;
 
-    const { fecha_inicio: fi, fecha_fin: ff, monto_ahorros, id_presupuesto } = periodo;
+    const fi = periodo.Fecha_inicio;
+    const ff = periodo.Fecha_fin;
+    const monto_ahorros = periodo.Monto_ahorros;
+    const id_presupuesto = periodo.ID_presupuesto;
+
     if (!monto_ahorros || Number(monto_ahorros) <= 0) return;
 
     const { rows: [aho] } = await pool.query(
@@ -295,13 +310,16 @@ const verificarUmbralAhorros = async (ID_usuario) => {
 };
 
 // --- EMERGENCIA ---
-// --- EMERGENCIA ---
 const verificarUmbralEmergencia = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
     if (!periodo) return;
 
-    const { fecha_inicio: fi, fecha_fin: ff, monto_emergencia, id_presupuesto } = periodo;
+    const fi = periodo.Fecha_inicio;
+    const ff = periodo.Fecha_fin;
+    const monto_emergencia = periodo.Monto_emergencia;
+    const id_presupuesto = periodo.ID_presupuesto;
+
     if (!monto_emergencia || Number(monto_emergencia) <= 0) return;
 
     const { rows: [eme] } = await pool.query(
@@ -342,7 +360,11 @@ const UMBRAL_IMPREVISTOS_NO_USADO = 10;
 
 const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
   try {
-    const { fecha_inicio: fi, fecha_fin: ff, monto_imprevistos, id_presupuesto } = periodo;
+    const fi = periodo.Fecha_inicio;
+    const ff = periodo.Fecha_fin;
+    const monto_imprevistos = periodo.Monto_imprevistos;
+    const id_presupuesto = periodo.ID_presupuesto;
+
     if (!monto_imprevistos || Number(monto_imprevistos) <= 0) return;
 
     const { rows: [imp] } = await pool.query(
@@ -365,7 +387,8 @@ const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
     await crearNotificacion({
       ID_usuario,
       Tipo: "sugerencia",
-      Mensaje: "No usaste casi nada de tu porción de imprevistos este período. Considera destinar parte de ese dinero a tus ahorros.",
+      Mensaje:
+        "No usaste casi nada de tu porción de imprevistos este período. Considera destinar parte de ese dinero a tus ahorros.",
       Entidad_tipo: "periodo_imprevistos_no_usado",
       Entidad_id: id_presupuesto,
     });
@@ -375,14 +398,21 @@ const verificarImprevistosNoUsados = async (ID_usuario, periodo) => {
 };
 
 // --- META AHORRO ALCANZADA ---
-const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) => {
+const verificarMetaAhorroAlcanzada = async (
+  ID_usuario,
+  ahorro,
+  montoAcumulado
+) => {
   try {
     const metaMonto = Number(ahorro.meta_monto);
     if (!metaMonto || metaMonto <= 0) return;
     if (Number(montoAcumulado) < metaMonto) return;
 
     const yaExiste = await existeNotificacionEntidad(
-      ID_usuario, "alerta_presupuesto", "ahorro_meta", ahorro.id_ahorros
+      ID_usuario,
+      "alerta_presupuesto",
+      "ahorro_meta",
+      ahorro.id_ahorros
     );
     if (yaExiste) return;
 
@@ -398,6 +428,17 @@ const verificarMetaAhorroAlcanzada = async (ID_usuario, ahorro, montoAcumulado) 
   } catch (error) {
     console.error("Error en verificarMetaAhorroAlcanzada:", error.message);
   }
+};
+
+// --- ORQUESTADOR ---
+const verificarTodosLosUmbrales = async (ID_usuario) => {
+  await Promise.all([
+    verificarUmbralGastos(ID_usuario),
+    verificarUmbralImprevistos(ID_usuario),
+    verificarUmbralDeudas(ID_usuario),
+    verificarUmbralAhorros(ID_usuario),
+    verificarUmbralEmergencia(ID_usuario),
+  ]);
 };
 
 const getPreferencias = async (ID_usuario) => {
@@ -440,5 +481,6 @@ module.exports = {
   verificarUmbralEmergencia,
   verificarImprevistosNoUsados,
   verificarMetaAhorroAlcanzada,
+  verificarTodosLosUmbrales,
   TIPOS_NOTIFICACION,
 };
