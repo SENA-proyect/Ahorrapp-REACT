@@ -227,6 +227,7 @@ const verificarUmbralImprevistos = async (ID_usuario) => {
 };
 
 // --- DEUDAS ---
+// --- DEUDAS ---
 const verificarUmbralDeudas = async (ID_usuario) => {
   try {
     const periodo = await getPeriodoActivo(ID_usuario);
@@ -239,12 +240,14 @@ const verificarUmbralDeudas = async (ID_usuario) => {
 
     if (!monto_deudas || Number(monto_deudas) <= 0) return;
 
+    // CORRECCIÓN: Se suma el monto de los ABONOS realizados en el período
     const { rows: [deu] } = await pool.query(
-      `SELECT COALESCE(SUM(d.monto), 0)::float AS total
-       FROM deudas d
+      `SELECT COALESCE(SUM(ad.monto), 0)::float AS total
+       FROM abonos_deuda ad
+       JOIN deudas d      ON ad.id_deudas     = d.id_deudas
        JOIN salida s      ON d.id_salida      = s.id_salida
        JOIN movimientos m ON s.id_movimiento  = m.id_movimiento
-       WHERE m.id_usuario = $1 AND d.fecha_inicio BETWEEN $2 AND $3`,
+       WHERE m.id_usuario = $1 AND ad.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
 
