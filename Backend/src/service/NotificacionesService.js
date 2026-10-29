@@ -120,6 +120,9 @@ const verificarUmbralGastos = async (ID_usuario) => {
     console.log(`\n--- [DEBUG UMBRAL GASTOS] Iniciando para usuario: ${ID_usuario} ---`);
     
     const periodo = await getPeriodoActivo(ID_usuario);
+
+    console.log("DEBUG PERIODO REAL:", periodo);
+
     if (!periodo) {
       console.log("❌ [DEBUG UMBRAL GASTOS]: No hay período activo.");
       return;
