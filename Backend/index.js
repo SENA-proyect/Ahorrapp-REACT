@@ -28,7 +28,9 @@ const app = express();
 
 app.use(cors({
     origin: [
-        "https://localhost:5173"
+        "https://localhost:5173",
+        "http://52.45.67.160",
+        "http://52.45.67.160:80"
         // Aquí posteriormente agregaremos
         // la URL de producción del frontend
     ],
