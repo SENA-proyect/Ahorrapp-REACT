@@ -46,7 +46,12 @@ const getResumen = async (req, res) => {
       });
     }
 
-    const { Fecha_inicio: fi, Fecha_fin: ff } = periodo;
+    // CORRECCIÓN: Usar los nombres exactos de las columnas del periodoHelper
+    const fi = periodo.Fecha_inicio;
+    const ff = periodo.Fecha_fin;
+
+    // LOG DE DIAGNÓSTICO
+    console.log(`[DASHBOARD] Consultando período: ${fi} a ${ff} para usuario ${ID_usuario}`);
 
     // Totales del período activo
     const { rows: [ing] } = await pool.query(
@@ -57,6 +62,8 @@ const getResumen = async (req, res) => {
       WHERE m.id_usuario = $1 AND i.fecha_registro BETWEEN $2 AND $3`,
       [ID_usuario, fi, ff]
     );
+
+    console.log(`[DASHBOARD] Ingresos encontrados: ${ing.total}`);
 
     const { rows: [gas] } = await pool.query(
       `SELECT COALESCE(SUM(g.monto), 0)::float AS total
