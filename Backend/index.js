@@ -31,7 +31,8 @@ app.use(cors({
         "https://localhost:5173",
         "http://52.45.67.160",
         "http://52.45.67.160:80",
-        "https://ahorrapp-react-gia9.onrender.com"
+        "https://ahorrapp-react-gia9.onrender.com",
+        "http://localhost:5173",
         // Aquí posteriormente agregaremos
         // la URL de producción del frontend
     ],
