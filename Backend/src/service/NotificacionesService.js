@@ -274,13 +274,15 @@ const verificarUmbralDeudas = async (ID_usuario) => {
 // --- RECORDATORIO DEUDAS PRÓXIMAS A VENCER (5 DÍAS) ---
 const verificarDeudasProximasAVencer = async (ID_usuario) => {
   try {
-    // CORRECCIÓN IEEE: Busca deudas que venzan exactamente en los próximos 5 días
+    // CORRECCIÓN: Hacemos JOIN para llegar al id_usuario
     const { rows: deudas } = await pool.query(
-      `SELECT id_deudas, monto, fecha_fin 
-       FROM deudas 
-       WHERE id_usuario = $1 
-         AND estado = 'pendiente' 
-         AND fecha_fin BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '5 days'`,
+      `SELECT d.id_deudas, d.monto, d.fecha_fin 
+       FROM deudas d
+       INNER JOIN salida s      ON d.id_salida     = s.id_salida
+       INNER JOIN movimientos m ON s.id_movimiento = m.id_movimiento
+       WHERE m.id_usuario = $1 
+         AND d.estado = 'pendiente' 
+         AND d.fecha_fin BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '5 days'`,
       [ID_usuario]
     );
 
