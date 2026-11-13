@@ -19,6 +19,7 @@ const historialRoutes = require("./src/routes/Historialroutes");
 
 const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacioncuentasJob");
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
+const { iniciarJobDeudas } = require("./src/service/jobs/DeudasJob"); // Importamos la función del job de deudas
 
 const app = express();
 
