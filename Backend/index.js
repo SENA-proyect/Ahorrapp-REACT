@@ -85,4 +85,5 @@ app.listen(PORT, "0.0.0.0", () => {
 
     iniciarEliminacionCuentasJob();
     iniciarVencimientosJob();
+    iniciarJobDeudas(); // Iniciamos el job de revisión de deudas próximas a vencer
 });

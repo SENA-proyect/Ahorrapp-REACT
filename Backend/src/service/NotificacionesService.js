@@ -271,6 +271,41 @@ const verificarUmbralDeudas = async (ID_usuario) => {
   }
 };
 
+// --- RECORDATORIO DEUDAS PRÓXIMAS A VENCER (5 DÍAS) ---
+const verificarDeudasProximasAVencer = async (ID_usuario) => {
+  try {
+    // CORRECCIÓN IEEE: Busca deudas que venzan exactamente en los próximos 5 días
+    const { rows: deudas } = await pool.query(
+      `SELECT id_deudas, monto, fecha_fin 
+       FROM deudas 
+       WHERE id_usuario = $1 
+         AND estado = 'pendiente' 
+         AND fecha_fin BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '5 days'`,
+      [ID_usuario]
+    );
+
+    for (const deuda of deudas) {
+      const yaExiste = await existeNotificacionEntidad(
+        ID_usuario, "recordatorio", "deuda_vencimiento", deuda.id_deudas
+      );
+      if (yaExiste) continue;
+
+      // Formatear la fecha para el mensaje
+      const fechaFormateada = new Date(deuda.fecha_fin).toLocaleDateString('es-CO');
+
+      await crearNotificacion({
+        ID_usuario,
+        Tipo: "recordatorio",
+        Mensaje: `¡Atención! Tu deuda de $${deuda.monto} vence el ${fechaFormateada}.`,
+        Entidad_tipo: "deuda_vencimiento",
+        Entidad_id: deuda.id_deudas,
+      });
+    }
+  } catch (error) {
+    console.error("Error en verificarDeudasProximasAVencer:", error.message);
+  }
+};
+
 // --- AHORROS ---
 const verificarUmbralAhorros = async (ID_usuario) => {
   try {
@@ -491,5 +526,8 @@ module.exports = {
   verificarImprevistosNoUsados,
   verificarMetaAhorroAlcanzada,
   verificarTodosLosUmbrales,
+  verificarDeudasProximasAVencer,
+  UMBRAL_GASTOS,
+  UMBRAL_IMPREVISTOS,
   TIPOS_NOTIFICACION,
 };

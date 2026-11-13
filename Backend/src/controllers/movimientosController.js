@@ -7,6 +7,7 @@ const {
   verificarUmbralDeudas,
   verificarUmbralAhorros,
   verificarMetaAhorroAlcanzada,
+  verificarDeudasProximasAVencer, // <-- NUEVA IMPORTACIÓN
 } = require("../service/NotificacionesService");
 const {
   LIMITES,
@@ -398,6 +399,7 @@ const crearMovimiento = async (req, res) => {
       await efectoSeguro(() => verificarUmbralImprevistos(ID_usuario));
     } else if (subtipo_modulo === "Deuda") {
       await efectoSeguro(() => verificarUmbralDeudas(ID_usuario));
+      await efectoSeguro(() => verificarDeudasProximasAVencer(ID_usuario)); // <-- NUEVA LLAMADA AQUÍ
     } else if (subtipo_modulo === "Ahorro") {
       await efectoSeguro(() => verificarUmbralAhorros(ID_usuario));
     }
@@ -872,6 +874,7 @@ const updateDeudas = async (req, res) => {
     );
 
     await efectoSeguro(() => verificarUmbralDeudas(ID_usuario));
+    await efectoSeguro(() => verificarDeudasProximasAVencer(ID_usuario)); // <-- NUEVA LLAMADA AQUÍ
 
     res.status(200).json({ ok: true, mensaje: "Deuda actualizada exitosamente" });
   } catch (error) {
@@ -971,6 +974,7 @@ const abonarDeuda = async (req, res) => {
     await connection.query("COMMIT");
 
     await efectoSeguro(() => verificarUmbralDeudas(ID_usuario));
+    await efectoSeguro(() => verificarDeudasProximasAVencer(ID_usuario)); // <-- NUEVA LLAMADA AQUÍ
 
     return res.status(200).json({
       ok: true,
