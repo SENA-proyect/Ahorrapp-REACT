@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const pool = require("../db/connection");
+const pool = require("../../db/connection");
 const { verificarDeudasProximasAVencer } = require("../service/NotificacionesService");
 
 const iniciarJobDeudas = () => {
