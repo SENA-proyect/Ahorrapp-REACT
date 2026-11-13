@@ -1,8 +1,8 @@
 const cron = require("node-cron");
 const pool = require("../../db/connection");
-const { verificarDeudasProximasAVencer } = require("../service/NotificacionesService");
+const { verificarDeudasProximasAVencer } = require("../../service/NotificacionesService");
 
-const iniciarJobDeudas = () => {
+const iniciarJobDeudas = () => {    q
   // '0 6 * * *' significa: Minuto 0, Hora 6, Todos los días
   cron.schedule("0 6 * * *", async () => {
     console.log("⏰ [CRON] Ejecutando revisión diaria de deudas próximas a vencer (06:00 AM)...");
