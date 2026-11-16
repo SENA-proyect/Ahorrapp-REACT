@@ -8,9 +8,9 @@
 | Diagramas del sistema | Juan Medina | En desarrollo |
 | | | |
 | Diagrama relacional | Manuel Guevara | FINALIZADO |
-| Diagrama casos de uso | Manuel Guevara | FINALIZADO |
+| Diagrama casos de uso | Manuel Guevara | En desarrollo |
 | Casos de uso extendido | Manuel Guevara | En desarrollo |
-| Diagrama de clases | Manuel Guevara | En desarrollo |
+| Diagrama de clases | Manuel Guevara | FINALIZADO |
 | | | |
 | Diagrama entidad relacion | David Barrera | En desarrollo |
 | Diagrama BPMN | David Barrera | En desarrollo |
@@ -19,7 +19,7 @@
 | | | |
 | Diagrama de despliegue | Santiago Hurtado | FINALIZADO |
 | Levantamiento de informacion | Santiago Hurtado | En desarrollo |
-| Analisis del problema | Santiago Hurtado | En desarrollo |
+| Analisis del problema | Santiago Hurtado | FINALIZADO |
 | Arquitectura Tecnica | Santiago Hurtado | En desarrollo |
 | | | |
 | POLITICAS DE SEGURIDAD | Por definir | ... |
