@@ -16,6 +16,7 @@ const PresupuestosRoutes = require("./src/routes/PresupuestosRoutes");
 const fondoemergenciaRoutes = require("./src/routes/fondoemergenciaRoutes");
 const ReportesRoutes = require("./src/routes/ReportesRoutes");
 const historialRoutes = require("./src/routes/Historialroutes");
+const { iniciarJobDeudas } = require("./src/service/jobs/DeudasJob");
 
 const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacioncuentasJob");
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
@@ -26,14 +27,13 @@ const app = express();
 // ================================
 // MIDDLEWARES
 // ================================
-
-// Orígenes permitidos: los de desarrollo + los que se definan en CORS_ORIGINS
-// (separados por coma), p. ej. la URL donde se despliega el frontend web.
+// Orígenes permitidos: desarrollo y entornos de despliegue.
 const ORIGENES_CORS = [
     "https://localhost:5173",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    ...(process.env.CORS_ORIGINS || "").split(",").map((o) => o.trim()).filter(Boolean),
+    "http://52.45.67.160",
+    "https://ahorrapp-react-gia9.onrender.com",
 ];
 
 app.use(cors({
@@ -114,4 +114,5 @@ app.listen(PORT, "0.0.0.0", () => {
     iniciarEliminacionCuentasJob();
     iniciarVencimientosJob();
     iniciarUmbralesJob();
+    iniciarJobDeudas();
 });
