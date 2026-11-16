@@ -2,13 +2,12 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const aiRoutes = require("./src/routes/aiRoutes");
+
 const alphaVantageRoutes = require("./src/routes/alphaVantageRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const categoriasRoutes = require("./src/routes/categoriasRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const dependientesRoutes = require("./src/routes/dependientesRoutes");
-// const exportRoutes= require("./src/routes/exportRoutes");
 const movimientosRoutes = require("./src/routes/movimientosRoutes");
 const noticiasRoutes = require("./src/routes/noticiasRoutes");
 const NotificacionesRoutes = require("./src/routes/NotificacionesRoutes");
@@ -47,14 +46,12 @@ app.use(express.json());
 // ================================
 // RUTAS
 // ================================
-app.use("/api/ai", aiRoutes);
 // app.use("/api/alphaVantageRoutes", alphaVantageRoutes);
 app.use("/api", alphaVantageRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/dependientes", dependientesRoutes);
-// app.use("/api/exportRoutes", exportRoutes);
 app.use("/api/movimientos", movimientosRoutes);
 app.use("/api/noticias", noticiasRoutes);
 app.use("/api", NotificacionesRoutes);
