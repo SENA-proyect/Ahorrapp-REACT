@@ -12,14 +12,15 @@
 | Casos de uso extendido | Manuel Guevara | En desarrollo |
 | Diagrama de clases | Manuel Guevara | FINALIZADO |
 | | | |
-| Diagrama entidad relacion | David Barrera | En desarrollo |
-| Diagrama BPMN | David Barrera | En desarrollo |
-| Normalizacion | David Barrera | En desarrollo |
-| Plan de migracion de datos | David Barrera | En desarrollo |
 | | | |
 | Diagrama de despliegue | Santiago Hurtado | FINALIZADO |
 | Levantamiento de informacion | Santiago Hurtado | En desarrollo |
 | Analisis del problema | Santiago Hurtado | FINALIZADO |
-| Arquitectura Tecnica | Santiago Hurtado | En desarrollo |
+| Arquitectura Tecnica | Santiago Hurtado | FINALIZADO |
 | | | |
 | POLITICAS DE SEGURIDAD | Por definir | ... |
+| ------ | ------------ | --------- |
+| Diagrama entidad relacion | David Barrera (Manuel)| En desarrollo |
+| Diagrama BPMN | David Barrera (Manuel) | En desarrollo  |
+| Normalizacion | David Barrera (Manuel) | En desarrollo  |
+| Plan de migracion de datos | David Barrera (Santiago) | En desarrollo |
