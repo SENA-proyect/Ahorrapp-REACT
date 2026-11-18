@@ -7,10 +7,12 @@ export default defineConfig({
   server: {
     host: `localhost`,
     port: 5173,
-    https: {
-      key: fs.readFileSync('certs/private.key'),
-      cert: fs.readFileSync('certs/certificate.crt'),
-    },
+    https: fs.existsSync('certs/private.key') && fs.existsSync('certs/certificate.crt')
+      ? {
+          key: fs.readFileSync('certs/private.key'),
+          cert: fs.readFileSync('certs/certificate.crt'),
+        }
+      : undefined,
     proxy: {
       "/api": {
         target: "https://manuel-4zg4.onrender.com",

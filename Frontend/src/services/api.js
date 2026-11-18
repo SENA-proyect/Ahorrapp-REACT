@@ -68,6 +68,12 @@ export const loginUser = (datos) =>
     body: JSON.stringify(datos),
   }).then((r) => r.json());
 
+export const loginWithGoogle = (idToken) =>
+  fetchPublicJSON(`${API_URL}/auth/google`, {
+    method: "POST",
+    body: JSON.stringify({ idToken }),
+  });
+
 export const actualizarRolUsuario = (id, ID_rol) =>
   fetchJSON(`${API_URL}/auth/PanelUsuarios/${id}/rol`, {
     method: "PUT",
