@@ -1,9 +1,30 @@
 const pool = require("../db/connection");
 const {
+  crearNotificacion,
   getPreferencias,
   setPreferencia,
   TIPOS_NOTIFICACION,
-} = require("../service/NotificacionesService")
+} = require("../service/NotificacionesService");
+
+// ─────────────────────────────────────────────────────────────
+//  POST /api/notificaciones/test   (solo para pruebas)
+// ─────────────────────────────────────────────────────────────
+// const testNotificacion = async (req, res) => {
+//   const ID_usuario = req.usuario.id;
+
+//   try {
+//     const id = await crearNotificacion({
+//       ID_usuario,
+//       Tipo: "sistema",
+//       Mensaje: "Esta es una notificación de prueba 🚀",
+//     });
+
+//     return res.status(200).json({ ok: true, id_notificacion: id });
+//   } catch (error) {
+//     console.error("Error en testNotificacion:", error.message);
+//     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+//   }
+// };
 
 // ─────────────────────────────────────────────────────────────
 //  GET /api/notificaciones
@@ -202,7 +223,7 @@ const getPreferenciasUsuario = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 const actualizarPreferenciasUsuario = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  const { preferencias } = req.body;
+  const { preferencias } = req.body || {};
 
   if (!Array.isArray(preferencias) || preferencias.length === 0) {
     return res.status(400).json({ ok: false, mensaje: "Debes enviar al menos una preferencia" });
@@ -228,7 +249,35 @@ const actualizarPreferenciasUsuario = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+//  POST /api/notificaciones/push-token
+//  Body esperado: { fcm_token, plataforma }
+// ─────────────────────────────────────────────────────────────
+const registrarPushToken = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+  const { fcm_token, plataforma } = req.body || {};
+
+  if (!fcm_token || !plataforma) {
+    return res.status(400).json({ ok: false, mensaje: "fcm_token y plataforma son requeridos" });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO push_tokens (id_usuario, fcm_token, plataforma)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (fcm_token) DO UPDATE SET id_usuario = $1, plataforma = $3`,
+      [ID_usuario, fcm_token, plataforma]
+    );
+
+    return res.status(200).json({ ok: true, mensaje: "Token registrado" });
+  } catch (error) {
+    console.error("Error en registrarPushToken:", error.message);
+    return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+  }
+};
+
 module.exports = {
+  // testNotificacion,
   getNotificaciones,
   getNoLeidasCount,
   marcarLeida,
@@ -237,4 +286,5 @@ module.exports = {
   eliminarNotificacion,
   getPreferenciasUsuario,
   actualizarPreferenciasUsuario,
+  registrarPushToken,
 };

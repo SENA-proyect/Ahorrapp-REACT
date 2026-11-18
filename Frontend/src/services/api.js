@@ -10,7 +10,23 @@ const authHeaders = () => ({
 
 const fetchJSON = async (url, options = {}) => {
   const res = await fetch(url, { headers: authHeaders(), cache: "no-store", ...options });
-  if (!res.ok) throw new Error(`HTTPS ${res.status}`);
+  
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Sesión expirada");
+  }
+  
+  if (!res.ok) {
+    // Antes solo se lanzaba "HTTP 400/500" y se perdía el motivo real.
+    // El backend responde { ok:false, mensaje } (algunos módulos usan { error }).
+    const data = await res.json().catch(() => ({}));
+    const error = new Error(data.mensaje || data.error || `HTTP ${res.status}`);
+    error.status = res.status;
+    error.response = { status: res.status, data };
+    throw error;
+  }
+  
   return res.json();
 };
 

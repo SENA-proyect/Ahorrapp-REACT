@@ -6,6 +6,7 @@ import {
   crearPerfil, editarPerfil,
 } from '../services/api'
 import HeaderModulos from '../components/HeaderModulos'
+import { validarMonto, validarLongitud, primerError, LIMITES } from '../utils/validaciones'
 
 const fmt      = (n) => `$${Number(n).toLocaleString('es-CO')}`
 const fmtFecha = (f) => {
@@ -38,8 +39,23 @@ const BarraEjecucion = ({ label, presupuestado, ejecutado, color }) => {
   )
 }
 
+// Validación del perfil: mismas reglas que el backend y el móvil.
+const CLAVES_PCT = ['gastos', 'deudas', 'imprevistos', 'ahorros', 'emergencia']
+const validarPerfilForm = (form) => {
+  const dia = Number(form.dia_corte)
+  const pct = CLAVES_PCT.map(k => Number(form[k]))
+  return primerError(
+    !form.nombre?.trim() ? 'El nombre del perfil es obligatorio' : null,
+    validarLongitud(form.nombre, LIMITES.nombrePresupuesto, 'El nombre'),
+    validarLongitud(form.descripcion, LIMITES.descripcionPresupuesto, 'La descripción'),
+    !Number.isInteger(dia) || dia < 1 || dia > 31 ? 'El día de corte debe estar entre 1 y 31' : null,
+    pct.some(n => !Number.isFinite(n) || n < 0 || n > 100) ? 'Cada porcentaje debe estar entre 0 y 100' : null,
+    Math.round(pct.reduce((a, n) => a + n, 0) * 100) !== 10000 ? 'Los porcentajes deben sumar 100' : null,
+  )
+}
+
 // Formulario de perfil (crear / editar)
-const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '28', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '15', emergencia: '10' }
+const DEFAULTS = { nombre: '', descripcion: '', dia_corte: '28', gastos: '40', deudas: '20', imprevistos: '15', ahorros: '10', emergencia: '15' }
 
 function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
   const [form, setForm] = useState(inicial || DEFAULTS)
@@ -62,10 +78,10 @@ function FormPerfil({ inicial, onGuardar, onCancelar, cargando, error }) {
   return (
     <div className="flex flex-col gap-1">
       <label className={labelCls}>Nombre del perfil *</label>
-      <input className={inputCls} type="text" name="nombre" placeholder="Ej: Perfil austero, Normal..." value={form.nombre} onChange={handleChange} />
+      <input className={inputCls} type="text" name="nombre" maxLength={LIMITES.nombrePresupuesto} placeholder="Ej: Perfil austero, Normal..." value={form.nombre} onChange={handleChange} />
 
       <label className={labelCls}>Descripción</label>
-      <input className={inputCls} type="text" name="descripcion" placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
+      <input className={inputCls} type="text" name="descripcion" maxLength={LIMITES.descripcionPresupuesto} placeholder="Descripción opcional" value={form.descripcion} onChange={handleChange} />
 
       <label className={labelCls}>Día de corte (1–31)</label>
       <input className={inputCls} type="number" name="dia_corte" min="1" max="31" value={form.dia_corte} onChange={handleChange} />
@@ -204,6 +220,8 @@ export default function ModuloPresupuestos() {
   // ── Crear perfil ──
   const handleCrear = async (form) => {
     setErrorModal(null)
+    const errForm = validarPerfilForm(form)
+    if (errForm) return setErrorModal(errForm)
     setGuardando(true)
     try {
       const data = await crearPerfil({
@@ -224,6 +242,8 @@ export default function ModuloPresupuestos() {
   // ── Editar perfil ──
   const handleEditar = async (form) => {
     setErrorModal(null)
+    const errForm = validarPerfilForm(form)
+    if (errForm) return setErrorModal(errForm)
     setGuardando(true)
     try {
       const data = await editarPerfil(modalEditar.ID_presupuesto, {
@@ -244,8 +264,9 @@ export default function ModuloPresupuestos() {
   // ── Abrir período ──
   const handleAbrirPeriodo = async () => {
     setErrorModal(null)
+    const errIngreso = validarMonto(ingresoInput, { nombre: 'El ingreso estimado', permitirCero: true })
+    if (errIngreso) return setErrorModal(errIngreso)
     const ingreso = parseFloat(ingresoInput)
-    if (!ingreso || ingreso < 0) return setErrorModal('Ingresa un ingreso estimado válido')
     setGuardando(true)
     try {
       const data = await abrirPeriodo(ingreso)
@@ -258,8 +279,9 @@ export default function ModuloPresupuestos() {
   // ── Ajustar ingreso ──
   const handleAjustarIngreso = async () => {
     setErrorModal(null)
+    const errIngreso = validarMonto(ingresoInput, { nombre: 'El ingreso estimado', permitirCero: true })
+    if (errIngreso) return setErrorModal(errIngreso)
     const ingreso = parseFloat(ingresoInput)
-    if (!ingreso || ingreso < 0) return setErrorModal('Ingresa un monto válido')
     setGuardando(true)
     try {
       const data = await ajustarIngresoPeriodo(ingreso)

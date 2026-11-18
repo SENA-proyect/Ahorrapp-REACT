@@ -1,49 +1,56 @@
-import assert from "node:assert/strict";
-import { after, describe, it } from "node:test";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_URL, loginWithGoogle } from "./api.js";
 
-const originalFetch = globalThis.fetch;
-
-after(() => {
-  globalThis.fetch = originalFetch;
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe("loginWithGoogle", () => {
   it("sends Google's ID token to the backend authentication endpoint", async () => {
-    let request;
-    globalThis.fetch = async (...args) => {
-      request = args;
-      return {
+    const fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ ok: true, token: "session-token", usuario: { id: 1 } }),
-      };
-    };
+    });
+    vi.stubGlobal("fetch", fetch);
 
     const result = await loginWithGoogle("google-id-token");
 
-    assert.deepEqual(request, [
+    expect(fetch).toHaveBeenCalledWith(
       `${API_URL}/auth/google`,
       {
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
         method: "POST",
         body: JSON.stringify({ idToken: "google-id-token" }),
-      },
-    ]);
-    assert.equal(result.ok, true);
-    assert.equal(result.usuario.id, 1);
+      }
+    );
+    expect(result).toMatchObject({
+      ok: true,
+      token: "session-token",
+      usuario: { id: 1 },
+    });
   });
 
   it("surfaces authentication errors returned by the backend", async () => {
-    globalThis.fetch = async () => ({
+    const fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      json: async () => ({
         ok: false,
-        status: 503,
-        json: async () => ({ ok: false, mensaje: "El inicio de sesión con Google no está configurado" }),
+        mensaje: "El inicio de sesión con Google no está configurado",
+      }),
     });
+    vi.stubGlobal("fetch", fetch);
 
-    await assert.rejects(loginWithGoogle("google-id-token"), {
+    await expect(loginWithGoogle("google-id-token")).rejects.toMatchObject({
       message: "El inicio de sesión con Google no está configurado",
-      response: { status: 503, data: { ok: false, mensaje: "El inicio de sesión con Google no está configurado" } },
+      response: {
+        status: 503,
+        data: {
+          ok: false,
+          mensaje: "El inicio de sesión con Google no está configurado",
+        },
+      },
     });
   });
 });

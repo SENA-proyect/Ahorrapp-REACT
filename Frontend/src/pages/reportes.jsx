@@ -128,6 +128,13 @@ export default function Reportes() {
       return;
     }
 
+    // Mismo tope que el backend (evolución temporal): ~5 años.
+    const dias = Math.round((Date.parse(fechaFin) - Date.parse(fechaInicio)) / 86400000) + 1;
+    if (dias > 1830) {
+      setError("El rango del informe no puede superar 5 años (1830 días).");
+      return;
+    }
+
     try {
       setCargando(true);
 
