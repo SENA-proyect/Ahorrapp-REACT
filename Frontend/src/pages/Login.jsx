@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../services/api";
+import { GoogleLogin } from "@react-oauth/google";
+import { loginUser, loginWithGoogle } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -68,6 +69,7 @@ function Field({
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
@@ -124,6 +126,35 @@ export default function Login() {
     } catch (err) {
       console.error("Error en login:", err);
       setError("Error de conexión con el servidor");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const idToken = credentialResponse?.credential;
+    if (!idToken) {
+      setError("Google no devolvió una credencial. Inténtalo nuevamente.");
+      return;
+    }
+
+    setError(null);
+    setCargando(true);
+
+    try {
+      const respuesta = await loginWithGoogle(idToken);
+      if (!respuesta.ok || !respuesta.token || !respuesta.usuario) {
+        setError(respuesta.mensaje || "No fue posible iniciar sesión con Google");
+        return;
+      }
+
+      localStorage.setItem("token", respuesta.token);
+      localStorage.setItem("usuario", JSON.stringify(respuesta.usuario));
+      login(respuesta.usuario);
+      navigate("/Dashboard");
+    } catch (err) {
+      console.error("Error en inicio de sesión con Google:", err);
+      setError(err.message || "Error de conexión al iniciar sesión con Google");
     } finally {
       setCargando(false);
     }
@@ -282,6 +313,33 @@ export default function Login() {
                     {cargando ? "Entrando..." : "Iniciar Sesión →"}
                   </button>
                 </form>
+
+                <div className="flex items-center gap-3 text-xs text-zinc-500">
+                  <span className="h-px flex-1 bg-zinc-700" />
+                  <span>o continúa con</span>
+                  <span className="h-px flex-1 bg-zinc-700" />
+                </div>
+
+                {googleClientId ? (
+                  <div
+                    className={`flex justify-center ${cargando ? "pointer-events-none opacity-60" : ""}`}
+                    aria-busy={cargando}
+                  >
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => setError("No se pudo completar el inicio de sesión con Google.")}
+                      text="continue_with"
+                      theme="outline"
+                      shape="rectangular"
+                      size="large"
+                      width="400"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center text-xs text-zinc-500">
+                    El inicio de sesión con Google no está configurado.
+                  </p>
+                )}
 
                 <p className="text-sm text-zinc-500 text-center">
                   ¿No tienes cuenta?&nbsp;

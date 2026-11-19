@@ -7,15 +7,17 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: './src/setupTests.js',
+    setupFiles: './setupTests.js',
   },
   server: {
     host: `localhost`,
     port: 5173,
-    https: {
-      key: fs.readFileSync('certs/private.key'),
-      cert: fs.readFileSync('certs/certificate.crt'),
-    },
+    https: fs.existsSync('certs/private.key') && fs.existsSync('certs/certificate.crt')
+      ? {
+          key: fs.readFileSync('certs/private.key'),
+          cert: fs.readFileSync('certs/certificate.crt'),
+        }
+      : undefined,
     proxy: {
       "/api": {
         target: "https://ahorrapp-react.onrender.com",
