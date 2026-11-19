@@ -6,21 +6,32 @@
 | Contrato de servicios |Juan Medina | En desarrollo |
 | Diccionario de datos | Juan Medina | FINALIZADO |
 | Diagramas del sistema | Juan Medina | En desarrollo |
+| Politicas de seguridad | Juan Medina | En desarrollo |
 | | | |
 | Diagrama relacional | Manuel Guevara | FINALIZADO |
-| Diagrama casos de uso | Manuel Guevara | En desarrollo |
-| Casos de uso extendido | Manuel Guevara | En desarrollo |
+| Diagrama casos de uso | Manuel Guevara | FINALIZADO |
+| Casos de uso extendido | Manuel Guevara | FINALIZADO |
 | Diagrama de clases | Manuel Guevara | FINALIZADO |
+| Terminos y condiciones | Manuel Guevara | En desarrollo |
 | | | |
+| Diagrama entidad relacion | David Barrera | En desarrollo |
+| Diagrama BPMN | David Barrera | En desarrollo  |
+| Normalizacion | David Barrera  | En desarrollo  |
+| Plan de migracion de datos | David Barrera | En desarrollo |
+| Plan de respaldo de recuperacion | David Barrera | En desarrollo |
 | | | |
 | Diagrama de despliegue | Santiago Hurtado | FINALIZADO |
 | Levantamiento de informacion | Santiago Hurtado | En desarrollo |
 | Analisis del problema | Santiago Hurtado | FINALIZADO |
 | Arquitectura Tecnica | Santiago Hurtado | FINALIZADO |
-| | | |
-| POLITICAS DE SEGURIDAD | Por definir | ... |
-| ------ | ------------ | --------- |
-| Diagrama entidad relacion | David Barrera (Manuel)| En desarrollo |
-| Diagrama BPMN | David Barrera (Manuel) | En desarrollo  |
-| Normalizacion | David Barrera (Manuel) | En desarrollo  |
-| Plan de migracion de datos | David Barrera (Santiago) | En desarrollo |
+| Plan de instalacion | Santiago Hurtado | En desarrollo
+
+<hr>
+
+| **TRABAJO** | **ENCARGADOS (Finalizado)** | **ENCARGADOS (En desarrollo)** |
+| ----------- | ------------ | --------- |
+| Manual de usuarios | Santiago | Manuel, Juan, David |
+| Manual de admin | ... | Santiago, Manuel, David, Juan |
+| Manual de superadmin | ... | Santiago, Manuel, David, Juan |
+| Pruebas jest (codigo) | ... | Santiago, Manuel, David, Juan |
+| Pruebas jest documentadas | ... | Santiago, Manuel, David, Juan |
