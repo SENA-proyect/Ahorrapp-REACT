@@ -4,3 +4,7 @@ npm install -D jest supertest
 
 en package.json
 agregar el " "test": "jest" " en la parte "scripts"
+
+ejecucion
+BAckend/
+npm test "nombre del archivo"
