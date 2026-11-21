@@ -313,56 +313,6 @@ export const abonarAhorro = (id, monto) =>
     method: "PATCH",
     body: JSON.stringify({ monto }),
   });
- 
-// ── Resumen financiero (para el Asistente) ────────────────────────────────────
-export const getResumenFinancieroBreve = async () => {
-  try {
-    const movimientos = await getMovimientos();
-
-    const sumar = (tipo) =>
-      movimientos
-        .filter((m) => (m.tipo ?? m.tipo_movimiento ?? "").toLowerCase() === tipo)
-        .reduce((acc, m) => acc + Number(m.monto ?? 0), 0);
-
-    const ingresosTotales = sumar("ingreso");
-    const gastosTotales = sumar("gasto");
-    const deudas = movimientos.filter((m) =>
-      ["deuda"].includes((m.tipo ?? m.tipo_movimiento ?? "").toLowerCase())
-    );
-    const ahorros = movimientos.filter((m) =>
-      ["ahorro"].includes((m.tipo ?? m.tipo_movimiento ?? "").toLowerCase())
-    );
-
-    const lines = [
-      "CONTEXTO FINANCIERO REAL DEL USUARIO:",
-      `- Ingresos totales de este mes: $${ingresosTotales}`,
-      `- Gastos totales de este mes: $${gastosTotales}`,
-      `- Balance actual: $${ingresosTotales - gastosTotales}`,
-      "",
-      "DEUDAS ACTIVAS:",
-      deudas.length === 0
-        ? "  Sin deudas registradas."
-        : deudas
-            .map(
-              (d) =>
-                `  * ${d.descripcion ?? "Deuda"}: $${d.monto} (Estado: ${d.estado ?? "Pendiente"})`
-            )
-            .join("\n"),
-      "",
-      "PLANES DE AHORRO:",
-      ahorros.length === 0
-        ? "  Sin ahorros registrados."
-        : ahorros
-            .map((a) => `  * ${a.descripcion ?? "Ahorro"}: $${a.monto}`)
-            .join("\n"),
-    ];
-
-    return lines.join("\n");
-  } catch (error) {
-    console.error("Error al recopilar el contexto financiero:", error);
-    return "No se pudo cargar la información financiera actual del usuario.";
-  }
-};
 
 // ── Exportar Datos (funciones desactivadas por el momento) ────────────────────────────────────────────────────────────
 // export const exportarDatos = async (payload, { onError, onDone } = {}) => {

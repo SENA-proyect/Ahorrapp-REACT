@@ -30,8 +30,8 @@
 
 | **TRABAJO** | **ENCARGADOS (Finalizado)** | **ENCARGADOS (En desarrollo)** |
 | ----------- | ------------ | --------- |
-| Manual de usuarios | Santiago, David | Manuel, Juan |
-| Manual de admin | ... | Santiago, Manuel, Juan |
-| Manual de superadmin | ... | Santiago, Manuel, Juan |
+| Manual de usuarios | Santiago, David, Juan | Manuel |
+| Manual de admin | ... | Santiago, Manuel |
+| Manual de superadmin | ... | Santiago, Manuel |
 | Pruebas jest (codigo) | ... | Santiago, Manuel, David, Juan |
 | Pruebas jest documentadas | ... | Santiago, Manuel, David, Juan |

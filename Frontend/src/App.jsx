@@ -29,7 +29,6 @@ import ModulosCategorias from './pages/ModulosCategorias.jsx';
 import ModulosDependientes from './pages/ModulosDependientes.jsx';
 import ModulosGastos from './pages/ModulosGastos.jsx';
 import ModulosIngresos from './pages/ModulosIngresos.jsx';
-import Asistente from './components/Asistente/Asistente';
 import Noticias from './pages/Noticias.jsx';
 // import Export from "./pages/exportar.jsx"
 import ModulosPresupuestos from './pages/ModulosPresupuestos.jsx'
@@ -54,16 +53,6 @@ import PanelUsuarios from './pages/PanelUsuarios.jsx';
 
 // Página de acceso denegado
 import Unauthorized from './pages/Unauthorized.jsx';
-
-// Muestra el Asistente solo si hay sesión activa, sin redirigir nunca la URL
-function AsistenteFlotante() {
-  const { user, loading } = useAuth();
-
-  if (loading) return null;
-  if (!user) return null;
-
-  return <Asistente />;
-}
 
 function App() {
   return (
@@ -282,8 +271,6 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         
-        {/* Asistente visible en todas las páginas (solo si hay sesión) */}
-        <AsistenteFlotante />
           </BrowserRouter>
         </NotificacionesProvider>
       </ToastProvider>
