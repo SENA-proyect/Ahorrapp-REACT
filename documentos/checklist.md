@@ -3,7 +3,7 @@
 | IEEE830 | Juan Medina | FINALIZADO |
 | Resumen Ejecutivo | Juan Medina | FINALIZADO |
 | Propuesta Comercial | Juan Medina | FINALIZADO |
-| Contrato de servicios |Juan Medina | En desarrollo |
+| Contrato de servicios |Juan Medina | FINALIZADO |
 | Diccionario de datos | Juan Medina | FINALIZADO |
 | Diagramas del sistema | Juan Medina | En desarrollo |
 | Politicas de seguridad | Juan Medina | En desarrollo |
@@ -14,8 +14,8 @@
 | Diagrama de clases | Manuel Guevara | FINALIZADO |
 | Terminos y condiciones | Manuel Guevara | En desarrollo |
 | | | |
-| Diagrama entidad relacion | David Barrera | En desarrollo |
-| Diagrama BPMN | David Barrera | En desarrollo  |
+| Diagrama entidad relacion | David Barrera | FINALIZADO |
+| Diagrama BPMN | David Barrera | FINALIZADO  |
 | Normalizacion | David Barrera  | En desarrollo  |
 | Plan de migracion de datos | David Barrera | En desarrollo |
 | Plan de respaldo de recuperacion | David Barrera | En desarrollo |
@@ -30,8 +30,8 @@
 
 | **TRABAJO** | **ENCARGADOS (Finalizado)** | **ENCARGADOS (En desarrollo)** |
 | ----------- | ------------ | --------- |
-| Manual de usuarios | Santiago | Manuel, Juan, David |
-| Manual de admin | ... | Santiago, Manuel, David, Juan |
-| Manual de superadmin | ... | Santiago, Manuel, David, Juan |
+| Manual de usuarios | Santiago, David | Manuel, Juan |
+| Manual de admin | ... | Santiago, Manuel, Juan |
+| Manual de superadmin | ... | Santiago, Manuel, Juan |
 | Pruebas jest (codigo) | ... | Santiago, Manuel, David, Juan |
 | Pruebas jest documentadas | ... | Santiago, Manuel, David, Juan |
