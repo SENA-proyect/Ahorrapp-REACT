@@ -17,7 +17,7 @@
 | Diagrama entidad relacion | David Barrera | FINALIZADO |
 | Diagrama BPMN | David Barrera | FINALIZADO  |
 | Normalizacion | David Barrera  | En desarrollo  |
-| Plan de migracion de datos | David Barrera | En desarrollo |
+| Plan de migracion de datos | David Barrera | FINALIZADO (rev. instructor) |
 | Plan de respaldo de recuperacion | David Barrera | En desarrollo |
 | | | |
 | Diagrama de despliegue | Santiago Hurtado | FINALIZADO |
