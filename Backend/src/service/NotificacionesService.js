@@ -1,3 +1,7 @@
+//? NOTAS
+//* Este archivo cambio la PK por la cual se llamaba originalmente, presupuesto.ID_periodo -> id_presupuesto
+//* realizar pruebas y hablar con el encargado del porque de los cambios
+
 const pool = require("../db/connection");
 const { getPeriodoActivo } = require("./periodoHelper");
 const admin = require("../config/firebase");
@@ -351,8 +355,7 @@ const verificarUmbralAhorros = async (ID_usuario) => {
   }
 };
 
-// --- EMERGENCIA ---
-// --- EMERGENCIA ---
+
 // --- EMERGENCIA ---
 const verificarUmbralEmergencia = async (ID_usuario) => {
   try {

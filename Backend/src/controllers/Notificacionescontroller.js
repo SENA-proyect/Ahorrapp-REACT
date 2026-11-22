@@ -1,10 +1,31 @@
 const pool = require("../db/connection");
 const { crearNotificacion } = require("../service/NotificacionesService");
 const {
+  crearNotificacion,
   getPreferencias,
   setPreferencia,
   TIPOS_NOTIFICACION,
-} = require("../service/NotificacionesService")
+} = require("../service/NotificacionesService");
+
+// ─────────────────────────────────────────────────────────────
+//  POST /api/notificaciones/test   (solo para pruebas)
+// ─────────────────────────────────────────────────────────────
+// const testNotificacion = async (req, res) => {
+//   const ID_usuario = req.usuario.id;
+
+//   try {
+//     const id = await crearNotificacion({
+//       ID_usuario,
+//       Tipo: "sistema",
+//       Mensaje: "Esta es una notificación de prueba 🚀",
+//     });
+
+//     return res.status(200).json({ ok: true, id_notificacion: id });
+//   } catch (error) {
+//     console.error("Error en testNotificacion:", error.message);
+//     return res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
+//   }
+// };
 
 const testNotificacion = async (req, res) => {
   const ID_usuario = req.usuario.id;
@@ -77,6 +98,9 @@ const getNotificaciones = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+//  GET /api/notificaciones/no-leidas/count
+// ─────────────────────────────────────────────────────────────
 const getNoLeidasCount = async (req, res) => {
   const ID_usuario = req.usuario.id;
 
@@ -94,6 +118,9 @@ const getNoLeidasCount = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+//  PATCH /api/notificaciones/:id/leer
+// ─────────────────────────────────────────────────────────────
 const marcarLeida = async (req, res) => {
   const ID_usuario = req.usuario.id;
   const { id } = req.params;
@@ -190,7 +217,7 @@ const getPreferenciasUsuario = async (req, res) => {
 
 const actualizarPreferenciasUsuario = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  const { preferencias } = req.body;
+  const { preferencias } = req.body || {};
 
   if (!Array.isArray(preferencias) || preferencias.length === 0) {
     return res.status(400).json({ ok: false, mensaje: "Debes enviar al menos una preferencia" });
@@ -216,9 +243,13 @@ const actualizarPreferenciasUsuario = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+//  POST /api/notificaciones/push-token
+//  Body esperado: { fcm_token, plataforma }
+// ─────────────────────────────────────────────────────────────
 const registrarPushToken = async (req, res) => {
   const ID_usuario = req.usuario.id;
-  const { fcm_token, plataforma } = req.body;
+  const { fcm_token, plataforma } = req.body || {};
 
   if (!fcm_token || !plataforma) {
     return res.status(400).json({ ok: false, mensaje: "fcm_token y plataforma son requeridos" });

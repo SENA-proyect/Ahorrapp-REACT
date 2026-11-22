@@ -105,7 +105,7 @@ export default function MiCuenta() {
       const data = await desactivarCuentaPropia()
       alert(data.mensaje || 'Tu cuenta ha sido desactivada')
       logout()
-      navigate('/Login')
+      navigate('/Login', { replace: true })
     } catch (err) {
       setErrorDesactivar(err.message || 'Error al desactivar la cuenta')
       setDesactivando(false)
