@@ -1,7 +1,6 @@
 const pool = require("../db/connection");
 const { crearNotificacion } = require("../service/NotificacionesService");
 const {
-  crearNotificacion,
   getPreferencias,
   setPreferencia,
   TIPOS_NOTIFICACION,

@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-
 const alphaVantageRoutes = require("./src/routes/alphaVantageRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const categoriasRoutes = require("./src/routes/categoriasRoutes");
@@ -15,11 +14,11 @@ const PresupuestosRoutes = require("./src/routes/PresupuestosRoutes");
 const fondoemergenciaRoutes = require("./src/routes/fondoemergenciaRoutes");
 const ReportesRoutes = require("./src/routes/ReportesRoutes");
 const historialRoutes = require("./src/routes/Historialroutes");
-const { iniciarJobDeudas } = require("./src/service/jobs/DeudasJob");
 
+// Jobs
 const { iniciarEliminacionCuentasJob } = require("./src/service/jobs/EliminacioncuentasJob");
 const { iniciarVencimientosJob } = require("./src/service/jobs/VencimientosJob");
-const { iniciarJobDeudas } = require("./src/service/jobs/DeudasJob"); // Importamos la función del job de deudas
+const { iniciarJobDeudas } = require("./src/service/jobs/DeudasJob"); // <-- Importado una sola vez
 
 const app = express();
 
@@ -27,23 +26,14 @@ const app = express();
 // MIDDLEWARES
 // ================================
 // Orígenes permitidos: desarrollo y entornos de despliegue.
-const ORIGENES_CORS = [
-    "https://localhost:5173",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://52.45.67.160",
-    "https://ahorrapp-react-gia9.onrender.com",
-];
-
 app.use(cors({
     origin: [
         "https://localhost:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
         "http://52.45.67.160",
         "http://52.45.67.160:80",
         "https://ahorrapp-react-gia9.onrender.com",
-        "http://localhost:5173",
-        // Aquí posteriormente agregaremos
-        // la URL de producción del frontend
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -54,7 +44,6 @@ app.use(express.json());
 // ================================
 // RUTAS
 // ================================
-// app.use("/api/alphaVantageRoutes", alphaVantageRoutes);
 app.use("/api", alphaVantageRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/categorias", categoriasRoutes);
@@ -68,12 +57,9 @@ app.use("/api/fondo-emergencia", fondoemergenciaRoutes);
 app.use("/api/reportes", ReportesRoutes);
 app.use("/api/historial", historialRoutes);
 
-
-
 // ================================
 // RUTA DE PRUEBA
 // ================================
-
 app.get("/", (req, res) => {
     res.json({
         ok: true,
@@ -82,16 +68,14 @@ app.get("/", (req, res) => {
 });
 
 // ================================
-// 404 Y MANEJO GLOBAL DE ERRORES (siempre JSON { ok, mensaje })
+// 404 Y MANEJO GLOBAL DE ERRORES
 // ================================
-
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: `Ruta no encontrada: ${req.method} ${req.originalUrl}` });
 });
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-    // JSON mal formado en el body -> 400 (antes Express respondía HTML)
     if (err && (err.type === "entity.parse.failed" || err instanceof SyntaxError)) {
         return res.status(400).json({ ok: false, mensaje: "El cuerpo de la petición no es un JSON válido" });
     }
@@ -102,21 +86,23 @@ app.use((err, req, res, next) => {
     res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
 });
 
-// Evita que una promesa rechazada sin capturar tumbe el proceso (500 en cadena)
 process.on("unhandledRejection", (motivo) => {
     console.error("unhandledRejection:", motivo && motivo.message ? motivo.message : motivo);
 });
 
 // ================================
-// SERVIDOR
+// SERVIDOR (Solo arranca si NO estamos en entorno de pruebas)
 // ================================
-
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor AhorrApp ejecutándose en el puerto ${PORT}`);
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Servidor AhorrApp ejecutándose en el puerto ${PORT}`);
+        iniciarEliminacionCuentasJob();
+        iniciarVencimientosJob();
+        iniciarJobDeudas();
+    });
+}
 
-    iniciarEliminacionCuentasJob();
-    iniciarVencimientosJob();
-    iniciarJobDeudas(); // Iniciamos el job de revisión de deudas próximas a vencer
-});
+// Exportamos la app para que los tests puedan usarla
+module.exports = app;
