@@ -4,10 +4,10 @@
 |---|---|
 | **Proceso / Subproceso** | Tecnología / Seguridad de la información |
 | **Código / Versión** | AHR-SI-PO-001 / 1.0 |
-| **Fecha de aprobación** | ______________ (próxima revisión: máximo 12 meses después) |
+| **Fecha de creacion** | 18-11-2026 |
 | **Norma de referencia** | ISO/IEC 27001:2022 (guía: ISO/IEC 27002:2022; riesgos: ISO/IEC 27005) |
-| **Clasificación** | Las secciones 1 a 13 pueden publicarse. Los anexos B y C son de uso interno |
 | **Contacto** | proyectofinanzassena@gmail.com |
+<!-- | **Clasificación** | Las secciones 1 a 13 pueden publicarse. Los anexos B y C son de uso interno | -->
 
 *AhorrApp alinea su gestión de seguridad con la ISO/IEC 27001:2022. Este documento no implica que esté certificada en esa norma.*
 
@@ -24,9 +24,9 @@ Las responsabilidades se asignan por rol; una persona puede tener varios. Cada r
 | Rol | Responsabilidades | Titular / Suplente |
 |---|---|---|
 | **Alta dirección (Comité de Seguridad):** los cuatro integrantes | Aprobar la política, asignar recursos, aceptar el riesgo residual y revisar el SGSI al menos una vez al año | Los cuatro |
-| **Responsable de Seguridad de la Información (RSI)** | Mantener la política y el registro de riesgos, medir indicadores, coordinar incidentes, capacitar y llevar el acta de revisión | ________ / ________ |
-| **Responsable de Infraestructura y Desarrollo (RID)** | Operar Render y AWS; gestionar despliegues, respaldos, vulnerabilidades, secretos y cuentas técnicas | ________ / ________ |
-| **Responsable de Protección de Datos Personales (RPD)** | Atender consultas y reclamos, custodiar autorizaciones, mantener la política de datos y atender el RNBD si aplica | ________ / ________ |
+| **Responsable de Seguridad de la Información (RSI)** | Mantener la política y el registro de riesgos, medir indicadores, coordinar incidentes, capacitar y llevar el acta de revisión | Santiago Hurtado |
+| **Responsable de Infraestructura y Desarrollo (RID)** | Operar Render y AWS; gestionar despliegues, respaldos, vulnerabilidades, secretos y cuentas técnicas | Juan Medina |
+| **Responsable de Protección de Datos Personales (RPD)** | Atender consultas y reclamos, custodiar autorizaciones, mantener la política de datos y atender el RNBD si aplica | Manuel Guevara y David Barrera |
 | **Integrantes y usuarios** | Cumplir esta política (equipo) y el contrato de servicios (usuarios); proteger credenciales y reportar incidentes | Todos |
 
 **Segregación de funciones:** cuando sea posible, el cambio en producción lo aprueba una persona distinta de quien lo desarrolló.
@@ -112,7 +112,7 @@ La política se guarda en el repositorio documental del equipo y su versión pú
 
 La alta dirección revisa la política y el SGSI **al menos una vez al año**, considerando indicadores, incidentes, riesgos, cambios legales, cambios de proveedores y resultados de pruebas, y de forma extraordinaria ante un incidente grave, una reforma legal relevante, un cambio de proveedor o de arquitectura, o nuevas funciones que traten nuevos datos. La revisión se documenta en un acta, aunque no haya cambios. Al menos una vez al año una persona ajena al desarrollo (docente, asesor o auditor externo) revisa la aplicación de la política, en lo posible. Se lleva un registro de no conformidades y acciones correctivas.
 
-## 13. Aprobación y control de versiones
+<!-- ## 13. Aprobación y control de versiones
 
 | Versión | Descripción | Elaboró | Revisó | Aprobó |
 |---|---|---|---|---|
@@ -123,7 +123,7 @@ La alta dirección revisa la política y el SGSI **al menos una vez al año**, c
 | Juan Medina | Alta dirección | ____________ | ________ |
 | Santiago Hurtado | Alta dirección | ____________ | ________ |
 | Manuel Guevara | Alta dirección | ____________ | ________ |
-| David Barrera | Alta dirección | ____________ | ________ |
+| David Barrera | Alta dirección | ____________ | ________ | -->
 
 ---
 

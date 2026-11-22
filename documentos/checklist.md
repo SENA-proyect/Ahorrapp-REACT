@@ -6,7 +6,7 @@
 | Contrato de servicios |Juan Medina | FINALIZADO |
 | Diccionario de datos | Juan Medina | FINALIZADO |
 | Diagramas del sistema | Juan Medina | En desarrollo |
-| Politicas de seguridad | Juan Medina | En desarrollo |
+| Politicas de seguridad | Juan Medina | FINALIZADO |
 | | | |
 | Diagrama relacional | Manuel Guevara | FINALIZADO |
 | Diagrama casos de uso | Manuel Guevara | FINALIZADO |
