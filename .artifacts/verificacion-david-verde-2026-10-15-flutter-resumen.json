@@ -1,0 +1,33 @@
+{
+  "suites": {
+    "rf16_test.dart": {
+      "success": 13
+    },
+    "rf18_test.dart": {
+      "success": 12
+    },
+    "rf18_form_test.dart": {
+      "success": 1
+    },
+    "rf19_offline_test.dart": {
+      "success": 16
+    },
+    "rf19_sync_test.dart": {
+      "success": 19
+    },
+    "rf20_widget_test.dart": {
+      "success": 10
+    },
+    "rf21_shortcuts_form_test.dart": {
+      "success": 8
+    },
+    "rf21_voice_test.dart": {
+      "success": 25
+    }
+  },
+  "completion": {
+    "success": true,
+    "type": "done",
+    "time": 30771
+  }
+}

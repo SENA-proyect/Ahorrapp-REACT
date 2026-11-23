@@ -1,0 +1,163 @@
+{
+  "scope": "Controladores reales, PostgreSQL y servicios secundarios simulados. No prueba HTTP ni persistencia real.",
+  "passed": 15,
+  "failed": 11,
+  "results": [
+    {
+      "name": "Crear personalizada",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "name": "Rechazar nombre vacío",
+      "expected": 400,
+      "actual": 400,
+      "passed": true
+    },
+    {
+      "name": "Editar personalizada",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "name": "Deshabilitar personalizada",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "name": "Habilitar personalizada",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "Eliminar activa rechazado",
+      "expected": 409,
+      "actual": 409,
+      "passed": true
+    },
+    {
+      "name": "Eliminar deshabilitada",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "name": "Proteger global: editar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger ajena: editar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger sistema no global: editar",
+      "expected": 403,
+      "actual": 200,
+      "passed": false
+    },
+    {
+      "name": "Proteger global: deshabilitar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger ajena: deshabilitar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger sistema no global: deshabilitar",
+      "expected": 403,
+      "actual": 200,
+      "passed": false
+    },
+    {
+      "name": "Proteger global: habilitar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger ajena: habilitar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger sistema no global: habilitar",
+      "expected": 403,
+      "actual": 200,
+      "passed": false
+    },
+    {
+      "name": "Proteger global: eliminar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger ajena: eliminar",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "name": "Proteger sistema no global: eliminar",
+      "expected": 403,
+      "actual": 200,
+      "passed": false
+    },
+    {
+      "name": "Bloquear creación duplicada",
+      "expected": 409,
+      "actual": 201,
+      "passed": false
+    },
+    {
+      "name": "Bloquear edición duplicada",
+      "expected": 409,
+      "actual": 200,
+      "passed": false
+    },
+    {
+      "name": "Bloquear categoría deshabilitada en Ingreso",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    },
+    {
+      "name": "Bloquear categoría deshabilitada en Ahorro",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    },
+    {
+      "name": "Bloquear categoría deshabilitada en Gasto",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    },
+    {
+      "name": "Bloquear categoría deshabilitada en Imprevisto",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    },
+    {
+      "name": "Bloquear categoría deshabilitada en Deuda",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    }
+  ]
+}

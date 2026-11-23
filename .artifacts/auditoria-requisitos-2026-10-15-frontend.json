@@ -1,0 +1,655 @@
+{
+  "scope": "React real en JSDOM, cuatro modos por ruta, respuestas HTTP simuladas; no prueba visual de navegador ni backend desplegado.",
+  "total": 112,
+  "passed": 105,
+  "failed": 7,
+  "results": [
+    {
+      "name": "sin sesión: /",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /Login",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /OlvidarContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /VerificacionCorreo",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ConfirmacionCambioContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /IngresoNuevaContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /Unauthorized",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /Dashboard",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /IndexLogeado",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModuloAhorros",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModuloDeudas",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModuloImprevistos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModuloFondoEmergencia",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModulosCategorias",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModulosDependientes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModulosGastos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModulosIngresos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /Reportes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /noticias",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /ModulosPresupuestos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /Configuracion",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /movimientos/nuevo",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /PanelAdmin",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /PanelDependientes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /PanelHistorial",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /PanelMovimientos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "sin sesión: /PanelUsuarios",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /Login",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /OlvidarContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /VerificacionCorreo",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ConfirmacionCambioContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /IngresoNuevaContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /Unauthorized",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /Dashboard",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /IndexLogeado",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModuloAhorros",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModuloDeudas",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModuloImprevistos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModuloFondoEmergencia",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModulosCategorias",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModulosDependientes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModulosGastos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModulosIngresos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /Reportes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /noticias",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /ModulosPresupuestos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /Configuracion",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /movimientos/nuevo",
+      "passed": false,
+      "error": "Cannot read properties of undefined (reading 'color')"
+    },
+    {
+      "name": "user: /PanelAdmin",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /PanelDependientes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /PanelHistorial",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /PanelMovimientos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "user: /PanelUsuarios",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /Login",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /OlvidarContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /VerificacionCorreo",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ConfirmacionCambioContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /IngresoNuevaContrasena",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /Unauthorized",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /Dashboard",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /IndexLogeado",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModuloAhorros",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModuloDeudas",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModuloImprevistos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModuloFondoEmergencia",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModulosCategorias",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModulosDependientes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModulosGastos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModulosIngresos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /Reportes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /noticias",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /ModulosPresupuestos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /Configuracion",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /movimientos/nuevo",
+      "passed": false,
+      "error": "Cannot read properties of undefined (reading 'color')"
+    },
+    {
+      "name": "admin: /PanelAdmin",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /PanelDependientes",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /PanelHistorial",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /PanelMovimientos",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "admin: /PanelUsuarios",
+      "passed": true,
+      "logs": []
+    },
+    {
+      "name": "error de red: /",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /Login",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /OlvidarContrasena",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /VerificacionCorreo",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ConfirmacionCambioContrasena",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /IngresoNuevaContrasena",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /Unauthorized",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /Dashboard",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error cargando resumen: Red simulada no disponible",
+        "Error cargando presupuesto: Red simulada no disponible",
+        "Error cargando flujo: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /IndexLogeado",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModuloAhorros",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModuloDeudas",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModuloImprevistos",
+      "passed": true,
+      "logs": [
+        "Error en getDependientes: Red simulada no disponible",
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModuloFondoEmergencia",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error cargando fondo de emergencia: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModulosCategorias",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error al cargar categorías combinadas: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModulosDependientes",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error cargando dependientes: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModulosGastos",
+      "passed": true,
+      "logs": [
+        "Error en getDependientes: Red simulada no disponible",
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModulosIngresos",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /Reportes",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /noticias",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /ModulosPresupuestos",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /Configuracion",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /movimientos/nuevo",
+      "passed": false,
+      "error": "Cannot read properties of undefined (reading 'color')"
+    },
+    {
+      "name": "error de red: /PanelAdmin",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /PanelDependientes",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /PanelHistorial",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /PanelMovimientos",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "error de red: /PanelUsuarios",
+      "passed": true,
+      "logs": [
+        "Error en getNoLeidasCount: Red simulada no disponible",
+        "Error en revisarNotificacionesNuevas: Red simulada no disponible"
+      ]
+    },
+    {
+      "name": "getMovimientos propaga HTTP 401",
+      "passed": false,
+      "actual": []
+    },
+    {
+      "name": "getMovimientos propaga HTTP 403",
+      "passed": false,
+      "actual": []
+    },
+    {
+      "name": "getMovimientos propaga HTTP 500",
+      "passed": false,
+      "actual": []
+    },
+    {
+      "name": "getMovimientos propaga fallo de red",
+      "passed": false,
+      "actual": []
+    }
+  ],
+  "warnings": []
+}

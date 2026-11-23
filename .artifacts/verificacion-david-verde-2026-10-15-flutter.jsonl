@@ -1,0 +1,262 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":13644,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"C:/ahorrapp-movile/test/rf16_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading C:/ahorrapp-movile/test/rf16_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":2,"platform":"vm","path":"C:/ahorrapp-movile/test/rf18_form_test.dart"},"type":"suite","time":8}
+{"test":{"id":3,"name":"loading C:/ahorrapp-movile/test/rf18_form_test.dart","suiteID":2,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":8}
+{"suite":{"id":4,"platform":"vm","path":"C:/ahorrapp-movile/test/rf18_test.dart"},"type":"suite","time":8}
+{"test":{"id":5,"name":"loading C:/ahorrapp-movile/test/rf18_test.dart","suiteID":4,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":8}
+{"suite":{"id":6,"platform":"vm","path":"C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"suite","time":9}
+{"test":{"id":7,"name":"loading C:/ahorrapp-movile/test/rf19_offline_test.dart","suiteID":6,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10}
+{"count":8,"time":12,"type":"allSuites"}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5297}
+{"group":{"id":8,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":13,"line":null,"column":null,"url":null},"type":"group","time":5300}
+{"test":{"id":9,"name":"Logout elimina token, usuario, PIN y biometría de memoria y almacenamiento","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":59,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5301}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5388}
+{"test":{"id":10,"name":"Reabrir después de logout no recupera una sesión recordada","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":76,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5389}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5397}
+{"test":{"id":11,"name":"Logout también elimina una sesión solo en memoria","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":84,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5398}
+{"testID":11,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5406}
+{"test":{"id":12,"name":"Un fallo de Google no mantiene la sesión local","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":92,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5406}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5417}
+{"test":{"id":13,"name":"Las credenciales locales se eliminan antes de esperar a Google","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":102,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5417}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5427}
+{"test":{"id":14,"name":"Una lectura anterior al logout no restaura el token","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":116,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5427}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5442}
+{"test":{"id":15,"name":"Una lectura anterior al logout no restaura el usuario","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":129,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5442}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5456}
+{"test":{"id":16,"name":"Dos cierres simultáneos comparten la limpieza","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":140,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5457}
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5471}
+{"test":{"id":17,"name":"Una sesión recordada válida se recupera antes de cerrar","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":147,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5472}
+{"testID":17,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5485}
+{"test":{"id":18,"name":"Acceso directo sin sesión a /home muestra login","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":155,"root_column":5,"root_url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":5486}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":3,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":6977}
+{"group":{"id":19,"suiteID":2,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":6978}
+{"test":{"id":20,"name":"corrige monto, descripción, mes y año antes de enviar el gasto","suiteID":2,"groupIDs":[19],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":35,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf18_form_test.dart"},"type":"testStart","time":6978}
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":7772}
+{"group":{"id":21,"suiteID":4,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":12,"line":null,"column":null,"url":null},"type":"group","time":7772}
+{"test":{"id":22,"name":"OCR solo acepta un monto asociado a la palabra TOTAL","suiteID":4,"groupIDs":[21],"metadata":{"skip":false,"skipReason":null},"line":7,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7773}
+{"testID":22,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7820}
+{"group":{"id":23,"suiteID":4,"parentID":21,"name":"OCR","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":27,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"group","time":7821}
+{"test":{"id":24,"name":"OCR extrae total final, fecha y comercio sin confundir subtotal","suiteID":4,"groupIDs":[21,23],"metadata":{"skip":false,"skipReason":null},"line":28,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7821}
+{"testID":24,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7832}
+{"test":{"id":25,"name":"OCR reconoce ISO, monto pequeño y separadores monetarios","suiteID":4,"groupIDs":[21,23],"metadata":{"skip":false,"skipReason":null},"line":36,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7833}
+{"testID":25,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7841}
+{"test":{"id":26,"name":"OCR ignora referencias aun si son mayores que el total","suiteID":4,"groupIDs":[21,23],"metadata":{"skip":false,"skipReason":null},"line":50,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7842}
+{"testID":26,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7849}
+{"test":{"id":27,"name":"OCR rechaza URLs y contenidos sin monto identificable","suiteID":4,"groupIDs":[21,23],"metadata":{"skip":false,"skipReason":null},"line":54,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7850}
+{"testID":27,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7856}
+{"test":{"id":28,"name":"OCR detecta categoría por comercio sin asignar un ID","suiteID":4,"groupIDs":[21,23],"metadata":{"skip":false,"skipReason":null},"line":66,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7857}
+{"testID":28,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7863}
+{"group":{"id":29,"suiteID":4,"parentID":21,"name":"QR","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":27,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"group","time":7863}
+{"test":{"id":30,"name":"QR extrae total final, fecha y comercio sin confundir subtotal","suiteID":4,"groupIDs":[21,29],"metadata":{"skip":false,"skipReason":null},"line":28,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7864}
+{"testID":30,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7870}
+{"test":{"id":31,"name":"QR reconoce ISO, monto pequeño y separadores monetarios","suiteID":4,"groupIDs":[21,29],"metadata":{"skip":false,"skipReason":null},"line":36,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7871}
+{"testID":31,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7879}
+{"test":{"id":32,"name":"QR ignora referencias aun si son mayores que el total","suiteID":4,"groupIDs":[21,29],"metadata":{"skip":false,"skipReason":null},"line":50,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7880}
+{"testID":32,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7885}
+{"test":{"id":33,"name":"QR rechaza URLs y contenidos sin monto identificable","suiteID":4,"groupIDs":[21,29],"metadata":{"skip":false,"skipReason":null},"line":54,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7885}
+{"testID":33,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7890}
+{"test":{"id":34,"name":"QR detecta categoría por comercio sin asignar un ID","suiteID":4,"groupIDs":[21,29],"metadata":{"skip":false,"skipReason":null},"line":66,"column":7,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7890}
+{"testID":34,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7896}
+{"test":{"id":35,"name":"descarta fechas imposibles y acepta años bisiestos","suiteID":4,"groupIDs":[21],"metadata":{"skip":false,"skipReason":null},"line":73,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf18_test.dart"},"type":"testStart","time":7897}
+{"testID":35,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7903}
+{"suite":{"id":36,"platform":"vm","path":"C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"suite","time":8227}
+{"test":{"id":37,"name":"loading C:/ahorrapp-movile/test/rf19_sync_test.dart","suiteID":36,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":8227}
+{"testID":18,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8235}
+{"test":{"id":38,"name":"Acceso directo sin sesión a /gastos muestra login","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":155,"root_column":5,"root_url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":8236}
+{"testID":38,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8574}
+{"test":{"id":39,"name":"Acceso directo sin sesión a /reportes muestra login","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":155,"root_column":5,"root_url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":8575}
+{"testID":39,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8865}
+{"test":{"id":40,"name":"Cerrar sesión borra historial y reabrir la ruta pide login","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":172,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf16_test.dart"},"type":"testStart","time":8865}
+{"testID":40,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9216}
+{"suite":{"id":41,"platform":"vm","path":"C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"suite","time":9274}
+{"test":{"id":42,"name":"loading C:/ahorrapp-movile/test/rf20_widget_test.dart","suiteID":41,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":9274}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":20,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10048}
+{"suite":{"id":43,"platform":"vm","path":"C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"suite","time":10093}
+{"test":{"id":44,"name":"loading C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart","suiteID":43,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10093}
+{"testID":7,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":10616}
+{"group":{"id":45,"suiteID":6,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":16,"line":null,"column":null,"url":null},"type":"group","time":10617}
+{"test":{"id":46,"name":"la copia persiste al cerrar y reabrir la base y el servicio","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":92,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":10617}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":46,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12922}
+{"test":{"id":47,"name":"sin copia no se devuelve una lista vacía que oculte un fallo","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":111,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":12922}
+{"testID":37,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":13380}
+{"group":{"id":48,"suiteID":36,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":19,"line":null,"column":null,"url":null},"type":"group","time":13380}
+{"test":{"id":49,"name":"ingreso, gasto y ahorro se guardan primero sin HTTP y sobreviven a reapertura","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":113,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":13381}
+{"testID":47,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13746}
+{"test":{"id":50,"name":"un vacío descargado es una copia válida; un error no la borra","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":119,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":13746}
+{"testID":50,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14152}
+{"test":{"id":51,"name":"otra cuenta no consulta la copia; volver a la original la recupera","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":129,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":14152}
+{"testID":51,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15096}
+{"test":{"id":52,"name":"sesión vencida permite consultar copia; un fallo 500 sigue explícito","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":141,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15096}
+{"testID":49,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15125}
+{"test":{"id":53,"name":"confirmar cambia ID y estado; repetir sync y descarga no duplica la lista","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":141,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":15125}
+{"testID":52,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15187}
+{"test":{"id":54,"name":"una respuesta inválida no reemplaza una copia válida","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":157,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15187}
+{"testID":54,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15243}
+{"test":{"id":55,"name":"peticiones simultáneas reutilizan una descarga","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":167,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15244}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":53,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15299}
+{"test":{"id":56,"name":"respuesta perdida reenvía exactamente el UUID y payload original tras reinicio","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":161,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":15300}
+{"testID":55,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15303}
+{"test":{"id":57,"name":"una respuesta tardía tras cambiar de cuenta no se guarda ni se muestra","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":180,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15303}
+{"testID":57,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15341}
+{"test":{"id":58,"name":"logout conserva la copia y elimina el estado visible","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":196,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15342}
+{"testID":58,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15391}
+{"test":{"id":59,"name":"una escritura online invalida solo la copia del propietario","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":205,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15392}
+{"testID":56,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15456}
+{"test":{"id":60,"name":"no se envía a servidor antiguo o sin migración","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":193,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":15457}
+{"testID":59,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15459}
+{"test":{"id":61,"name":"un rechazo de escritura conserva la copia anterior","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":217,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15459}
+{"testID":61,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15503}
+{"test":{"id":62,"name":"una consulta anterior a una escritura no puede restaurar datos viejos","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":228,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15504}
+{"testID":60,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15514}
+{"test":{"id":63,"name":"token vencido conserva cola, permite consulta local y exige reautenticación","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":205,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":15515}
+{"testID":62,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15539}
+{"test":{"id":64,"name":"los tres servicios consultan los mismos modelos tras perder conexión","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":242,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15540}
+{"testID":64,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15632}
+{"test":{"id":65,"name":"un fallo en categorías no borra la copia de movimientos","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":274,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15633}
+{"testID":63,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15636}
+{"test":{"id":66,"name":"una cuenta no consulta ni sincroniza pendientes de otra","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":228,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":15637}
+{"testID":65,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15691}
+{"test":{"id":67,"name":"descartar una respuesta antigua no borra una descarga más reciente","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":293,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15692}
+{"testID":67,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15738}
+{"test":{"id":68,"name":"el aviso distingue una copia vacía del fallo sin copia","suiteID":6,"groupIDs":[45],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":309,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf19_offline_test.dart"},"type":"testStart","time":15738}
+{"testID":66,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15758}
+{"test":{"id":69,"name":"cambio de cuenta durante un envío confirma solo al propietario y no envía el siguiente","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":244,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":15758}
+{"testID":69,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15846}
+{"test":{"id":70,"name":"dos sincronizaciones simultáneas comparten un envío","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":270,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":15847}
+{"testID":70,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16040}
+{"test":{"id":71,"name":"rechazo requiere corrección online y nuevo UUID solo tras confirmar ausencia en servidor","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":289,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":16040}
+{"testID":42,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":16595}
+{"group":{"id":72,"suiteID":41,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":10,"line":null,"column":null,"url":null},"type":"group","time":16595}
+{"test":{"id":73,"name":"limpiar no espera a que finalice el cierre de sesión","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":9,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16596}
+{"testID":73,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16625}
+{"test":{"id":74,"name":"mes y año actuales, imprevistos y exclusión de pendientes","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":23,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16626}
+{"testID":74,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16642}
+{"test":{"id":75,"name":"centavos y formato iguales incluso con balance negativo","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":45,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16642}
+{"testID":75,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16647}
+{"test":{"id":76,"name":"sin ingresos el porcentaje es indefinido, no un 0% falso","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":58,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16648}
+{"testID":76,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16652}
+{"test":{"id":77,"name":"copia local identificada y montos inválidos rechazados","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":64,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16652}
+{"testID":77,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16660}
+{"test":{"id":78,"name":"solicitudes repetidas conservan el resumen completo","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":75,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16661}
+{"testID":78,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16671}
+{"test":{"id":79,"name":"fallo de un recurso conserva cifras del mismo mes, sin poner ceros","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":89,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16671}
+{"testID":79,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16680}
+{"test":{"id":80,"name":"respuestas fuera de orden no pisan la actualización reciente","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":112,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16681}
+{"testID":80,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16688}
+{"test":{"id":81,"name":"logout borra cifras e invalida una consulta en vuelo","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":136,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16689}
+{"testID":81,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16696}
+{"test":{"id":82,"name":"otra cuenta no conserva el resumen anterior si falla su descarga","suiteID":41,"groupIDs":[72],"metadata":{"skip":false,"skipReason":null},"line":158,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf20_widget_test.dart"},"type":"testStart","time":16696}
+{"testID":82,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16703}
+{"suite":{"id":83,"platform":"vm","path":"C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"suite","time":17097}
+{"test":{"id":84,"name":"loading C:/ahorrapp-movile/test/rf21_voice_test.dart","suiteID":83,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":17097}
+{"testID":68,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":17102}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":71,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":17684}
+{"test":{"id":85,"name":"desconexión al corregir no altera operación rechazada","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":321,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":17684}
+{"testID":85,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":17976}
+{"test":{"id":86,"name":"un GET reconoce UUID guardado antes de perder respuesta y limpia cola","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":336,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":17977}
+{"testID":44,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":18570}
+{"group":{"id":87,"suiteID":43,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":null,"column":null,"url":null},"type":"group","time":18571}
+{"test":{"id":88,"name":"registra dos accesos con recursos de ícono propios una sola vez","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":125,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":18571}
+{"testID":88,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":18637}
+{"test":{"id":89,"name":"sistema sin shortcuts no impide iniciar la app","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":137,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":18637}
+{"testID":89,"messageType":"print","message":"Accesos nativos no disponibles: Unsupported operation: Sin soporte","type":"print","time":18646}
+{"testID":89,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":18646}
+{"test":{"id":90,"name":"arranque frío conserva gasto hasta que haya sesión y pantalla lista","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":143,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":18647}
+{"testID":86,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":19347}
+{"test":{"id":91,"name":"fallo en outbox revierte también movimiento local; no anuncia éxito","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":355,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":19347}
+{"testID":90,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":19953}
+{"test":{"id":92,"name":"acceso ingreso no se duplica y descarta acciones desconocidas","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":163,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":19953}
+{"testID":92,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20130}
+{"test":{"id":93,"name":"un contexto descartado no abre rutas y el siguiente retoma el acceso","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":180,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":20130}
+{"testID":93,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20303}
+{"test":{"id":94,"name":"logout protege el formulario abierto por shortcut","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":196,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":20304}
+{"testID":94,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20703}
+{"test":{"id":95,"name":"dictado de ingreso precarga un registro nuevo y guarda solo las correcciones","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":211,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":20703}
+{"testID":91,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20829}
+{"test":{"id":96,"name":"migrar la base de etapa 1 conserva sus copias y habilita la cola","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":369,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":20829}
+{"testID":95,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":21106}
+{"test":{"id":97,"name":"dictado de gasto conserva revisión y no elige categoría inactiva","suiteID":43,"groupIDs":[87],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":233,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_shortcuts_form_test.dart"},"type":"testStart","time":21107}
+{"testID":97,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":21286}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":96,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":27464}
+{"test":{"id":98,"name":"enviando tras cierre se recupera con el mismo UUID","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":402,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":27465}
+{"testID":84,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":28233}
+{"group":{"id":99,"suiteID":83,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":25,"line":null,"column":null,"url":null},"type":"group","time":28233}
+{"test":{"id":100,"name":"monto: Gasté diez mil pesos en taxi","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28234}
+{"testID":98,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28235}
+{"test":{"id":101,"name":"sin sesión y monto inválido no crean operaciones","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":415,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":28236}
+{"testID":100,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28284}
+{"test":{"id":102,"name":"monto: Recibí un millón quinientos mil pesos de salario","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28285}
+{"testID":102,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28289}
+{"test":{"id":103,"name":"monto: Gasté 45.000,50 pesos en comida","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28290}
+{"testID":103,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28295}
+{"test":{"id":104,"name":"monto: Gasté 45,000.50 pesos en comida","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28296}
+{"testID":104,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28301}
+{"test":{"id":105,"name":"monto: Gasté 500,50 pesos","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28301}
+{"testID":105,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28306}
+{"test":{"id":106,"name":"monto: Gasté 500.50 pesos","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28306}
+{"testID":106,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28310}
+{"test":{"id":107,"name":"monto: Compré dos cafés por diez mil pesos","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28311}
+{"testID":107,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28317}
+{"test":{"id":108,"name":"monto: Gasté diez mil en un taxi","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28318}
+{"testID":108,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28322}
+{"test":{"id":109,"name":"monto: Recibí 2,5 millones de salario","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28322}
+{"testID":109,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28326}
+{"test":{"id":110,"name":"monto: Gasté veintiún mil pesos","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28327}
+{"testID":110,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28331}
+{"test":{"id":111,"name":"monto: Gasté 500 pesos el 05/10/2026","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28331}
+{"testID":111,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28336}
+{"test":{"id":112,"name":"monto: Compré una pizza","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28336}
+{"testID":101,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28342}
+{"test":{"id":113,"name":"pendientes no admiten edición, eliminación ni abonos offline","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":430,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":28343}
+{"testID":112,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28343}
+{"test":{"id":114,"name":"monto: Gasté -500 pesos","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28344}
+{"testID":114,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28349}
+{"test":{"id":115,"name":"monto: Gasté 500 pesos y 800 pesos","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":32,"column":5,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28350}
+{"testID":115,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28355}
+{"test":{"id":116,"name":"categorías por palabras completas, sin inventar categoría o ID","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":37,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28356}
+{"testID":116,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28362}
+{"test":{"id":117,"name":"dictado devuelve texto solo al revisar y usa español disponible","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":114,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":28362}
+{"testID":113,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28497}
+{"test":{"id":118,"name":"reportes consultan solo el servidor y no suman pendientes locales","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":453,"column":3,"url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":28498}
+{"testID":118,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":28535}
+{"test":{"id":119,"name":"salir advierte, cancelar mantiene sesión y confirmar retiene pendientes","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":467,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":28535}
+{"testID":117,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":29663}
+{"test":{"id":120,"name":"cancelar ignora resultados tardíos y cancela el motor","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":129,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":29663}
+{"testID":120,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":29823}
+{"test":{"id":121,"name":"fin natural no reinicia la escucha al reconstruir","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":141,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":29824}
+{"testID":121,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":29964}
+{"test":{"id":122,"name":"permiso denegado explica el problema y no inicia el motor","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":154,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":29964}
+{"testID":122,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30077}
+{"test":{"id":123,"name":"motor no disponible se informa","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":163,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":30077}
+{"testID":119,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30104}
+{"test":{"id":124,"name":"cada estado muestra claramente pendientes, sesión y errores","suiteID":36,"groupIDs":[48],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":501,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf19_sync_test.dart"},"type":"testStart","time":30104}
+{"testID":124,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30161}
+{"testID":123,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30211}
+{"test":{"id":125,"name":"error tardío permite cancelar sin enviar datos","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":172,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":30212}
+{"testID":125,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30317}
+{"test":{"id":126,"name":"sin idioma español informa y no inicia escucha","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":181,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":30318}
+{"testID":126,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30404}
+{"test":{"id":127,"name":"pasar a segundo plano cancela y descarta texto tardío","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":192,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":30404}
+{"testID":127,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30494}
+{"test":{"id":128,"name":"stop espera al resultado final y bloquea doble confirmación","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":203,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":30495}
+{"testID":128,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30610}
+{"test":{"id":129,"name":"volver atrás cierra y cancela, incluso antes del permiso","suiteID":83,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":219,"root_column":3,"root_url":"file:///C:/ahorrapp-movile/test/rf21_voice_test.dart"},"type":"testStart","time":30611}
+{"testID":129,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30721}
+{"success":true,"type":"done","time":30771}

@@ -1,0 +1,360 @@
+{
+  "total": 88,
+  "passed": 88,
+  "failed": 0,
+  "scope": "Solo sintaxis; no ejecución ni permisos.",
+  "results": [
+    {
+      "file": "Backend\\src\\controllers\\aiController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\authController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\categoriasController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\dashboardController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\dependientesController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\exportController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\fondoemergenciaController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\Historialcontroller.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\movimientosController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\Notificacionescontroller.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\PresupuestosController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\ReportesController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\controllers\\sincronizacionController.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\db\\connection.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\middlewares\\authMiddleware.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\aiRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\alphaVantageRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\authRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\categoriasRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\dashboardRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\dependientesRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\exportRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\fondoemergenciaRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\Historialroutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\movimientosRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\noticiasRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\NotificacionesRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\PresupuestosRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\routes\\ReportesRoutes.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\service\\jobs\\EliminacioncuentasJob.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\service\\jobs\\VencimientosJob.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\service\\MailService.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\service\\NotificacionesService.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\service\\OperacionesMovilesService.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\src\\service\\periodoHelper.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\index.js",
+      "passed": true
+    },
+    {
+      "file": "Backend\\tests\\rf15.cjs",
+      "passed": true
+    },
+    {
+      "file": "Backend\\tests\\rf19-fixture.cjs",
+      "passed": true
+    },
+    {
+      "file": "Backend\\tests\\rf19.cjs",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\App.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\BolsaWidget.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\HeaderModulos.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\Historialnotificaciones.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\Micuenta.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\Mismovimientos.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\Modalnuevomovimiento.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\modals\\InfoActividad.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\modals\\InfoDashboard.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\modals\\InfoDependientes.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\Preferenciasnotificaciones.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\components\\ProtectedRoute.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\context\\AuthContext.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\context\\NotificacionesContext.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\context\\ToastContext.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\main.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\Configuracion.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ConfirmacionCambioContrasena.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\Dashboard.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\exportar.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\Index.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\IndexLogeado.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\IngresoNuevaContrasena.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\Login.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModuloAhorros.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModuloDeudas.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\Modulofondoemergencia.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModuloImprevistos.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModulosCategorias.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModulosDependientes.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModulosGastos.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModulosIngresos.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\ModulosPresupuestos.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\Noticias.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\OlvidarContrasena.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\PanelAdmin.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\PanelDependientes.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\PanelHistorial.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\PanelMovimientos.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\PanelUsuarios.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\reportes.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\Unauthorized.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\pages\\VerificacionCorreo.jsx",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\services\\api.js",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\services\\session.js",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\src\\utils\\generarreportepdf.js",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\tests\\rf16.test.js",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\vite.config.js",
+      "passed": true
+    },
+    {
+      "file": "Frontend\\eslint.config.js",
+      "passed": true
+    }
+  ]
+}

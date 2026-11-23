@@ -1,0 +1,127 @@
+{
+  "alcance": "Parsers originales copiados sin cambios; DTO mínimo sin Flutter. No verifica cámara, UI ni BD.",
+  "aprobados": 5,
+  "total": 15,
+  "casos": [
+    {
+      "caso": "OCR básico",
+      "correcto": true,
+      "montoEsperado": 45000,
+      "montoObtenido": 45000.0,
+      "fechaEsperada": "2026-10-05",
+      "fechaObtenida": "2026-10-05"
+    },
+    {
+      "caso": "OCR ISO",
+      "correcto": true,
+      "montoEsperado": 45000,
+      "montoObtenido": 45000.0,
+      "fechaEsperada": "2026-10-05",
+      "fechaObtenida": "2026-10-05"
+    },
+    {
+      "caso": "OCR subtotal antes de total",
+      "correcto": false,
+      "montoEsperado": 45000,
+      "montoObtenido": 40000.0,
+      "fechaEsperada": null,
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "OCR decimales COP",
+      "correcto": true,
+      "montoEsperado": 45000,
+      "montoObtenido": 45000.0,
+      "fechaEsperada": null,
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "OCR monto pequeño",
+      "correcto": false,
+      "montoEsperado": 500,
+      "montoObtenido": null,
+      "fechaEsperada": null,
+      "fechaObtenida": null
+    },
+    {
+      "caso": "OCR referencia sin monto",
+      "correcto": false,
+      "montoEsperado": null,
+      "montoObtenido": 123456789.0,
+      "fechaEsperada": null,
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "OCR fecha imposible",
+      "correcto": false,
+      "montoEsperado": 45000,
+      "montoObtenido": 45000.0,
+      "fechaEsperada": "REJECT_INVALID",
+      "fechaObtenida": "2026-03-03"
+    },
+    {
+      "caso": "OCR vacío",
+      "correcto": true,
+      "montoEsperado": null,
+      "montoObtenido": null,
+      "fechaEsperada": null,
+      "fechaObtenida": null
+    },
+    {
+      "caso": "QR básico con fecha",
+      "correcto": false,
+      "montoEsperado": 45000,
+      "montoObtenido": 45000.0,
+      "fechaEsperada": "2026-10-05",
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "QR ISO",
+      "correcto": false,
+      "montoEsperado": 45000,
+      "montoObtenido": 45000.0,
+      "fechaEsperada": "2026-10-05",
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "QR símbolo y referencia",
+      "correcto": false,
+      "montoEsperado": 45000,
+      "montoObtenido": 987654321.0,
+      "fechaEsperada": null,
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "QR decimales COP",
+      "correcto": false,
+      "montoEsperado": 45000,
+      "montoObtenido": 4500000.0,
+      "fechaEsperada": null,
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "QR monto pequeño",
+      "correcto": false,
+      "montoEsperado": 500,
+      "montoObtenido": null,
+      "fechaEsperada": null,
+      "fechaObtenida": null
+    },
+    {
+      "caso": "QR URL numérica",
+      "correcto": false,
+      "montoEsperado": null,
+      "montoObtenido": 123456789.0,
+      "fechaEsperada": null,
+      "fechaObtenida": "2026-10-07"
+    },
+    {
+      "caso": "QR texto no interpretable",
+      "correcto": true,
+      "montoEsperado": null,
+      "montoObtenido": null,
+      "fechaEsperada": null,
+      "fechaObtenida": null
+    }
+  ]
+}
