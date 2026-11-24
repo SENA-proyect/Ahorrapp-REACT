@@ -1216,7 +1216,7 @@ module.exports = {
   deleteGastos,
   deleteImprevistos,
   deleteDeudas,
-  // getMovimientos,
+  getMovimientos,
   abonarDeuda,
   abonarAhorro,
 };
