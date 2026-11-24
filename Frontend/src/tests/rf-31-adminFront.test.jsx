@@ -1,11 +1,12 @@
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import PanelAdmin from '../pages/PanelAdmin';
 import PanelUsuarios from '../pages/PanelUsuarios';
 import PanelDependientes from '../pages/PanelDependientes';
 import PanelMovimientos from '../pages/PanelMovimientos';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import * as api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -263,5 +264,78 @@ describe('RF-31.5: Panel de Movimientos (Frontend)', () => {
     render(<MemoryRouter><PanelMovimientos /></MemoryRouter>);
 
     expect(await screen.findByText('No hay movimientos registrados.')).toBeInTheDocument();
+  });
+});
+describe('RF-31.1 / RF-31.2: Ruta protegida por rol (Frontend)', () => {
+  // Dibuja una mini-app con 3 rutas y entra a /Panel
+  const renderRuta = (auth, requiredRoles = ['admin']) => {
+    useAuth.mockReturnValue(auth);
+    render(
+      <MemoryRouter initialEntries={['/Panel']}>
+        <Routes>
+          <Route
+            path="/Panel"
+            element={
+              <ProtectedRoute requiredRoles={requiredRoles}>
+                <p>Contenido del panel</p>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/Login" element={<p>Pantalla de login</p>} />
+          <Route path="/Unauthorized" element={<p>Sin permiso</p>} />
+        </Routes>
+      </MemoryRouter>
+    );
+  };
+
+  // Crea un "auth" falso con los roles que le indiques
+  const crearAuth = (roles) => ({
+    user: { nombre: 'Test' },
+    loading: false,
+    hasRole: (rol) => roles.includes(rol),
+    isSuperUser: roles.includes('superuser'),
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('debe mostrar "Cargando..." mientras se verifica la sesión', () => {
+    renderRuta({ user: null, loading: true, hasRole: () => false, isSuperUser: false });
+
+    expect(screen.getByText('Cargando...')).toBeInTheDocument();
+    expect(screen.queryByText('Contenido del panel')).not.toBeInTheDocument();
+  });
+
+  it('debe redirigir al login si no hay sesión', () => {
+    renderRuta({ user: null, loading: false, hasRole: () => false, isSuperUser: false });
+
+    expect(screen.getByText('Pantalla de login')).toBeInTheDocument();
+    expect(screen.queryByText('Contenido del panel')).not.toBeInTheDocument();
+  });
+
+  it('debe rechazar a un usuario con rol user', () => {
+    renderRuta(crearAuth(['user']));
+
+    expect(screen.getByText('Sin permiso')).toBeInTheDocument();
+    expect(screen.queryByText('Contenido del panel')).not.toBeInTheDocument();
+  });
+
+  it('debe permitir el acceso a un admin', () => {
+    renderRuta(crearAuth(['admin']));
+
+    expect(screen.getByText('Contenido del panel')).toBeInTheDocument();
+  });
+
+  it('debe permitir el acceso a un superuser aunque la ruta pida solo admin', () => {
+    renderRuta(crearAuth(['superuser']));
+
+    expect(screen.getByText('Contenido del panel')).toBeInTheDocument();
+  });
+
+  it('debe permitir el acceso a cualquier usuario con sesión si la ruta no exige roles', () => {
+    renderRuta(crearAuth(['user']), []);
+
+    expect(screen.getByText('Contenido del panel')).toBeInTheDocument();
   });
 });
