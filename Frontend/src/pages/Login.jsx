@@ -226,7 +226,7 @@ export default function Login() {
                   <p className="text-sm text-zinc-500 mt-1">Ingresa tus datos para continuar</p>
                 </div>
 
-                <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5">
+                <form noValidate onSubmit={handleLoginSubmit} className="flex flex-col gap-5">
                   <Field
                     id="login-email"
                     label="CORREO ELECTRÓNICO"

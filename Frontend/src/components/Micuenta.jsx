@@ -130,7 +130,7 @@ export default function MiCuenta() {
           </div>
         )}
 
-        <form onSubmit={handleGuardarPerfil} className="flex flex-col gap-3 max-w-md">
+        <form noValidate onSubmit={handleGuardarPerfil} className="flex flex-col gap-3 max-w-md">
           <div>
             <label className="block mb-1 text-xs font-semibold text-zinc-400">Nombre</label>
             <input
