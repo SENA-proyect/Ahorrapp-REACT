@@ -32,7 +32,7 @@ const ORIGENES_CORS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://52.45.67.160",
-    "https://ahorrapp-react-gia9.onrender.com",
+    "https://ahorrapp-react.onrender.com",
 ];
 
 app.use(cors({

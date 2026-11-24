@@ -909,6 +909,48 @@ const deleteDeudas = crearEliminador({
   alEliminar: (ID_usuario) => verificarUmbralDeudas(ID_usuario),
 });
 
+
+// ─────────────────────────────────────────────────────────────
+//  GET /movimientos  
+// ─────────────────────────────────────────────────────────────
+
+const getMovimientos = async (req, res) => {
+  const ID_usuario = req.usuario.id;
+
+  try {
+    const { rows: ingresos } = await pool.query(
+      "SELECT 'ingreso' as tipo, monto as monto, descripcion as descripcion, fecha_registro as fecha FROM ingresos i JOIN entrada s ON i.id_entrada = s.id_entrada JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
+      [ID_usuario]
+    );
+
+    const { rows: gastos } = await pool.query(
+      "SELECT 'gasto' as tipo, monto as monto, descripcion as descripcion, fecha_registro as fecha FROM gastos g JOIN salida s ON g.id_salida = s.id_salida JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
+      [ID_usuario]
+    );
+
+    const { rows: deudas } = await pool.query(
+      "SELECT 'deuda' as tipo, monto as monto, descripcion as descripcion, estado as estado, fecha_fin as fecha FROM deudas d JOIN salida s ON d.id_salida = s.id_salida JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
+      [ID_usuario]
+    );
+
+    const { rows: ahorros } = await pool.query(
+      "SELECT 'ahorro' as tipo, monto_acumulado as monto, descripcion as descripcion, fecha_registro as fecha, fecha_meta as fecha_meta FROM ahorros a JOIN entrada s ON a.id_entrada = s.id_entrada JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
+      [ID_usuario]
+    );
+
+    const { rows: imprevistos } = await pool.query(
+      "SELECT 'imprevisto' as tipo, monto as monto, causa as descripcion, fecha_registro as fecha FROM imprevistos i JOIN salida s ON i.id_salida = s.id_salida JOIN movimientos m ON s.id_movimiento = m.id_movimiento WHERE m.id_usuario = $1",
+      [ID_usuario]
+    );
+
+    res.status(200).json([...ingresos, ...gastos, ...deudas, ...ahorros, ...imprevistos]);
+  } catch (error) {
+    console.error("Error en getMovimientos:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error al recopilar movimientos" });
+  }
+};
+
+
 // ─────────────────────────────────────────────────────────────
 //  PATCH /movimientos/deudas/:id/abonar
 //  Cada pago equivale a (monto ÷ cuotas_total) × cuotas pagadas.
@@ -1174,7 +1216,7 @@ module.exports = {
   deleteGastos,
   deleteImprevistos,
   deleteDeudas,
-  getMovimientos,
+  // getMovimientos,
   abonarDeuda,
   abonarAhorro,
 };
