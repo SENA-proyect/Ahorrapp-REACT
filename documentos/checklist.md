@@ -7,6 +7,7 @@
 | Diccionario de datos | Juan Medina | FINALIZADO |
 | Diagramas del sistema | Juan Medina | En desarrollo |
 | Politicas de seguridad | Juan Medina | FINALIZADO |
+| Normalizacion | Juan Medina  | FINALIZADO  |
 | | | |
 | Diagrama relacional | Manuel Guevara | FINALIZADO |
 | Diagrama casos de uso | Manuel Guevara | FINALIZADO |
@@ -16,7 +17,6 @@
 | | | |
 | Diagrama entidad relacion | David Barrera | FINALIZADO |
 | Diagrama BPMN | David Barrera | FINALIZADO  |
-| Normalizacion | David Barrera  | En desarrollo  |
 | Plan de migracion de datos | David Barrera | FINALIZADO (rev. instructor) |
 | Plan de respaldo de recuperacion | David Barrera | En desarrollo |
 | | | |
@@ -33,5 +33,5 @@
 | Manual de usuarios | Santiago, David, Juan | Manuel |
 | Manual de admin | ... | Santiago, Manuel |
 | Manual de superadmin | ... | Santiago, Manuel |
-| Pruebas jest (codigo) | ... | Santiago, Manuel, David, Juan |
-| Pruebas jest documentadas | ... | Santiago, Manuel, David, Juan |
+| Pruebas jest (codigo) | Juan, Santiago, David | Manuel |
+| Pruebas jest documentadas | Juan | Santiago, Manuel, David |
