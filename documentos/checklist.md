@@ -5,7 +5,7 @@
 | Propuesta Comercial | Juan Medina | FINALIZADO |
 | Contrato de servicios |Juan Medina | FINALIZADO |
 | Diccionario de datos | Juan Medina | FINALIZADO |
-| Diagramas del sistema | Juan Medina | En desarrollo |
+| Diagramas del sistema | Juan Medina | FINALIZADO |
 | Politicas de seguridad | Juan Medina | FINALIZADO |
 | Normalizacion | Juan Medina  | FINALIZADO  |
 | | | |
