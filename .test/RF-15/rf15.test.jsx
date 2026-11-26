@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import Categorias from '../../Frontend/src/pages/ModulosCategorias';
 import * as api from '../../Frontend/src/services/api';
 
+// Aísla la pantalla de componentes secundarios y simula todas las llamadas al servicio API.
 jest.mock('../../Frontend/src/components/HeaderModulos', () => () => null);
 jest.mock('../../Frontend/src/context/ToastContext', () => ({ useToast: () => ({ mostrarToast() {} }) }));
 jest.mock('../../Frontend/src/context/NotificacionesContext', () => ({
@@ -23,6 +24,7 @@ jest.mock('../../Frontend/src/services/api', () => ({
 }));
 
 beforeEach(() => {
+  // Prepara categorías globales, propias y deshabilitadas para los escenarios de la interfaz.
   api.getGastosPorCategoria.mockResolvedValue([
     { id: 1, nombre: 'Mercado', activa: true, es_global: true },
     { id: 2, nombre: 'Mascotas', activa: true },
@@ -35,6 +37,7 @@ beforeEach(() => {
 });
 
 async function abrirModulo() {
+  // Renderiza la pantalla y espera a que termine de cargar la lista inicial.
   const usuario = userEvent.setup();
   render(<Categorias />);
   await screen.findAllByText('Mercado');
@@ -42,10 +45,12 @@ async function abrirModulo() {
 }
 
 function fila(nombre) {
+  // Devuelve las consultas y acciones asociadas a la fila de una categoría.
   return within(screen.getAllByText(nombre).find(texto => texto.closest('tr')).closest('tr'));
 }
 
 test('RF-15 consulta los cinco módulos y protege la categoría global en pantalla', async () => {
+  // Confirma que la pantalla cargue categorías de los cinco tipos financieros.
   await abrirModulo();
   for (const consulta of [
     api.getGastosPorCategoria, api.getIngresosPorCategoria, api.getAhorrosPorCategoria,
@@ -58,6 +63,7 @@ test('RF-15 consulta los cinco módulos y protege la categoría global en pantal
 });
 
 test('RF-15 rechaza un nombre duplicado y permite crear uno nuevo', async () => {
+  // Intenta primero un nombre repetido ignorando mayúsculas y espacios, luego uno válido.
   const alerta = jest.spyOn(window, 'alert').mockImplementation(() => {});
   api.crearCategoria.mockResolvedValue({ ok: true, id: 4 });
   const usuario = await abrirModulo();
@@ -77,6 +83,7 @@ test('RF-15 rechaza un nombre duplicado y permite crear uno nuevo', async () => 
 });
 
 test('RF-15 permite editar una categoría personalizada', async () => {
+  // Cambia una categoría propia y verifica los datos enviados y el resultado visible.
   api.editarCategoria.mockResolvedValue({ ok: true });
   const usuario = await abrirModulo();
   await usuario.click(fila('Mascotas').getByRole('button', { name: 'Editar' }));
@@ -89,6 +96,7 @@ test('RF-15 permite editar una categoría personalizada', async () => {
 });
 
 test('RF-15 permite deshabilitar, volver a habilitar y eliminar con confirmación', async () => {
+  // Comprueba el ciclo de habilitar y deshabilitar, además de cancelar o aceptar una eliminación.
   const confirmar = jest.spyOn(window, 'confirm').mockReturnValue(true);
   api.deshabilitarCategoria.mockResolvedValue({ ok: true });
   api.habilitarCategoria.mockResolvedValue({ ok: true });
